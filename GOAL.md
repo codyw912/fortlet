@@ -1,30 +1,29 @@
-# GOAL: Bootstrap standalone Fortlet repository
+# GOAL: Standalone Fortlet foundation
 
-You are a fresh session. Read this file, then `experiments/HANDOFF.md`, then
-`governance/CHARTER.md`, before writing code. Verify claimed state before
-relying on it.
+Status: complete on 2026-08-10. This mission is closed. A fresh session MUST
+verify the baseline, then stop and obtain a new `GOAL.md` from the operator
+before beginning follow-on product work.
 
-The validated Rust capsule prototype currently lives in the operator's
-`nix-config` repository. This mission establishes Fortlet's standalone history,
-imports that baseline under the Fortlet name, and makes its package and workflow
-self-contained.
+The Rust capsule prototype has been extracted from the personal Nix
+configuration into a standalone Fortlet repository. The repository now carries
+its own reproducible package, validated product architecture, SPAWN workflow,
+and verification commands.
 
 ## Deliverable 1 — Instantiate project governance (offline)
 
-Bind SPAWN to Fortlet, record FIP-0001 honestly as an already-approved design,
-seed conformance, and define the standing operator charter. Do not import old
-Python or backend-evaluation experiment records.
+Completed: bind SPAWN to Fortlet, record FIP-0001, seed conformance, and define
+the standing operator charter without importing obsolete prototype history.
 
 ## Deliverable 2 — Import the standalone Rust baseline (offline)
 
-Import the Rust implementation and reproducible package. Rename the crate,
-binary, runtime namespace, package, and documentation to Fortlet while
-preserving validated Codex and Tact behavior.
+Completed: rename the crate, binary, runtime namespace, package, and
+documentation to Fortlet while preserving the validated Codex and Tact launch
+behavior.
 
 ## Deliverable 3 — Establish reproducible verification (offline)
 
-Add a standalone flake, a Rust conformance checker, and the commands documented
-in `docs/RUNBOOK.md`. Verify the package independently of `nix-config`.
+Completed: provide a standalone flake, Rust conformance test, standard test and
+lint commands, and an operational runbook.
 
 ## Definition of Done
 
@@ -33,10 +32,10 @@ in `docs/RUNBOOK.md`. Verify the package independently of `nix-config`.
 3. `arch/conformance.json` passes its checker and honestly lists current gaps.
 4. The standard verification set is green.
 5. Then STOP and report. Transparent shims, new management commands, additional
-   harnesses, publication, remote execution, and GitHub publication are not
-   authorized under this goal.
+   harnesses, publication, remote execution, and GitHub publication were not
+   authorized by this goal.
 
-## Binding rules
+## Binding rules (unchanged ceilings)
 
 1. Do not weaken the credential boundary or mount host signing authority.
 2. Do not silently launch a harness outside the expected isolation boundary.
@@ -46,8 +45,8 @@ in `docs/RUNBOOK.md`. Verify the package independently of `nix-config`.
 
 ## Budget and escalation
 
-1. Eight hours of engineering effort; zero external spend or remote mutation.
-2. Report at every deliverable completion.
+1. Zero external spend and zero remote mutation.
+2. Report at deliverable completion.
 3. Stop on any need to change the validated product boundary, publish remotely,
    weaken a hard invariant, or overwrite user-owned state.
 

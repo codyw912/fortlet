@@ -1,0 +1,43 @@
+diff --git a/microsandbox-filesystem-0.6.8/build.rs b/microsandbox-filesystem-0.6.8/build.rs
+index 5d4146e..ffb8206 100644
+--- a/microsandbox-filesystem-0.6.8/build.rs
++++ b/microsandbox-filesystem-0.6.8/build.rs
+@@ -10,6 +10,7 @@ use microsandbox_utils::{PREBUILT_VERSION, agentd_download_url, http_client};
+ fn main() {
+     println!("cargo:rerun-if-changed=build.rs");
+     println!("cargo:rerun-if-changed=../utils/lib/lib.rs");
++    println!("cargo:rerun-if-env-changed=MICROSANDBOX_AGENTD");
+     // Invalidate the embedded agentd when its source changes.
+     // This won't auto-rebuild agentd (that requires `just build-agentd`),
+     // but it forces cargo to re-check that `build/agentd` is fresh.
+@@ -31,6 +32,14 @@ fn build_agentd(workspace_root: &Path, out_dir: &Path) {
+     {
+         let dest = out_dir.join(AGENTD_BINARY);
+ 
++        if let Some(prebuilt) = std::env::var_os("MICROSANDBOX_AGENTD") {
++            let prebuilt = PathBuf::from(prebuilt);
++            if !dest.exists() {
++                copy_agentd(&prebuilt, &dest);
++            }
++            return;
++        }
++
+         // Local development recipes rebuild build/agentd before compiling msb.
+         // Prefer it over a cached OUT_DIR copy so the embedded PID 1 binary
+         // cannot silently lag behind the freshly built guest agent.
+diff --git a/microsandbox-0.6.8/build.rs b/microsandbox-0.6.8/build.rs
+index 29e39a8..28f5f19 100644
+--- a/microsandbox-0.6.8/build.rs
++++ b/microsandbox-0.6.8/build.rs
+@@ -29,6 +29,11 @@ fn main() {
+     println!("cargo:rerun-if-env-changed=MSB_HOME");
+     println!("cargo:rerun-if-env-changed=HOME");
+ 
++    println!("cargo:rerun-if-env-changed=MICROSANDBOX_SKIP_RUNTIME_INSTALL");
++    if std::env::var_os("MICROSANDBOX_SKIP_RUNTIME_INSTALL").is_some() {
++        return;
++    }
++
+     let base_dir = resolve_home();
+     // Re-run if the binaries are deleted so we can re-download.
+     println!(

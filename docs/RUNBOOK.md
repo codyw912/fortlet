@@ -16,7 +16,9 @@ nix flake check
 ```
 
 `nix flake check` builds the package for the current system and may take longer
-than the Rust-only gates. Native Linux verification is still outstanding.
+than the Rust-only gates. Direct Cargo builds may download MicroSandbox's pinned
+guest agent once per build profile; the Nix package uses fixed-output inputs and
+builds offline. Native Linux verification is still outstanding.
 
 ## Running the system
 

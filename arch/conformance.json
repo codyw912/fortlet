@@ -12,11 +12,30 @@
     {
       "proposal": "0001",
       "title": "Project-scoped capsule architecture",
-      "status": "unimplemented",
-      "modules": [],
-      "tests": [],
+      "status": "partial",
+      "modules": [
+        "src/auth.rs",
+        "src/environment.rs",
+        "src/harness/mod.rs",
+        "src/paths.rs",
+        "src/project.rs",
+        "src/runtime.rs",
+        "src/session.rs"
+      ],
+      "tests": [
+        "src/auth.rs",
+        "src/cli.rs",
+        "src/paths.rs",
+        "src/project.rs",
+        "tests/conformance.rs"
+      ],
       "gaps": [
-        "The validated Rust baseline has not yet been imported into this repository."
+        "Transparent harness and native escape-hatch shims are not implemented.",
+        "Status, stop, restart, logs, and tool-update management commands are not implemented.",
+        "Interactive and background workload leases are not yet represented explicitly.",
+        "Declarative project environment activation and private overlays are not implemented.",
+        "The host-side publication transaction is not implemented.",
+        "Native x86_64-linux package verification is outstanding."
       ]
     }
   ]
