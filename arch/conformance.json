@@ -1,0 +1,23 @@
+{
+  "description": "Machine-readable map from Fortlet Improvement Proposals to implementation evidence. Conformant entries require tests; partial entries require gaps; update this file with the code that changes conformance.",
+  "entries": [
+    {
+      "proposal": "0000",
+      "title": "Proposal Template",
+      "status": "n-a",
+      "modules": [],
+      "tests": [],
+      "gaps": []
+    },
+    {
+      "proposal": "0001",
+      "title": "Project-scoped capsule architecture",
+      "status": "unimplemented",
+      "modules": [],
+      "tests": [],
+      "gaps": [
+        "The validated Rust baseline has not yet been imported into this repository."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+# Fortlet Experiment Records
+
+This directory records contact-with-reality attempts and their outcomes.
+Proposals hold durable design decisions; these files hold mutable
+experimental status, declared scope, outcomes, attribution, rejection
+reasons, and rollout decisions.
+
+Every experiment must state its production mechanism, scope, control,
+alternatives, risks, acceptance criteria, and budget BEFORE any expensive
+dispatch. Record losses and invalid evidence as carefully as wins. Never
+edit raw run artifacts to improve a result. Never resume a terminally
+closed experiment — a successor gets a new number and identity.
+
+Also in this directory:
+
+- `HANDOFF.md` — the descriptive briefing for the next session (see
+  `WORKFLOW.md` §1.4). Rewritten at mission completion; history in git.
+
+## Index
+
+Keep one line per record, newest last, outcome included — this list is the
+scannable failure/win history of the project:
+
+- `0000-template.md` — the record template.
