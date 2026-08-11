@@ -81,6 +81,27 @@ adapters. Capsules have disposable roots and explicit persistent mounts.
 4. Tool updates MUST be explicit and MUST leave the last working version
    available after failure.
 
+### Build, distribution, and project environments
+
+1. Nix MAY be Fortlet's canonical build, development, and release-reproduction
+   system.
+2. Ordinary users MUST be able to install and run Fortlet without installing,
+   configuring, or understanding Nix.
+3. If Fortlet uses Nix internally, routine store management, configuration, and
+   Nix-specific failure recovery MUST NOT become user responsibilities. Errors
+   MUST be reported in Fortlet product terms, with Nix details available for
+   diagnostics.
+4. Supported platforms MUST receive a user-facing installation artifact that
+   does not require a pre-existing Nix installation. The Nix package MAY remain
+   an additional first-class installation method.
+5. Repository flakes, devenv configurations, and private Nix overlays MUST be
+   optional environment inputs rather than project requirements.
+6. Advanced users MAY explicitly select Nix-backed environments, overlays, and
+   caching without changing the default experience for other users.
+7. Making Nix an opinionated runtime mechanism requires an accepted FIP that
+   demonstrates a concrete security, reproducibility, or UX advantage over a
+   simpler implementation.
+
 ### Credentials and publication
 
 1. Provider credentials SHOULD be delegated through a host broker and MUST NOT
@@ -117,6 +138,10 @@ extensible, but MicroSandbox is a deliberate product dependency. Native-feeling
 commands require careful shim installation, terminal forwarding, and lifecycle
 work. Remote execution cannot be added as a trivial endpoint switch because it
 changes workspace and credential authority.
+
+The current Nix package proves reproducible builds and is the polished alpha
+installation path, but it is not the final general-user distribution contract.
+Standalone release artifacts require separate implementation and verification.
 
 ## Alternatives Considered
 

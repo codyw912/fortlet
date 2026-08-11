@@ -35,6 +35,7 @@
         "Interactive and background workload leases are not yet represented explicitly.",
         "Declarative project environment activation and private overlays are not implemented.",
         "The host-side publication transaction is not implemented.",
+        "A supported standalone installation path that does not require Nix is not implemented.",
         "Native x86_64-linux package verification is outstanding."
       ]
     }

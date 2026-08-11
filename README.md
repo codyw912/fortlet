@@ -19,6 +19,11 @@ nix run . -- run codex --
 nix run . -- run tact --
 ```
 
+Nix is the current reproducible alpha installation path, not an intended
+general-user requirement. Fortlet's release distribution should also provide
+standalone platform artifacts; Nix remains an optional first-class path for
+users who prefer it.
+
 For local Rust development:
 
 ```sh

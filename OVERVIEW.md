@@ -32,6 +32,9 @@ remote execution remain designed directions rather than implemented features.
 6. Local execution comes first. Remote execution must introduce a real
    workspace, terminal, and credential transport rather than a speculative
    generic backend abstraction.
+7. Nix is Fortlet's canonical build and development system, not part of the
+   end-user contract. Ordinary installation and use must not require Nix
+   knowledge or configuration.
 
 ## Scope and non-goals
 
@@ -44,6 +47,12 @@ require a vendor account, add cross-harness messaging, or promise that
 networking is disabled. It does not mount SSH private keys or the 1Password SSH
 agent into capsules. MicroSandbox is the only implemented backend until a real
 second execution mode demonstrates a useful shared seam.
+
+Fortlet may support Nix and devenv project environments exceptionally well,
+but projects are not required to use them. Advanced users may opt into
+Nix-backed environments, overlays, and caching. Any opinionated runtime use of
+Nix must provide a concrete security, reproducibility, or UX advantage that is
+not available through a simpler mechanism.
 
 ## Workflow bindings (from ADAPTATION.md)
 

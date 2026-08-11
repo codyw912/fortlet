@@ -43,6 +43,9 @@ verify this briefing, then obtain a new goal before writing product code.
    not leak across the implementation.
 4. Treat remote execution as a future transport and workspace design, not as a
    flag on the local bind-mount implementation.
+5. Keep Nix as a reproducibility and advanced-environment capability rather than
+   an end-user prerequisite. A general release needs a supported standalone
+   installation path.
 
 ## Known local quirks
 
