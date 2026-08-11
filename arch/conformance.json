@@ -31,12 +31,27 @@
       ],
       "gaps": [
         "Transparent harness and native escape-hatch shims are not implemented.",
+        "Harness adapters do not yet own persistent paths or credential policy.",
+        "Launch failures are not consistently stage-specific with one actionable next step.",
+        "Automated coverage does not yet exercise project-resolution precedence, broad-root scratch behavior, capsule topology and concurrency, or terminal semantics.",
         "Status, stop, restart, logs, and tool-update management commands are not implemented.",
         "Interactive and background workload leases are not yet represented explicitly.",
         "Declarative project environment activation and private overlays are not implemented.",
         "The host-side publication transaction is not implemented.",
         "A supported standalone installation path that does not require Nix is not implemented.",
         "Native x86_64-linux package verification is outstanding."
+      ]
+    },
+    {
+      "proposal": "0002",
+      "title": "Optional transparent harness shims",
+      "status": "unimplemented",
+      "modules": [],
+      "tests": [],
+      "gaps": [
+        "The package does not expose optional codex and tact launchers in a dedicated shim directory.",
+        "Invocation-name dispatch and the explicit recursion-safe native escape hatch are not implemented.",
+        "Stage-specific actionable shim failures and packaged non-interactive evidence are not implemented."
       ]
     }
   ]

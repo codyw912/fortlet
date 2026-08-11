@@ -12,6 +12,9 @@ design at `docs/plans/2026-08-11-transparent-shim-slice-design.md`.
 
 ## Deliverable 1 — Accept the shim contract
 
+Completed 2026-08-11: accepted FIP-0002 and added its initial conformance entry
+before implementation.
+
 Record and accept the next numbered FIP extending FIP-0001 with:
 
 1. An immutable, package-owned shim directory separate from the ordinary
