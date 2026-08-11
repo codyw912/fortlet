@@ -25,6 +25,11 @@ typed exit interaction.
 
 ## Deliverable 1 — Add a paced typed-exit observer path
 
+Completed at checkpoint `31b4f073`: all three observer actions pass twelve
+focused tests. The new action proves six separate key writes, five fixed
+20-millisecond delays, distinctive code 23, structural events, and owned
+timeout cleanup while preserving both earlier actions.
+
 1. Preserve the existing signal and atomic exit modes and all evidence they
    produced.
 2. Add separate deterministic and live typed-exit modes. After the unchanged
