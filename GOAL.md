@@ -1,107 +1,96 @@
-# GOAL: Attribute native Codex first-interrupt behavior
+# GOAL: Observe native Codex outside the Codex runner
 
-Status: completed on 2026-08-11 with the declared mechanism rejected. Removing
-the four outer-Codex marker names did not change the native UI's pre-signal PTY
-close. Codex first-interrupt attribution remains outside this completed goal;
-do not retry Experiment 0005.
+Status: active. Authorized by the operator on 2026-08-11 after confirming from
+an external Fish shell that `CODEX_THREAD_ID`, `CODEX_SANDBOX`,
+`CODEX_SANDBOX_NETWORK_DISABLED`, and `CODEX_CI` are all absent.
 
-Determine whether inherited outer-Codex session markers caused Experiment
-0004's native Codex UI to close before its signal boundary. Run one bounded
-native Codex control with only those markers removed. Do not change Fortlet,
-the PTY observer, accepted architecture, or native harness state.
+Run one native Codex 0.147.0 UI control from the operator's external terminal
+under the unchanged PTY observer. Determine whether native Codex reaches and
+responds to the same first-interrupt boundary as packaged Codex when no Codex
+runner contains the observer. Do not change Fortlet, the observer, the native
+harness, or accepted architecture.
 
-Before dispatch, read FIP-0001 and FIP-0002 in full, the validated design, and
-Experiments 0003 and 0004.
+Before dispatch, read FIP-0001 and FIP-0002 in full, the validated design at
+`docs/plans/2026-08-11-external-native-codex-control-design.md`, and Experiments
+0003 through 0005.
 
-## Deliverable 1 — Freeze and qualify the control
+## Deliverable 1 — Qualify the operator control
 
-Completed on 2026-08-11 at checkpoint `cd5445f6`: both hashes matched, marker
-presence was recorded by name only, the product and observer were unchanged,
-and the complete verification set plus fixture rehearsal passed.
-
-1. Verify the exact Codex 0.147.0 launcher and native-binary hashes declared in
-   Experiment 0005.
-2. Record only whether the four declared marker names are initially present;
-   never record environment values.
-3. Confirm the product and observer are unchanged from the verified Experiment
-   0004 stack.
-4. Run the complete standard verification set, the six observer tests, and the
+1. Verify the frozen Codex launcher and native-binary hashes.
+2. Confirm the operator's name-only marker check reported all four runner
+   markers absent from the external Fish shell.
+3. Confirm Fortlet and the observer remain unchanged from checkpoint
+   `ad7fdd0e`.
+4. Run the complete standard verification set, all six observer tests, and the
    deterministic fixture rehearsal before dispatch.
-5. Checkpoint the predeclared experiment before any native UI launch.
+5. Checkpoint the rehearsed Experiment 0006 before giving the operator the live
+   command.
 
-## Deliverable 2 — Run one native Codex unit
+## Deliverable 2 — Observe the external native UI
 
-Completed as a terminally rejected mechanism on 2026-08-11. The sole unit
-closed during startup settling before resize or signal, matching Experiment
-0004 despite the four-name removal. See Experiment 0005.
+The operator runs the exact command declared in Experiment 0006 from
+`/Users/cody/dev/fortlet` in the already-checked external Fish shell. The unit
+uses an 80-by-24 PTY, 100-millisecond settle, 120-by-40 resize, 20-second
+unattended hold, one `SIGINT` to the verified observer-owned foreground process
+group, and a 15-second exit bound.
 
-Launch the exact native Codex npm entry point under the unchanged observer from
-`/Users/cody/dev/fortlet`, removing only these inherited names from the
-observer and child environment:
+The operator must not type, press Enter, press Ctrl-C, or retry. The observer
+stores no native screen bytes. The operator returns the complete structural
+output verbatim.
 
-- `CODEX_THREAD_ID`
-- `CODEX_SANDBOX`
-- `CODEX_SANDBOX_NETWORK_DISABLED`
-- `CODEX_CI`
+Close by the first matching rule:
 
-Keep the real workspace sandbox and `CODEX_MANAGED_*` launcher behavior intact.
-Use an 80-by-24 PTY, settle for 100 milliseconds, resize to 120 by 40, allow a
-20-second unattended hold, send one `SIGINT` to the verified observer-owned
-foreground process group, and wait at most 15 seconds for exit. Write no prompt,
-newline, or other input. Do not retry or adapt the environment, signal, or
-timings.
-
-Close the unit by the first matching rule:
-
-1. If it reaches signal and remains alive, native Codex matches the packaged
-   first-interrupt behavior; do not attribute Experiment 0003 to Fortlet.
-2. If it reaches signal and exits, record the exact status and the narrowed
+1. If native Codex reaches signal and remains alive, its first-interrupt
+   behavior matches packaged Codex; do not attribute that timeout to Fortlet.
+2. If native Codex reaches signal and exits, record the exact status and a
    packaged-path discrepancy; do not repair it under this goal.
-3. If it closes before signal again, reject the marker-removal mechanism. A
-   future external-terminal control requires a new goal and experiment.
+3. If native Codex closes before signal, the external-runner mechanism is
+   rejected and no signal comparison is established.
 
-After the unit, verify owned cleanup, close Experiment 0005 terminally, update
-conformance and the handoff, mark this goal complete or blocked, then STOP and
-report.
+After receiving the result, verify or obtain operator confirmation of owned
+cleanup, close Experiment 0006 terminally, update conformance and the handoff,
+mark this goal complete or blocked, then STOP and report.
 
 ## Definition of Done
 
-1. The experiment freezes one exact Codex identity and changes only the four
-   declared environment names relative to Experiment 0004.
-2. The unchanged observer is qualified immediately before dispatch.
-3. The single unit is recorded without raw PTY bytes, retries, or adaptive
-   input, and one of the three decision rules is applied without inference.
-4. No provider credential value, paid quota, host setup mutation, unowned
-   process control, native fallback, or product change occurs.
-5. Conformance and the handoff state only what the result establishes; then
-   STOP and report.
+1. One exact native Codex identity runs under the unchanged observer from a
+   marker-free external Fish shell.
+2. The complete gate and deterministic rehearsal pass before the live command
+   is issued.
+3. The operator supplies one unedited structural result with no retry or input.
+4. Ordinary Codex-managed state writes are allowed for this one native launch;
+   shell startup-file, Fish configuration, Nix configuration, and PATH-manager
+   edits are not authorized.
+5. No prompt, intentional inference, paid quota, credential value, unowned
+   process control, Fortlet invocation, or product change occurs.
+6. Conformance and the handoff state only what the result proves; then STOP.
 
 ## Binding rules
 
 1. Preserve every charter invariant and FIP-0001/FIP-0002 constraint.
-2. Unsetting a marker must not weaken or bypass the execution sandbox; the
-   workspace-only write boundary remains enforced externally.
-3. Do not unset `CODEX_MANAGED_BY_NPM` or `CODEX_MANAGED_PACKAGE_ROOT`; the npm
-   launcher may manage them normally.
-4. Never persist raw native UI output, environment values, account metadata, or
-   credentials.
-5. Do not alter the observer, Fortlet, package, harness configuration, shell
-   startup files, or native Codex state.
+2. Use the exact native launcher path, not `codex` through `PATH`, a Fortlet
+   shim, `fortlet native`, or another wrapper.
+3. Do not add a sandbox around the external control; that would change the
+   runner-context variable being tested.
+4. Never persist raw UI output, environment values, account metadata, or
+   credential values.
+5. Do not change product code, observer code, native Codex configuration, or
+   timings during the mission.
 6. Use reviewable Jujutsu checkpoints and inspect `main..@` before handoff.
 
 ## Budget and escalation
 
-1. Engineering ceiling: 30 minutes from implementation start.
+1. Engineering ceiling: 30 minutes from mission setup.
 2. Experiment ceiling: zero money, zero paid quota, zero prompts, one unit,
    zero retries, and at most 10 minutes after dispatch begins.
-3. Stop on any need to weaken an invariant, initiate model inference, change an
-   accepted FIP, mutate state outside the project, or control an unowned
-   process.
-4. Any early close settles the unit; it does not authorize a second launch.
+3. The operator explicitly authorizes ordinary Codex-managed state writes for
+   this one launch, but no shell or declarative-environment mutation.
+4. Stop on any credential output, unexpected external mutation, unowned process
+   control, paid activity, or need to change the declared command.
 
 ## Verification
 
-Run from `nix develop` before dispatch:
+Run before issuing the operator command:
 
 - `cargo test --example pty_observer`
 - `cargo run --quiet --example pty_observer -- fixture`
@@ -111,4 +100,5 @@ Run from `nix develop` before dispatch:
 - `cargo test --test conformance`
 - `nix flake check`
 - `nix run . -- doctor`
-- Exact identity and marker-name checks declared in Experiment 0005
+- Exact identity, unchanged-path, and one-active-experiment checks declared in
+  Experiment 0006
