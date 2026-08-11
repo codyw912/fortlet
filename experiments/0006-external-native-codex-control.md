@@ -1,6 +1,6 @@
 # Experiment 0006: External native Codex control
 
-Status: declared
+Status: completed — accepted
 Design: FIP-0001 and FIP-0002
 Charter scope: `local-foundation/v1`
 
@@ -116,8 +116,44 @@ Completed on 2026-08-11 before issuing the operator command:
 
 ## Results
 
-Pending operator output.
+The operator ran the exact command once from the marker-free external Fish
+shell and returned this structural output:
+
+```text
+{"event":"started"}
+{"event":"activity_initial"}
+{"event":"resized"}
+{"event":"activity_resized"}
+{"event":"concurrent_window"}
+{"event":"signal"}
+Error: PTY child did not exit before timeout
+85:86: syntax error: Expected “"” but found unknown token. (-2741)
+```
+
+Native Codex reached initial activity, actual resize activity, the unattended
+hold, and the first-signal boundary. It then remained alive beyond the fixed
+15-second exit bound, matching packaged Codex in Experiment 0003. The observer
+emitted no `exited` event or numeric summary and returned nonzero.
+
+The final `-2741` line appeared after the observer timeout diagnostic. Its
+AppleScript-style provenance is not established, so it is retained as an
+unattributed post-observer diagnostic and is not used in the decision. No retry
+or input was reported. A subsequent read-only process-table query found no
+matching observer or npm Codex-launcher process beyond the query itself.
 
 ## Terminal Closure
 
-Pending.
+1. Outcome: accepted — external native Codex reached the first `SIGINT` and
+   reproduced packaged Codex's bounded non-exit.
+2. Root cause: the pre-signal closes in Experiments 0004 and 0005 were specific
+   to the containing Codex runner context, although its exact internal cause is
+   not identified. The first interrupt's non-termination is native Codex
+   behavior, not evidence of Fortlet-specific signal propagation failure.
+3. Actual total cost: zero money, zero paid quota, zero prompts, one of one
+   operator unit, and zero retries. Wall-clock elapsed time was not captured,
+   so no numeric elapsed claim is made; the unchanged observer enforced every
+   declared stage bound and no budget overrun was reported.
+4. Next action: stop this goal. Treat first-interrupt behavior as matching
+   native semantics. If exact eventual termination and exit-status preservation
+   remain release-critical, design a successor around the native UI's actual
+   termination action rather than assuming one `SIGINT` exits.

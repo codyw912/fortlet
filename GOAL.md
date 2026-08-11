@@ -1,8 +1,9 @@
 # GOAL: Observe native Codex outside the Codex runner
 
-Status: active. Authorized by the operator on 2026-08-11 after confirming from
-an external Fish shell that `CODEX_THREAD_ID`, `CODEX_SANDBOX`,
-`CODEX_SANDBOX_NETWORK_DISABLED`, and `CODEX_CI` are all absent.
+Status: completed on 2026-08-11. External native Codex reached resize and the
+first-signal boundary, then remained alive through the same 15-second exit
+bound as packaged Codex. The packaged timeout therefore matches native
+first-interrupt behavior and is not evidence of a Fortlet-specific defect.
 
 Run one native Codex 0.147.0 UI control from the operator's external terminal
 under the unchanged PTY observer. Determine whether native Codex reaches and
@@ -16,6 +17,9 @@ Before dispatch, read FIP-0001 and FIP-0002 in full, the validated design at
 
 ## Deliverable 1 — Qualify the operator control
 
+Completed at checkpoint `c049a2b3`: hashes, unchanged paths, the complete
+verification set, and deterministic observer rehearsal passed before dispatch.
+
 1. Verify the frozen Codex launcher and native-binary hashes.
 2. Confirm the operator's name-only marker check reported all four runner
    markers absent from the external Fish shell.
@@ -27,6 +31,9 @@ Before dispatch, read FIP-0001 and FIP-0002 in full, the validated design at
    command.
 
 ## Deliverable 2 — Observe the external native UI
+
+Completed as accepted evidence in Experiment 0006. The operator ran one unit
+without reported input or retry and returned the complete structural output.
 
 The operator runs the exact command declared in Experiment 0006 from
 `/Users/cody/dev/fortlet` in the already-checked external Fish shell. The unit

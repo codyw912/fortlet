@@ -68,10 +68,11 @@
         "examples/pty_observer.rs",
         "experiments/0003-interactive-packaged-sessions.md",
         "experiments/0004-native-ui-signal-control.md",
-        "experiments/0005-native-codex-marker-control.md"
+        "experiments/0005-native-codex-marker-control.md",
+        "experiments/0006-external-native-codex-control.md"
       ],
       "gaps": [
-        "Runner evidence proves both packaged shims attach through real PTYs, produce activity after resize, share the expected capsule with concurrent invocations, and remain responsive. A native control shows Tact also remains alive after its first foreground-group SIGINT, so that timeout is native UI behavior rather than evidence of a Fortlet-specific defect. Two native Codex controls closed before reaching signal, and removing inherited outer-Codex marker names did not change that behavior; Codex signal comparison and exact packaged exit-status preservation remain unresolved."
+        "Runner evidence proves both packaged shims attach through real PTYs, produce activity after resize, share the expected capsule with concurrent invocations, and remain responsive. Native controls show both Tact and externally launched Codex also remain alive after their first foreground-group SIGINT, so the packaged timeouts match native UI behavior rather than a Fortlet-specific defect. Exact eventual termination and packaged exit-status preservation remain unresolved."
       ]
     }
   ]
