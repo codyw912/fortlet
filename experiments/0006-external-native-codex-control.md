@@ -98,7 +98,21 @@ capped at 30 minutes.
 
 ## Rehearsal
 
-Pending before dispatch.
+Completed on 2026-08-11 before issuing the operator command:
+
+1. The operator reported all four declared runner marker names absent from the
+   external Fish shell using the name-only check.
+2. The launcher and selected native-binary SHA-256 hashes matched their frozen
+   values exactly.
+3. A Jujutsu path diff from `ad7fdd0e` showed no product, observer, fixture,
+   package, manifest, or lockfile change, and Experiment 0006 was the only
+   declared experiment.
+4. All six observer tests passed. The deterministic fixture emitted the full
+   sequence with signal 2, 7 initial bytes, and 13 resized bytes.
+5. The full Rust suite, formatting, strict all-target Clippy, explicit
+   conformance, exact-tree `nix flake check`, and `nix run . -- doctor` passed.
+   The flake retained the known app-`meta` warning and incompatible
+   `x86_64-linux` omission; doctor printed no credential values.
 
 ## Results
 
