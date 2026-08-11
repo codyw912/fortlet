@@ -1,7 +1,9 @@
 # GOAL: Attribute native Codex first-interrupt behavior
 
-Status: active. Authorized by the operator on 2026-08-11 after validating the
-design in `docs/plans/2026-08-11-native-codex-marker-control-design.md`.
+Status: completed on 2026-08-11 with the declared mechanism rejected. Removing
+the four outer-Codex marker names did not change the native UI's pre-signal PTY
+close. Codex first-interrupt attribution remains outside this completed goal;
+do not retry Experiment 0005.
 
 Determine whether inherited outer-Codex session markers caused Experiment
 0004's native Codex UI to close before its signal boundary. Run one bounded
@@ -12,6 +14,10 @@ Before dispatch, read FIP-0001 and FIP-0002 in full, the validated design, and
 Experiments 0003 and 0004.
 
 ## Deliverable 1 — Freeze and qualify the control
+
+Completed on 2026-08-11 at checkpoint `cd5445f6`: both hashes matched, marker
+presence was recorded by name only, the product and observer were unchanged,
+and the complete verification set plus fixture rehearsal passed.
 
 1. Verify the exact Codex 0.147.0 launcher and native-binary hashes declared in
    Experiment 0005.
@@ -24,6 +30,10 @@ Experiments 0003 and 0004.
 5. Checkpoint the predeclared experiment before any native UI launch.
 
 ## Deliverable 2 — Run one native Codex unit
+
+Completed as a terminally rejected mechanism on 2026-08-11. The sole unit
+closed during startup settling before resize or signal, matching Experiment
+0004 despite the four-name removal. See Experiment 0005.
 
 Launch the exact native Codex npm entry point under the unchanged observer from
 `/Users/cody/dev/fortlet`, removing only these inherited names from the

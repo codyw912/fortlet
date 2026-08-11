@@ -1,6 +1,6 @@
 # Experiment 0005: Native Codex marker control
 
-Status: declared
+Status: completed — rejected
 Design: FIP-0001 and FIP-0002
 Charter scope: `local-foundation/v1`
 
@@ -132,8 +132,35 @@ Completed on 2026-08-11 before dispatch:
 
 ## Results
 
-Pending.
+Dispatch ran from 2026-08-11 17:13:32 EDT through the owned-cleanup check at
+17:13:43 EDT. The observer emitted:
+
+```json
+{"event":"started"}
+{"event":"activity_initial"}
+```
+
+It then exited `1` with `PTY closed while startup output was settling`, before
+resize, hold, signal, or summary. The launch command removed exactly the four
+declared names; `CODEX_MANAGED_*` behavior and the externally enforced sandbox
+remained intact. No input byte was written and no retry was made.
+
+A read-only process-table check found no surviving observer or matching Codex
+launcher beyond the query itself. No raw UI output, environment value, prompt,
+intentional model inference, paid quota, credential value, Fortlet invocation,
+shell mutation, or unowned process control was observed.
 
 ## Terminal Closure
 
-Pending.
+1. Outcome: rejected — removing the declared outer-Codex marker names did not
+   let native Codex reach resize or signal.
+2. Root cause: the marker-removal mechanism is falsified because Experiment
+   0005 reproduced Experiment 0004's pre-signal PTY close with those names
+   absent. The cause of the native early close and Codex signal semantics remain
+   unestablished because raw UI bytes were intentionally not retained.
+3. Actual total cost: zero money, zero paid quota, zero prompts, zero remote
+   mutation, one of one unit, zero retries, and 11 seconds through cleanup
+   verification versus the 10-minute dispatch ceiling.
+4. Next action: stop this goal. Any external-terminal native Codex control or
+   deterministic guest signal probe requires a new mission and experiment; do
+   not retry this record or infer a Fortlet repair from it.
