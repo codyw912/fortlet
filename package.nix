@@ -66,6 +66,8 @@ rustPlatform.buildRustPackage {
 
   nativeBuildInputs = [ makeWrapper ];
 
+  dontStrip = true;
+
   postInstall = ''
     runtime="$out/libexec/fortlet/microsandbox"
     shims="$out/libexec/fortlet/shims"
@@ -86,8 +88,16 @@ rustPlatform.buildRustPackage {
   doInstallCheck = true;
   installCheckPhase = ''
     shims="$out/libexec/fortlet/shims"
+    runtime="$out/libexec/fortlet/microsandbox"
     test_home="$(mktemp -d)"
-    trap 'rm -rf "$test_home"' EXIT
+    runtime_check="$(mktemp -d)"
+    trap 'rm -rf "$test_home" "$runtime_check"' EXIT
+
+    tar -xzf ${runtimeBundle} -C "$runtime_check"
+    cmp "$runtime_check/msb" "$runtime/msb"
+    cmp \
+      "$runtime_check/${platform.libkrunfwFilename}" \
+      "$runtime/${platform.libkrunfwFilename}"
 
     env -i HOME="$test_home" PATH="$out/bin" \
       "$out/bin/fortlet" --help >/dev/null
