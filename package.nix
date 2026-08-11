@@ -49,6 +49,7 @@ rustPlatform.buildRustPackage {
       ./Cargo.lock
       ./Cargo.toml
       ./arch
+      ./package.nix
       ./src
       ./tests
     ];
@@ -67,12 +68,42 @@ rustPlatform.buildRustPackage {
 
   postInstall = ''
     runtime="$out/libexec/fortlet/microsandbox"
+    shims="$out/libexec/fortlet/shims"
     mkdir -p "$runtime"
+    mkdir -p "$shims"
     tar -xzf ${runtimeBundle} -C "$runtime"
+
+    for harness in codex tact; do
+      ln -s "$out/bin/fortlet" "$shims/$harness"
+    done
 
     wrapProgram "$out/bin/fortlet" \
       --set MSB_PATH "$runtime/msb" \
-      --set MSB_LIBKRUNFW_PATH "$runtime/${platform.libkrunfwFilename}"
+      --set MSB_LIBKRUNFW_PATH "$runtime/${platform.libkrunfwFilename}" \
+      --set FORTLET_SHIM_DIR "$shims"
+  '';
+
+  doInstallCheck = true;
+  installCheckPhase = ''
+    shims="$out/libexec/fortlet/shims"
+    test_home="$(mktemp -d)"
+    trap 'rm -rf "$test_home"' EXIT
+
+    env -i HOME="$test_home" PATH="$out/bin" \
+      "$out/bin/fortlet" --help >/dev/null
+
+    for harness in codex tact; do
+      test -L "$shims/$harness"
+      test "$shims/$harness" -ef "$out/bin/fortlet"
+      discovered="$(env -i PATH="$shims" ${stdenv.shell} -c "command -v $harness")"
+      test "$discovered" = "$shims/$harness"
+      if env -i HOME="$test_home" PATH="$shims" \
+        "$shims/$harness" --version >/dev/null 2>"$test_home/$harness.err"; then
+        echo "$harness unexpectedly launched without test credentials" >&2
+        exit 1
+      fi
+      grep -q '^fortlet: credentials stage failed;' "$test_home/$harness.err"
+    done
   '';
 
   strictDeps = true;

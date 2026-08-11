@@ -32,6 +32,11 @@ Accepted before implementation begins.
 
 ## Deliverable 2 — Implement the optional transparent slice
 
+Completed 2026-08-11: implemented optional packaged `codex` and `tact` shims,
+explicit recursion-safe native execution, staged launch failures, focused
+coverage, and partial conformance evidence. Live packaged smoke remains in
+Deliverable 3.
+
 1. Package `codex` and `tact` launchers in the dedicated shim directory and
    keep harness registration as their source of truth.
 2. Route shim invocation through the existing capsule-session transaction,

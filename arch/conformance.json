@@ -14,25 +14,31 @@
       "title": "Project-scoped capsule architecture",
       "status": "partial",
       "modules": [
+        "package.nix",
         "src/auth.rs",
+        "src/cli.rs",
         "src/environment.rs",
         "src/harness/mod.rs",
+        "src/native.rs",
         "src/paths.rs",
         "src/project.rs",
         "src/runtime.rs",
         "src/session.rs"
       ],
       "tests": [
+        "package.nix",
         "src/auth.rs",
         "src/cli.rs",
+        "src/native.rs",
         "src/paths.rs",
         "src/project.rs",
+        "src/session.rs",
+        "tests/native.rs",
         "tests/conformance.rs"
       ],
       "gaps": [
-        "Transparent harness and native escape-hatch shims are not implemented.",
         "Harness adapters do not yet own persistent paths or credential policy.",
-        "Launch failures are not consistently stage-specific with one actionable next step.",
+        "Automated coverage checks staged error formatting but does not exercise each live launch failure stage.",
         "Automated coverage does not yet exercise project-resolution precedence, broad-root scratch behavior, capsule topology and concurrency, or terminal semantics.",
         "Status, stop, restart, logs, and tool-update management commands are not implemented.",
         "Interactive and background workload leases are not yet represented explicitly.",
@@ -45,13 +51,23 @@
     {
       "proposal": "0002",
       "title": "Optional transparent harness shims",
-      "status": "unimplemented",
-      "modules": [],
-      "tests": [],
+      "status": "partial",
+      "modules": [
+        "package.nix",
+        "src/cli.rs",
+        "src/native.rs",
+        "src/session.rs"
+      ],
+      "tests": [
+        "package.nix",
+        "src/cli.rs",
+        "src/native.rs",
+        "src/session.rs",
+        "tests/native.rs"
+      ],
       "gaps": [
-        "The package does not expose optional codex and tact launchers in a dedicated shim directory.",
-        "Invocation-name dispatch and the explicit recursion-safe native escape hatch are not implemented.",
-        "Stage-specific actionable shim failures and packaged non-interactive evidence are not implemented."
+        "The required runner-executed local smoke evidence for both packaged shims is pending.",
+        "Interactive TTY, resize, and signal preservation are inherited from the explicit launch path but are not independently exercised through the shims."
       ]
     }
   ]

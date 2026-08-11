@@ -1,11 +1,12 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
-use anyhow::{bail, Result};
+use anyhow::{bail, Context, Result};
 use clap::{Parser, Subcommand};
 use microsandbox::setup;
 
 use crate::auth::{require_outside_mounts, Credentials};
 use crate::harness;
+use crate::native;
 use crate::paths::AppPaths;
 use crate::project;
 use crate::session::{self, LaunchRequest};
@@ -32,10 +33,22 @@ enum Command {
         #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
         arguments: Vec<String>,
     },
+    Native {
+        harness: String,
+        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+        arguments: Vec<String>,
+    },
 }
 
 pub async fn run() -> Result<()> {
-    match Cli::parse().command {
+    match split_invocation(std::env::args().collect())? {
+        Invocation::Fortlet(arguments) => run_command(Cli::parse_from(arguments).command).await,
+        Invocation::Shim { harness, arguments } => launch(harness, arguments).await,
+    }
+}
+
+async fn run_command(command: Command) -> Result<()> {
+    match command {
         Command::Doctor => doctor(),
         Command::Run {
             harness,
@@ -43,19 +56,65 @@ pub async fn run() -> Result<()> {
             allow_broad_mount,
             arguments,
         } => {
-            let code = session::launch(LaunchRequest {
+            launch_with_request(LaunchRequest {
                 harness,
                 project,
                 allow_broad_mount,
                 arguments: strip_separator(arguments),
             })
-            .await?;
-            if code != 0 {
-                std::process::exit(code);
-            }
-            Ok(())
+            .await
+        }
+        Command::Native { harness, arguments } => {
+            native::execute(&harness, &strip_separator(arguments))
         }
     }
+}
+
+async fn launch(harness: String, arguments: Vec<String>) -> Result<()> {
+    launch_with_request(LaunchRequest {
+        harness,
+        project: None,
+        allow_broad_mount: false,
+        arguments,
+    })
+    .await
+}
+
+async fn launch_with_request(request: LaunchRequest) -> Result<()> {
+    let code = session::launch(request).await?;
+    if code != 0 {
+        std::process::exit(code);
+    }
+    Ok(())
+}
+
+#[derive(Debug, PartialEq, Eq)]
+enum Invocation {
+    Fortlet(Vec<String>),
+    Shim {
+        harness: String,
+        arguments: Vec<String>,
+    },
+}
+
+fn split_invocation(arguments: Vec<String>) -> Result<Invocation> {
+    let executable = arguments
+        .first()
+        .context("invocation has no executable name")?;
+    let name = Path::new(executable)
+        .file_name()
+        .and_then(|name| name.to_str())
+        .context("invocation executable name is not valid UTF-8")?;
+    if name == "fortlet" {
+        return Ok(Invocation::Fortlet(arguments));
+    }
+    if harness::find(name).is_ok() {
+        return Ok(Invocation::Shim {
+            harness: name.to_owned(),
+            arguments: arguments.into_iter().skip(1).collect(),
+        });
+    }
+    bail!("unsupported invocation name {name:?}; run as fortlet, codex, or tact")
 }
 
 fn doctor() -> Result<()> {
@@ -102,5 +161,38 @@ mod tests {
             strip_separator(vec!["--".into(), "--help".into()]),
             vec!["--help"]
         );
+    }
+
+    #[test]
+    fn dispatches_registered_shims_without_consuming_arguments() {
+        for harness in ["codex", "tact"] {
+            assert_eq!(
+                split_invocation(vec![
+                    format!("/nix/store/example/shims/{harness}"),
+                    "--".into(),
+                    "--help".into(),
+                ])
+                .unwrap(),
+                Invocation::Shim {
+                    harness: harness.into(),
+                    arguments: vec!["--".into(), "--help".into()],
+                }
+            );
+        }
+    }
+
+    #[test]
+    fn preserves_the_explicit_cli_invocation() {
+        let arguments = vec!["/nix/store/example/bin/fortlet".into(), "doctor".into()];
+        assert_eq!(
+            split_invocation(arguments.clone()).unwrap(),
+            Invocation::Fortlet(arguments)
+        );
+    }
+
+    #[test]
+    fn rejects_unknown_multicall_names() {
+        let error = split_invocation(vec!["/tmp/not-fortlet".into()]).unwrap_err();
+        assert!(error.to_string().contains("unsupported invocation name"));
     }
 }
