@@ -23,6 +23,7 @@ struct ObserverConfig {
     resize_timeout: Duration,
     hold: Duration,
     exit_timeout: Duration,
+    termination: TerminationAction,
 }
 
 #[derive(Debug)]
@@ -39,9 +40,21 @@ struct TerminalSize {
     cols: u16,
 }
 
+#[derive(Clone, Copy)]
+enum TerminationAction {
+    SignalInterrupt,
+    ExitCommand,
+}
+
 enum Mode {
     Fixture,
+    FixtureExit,
     Observe {
+        program: PathBuf,
+        cwd: PathBuf,
+        hold: Duration,
+    },
+    ObserveExit {
         program: PathBuf,
         cwd: PathBuf,
         hold: Duration,
@@ -52,6 +65,7 @@ fn parse_args(args: impl IntoIterator<Item = OsString>) -> Result<Mode> {
     let args: Vec<OsString> = args.into_iter().collect();
     match args.as_slice() {
         [mode] if mode == "fixture" => Ok(Mode::Fixture),
+        [mode] if mode == "fixture-exit" => Ok(Mode::FixtureExit),
         [mode, program, cwd, hold] if mode == "observe" => {
             let hold = hold
                 .to_str()
@@ -64,8 +78,21 @@ fn parse_args(args: impl IntoIterator<Item = OsString>) -> Result<Mode> {
                 hold: Duration::from_secs(hold),
             })
         }
+        [mode, program, cwd, hold] if mode == "observe-exit" => {
+            let hold = hold
+                .to_str()
+                .context("hold seconds must be valid UTF-8")?
+                .parse::<u64>()
+                .context("hold seconds must be an integer")?;
+            Ok(Mode::ObserveExit {
+                program: PathBuf::from(program),
+                cwd: PathBuf::from(cwd),
+                hold: Duration::from_secs(hold),
+            })
+        }
         _ => bail!(
-            "usage: pty_observer fixture | pty_observer observe <program> <cwd> <hold-seconds>"
+            "usage: pty_observer fixture | fixture-exit | observe <program> <cwd> \
+             <hold-seconds> | observe-exit <program> <cwd> <hold-seconds>"
         ),
     }
 }
@@ -103,8 +130,16 @@ fn observe_with_events(
     };
     emit("concurrent_window");
     thread::sleep(config.hold);
-    child.signal(libc::SIGINT)?;
-    emit("signal");
+    match config.termination {
+        TerminationAction::SignalInterrupt => {
+            child.signal(libc::SIGINT)?;
+            emit("signal");
+        }
+        TerminationAction::ExitCommand => {
+            write_exit_command(&mut master)?;
+            emit("exit_command");
+        }
+    }
     let status = child.wait(config.exit_timeout)?;
     emit("exited");
 
@@ -114,6 +149,12 @@ fn observe_with_events(
         exit_code: status.code(),
         exit_signal: status.signal(),
     })
+}
+
+fn write_exit_command(output: &mut impl Write) -> Result<()> {
+    output
+        .write_all(b"/exit\r")
+        .context("cannot write exit command to PTY")
 }
 
 fn open_pty(rows: u16, cols: u16) -> Result<(File, File)> {
@@ -340,6 +381,25 @@ fn main() -> Result<()> {
                 resize_timeout: Duration::from_secs(2),
                 hold: Duration::ZERO,
                 exit_timeout: Duration::from_secs(2),
+                termination: TerminationAction::SignalInterrupt,
+            },
+        ),
+        Mode::FixtureExit => (
+            CommandSpec {
+                program: PathBuf::from("/bin/sh"),
+                args: vec![fixture.display().to_string(), "exit-command".into()],
+                cwd: None,
+            },
+            ObserverConfig {
+                startup_timeout: Duration::from_secs(2),
+                resize: Some(TerminalSize {
+                    rows: 40,
+                    cols: 120,
+                }),
+                resize_timeout: Duration::from_secs(2),
+                hold: Duration::ZERO,
+                exit_timeout: Duration::from_secs(2),
+                termination: TerminationAction::ExitCommand,
             },
         ),
         Mode::Observe { program, cwd, hold } => (
@@ -357,6 +417,25 @@ fn main() -> Result<()> {
                 resize_timeout: Duration::from_secs(15),
                 hold,
                 exit_timeout: Duration::from_secs(15),
+                termination: TerminationAction::SignalInterrupt,
+            },
+        ),
+        Mode::ObserveExit { program, cwd, hold } => (
+            CommandSpec {
+                program,
+                args: Vec::new(),
+                cwd: Some(cwd),
+            },
+            ObserverConfig {
+                startup_timeout: Duration::from_secs(90),
+                resize: Some(TerminalSize {
+                    rows: 40,
+                    cols: 120,
+                }),
+                resize_timeout: Duration::from_secs(15),
+                hold,
+                exit_timeout: Duration::from_secs(15),
+                termination: TerminationAction::ExitCommand,
             },
         ),
     };
@@ -412,6 +491,7 @@ mod tests {
                 resize_timeout: Duration::from_secs(2),
                 hold: Duration::ZERO,
                 exit_timeout: Duration::from_secs(2),
+                termination: TerminationAction::SignalInterrupt,
             },
         )
         .expect("fixture observation should succeed");
@@ -439,6 +519,7 @@ mod tests {
                 resize_timeout: Duration::from_secs(2),
                 hold: Duration::ZERO,
                 exit_timeout: Duration::from_secs(2),
+                termination: TerminationAction::SignalInterrupt,
             },
         )
         .expect("fixture observation should succeed");
@@ -471,6 +552,7 @@ mod tests {
                 resize_timeout: Duration::from_secs(2),
                 hold: Duration::ZERO,
                 exit_timeout: Duration::from_secs(2),
+                termination: TerminationAction::SignalInterrupt,
             },
         )
         .expect_err("quiet fixture should time out");
@@ -504,6 +586,7 @@ mod tests {
                 resize_timeout: Duration::from_secs(2),
                 hold: Duration::ZERO,
                 exit_timeout: Duration::from_secs(2),
+                termination: TerminationAction::SignalInterrupt,
             },
             |event| events.push(event),
         )
@@ -529,6 +612,10 @@ mod tests {
             parse_args([OsString::from("fixture")]),
             Ok(Mode::Fixture)
         ));
+        assert!(matches!(
+            parse_args([OsString::from("fixture-exit")]),
+            Ok(Mode::FixtureExit)
+        ));
         let mode = parse_args([
             OsString::from("observe"),
             OsString::from("/immutable/shim"),
@@ -542,8 +629,19 @@ mod tests {
                 assert_eq!(cwd, PathBuf::from("/project"));
                 assert_eq!(hold, Duration::from_secs(20));
             }
-            Mode::Fixture => panic!("expected live observation mode"),
+            Mode::Fixture | Mode::FixtureExit | Mode::ObserveExit { .. } => {
+                panic!("expected live observation mode")
+            }
         }
+
+        let mode = parse_args([
+            OsString::from("observe-exit"),
+            OsString::from("/immutable/shim"),
+            OsString::from("/project"),
+            OsString::from("20"),
+        ])
+        .expect("live exit-command observer arguments should parse");
+        assert!(matches!(mode, Mode::ObserveExit { .. }));
     }
 
     #[test]
@@ -564,10 +662,96 @@ mod tests {
                 resize_timeout: Duration::from_millis(100),
                 hold: Duration::ZERO,
                 exit_timeout: Duration::from_secs(2),
+                termination: TerminationAction::SignalInterrupt,
             },
         )
         .expect_err("fixture without redraw should fail resize observation");
 
         assert!(error.to_string().contains("produced no output"));
+    }
+
+    #[test]
+    fn exit_command_writes_exact_terminal_bytes() {
+        let mut bytes = Vec::new();
+        write_exit_command(&mut bytes).expect("exit command should be writable");
+        assert_eq!(bytes, b"/exit\r");
+    }
+
+    #[test]
+    fn fixture_exit_command_preserves_distinctive_status_and_events() {
+        let fixture = fixture();
+        let mut events = Vec::new();
+        let observation = observe_with_events(
+            &CommandSpec {
+                program: PathBuf::from("/bin/sh"),
+                args: vec![fixture.display().to_string(), "exit-command".into()],
+                cwd: None,
+            },
+            &ObserverConfig {
+                startup_timeout: Duration::from_secs(2),
+                resize: Some(TerminalSize {
+                    rows: 40,
+                    cols: 120,
+                }),
+                resize_timeout: Duration::from_secs(2),
+                hold: Duration::ZERO,
+                exit_timeout: Duration::from_secs(2),
+                termination: TerminationAction::ExitCommand,
+            },
+            |event| events.push(event),
+        )
+        .expect("fixture should accept the exit command");
+
+        assert!(observation.initial_bytes > 0);
+        assert!(observation.resized_bytes > 0);
+        assert_eq!(observation.exit_code, Some(23));
+        assert_eq!(observation.exit_signal, None);
+        assert_eq!(
+            events,
+            [
+                "started",
+                "activity_initial",
+                "resized",
+                "activity_resized",
+                "concurrent_window",
+                "exit_command",
+                "exited",
+            ]
+        );
+    }
+
+    #[test]
+    fn exit_timeout_removes_the_owned_fixture_process() {
+        let fixture = fixture();
+        let temporary = tempfile::tempdir().expect("temporary directory should exist");
+        let pid_file = temporary.path().join("fixture.pid");
+        let error = observe(
+            &CommandSpec {
+                program: PathBuf::from("/bin/sh"),
+                args: vec![
+                    fixture.display().to_string(),
+                    "ignore-exit".into(),
+                    pid_file.display().to_string(),
+                ],
+                cwd: None,
+            },
+            &ObserverConfig {
+                startup_timeout: Duration::from_secs(2),
+                resize: None,
+                resize_timeout: Duration::from_secs(2),
+                hold: Duration::ZERO,
+                exit_timeout: Duration::from_millis(50),
+                termination: TerminationAction::ExitCommand,
+            },
+        )
+        .expect_err("fixture that ignores the exit command should time out");
+
+        assert!(error.to_string().contains("did not exit"));
+        let pid: libc::pid_t = fs::read_to_string(pid_file)
+            .expect("fixture should record its pid")
+            .parse()
+            .expect("fixture pid should be numeric");
+        assert_eq!(unsafe { libc::kill(pid, 0) }, -1);
+        assert_eq!(io::Error::last_os_error().raw_os_error(), Some(libc::ESRCH));
     }
 }
