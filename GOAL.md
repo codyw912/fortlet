@@ -1,110 +1,112 @@
-# GOAL: Verify exact Codex exit parity
+# GOAL: Verify human-paced Codex exit parity
 
-Status: completed on 2026-08-11 — rejected as an exact termination proof.
-Native and packaged Codex both reached the exact `/exit\r` action and remained
-alive beyond the same 15-second bound. No Fortlet discrepancy was observed,
-but neither unit supplied an exit status to compare.
+Status: active on 2026-08-11.
 
-Determine whether the packaged Codex shim preserves native Codex's exact
-termination result when both receive the documented local `/exit` command
-through the same PTY observer. Extend only the repository test observer needed
-to make that comparison; do not change Fortlet product behavior or accepted
-architecture.
+Determine whether Fortlet's packaged Codex shim preserves native Codex's exact
+termination result when both receive Codex's accepted human-paced `/exit`
+interaction through the same PTY observer. Extend only repository test tooling;
+do not change Fortlet product behavior, package behavior, harness configuration,
+or accepted architecture.
 
 Before implementation, read FIP-0001 and FIP-0002 in full, the validated design
-at `docs/plans/2026-08-11-exact-codex-exit-parity-design.md`, and Experiments
-0003 through 0006.
+at `docs/plans/2026-08-11-human-paced-codex-exit-parity-design.md`, and
+Experiment 0007. Preserve every terminal result from Experiments 0003 through
+0007.
 
-## Deliverable 1 — Add the bounded exit-command observer path
+## Source-established premise
 
-Completed at checkpoint `147e956d`: both observer actions pass nine focused
-tests, including exact `/exit\r` bytes, distinctive exit code 23, structured
-event order, and owned cleanup after an ignored exit command.
+OpenAI Codex tag `rust-v0.147.0`, peeled commit
+`be6e8eac029b183056b7e4402879f15d2c85f61b`, explains Experiment 0007 without a
+Fortlet hypothesis. Codex classifies character bursts no more than 8
+milliseconds apart as paste. Enter during an active burst becomes a newline in
+the pasted composer text rather than a submit action. The observer's one atomic
+`/exit\r` write therefore tested paste handling, not the native UI's accepted
+typed exit interaction.
 
-1. Preserve the existing signal observer and all evidence it produced.
-2. Add an explicit observer mode that writes exactly `/exit\r` to its owned PTY
-   after the existing startup, resize, and hold sequence.
-3. Emit a structural `exit_command` event, discard all raw screen bytes, wait
-   within the existing exit bound, and report the exact exit code or signal.
-4. Extend the deterministic fixture and focused tests to prove exact command
-   delivery, event order, distinctive exit-code preservation, timeout cleanup,
-   and compatibility with the existing signal mode.
-5. Checkpoint the tested observer before declaring the live experiment.
+## Deliverable 1 — Add a paced typed-exit observer path
 
-## Deliverable 2 — Qualify the comparison
+1. Preserve the existing signal and atomic exit modes and all evidence they
+   produced.
+2. Add separate deterministic and live typed-exit modes. After the unchanged
+   startup, resize, and hold sequence, write `/`, `e`, `x`, `i`, and `t` as
+   separate PTY writes, sleeping 20 milliseconds after each character, then
+   write Enter as a separate `\r` write.
+3. Emit a distinct `typed_exit_command` structural event, discard all raw PTY
+   screen bytes, and retain the existing exit bound and owned cleanup.
+4. Use test-first vertical slices to prove the public modes, exact write chunks,
+   five exact requested delays, event order, distinctive fixture exit code 23,
+   timeout cleanup, and unchanged existing modes.
+5. Simplify the completed observer without changing behavior, run the focused
+   gate, and checkpoint the tested observer before declaring a live experiment.
 
-Completed at checkpoint `4ffb622f`: exact identities, both deterministic
-rehearsals, the complete gate, package smoke, doctor, the sole-active-record
-check, and the external Fish marker check passed before dispatch.
+## Deliverable 2 — Qualify Experiment 0008
 
-1. Freeze the native Codex 0.147.0 launcher and selected-binary hashes.
-2. Freeze one exact packaged Codex shim produced from the observer checkpoint.
-3. Declare Experiment 0007 with the exact commands, identities, timings,
+1. Freeze the official Codex source tag and commit that establish the input
+   mechanism, plus the exact native launcher and selected-binary hashes.
+2. Freeze one exact packaged Codex shim produced from the tested observer
+   checkpoint.
+3. Declare Experiment 0008 with the exact commands, identities, timings,
    decision rules, and two-unit zero-retry budget.
-4. Run the complete standard verification set, both deterministic observer
-   rehearsals, package checks, and `nix run . -- doctor` before dispatch.
-5. Confirm Experiment 0007 is the sole active record and checkpoint the
+4. Run the complete standard verification set, all three deterministic observer
+   rehearsals, exact package checks, and `nix run . -- doctor` before dispatch.
+5. Confirm Experiment 0008 is the sole active record and checkpoint the
    rehearsed declaration before giving the operator either live command.
 
-## Deliverable 3 — Compare native and packaged exit
-
-Completed as rejected evidence in Experiment 0007. Both zero-retry units
-reached `exit_command`, timed out identically, and left no matching owned
-process. Exact termination and status preservation remain unresolved.
+## Deliverable 3 — Compare native and packaged typed exit
 
 The operator runs native Codex, then packaged Codex, from
-`/Users/cody/dev/fortlet` in the same external Fish shell. The four known
-runner marker names must be absent. Each unit uses an 80-by-24 PTY,
-100-millisecond settle, 120-by-40 resize, 20-second unattended hold, exact
-`/exit\r` observer input, and a 15-second exit bound.
+`/Users/cody/dev/fortlet` in the same external Fish shell. The four known runner
+marker names must be absent. Each unit uses an 80-by-24 PTY, 100-millisecond
+settle, 120-by-40 resize, 20-second unattended hold, the fixed paced typed-exit
+action, and a 15-second exit bound.
 
 The operator supplies no additional input and returns each complete structural
-result verbatim. Close after both units unless a hard invariant fires:
+result verbatim. Both declared units run once unless a hard invariant fires:
 
-1. Matching exact exit codes and signals accept packaged exit parity.
+1. Exact `exit_code:0` and `exit_signal:null` for both units accepts packaged
+   typed-exit parity.
 2. Any native-versus-packaged termination or status mismatch records a
    packaged-path discrepancy but authorizes no repair under this goal.
-3. Failure of native Codex to reach or respond to `exit_command` leaves the
-   native termination protocol unestablished; record both declared units
-   without retry.
+3. Failure of native Codex to terminate normally rejects the native interaction
+   premise; record the packaged unit too, without retry or adaptation.
 
-After the results, verify owned cleanup, close Experiment 0007 terminally,
+After the results, verify owned cleanup, close Experiment 0008 terminally,
 update conformance and the experiment index, rewrite the handoff, mark this goal
 complete or blocked, then STOP and report.
 
 ## Definition of Done
 
-1. Deterministic evidence proves that the observer writes exactly `/exit\r`
-   and preserves a distinctive fixture exit status.
-2. One exact native Codex identity and one exact packaged Codex shim receive
-   the same action under the same observer protocol from the same external
-   Fish shell.
+1. Deterministic evidence proves separate key writes, the fixed 20-millisecond
+   pacing, event order, status preservation, and owned cleanup.
+2. One exact native Codex identity and one exact packaged Codex shim receive the
+   same source-established interaction from the same external Fish shell.
 3. The full gate passes before live dispatch, and both unedited structural
    results are recorded with zero retries.
-4. The two `/exit` slash commands are local control input, not model prompts;
-   no intentional inference or paid quota occurs.
-5. Ordinary Codex-managed state writes are allowed for these launches, but
-   shell startup-file, Fish, Nix, PATH-manager, Codex-configuration, and
-   outside-project mutation are not authorized.
-6. Conformance states only what the results prove; then STOP.
+4. The two `/exit` interactions are local control input, not model prompts; no
+   intentional inference or paid quota occurs.
+5. Conformance states only what the results prove; then STOP.
 
 ## Binding rules
 
 1. Preserve every charter invariant and FIP-0001/FIP-0002 constraint.
-2. Keep the exit action explicit; do not replace it with EOF, a second signal,
-   adaptive input, or screen-text matching.
-3. Do not store or print raw PTY content, environment values, account metadata,
+2. Keep the new typed action explicit and fixed. Do not use EOF, signals,
+   adaptive input, prompt matching, screen-text matching, or a retry.
+3. Keep the atomic `observe-exit` path available unchanged for reproducibility.
+4. Do not store or print raw PTY content, environment values, account metadata,
    or credential values.
-4. Do not change Fortlet, the package contract, harness configuration, live
-   timings, or observer behavior after Experiment 0007 is declared.
-5. The observer may control only the process group it created and verified.
-6. Use reviewable Jujutsu checkpoints and inspect `main..@` before handoff.
+5. Do not change Fortlet, the package contract, live timings, or observer
+   behavior after Experiment 0008 is declared.
+6. The observer may control only the process group it created and verified.
+7. Ordinary Codex-managed and Fortlet-managed state writes are allowed for the
+   two launches. Shell startup-file, Fish, Nix, PATH-manager,
+   Codex-configuration, and outside-project mutation are not authorized.
+8. Use reviewable Jujutsu checkpoints and inspect `main..@` before handoff.
 
 ## Budget and escalation
 
 1. Engineering ceiling: one hour from mission setup.
-2. Experiment ceiling: zero money, zero paid quota, zero prompts, two units,
-   zero retries, and at most 15 minutes after dispatch begins.
+2. Experiment ceiling: zero money, zero paid quota, zero model prompts, two
+   units, zero retries, and at most 15 minutes after dispatch begins.
 3. Stop on credential output, unexpected external mutation, unowned process
    control, paid activity, or any need to change a declared live command.
 
@@ -113,12 +115,12 @@ complete or blocked, then STOP and report.
 Run before issuing either operator command:
 
 - `cargo test --example pty_observer`
-- Both deterministic observer fixture modes declared by Experiment 0007
+- All deterministic observer fixture modes declared by Experiment 0008
 - `cargo test`
 - `cargo fmt --all -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
 - `cargo test --test conformance`
 - `nix flake check`
 - `nix run . -- doctor`
-- Exact native identity, package identity, marker-name, unchanged-path, and
-  one-active-experiment checks declared in Experiment 0007
+- Exact source, native identity, package identity, marker-name, unchanged-path,
+  and one-active-experiment checks declared in Experiment 0008
