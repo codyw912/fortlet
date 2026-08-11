@@ -68,14 +68,17 @@ owned-cleanup behavior before using it against a packaged shim:
 cargo test --example pty_observer
 cargo run --quiet --example pty_observer -- fixture
 cargo run --quiet --example pty_observer -- fixture-exit
+cargo run --quiet --example pty_observer -- fixture-typed-exit
 ```
 
 The signal fixture proves foreground-group signal status. The exit fixture
 proves exact `/exit\r` input, structural action ordering, and distinctive exit
-code 23. The observer emits structured event lines and a numeric summary; it
-never persists raw PTY screen content. Live `observe` and `observe-exit`
-invocation parameters and timeouts belong in a predeclared experiment record
-before dispatch.
+code 23. The typed-exit fixture additionally proves separate `/`, `e`, `x`,
+`i`, `t`, and Enter writes with a fixed 20-millisecond delay after each
+character. The observer emits structured event lines and a numeric summary; it
+never persists raw PTY screen content. Live `observe`, `observe-exit`, and
+`observe-typed-exit` invocation parameters and timeouts belong in a predeclared
+experiment record before dispatch.
 
 ## Experiments
 

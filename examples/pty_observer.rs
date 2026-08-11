@@ -1,5 +1,5 @@
 use std::env;
-use std::ffi::OsString;
+use std::ffi::{OsStr, OsString};
 use std::fs::File;
 use std::io::{self, Read, Write};
 use std::os::fd::{AsRawFd, FromRawFd};
@@ -44,17 +44,24 @@ struct TerminalSize {
 enum TerminationAction {
     SignalInterrupt,
     ExitCommand,
+    TypedExitCommand,
 }
 
 enum Mode {
     Fixture,
     FixtureExit,
+    FixtureTypedExit,
     Observe {
         program: PathBuf,
         cwd: PathBuf,
         hold: Duration,
     },
     ObserveExit {
+        program: PathBuf,
+        cwd: PathBuf,
+        hold: Duration,
+    },
+    ObserveTypedExit {
         program: PathBuf,
         cwd: PathBuf,
         hold: Duration,
@@ -66,35 +73,37 @@ fn parse_args(args: impl IntoIterator<Item = OsString>) -> Result<Mode> {
     match args.as_slice() {
         [mode] if mode == "fixture" => Ok(Mode::Fixture),
         [mode] if mode == "fixture-exit" => Ok(Mode::FixtureExit),
-        [mode, program, cwd, hold] if mode == "observe" => {
-            let hold = hold
-                .to_str()
-                .context("hold seconds must be valid UTF-8")?
-                .parse::<u64>()
-                .context("hold seconds must be an integer")?;
-            Ok(Mode::Observe {
-                program: PathBuf::from(program),
-                cwd: PathBuf::from(cwd),
-                hold: Duration::from_secs(hold),
-            })
-        }
-        [mode, program, cwd, hold] if mode == "observe-exit" => {
-            let hold = hold
-                .to_str()
-                .context("hold seconds must be valid UTF-8")?
-                .parse::<u64>()
-                .context("hold seconds must be an integer")?;
-            Ok(Mode::ObserveExit {
-                program: PathBuf::from(program),
-                cwd: PathBuf::from(cwd),
-                hold: Duration::from_secs(hold),
-            })
-        }
+        [mode] if mode == "fixture-typed-exit" => Ok(Mode::FixtureTypedExit),
+        [mode, program, cwd, hold] if mode == "observe" => Ok(Mode::Observe {
+            program: PathBuf::from(program),
+            cwd: PathBuf::from(cwd),
+            hold: parse_hold(hold)?,
+        }),
+        [mode, program, cwd, hold] if mode == "observe-exit" => Ok(Mode::ObserveExit {
+            program: PathBuf::from(program),
+            cwd: PathBuf::from(cwd),
+            hold: parse_hold(hold)?,
+        }),
+        [mode, program, cwd, hold] if mode == "observe-typed-exit" => Ok(Mode::ObserveTypedExit {
+            program: PathBuf::from(program),
+            cwd: PathBuf::from(cwd),
+            hold: parse_hold(hold)?,
+        }),
         _ => bail!(
-            "usage: pty_observer fixture | fixture-exit | observe <program> <cwd> \
-             <hold-seconds> | observe-exit <program> <cwd> <hold-seconds>"
+            "usage: pty_observer fixture | fixture-exit | fixture-typed-exit | \
+             observe <program> <cwd> <hold-seconds> | observe-exit <program> <cwd> \
+             <hold-seconds> | observe-typed-exit <program> <cwd> <hold-seconds>"
         ),
     }
+}
+
+fn parse_hold(value: &OsStr) -> Result<Duration> {
+    let seconds = value
+        .to_str()
+        .context("hold seconds must be valid UTF-8")?
+        .parse::<u64>()
+        .context("hold seconds must be an integer")?;
+    Ok(Duration::from_secs(seconds))
 }
 
 #[cfg(test)]
@@ -139,6 +148,10 @@ fn observe_with_events(
             write_exit_command(&mut master)?;
             emit("exit_command");
         }
+        TerminationAction::TypedExitCommand => {
+            write_typed_exit_command(&mut master)?;
+            emit("typed_exit_command");
+        }
     }
     let status = child.wait(config.exit_timeout)?;
     emit("exited");
@@ -155,6 +168,27 @@ fn write_exit_command(output: &mut impl Write) -> Result<()> {
     output
         .write_all(b"/exit\r")
         .context("cannot write exit command to PTY")
+}
+
+const TYPED_EXIT_KEY_DELAY: Duration = Duration::from_millis(20);
+
+fn write_typed_exit_command(output: &mut impl Write) -> Result<()> {
+    write_typed_exit_command_with_delay(output, thread::sleep)
+}
+
+fn write_typed_exit_command_with_delay(
+    output: &mut impl Write,
+    mut delay: impl FnMut(Duration),
+) -> Result<()> {
+    for byte in b"/exit" {
+        output
+            .write_all(std::slice::from_ref(byte))
+            .context("cannot write typed exit key to PTY")?;
+        delay(TYPED_EXIT_KEY_DELAY);
+    }
+    output
+        .write_all(b"\r")
+        .context("cannot write typed exit Enter key to PTY")
 }
 
 fn open_pty(rows: u16, cols: u16) -> Result<(File, File)> {
@@ -402,6 +436,24 @@ fn main() -> Result<()> {
                 termination: TerminationAction::ExitCommand,
             },
         ),
+        Mode::FixtureTypedExit => (
+            CommandSpec {
+                program: PathBuf::from("/bin/sh"),
+                args: vec![fixture.display().to_string(), "exit-command".into()],
+                cwd: None,
+            },
+            ObserverConfig {
+                startup_timeout: Duration::from_secs(2),
+                resize: Some(TerminalSize {
+                    rows: 40,
+                    cols: 120,
+                }),
+                resize_timeout: Duration::from_secs(2),
+                hold: Duration::ZERO,
+                exit_timeout: Duration::from_secs(2),
+                termination: TerminationAction::TypedExitCommand,
+            },
+        ),
         Mode::Observe { program, cwd, hold } => (
             CommandSpec {
                 program,
@@ -438,6 +490,24 @@ fn main() -> Result<()> {
                 termination: TerminationAction::ExitCommand,
             },
         ),
+        Mode::ObserveTypedExit { program, cwd, hold } => (
+            CommandSpec {
+                program,
+                args: Vec::new(),
+                cwd: Some(cwd),
+            },
+            ObserverConfig {
+                startup_timeout: Duration::from_secs(90),
+                resize: Some(TerminalSize {
+                    rows: 40,
+                    cols: 120,
+                }),
+                resize_timeout: Duration::from_secs(15),
+                hold,
+                exit_timeout: Duration::from_secs(15),
+                termination: TerminationAction::TypedExitCommand,
+            },
+        ),
     };
 
     let stdout = io::stdout();
@@ -471,6 +541,22 @@ mod tests {
     use super::*;
     use std::ffi::OsString;
     use std::fs;
+
+    #[derive(Default)]
+    struct RecordingWriter {
+        writes: Vec<Vec<u8>>,
+    }
+
+    impl Write for RecordingWriter {
+        fn write(&mut self, bytes: &[u8]) -> io::Result<usize> {
+            self.writes.push(bytes.to_vec());
+            Ok(bytes.len())
+        }
+
+        fn flush(&mut self) -> io::Result<()> {
+            Ok(())
+        }
+    }
 
     fn fixture() -> PathBuf {
         PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/pty-observer.sh")
@@ -616,6 +702,10 @@ mod tests {
             parse_args([OsString::from("fixture-exit")]),
             Ok(Mode::FixtureExit)
         ));
+        assert!(matches!(
+            parse_args([OsString::from("fixture-typed-exit")]),
+            Ok(Mode::FixtureTypedExit)
+        ));
         let mode = parse_args([
             OsString::from("observe"),
             OsString::from("/immutable/shim"),
@@ -629,7 +719,11 @@ mod tests {
                 assert_eq!(cwd, PathBuf::from("/project"));
                 assert_eq!(hold, Duration::from_secs(20));
             }
-            Mode::Fixture | Mode::FixtureExit | Mode::ObserveExit { .. } => {
+            Mode::Fixture
+            | Mode::FixtureExit
+            | Mode::FixtureTypedExit
+            | Mode::ObserveExit { .. }
+            | Mode::ObserveTypedExit { .. } => {
                 panic!("expected live observation mode")
             }
         }
@@ -642,6 +736,15 @@ mod tests {
         ])
         .expect("live exit-command observer arguments should parse");
         assert!(matches!(mode, Mode::ObserveExit { .. }));
+
+        let mode = parse_args([
+            OsString::from("observe-typed-exit"),
+            OsString::from("/immutable/shim"),
+            OsString::from("/project"),
+            OsString::from("20"),
+        ])
+        .expect("live typed-exit observer arguments should parse");
+        assert!(matches!(mode, Mode::ObserveTypedExit { .. }));
     }
 
     #[test]
@@ -675,6 +778,21 @@ mod tests {
         let mut bytes = Vec::new();
         write_exit_command(&mut bytes).expect("exit command should be writable");
         assert_eq!(bytes, b"/exit\r");
+    }
+
+    #[test]
+    fn typed_exit_command_writes_separate_keys_with_fixed_delays() {
+        let mut output = RecordingWriter::default();
+        let mut delays = Vec::new();
+
+        write_typed_exit_command_with_delay(&mut output, |delay| delays.push(delay))
+            .expect("typed exit command should be writable");
+
+        assert_eq!(
+            output.writes,
+            [b"/".as_slice(), b"e", b"x", b"i", b"t", b"\r"]
+        );
+        assert_eq!(delays, [Duration::from_millis(20); 5]);
     }
 
     #[test]
@@ -721,6 +839,49 @@ mod tests {
     }
 
     #[test]
+    fn fixture_typed_exit_preserves_distinctive_status_and_events() {
+        let fixture = fixture();
+        let mut events = Vec::new();
+        let observation = observe_with_events(
+            &CommandSpec {
+                program: PathBuf::from("/bin/sh"),
+                args: vec![fixture.display().to_string(), "exit-command".into()],
+                cwd: None,
+            },
+            &ObserverConfig {
+                startup_timeout: Duration::from_secs(2),
+                resize: Some(TerminalSize {
+                    rows: 40,
+                    cols: 120,
+                }),
+                resize_timeout: Duration::from_secs(2),
+                hold: Duration::ZERO,
+                exit_timeout: Duration::from_secs(2),
+                termination: TerminationAction::TypedExitCommand,
+            },
+            |event| events.push(event),
+        )
+        .expect("fixture should accept the typed exit command");
+
+        assert!(observation.initial_bytes > 0);
+        assert!(observation.resized_bytes > 0);
+        assert_eq!(observation.exit_code, Some(23));
+        assert_eq!(observation.exit_signal, None);
+        assert_eq!(
+            events,
+            [
+                "started",
+                "activity_initial",
+                "resized",
+                "activity_resized",
+                "concurrent_window",
+                "typed_exit_command",
+                "exited",
+            ]
+        );
+    }
+
+    #[test]
     fn exit_timeout_removes_the_owned_fixture_process() {
         let fixture = fixture();
         let temporary = tempfile::tempdir().expect("temporary directory should exist");
@@ -745,6 +906,41 @@ mod tests {
             },
         )
         .expect_err("fixture that ignores the exit command should time out");
+
+        assert!(error.to_string().contains("did not exit"));
+        let pid: libc::pid_t = fs::read_to_string(pid_file)
+            .expect("fixture should record its pid")
+            .parse()
+            .expect("fixture pid should be numeric");
+        assert_eq!(unsafe { libc::kill(pid, 0) }, -1);
+        assert_eq!(io::Error::last_os_error().raw_os_error(), Some(libc::ESRCH));
+    }
+
+    #[test]
+    fn typed_exit_timeout_removes_the_owned_fixture_process() {
+        let fixture = fixture();
+        let temporary = tempfile::tempdir().expect("temporary directory should exist");
+        let pid_file = temporary.path().join("fixture.pid");
+        let error = observe(
+            &CommandSpec {
+                program: PathBuf::from("/bin/sh"),
+                args: vec![
+                    fixture.display().to_string(),
+                    "ignore-exit".into(),
+                    pid_file.display().to_string(),
+                ],
+                cwd: None,
+            },
+            &ObserverConfig {
+                startup_timeout: Duration::from_secs(2),
+                resize: None,
+                resize_timeout: Duration::from_secs(2),
+                hold: Duration::ZERO,
+                exit_timeout: Duration::from_millis(50),
+                termination: TerminationAction::TypedExitCommand,
+            },
+        )
+        .expect_err("fixture that ignores typed exit should time out");
 
         assert!(error.to_string().contains("did not exit"));
         let pid: libc::pid_t = fs::read_to_string(pid_file)
