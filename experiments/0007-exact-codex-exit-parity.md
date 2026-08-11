@@ -1,6 +1,6 @@
 # Experiment 0007: Exact Codex exit parity
 
-Status: in-flight
+Status: completed — rejected
 Design: FIP-0001 and FIP-0002
 Charter scope: `local-foundation/v1`
 
@@ -206,9 +206,45 @@ found no matching observer or npm Codex-launcher process.
 
 ### Packaged Codex unit
 
-Pending. The declared second unit still runs because the native timeout did not
-trigger a hard invariant.
+The operator then ran the exact immutable packaged command once from the same
+external Fish shell and returned this complete structural output:
+
+```text
+{"event":"started"}
+{"event":"activity_initial"}
+{"event":"resized"}
+{"event":"activity_resized"}
+{"event":"concurrent_window"}
+{"event":"exit_command"}
+Error: PTY child did not exit before timeout
+90:91: syntax error: Expected “"” but found unknown token. (-2741)
+```
+
+Packaged Codex reached the same structural boundaries as native Codex and
+remained alive beyond the same 15-second exit bound. It emitted neither
+`exited` nor a numeric summary, so it also establishes no exit status. The
+matching timeout supplies no evidence of a Fortlet-specific discrepancy.
+
+The same unattributed `-2741` diagnostic followed the observer error. It is
+retained but excluded from the decision. A subsequent read-only process-table
+query found no matching observer or packaged Fortlet process.
 
 ## Terminal Closure
 
-Pending.
+1. Outcome: rejected — exact `/exit\r` input did not terminate either native or
+   packaged Codex within the fixed bound, so the experiment establishes no
+   exact status to compare. The matching structural results expose no packaged
+   discrepancy.
+2. Root cause: the observer demonstrably wrote the declared bytes, but the
+   experiment did not establish that either real UI accepted them as a
+   terminating command. Because raw UI state was intentionally unavailable,
+   command-readiness, key interpretation, and current CLI semantics remain
+   indistinguishable.
+3. Actual total cost: zero money, zero paid quota, zero model prompts, two of
+   two units, and zero retries. Numeric wall time was not captured; no estimate
+   is backfilled. Both observer invocations enforced every declared stage
+   bound, and no overrun was reported.
+4. Next action: stop this goal. No Fortlet repair is justified. Any successor
+   must first establish the native UI's accepted termination interaction
+   without retrying this exact `/exit\r` protocol or weakening the raw-content
+   and zero-prompt boundaries.

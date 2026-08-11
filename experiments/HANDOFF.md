@@ -1,7 +1,7 @@
-# Session Handoff — First-interrupt behavior attributed
+# Session Handoff — Explicit Codex exit still unresolved
 
 Audience: a fresh agent session. `GOAL.md` is normative and complete.
-Experiments 0003 through 0006 are terminally closed. Do not resume them or
+Experiments 0003 through 0007 are terminally closed. Do not resume them or
 repair Fortlet from their rejected assumptions.
 
 ## Verified product evidence
@@ -10,45 +10,53 @@ repair Fortlet from their rejected assumptions.
    fallback, attach through real PTYs, produce activity after resize, reconcile
    concurrent invocations to the same harness capsule, and remain responsive.
 2. Both packaged UIs remained alive after one foreground-group `SIGINT`.
-3. Native Tact reproduced that result under the unchanged observer.
-4. Native Codex closed before signal when the observer ran inside an active
-   Codex runner, even after known marker names were removed.
-5. In Experiment 0006, the operator ran the exact native Codex 0.147.0 launcher
-   from a separate Fish shell where all four runner markers were absent. Native
-   Codex reached initial activity, resize activity, the unattended hold, and
-   signal, then remained alive beyond the same 15-second exit bound.
+3. Native Tact and externally launched native Codex reproduced that first-
+   interrupt behavior, removing the evidence basis for a Fortlet signal defect.
+4. The PTY observer now has a separate `observe-exit` action. Deterministic
+   evidence proves it writes exactly `/exit\r`, emits an `exit_command` event,
+   preserves fixture exit code 23, and cleans up an owned process that ignores
+   the command.
+5. In Experiment 0007, native and packaged Codex 0.147.0 each reached initial
+   activity, real resize activity, the fixed hold, and `exit_command`, then
+   remained alive beyond the same 15-second exit bound.
 
-The evidence now attributes both packaged timeouts to native first-interrupt
-semantics rather than a Fortlet-specific propagation defect. It does not prove
-the exact eventual termination action or exit-status preservation for either
-packaged UI.
+The matching explicit-input timeouts expose no Fortlet-specific discrepancy.
+They do not establish that either UI accepted `/exit\r` as a command, and they
+provide no exit status with which to verify packaged status preservation.
 
-## Experiment 0006 integrity
+## Experiment 0007 integrity
 
-Before dispatch, both native hashes matched, product and observer paths were
-unchanged since `ad7fdd0e`, Experiment 0006 was the sole active record, and all
-six observer tests plus the deterministic fixture passed. The full Rust suite,
-formatting, strict Clippy, explicit conformance, exact-tree `nix flake check`,
-and doctor passed. The known app-`meta` warning and incompatible
-`x86_64-linux` omission remain.
+The observer was checkpointed before declaration. Nine focused tests, both
+deterministic fixtures, the full Rust suite, formatting, strict Clippy,
+explicit conformance, exact-tree `nix flake check`, exact packaged
+`codex --version`, and doctor passed before dispatch. Both native hashes and
+the observer hash matched, product paths were unchanged, Experiment 0007 was
+the sole active record, and the operator reported all four known runner marker
+names absent from the external Fish shell.
 
-The operator reported no input or retry and returned the complete structural
-output. A final AppleScript-style `-2741` diagnostic appeared after the observer
-timeout; its provenance is unknown and it did not affect the declared event
-sequence or decision. Read-only process inspection found no matching observer
-or npm launcher afterward.
+The operator ran native and packaged units once each, in order, without a
+reported retry or additional input. Both returned the same structural sequence
+through `exit_command` and the same timeout. Both also ended with an identical
+AppleScript-style `90:91 ... (-2741)` line whose provenance remains unknown;
+it is not part of the decision. Read-only checks found no matching owned
+process after either unit.
 
-Actual cost was zero money, zero paid quota, zero prompts, one unit, and zero
-retries. Numeric wall time was not captured; do not backfill an estimate.
+Actual cost was zero money, zero paid quota, zero model prompts, two units, and
+zero retries. Numeric wall time was not captured; do not backfill an estimate.
 
 ## Successor boundary
 
-No product repair is justified for first-interrupt handling. If daily-use
-acceptance requires exact termination and exit status, a successor must first
-identify the native UI's actual termination action and compare that same action
-through the packaged path. Do not assume a first `SIGINT` should exit.
+No product repair is justified. Do not retry first `SIGINT`, marker removal,
+external first-signal control, or exact `/exit\r` injection: those protocols
+are settled.
+
+If exact daily-use termination remains release-critical, first establish the
+native UI's accepted termination interaction under a protocol that can
+distinguish command readiness or key interpretation without persisting raw UI
+content, submitting a model prompt, or adapting a failed unit. Source-level
+inspection of the pinned Codex input handling or a new bounded native-only
+control may supply that mechanism. It requires a new mission and experiment.
 
 Preserve optional shim activation, fail-closed behavior, credential isolation,
-package runtime integrity, no-prompt operation, observer ownership checks, and
-Jujutsu discipline. Native Linux verification and broader FIP-0001 gaps remain
-outstanding.
+package runtime integrity, observer ownership checks, and Jujutsu discipline.
+Native Linux verification and broader FIP-0001 gaps remain outstanding.

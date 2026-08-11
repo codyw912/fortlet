@@ -1,6 +1,9 @@
 # GOAL: Verify exact Codex exit parity
 
-Status: active. Validated with the operator on 2026-08-11.
+Status: completed on 2026-08-11 — rejected as an exact termination proof.
+Native and packaged Codex both reached the exact `/exit\r` action and remained
+alive beyond the same 15-second bound. No Fortlet discrepancy was observed,
+but neither unit supplied an exit status to compare.
 
 Determine whether the packaged Codex shim preserves native Codex's exact
 termination result when both receive the documented local `/exit` command
@@ -30,6 +33,10 @@ event order, and owned cleanup after an ignored exit command.
 
 ## Deliverable 2 — Qualify the comparison
 
+Completed at checkpoint `4ffb622f`: exact identities, both deterministic
+rehearsals, the complete gate, package smoke, doctor, the sole-active-record
+check, and the external Fish marker check passed before dispatch.
+
 1. Freeze the native Codex 0.147.0 launcher and selected-binary hashes.
 2. Freeze one exact packaged Codex shim produced from the observer checkpoint.
 3. Declare Experiment 0007 with the exact commands, identities, timings,
@@ -40,6 +47,10 @@ event order, and owned cleanup after an ignored exit command.
    rehearsed declaration before giving the operator either live command.
 
 ## Deliverable 3 — Compare native and packaged exit
+
+Completed as rejected evidence in Experiment 0007. Both zero-retry units
+reached `exit_command`, timed out identically, and left no matching owned
+process. Exact termination and status preservation remain unresolved.
 
 The operator runs native Codex, then packaged Codex, from
 `/Users/cody/dev/fortlet` in the same external Fish shell. The four known
