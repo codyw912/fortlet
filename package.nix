@@ -49,6 +49,7 @@ rustPlatform.buildRustPackage {
       ./Cargo.lock
       ./Cargo.toml
       ./arch
+      ./examples
       ./experiments
       ./package.nix
       ./src

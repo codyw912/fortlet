@@ -58,6 +58,21 @@ Package install checks compare the bundled MicroSandbox runtime byte-for-byte
 with its fixed-output release archive. This preserves the macOS Hypervisor
 entitlement that Nix's generic stripping phase would otherwise remove.
 
+## Interactive acceptance observer
+
+The repository-local PTY observer is test tooling, not an installed Fortlet
+command. Verify its bounded dimensions, resize, signal, timeout, status, and
+owned-cleanup behavior before using it against a packaged shim:
+
+```bash
+cargo test --example pty_observer
+cargo run --quiet --example pty_observer -- fixture
+```
+
+The observer emits structured event lines and a numeric summary. It never
+persists raw PTY screen content. Live invocation parameters and timeouts belong
+in a predeclared experiment record before dispatch.
+
 ## Experiments
 
 Create a numbered record from `experiments/0000-template.md` before a benchmark,
