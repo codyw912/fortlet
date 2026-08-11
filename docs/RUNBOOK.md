@@ -38,6 +38,26 @@ cargo run -- run codex --
 `doctor` reads authentication metadata but never prints token values. Real
 launches require a healthy MicroSandbox host and a valid ChatGPT credential.
 
+## Optional transparent shims
+
+The Nix package exposes `codex` and `tact` in a dedicated directory without
+activating them implicitly:
+
+```bash
+nix build .#fortlet
+env PATH="$PWD/result/libexec/fortlet/shims:$PATH" codex --version
+env PATH="$PWD/result/libexec/fortlet/shims:$PATH" tact --version
+```
+
+Declarative users may prepend the same package path through Nix or Home
+Manager. Fortlet does not edit shell startup files, and omitting the shim path
+leaves the explicit CLI fully usable. `fortlet native <harness> -- <arguments>`
+is the deliberate host escape hatch; isolated launch failures never select it.
+
+Package install checks compare the bundled MicroSandbox runtime byte-for-byte
+with its fixed-output release archive. This preserves the macOS Hypervisor
+entitlement that Nix's generic stripping phase would otherwise remove.
+
 ## Experiments
 
 Create a numbered record from `experiments/0000-template.md` before a benchmark,

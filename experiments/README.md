@@ -23,4 +23,4 @@ scannable failure/win history of the project:
 
 - `0000-template.md` — the record template.
 - `0001-packaged-transparent-shims.md` — rejected; both shims entered Fortlet, but MicroSandbox VM creation failed before guest launch.
-- `0002-preserved-runtime-shim-smoke.md` — declared; test the entitlement-preserving package through Codex, then conditionally Tact.
+- `0002-preserved-runtime-shim-smoke.md` — accepted; preserved runtime entitlements restored VM creation and both packaged shims returned pinned guest versions.

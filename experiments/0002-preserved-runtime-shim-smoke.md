@@ -1,6 +1,6 @@
 # Experiment 0002: Preserved-runtime packaged shim smoke
 
-Status: declared
+Status: completed — accepted
 Design: FIP-0002
 Charter scope: `local-foundation/v1`
 
@@ -122,8 +122,71 @@ The remaining contact-with-reality step is the declared packaged shim dispatch.
 
 ## Results
 
-Pending.
+Dispatch ran from 2026-08-11 12:53:15 EDT through 12:54:35 EDT.
+
+### Codex falsification unit
+
+Command:
+
+```bash
+env PATH=/nix/store/xvhq837ac4fmw6144vl2magmlr8miqgl-fortlet-0.1.0/libexec/fortlet/shims:/usr/bin:/bin codex --version
+```
+
+Exit: `0`.
+
+Output:
+
+```text
+fortlet: preparing _base bookworm-1 (first use)
+fortlet: preparing codex 0.147.0 (first use)
+codex-cli 0.147.0
+```
+
+The declared label query returned running capsule
+`fortlet-501-codex-6652b8ca5f1b9273`. This unit crossed the previously failing
+VM-creation boundary, provisioned the pinned guest tool, and met the condition
+for running Tact.
+
+### Conditional Tact unit
+
+Command:
+
+```bash
+env PATH=/nix/store/xvhq837ac4fmw6144vl2magmlr8miqgl-fortlet-0.1.0/libexec/fortlet/shims:/usr/bin:/bin tact --version
+```
+
+Exit: `0`.
+
+Output:
+
+```text
+fortlet: preparing tact 0.3.7 (first use)
+tact 0.3.7
+commit: f03a9e323b7a (unknown, clean)
+commit timestamp: 2026-08-07T09:05:20-04:00
+build timestamp: 2026-08-07T13:09:28+00:00
+target: aarch64-unknown-linux-gnu
+profile: release
+rustc: rustc 1.97.1 (8bab26f4f 2026-07-14)
+```
+
+The declared label query returned running capsule
+`fortlet-501-tact-6652b8ca5f1b9273`. Both units used the packaged shim path,
+reported their pinned Linux guest versions, and produced no host-harness output
+or credential values. Fortlet's first-use lines were environment provisioning
+progress, not wrapper startup banners.
 
 ## Terminal Closure
 
-Pending.
+1. Outcome: accepted — both entitlement-preserving packaged shims entered
+   Fortlet, created or attached their managed capsules, and returned the pinned
+   guest harness versions.
+2. Root cause: Nix's generic `strip -S` fixup had replaced the release `msb`
+   signature and removed its macOS Hypervisor entitlement. Preserving the
+   fixed-output runtime byte-for-byte restored VM creation.
+3. Actual total cost: zero money, zero paid quota, zero remote mutation, two of
+   two declared units, zero retries, and 80 seconds elapsed versus the
+   30-minute ceiling.
+4. Next action: close the transparent-shim mission, retain interactive terminal
+   behavior as an explicit conformance gap, and choose a new goal with the
+   operator.

@@ -1,70 +1,64 @@
-# Session Handoff — Transparent shims implemented; live smoke blocked
+# Session Handoff — Transparent shim mission complete
 
-Audience: a fresh agent session. `GOAL.md` is normative and currently blocked
-at Deliverable 3 by the charter's repeated-failure escalation trigger. Do not
-retry or alter MicroSandbox runtime state until the operator responds.
+Audience: a fresh agent session. `GOAL.md` is normative and complete. Do not
+start follow-on implementation until the operator and agent choose a new goal.
 
-## Program context
+## Completed outcome
 
 1. FIP-0002 is Accepted and defines optional package-owned `codex` and `tact`
-   shims plus the explicit `fortlet native` escape hatch.
-2. The shim directory is activated only by user-controlled `PATH` ordering;
-   Fortlet never writes shell startup files.
-3. Explicit `fortlet doctor` and `fortlet run` use remains supported without
-   shim activation.
+   shims plus the explicit recursion-safe `fortlet native` escape hatch.
+2. Shim activation is only a user-controlled `PATH` decision. Fortlet never
+   writes shell startup files, uses shell aliases or functions, or silently
+   falls back to a host harness.
+3. Checkpoint `29d42a82` implements invocation-name dispatch, native execution,
+   staged failures, package shims, and focused tests.
+4. Checkpoint `85d4766b` preserves the fixed-output MicroSandbox runtime and
+   adds byte-for-byte package checks for `msb` and libkrunfw.
 
-## Verified implementation state
+## Packaging failure and repair
 
-1. Checkpoint `29d42a82` implements invocation-name dispatch, direct
-   recursion-safe native execution, staged actionable launch errors, Nix-owned
-   shims, empty-environment package checks, focused tests, and partial
-   conformance.
-2. `cargo test`, formatting, strict Clippy, the explicit conformance test, and
-   exact-tree `nix flake check` passed before live dispatch on
-   `aarch64-darwin`. Native `x86_64-linux` verification remains outstanding.
-3. `nix run . -- doctor` passed immediately before dispatch: MicroSandbox SDK
-   0.6.8, host authentication, project resolution, and the credential boundary
-   were healthy without secret output.
-4. Package output
-   `/nix/store/6282j3n2vxhmyq1q1pnhskfvkar7k2m7-fortlet-0.1.0` contains both
-   shims. Package checks prove each name enters Fortlet under an empty
-   environment and stops at credentials rather than resolving a host harness.
+Experiment 0001 rejected the original package after both shims reached Fortlet
+but failed with `Internal(Vm(VmSetup(VmCreate)))`. Read-only diagnosis found
+that Nix's `strip -S` fixup changed the release runtime and removed `msb`'s
+`com.apple.security.hypervisor` entitlement even though `doctor` remained
+green. The release archive was byte-identical to the previously working user
+installation.
 
-## Experiment 0001 terminal result
+The repair disables stripping for the Fortlet output and compares both runtime
+files with the immutable archive during install checks. Repaired package output
+`/nix/store/xvhq837ac4fmw6144vl2magmlr8miqgl-fortlet-0.1.0` retains the exact
+release hashes and Hypervisor entitlement.
 
-1. Both predeclared commands used the immutable shim directory first on a
-   minimal `PATH` and passed only `--version`.
-2. Both shims entered Fortlet and attempted `_base bookworm-1` provisioning.
-3. Both failed before guest harness launch with
-   `Internal(Vm(VmSetup(VmCreate)))` while creating a provisioning capsule.
-4. Read-only label queries found no running Fortlet Codex or Tact capsule.
-5. No retries, credential exposure, host fallback, repository mutation, remote
-   effect, or unowned cleanup occurred.
-6. The record is terminally rejected in
-   `experiments/0001-packaged-transparent-shims.md`.
+## Accepted runtime evidence
 
-## Why work stopped
+Experiment 0002 is terminally accepted:
 
-The two declared units are consecutive terminal failures sharing the same
-assumption: a healthy MicroSandbox diagnosis implies the host can create a VM.
-The charter therefore requires operator escalation. The implementation gates
-are green, but the goal's end-to-end guest-launch evidence is not.
+1. Packaged `codex --version` crossed VM creation, provisioned `_base` and Codex,
+   returned `codex-cli 0.147.0`, and left a running Fortlet-managed Codex
+   capsule.
+2. Conditional packaged `tact --version` returned `tact 0.3.7` for
+   `aarch64-unknown-linux-gnu` and left a running Fortlet-managed Tact capsule.
+3. Both commands exited zero, used the immutable shim directory, emitted no
+   credential values, and did not resolve a host harness.
+4. Actual experiment cost was zero money, two units, zero retries, and 80
+   seconds versus the 30-minute ceiling.
 
-## Next action requiring operator direction
+## Verification and honest gaps
 
-Choose whether to resume with a bounded diagnosis of local MicroSandbox VM
-creation. A successor runtime attempt must not silently retry Experiment 0001;
-if authorized, declare a new experiment or an explicitly diagnostic mission as
-appropriate, preserve the credential boundary, and do not mutate unowned
-runtime state.
+The complete standard verification set and `nix run . -- doctor` passed on
+`aarch64-darwin`. Package install checks exercise empty-environment discovery,
+fail-closed dispatch, and runtime byte integrity. Native `x86_64-linux` package
+verification remains outstanding.
 
-## Conventions that remain binding
+FIP-0002 remains partial because interactive TTY, resize, and signal behavior
+is inherited from the explicit session path but has not been independently
+exercised through the shims. FIP-0001 retains its broader lifecycle,
+standalone-distribution, adapter-ownership, project/broad-root, terminal, and
+publication gaps in `arch/conformance.json`.
 
-1. Use Jujutsu checkpoints and inspect `main..@` before handoff.
-2. Keep successful wrapper startup silent and failures stage-specific with one
-   actionable next step.
-3. Never fall back from isolated launch to a host harness.
-4. Do not mount provider credentials, SSH keys, signing agents, or publication
-   authority into capsules.
-5. Do not broaden this into lifecycle, alternative runtime, remote execution,
-   or publication work.
+## Next action
+
+Choose a new `GOAL.md` with the operator. Preserve the optional activation,
+credential boundary, no-fallback rule, package runtime-integrity check, and
+Jujutsu checkpoint discipline. Do not turn the remaining conformance list into
+an inferred mission; prioritize the next daily-use bottleneck together.

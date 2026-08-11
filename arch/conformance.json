@@ -63,10 +63,10 @@
         "src/cli.rs",
         "src/native.rs",
         "src/session.rs",
-        "tests/native.rs"
+        "tests/native.rs",
+        "experiments/0002-preserved-runtime-shim-smoke.md"
       ],
       "gaps": [
-        "Runner evidence reached Fortlet through both packaged shims, but MicroSandbox VM creation failed before either guest harness executed.",
         "Interactive TTY, resize, and signal preservation are inherited from the explicit launch path but are not independently exercised through the shims."
       ]
     }

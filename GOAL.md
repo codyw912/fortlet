@@ -1,10 +1,10 @@
 # GOAL: Optional transparent harness shims
 
-Status: active. The operator resumed Deliverable 3 on 2026-08-11 after a
-read-only diagnosis found that Nix stripping removed MicroSandbox's required
-macOS Hypervisor entitlement. Preserve the fixed-output runtime byte-for-byte,
-verify the package, then use a newly declared experiment for the next runtime
-attempt; do not resume terminally closed Experiment 0001.
+Status: completed 2026-08-11. The package now preserves the fixed-output
+MicroSandbox runtime byte-for-byte, the complete verification set is green,
+and Experiment 0002 proved both packaged shims return their pinned Linux guest
+versions without native fallback. Interactive shim terminal semantics remain
+an explicit conformance gap rather than an exercised claim.
 
 Deliver the smallest daily-use vertical slice of FIP-0001: optional,
 package-owned `codex` and `tact` shims that transparently enter Fortlet's
@@ -56,6 +56,10 @@ Deliverable 3.
    tests that change it.
 
 ## Deliverable 3 — Prove the packaged workflow
+
+Completed 2026-08-11: the package integrity check prevents runtime stripping,
+all standard gates passed, and accepted Experiment 0002 exercised both shims
+through VM creation and guest harness execution.
 
 1. Verify both launchers exist in the packaged immutable shim directory and
    work without shell initialization.
