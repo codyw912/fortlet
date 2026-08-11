@@ -1,6 +1,6 @@
 # Experiment 0003: Interactive packaged sessions
 
-Status: declared
+Status: completed — rejected
 Design: FIP-0001 and FIP-0002
 Charter scope: `local-foundation/v1`
 
@@ -127,8 +127,61 @@ On 2026-08-11, before declaration:
 
 ## Results
 
-Pending.
+Dispatch ran from 2026-08-11 14:47:03 EDT through 14:49:17 EDT.
+
+### Codex unit
+
+The observer emitted:
+
+```json
+{"event":"started"}
+{"event":"activity_initial"}
+{"event":"resized"}
+{"event":"activity_resized"}
+{"event":"concurrent_window"}
+```
+
+The before-label query returned
+`fortlet-501-codex-6652b8ca5f1b9273`. Concurrent `codex --version` exited `0`
+with `codex-cli 0.147.0`, and the after-label query returned the same capsule.
+
+After the window, the observer emitted `{"event":"signal"}` but exited `1`
+with `PTY child did not exit before timeout`. It therefore emitted neither
+`exited` nor a numeric summary. No retry was made. The declared final
+`codex --version` responsiveness check exited `0` with `codex-cli 0.147.0`.
+
+### Tact unit
+
+The observer emitted the same sequence through `concurrent_window`. The
+before-label query returned `fortlet-501-tact-6652b8ca5f1b9273`. Concurrent
+`tact --version` exited `0` with `tact 0.3.7` for
+`aarch64-unknown-linux-gnu`, and the after-label query returned the same
+capsule.
+
+After the window, the observer emitted `{"event":"signal"}` but exited `1`
+with the same bounded-exit error and no numeric summary. No retry was made. The
+declared final `tact --version` responsiveness check exited `0` with the same
+pinned guest version.
+
+Both real UIs produced activity before and after the actual PTY resize. The
+observer emitted no raw screen bytes, wrote no prompt or newline to either PTY,
+and controlled only its verified child process group. No credential value,
+host fallback, unexpected mount, paid quota, or shell mutation was observed.
 
 ## Terminal Closure
 
-Pending.
+1. Outcome: rejected — both harnesses passed PTY, resize, concurrent capsule,
+   pinned-version, and final-responsiveness checks, but neither terminated
+   after the single declared `SIGINT` within 15 seconds.
+2. Root cause: the experiment's shared assumption that one foreground-group
+   `SIGINT` should terminate each real UI is invalid or unproven. Current
+   evidence cannot distinguish native harness cancellation semantics from a
+   Fortlet or SDK signal-propagation defect, so changing Fortlet would be
+   unattributed.
+3. Actual total cost: zero money, zero paid quota, zero prompts, zero remote
+   mutation, two of two units, zero retries, and 134 seconds elapsed versus the
+   30-minute ceiling.
+4. Next action: stop under the repeated-failure trigger. A successor must first
+   falsify the shared assumption with a bounded control, such as native UI
+   behavior under the same observer or a deterministic guest terminal probe,
+   before attempting a Fortlet repair.

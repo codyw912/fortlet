@@ -64,10 +64,12 @@
         "src/native.rs",
         "src/session.rs",
         "tests/native.rs",
-        "experiments/0002-preserved-runtime-shim-smoke.md"
+        "experiments/0002-preserved-runtime-shim-smoke.md",
+        "examples/pty_observer.rs",
+        "experiments/0003-interactive-packaged-sessions.md"
       ],
       "gaps": [
-        "Interactive TTY, resize, and signal preservation are inherited from the explicit launch path but are not independently exercised through the shims."
+        "Runner evidence proves both packaged shims attach through real PTYs, produce activity after resize, share the expected capsule with concurrent invocations, and remain responsive, but one foreground-group SIGINT did not terminate either UI within 15 seconds; signal and exit preservation remain unresolved."
       ]
     }
   ]

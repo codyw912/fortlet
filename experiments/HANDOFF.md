@@ -1,59 +1,62 @@
-# Session Handoff — Interactive acceptance mission authorized
+# Session Handoff — Interactive evidence gained; signal exit blocked
 
-Audience: a fresh agent session. `GOAL.md` is normative and active. Verify the
-claimed baseline before relying on it, then implement only the bounded
-interactive acceptance mission.
+Audience: a fresh agent session. `GOAL.md` is normative and blocked by the
+charter's repeated-failure trigger. Do not run another signal variation until
+the operator authorizes a control that tests the shared assumption.
 
-## Verified predecessor state
+## Verified implementation state
 
-1. FIP-0002 is Accepted and defines optional package-owned `codex` and `tact`
-   shims plus the explicit recursion-safe `fortlet native` escape hatch.
-2. Checkpoint `29d42a82` implements transparent dispatch, native execution,
-   staged failures, package shims, and focused tests.
-3. Checkpoint `85d4766b` preserves the fixed-output MicroSandbox runtime and
-   checks `msb` and libkrunfw byte-for-byte against the release archive.
-4. Accepted Experiment 0002 proved packaged `codex --version` and
-   `tact --version` return pinned Linux guest versions without native fallback
-   or credential output.
-5. The predecessor mission's complete verification set passed on
-   `aarch64-darwin`; native `x86_64-linux` verification remains outstanding.
+1. The predecessor transparent-shim mission remains complete. Packaged Codex
+   and Tact non-interactive commands enter managed Linux capsules without host
+   fallback or credential output.
+2. Checkpoint `ad7fdd0e` adds a repository-local PTY observer. It is test
+   tooling, not an installed Fortlet command or runtime abstraction.
+3. Six focused observer tests cover parsing, PTY activity, actual resize,
+   buffered-startup exclusion, structured event order, `SIGINT` status,
+   timeout, and owned-process cleanup.
+4. The deterministic fixture rehearsal emits the complete event sequence and
+   terminates with signal 2. The observer never persists raw PTY screen bytes.
+5. Before live dispatch, the observer tests, full Rust suite, formatting,
+   strict all-target Clippy, explicit conformance test, exact-tree
+   `nix flake check`, package integrity checks, and doctor all passed on
+   `aarch64-darwin`.
 
-## Why this mission exists
+## Experiment 0003 terminal result
 
-The package, shims, VM creation, provisioning, guest tools, and non-interactive
-exit path are proven. Interactive TTY, resize, signal, and concurrent-attachment
-behavior is still inherited from the explicit session path rather than
-independently exercised through packaged shims. That is the nearest remaining
-daily-use uncertainty.
+Both prompt-free real UI units produced activity before and after resizing from
+80 by 24 to 120 by 40. During each 20-second window, a concurrent packaged
+`--version` invocation returned the pinned guest version and read-only label
+queries returned one unchanged matching managed capsule.
 
-The operator validated
-`docs/plans/2026-08-11-interactive-session-acceptance-design.md` and authorized
-one prompt-free real UI launch for each harness. The engineering ceiling is two
-hours.
+For both Codex and Tact, the observer then successfully sent the one declared
+`SIGINT` to its verified foreground process group, but the UI did not terminate
+within 15 seconds. Each observer exited `1` without an `exited` event or numeric
+summary. The observer's owned cleanup completed, and final packaged
+`--version` checks proved both capsules remained responsive.
 
-## Intended evidence path
+No prompt, newline, intentional model inference, paid quota, credential value,
+native fallback, unexpected mount, unowned process control, or shell mutation
+was observed. Experiment cost was zero money, two units, zero retries, and 134
+seconds.
 
-1. Build a test-side PTY observer and rehearse it end-to-end with a deterministic
-   fixture before trusting it against Fortlet.
-2. Emit structured events rather than repository-persisted raw UI content.
-3. Run all standard gates and doctor before declaring live dispatch.
-4. Declare a new experiment; never resume terminal Experiment 0001 or accepted
-   Experiment 0002.
-5. Exercise Codex and Tact with fixed initial and resized dimensions, a
-   concurrent `--version` attach, managed-label evidence, `SIGINT`, bounded exit,
-   and a final responsiveness check.
+## Why work stopped
 
-## Safety and stopping rules
+The two harness units are consecutive failures of the same assumption: that
+one foreground-group `SIGINT` should terminate a real harness UI. Current
+evidence does not attribute the result. Codex and Tact may both treat SIGINT as
+an in-UI cancellation, or Fortlet/MicroSandbox may fail to propagate the signal
+as intended. A third signal or timeout variation would repeat the mask-level
+failure prohibited by the self-correction playbook.
 
-Do not write prompt text or a newline to either real UI or intentionally
-initiate model inference. Automatic authentication or metadata traffic remains
-host-brokered and must use no paid quota. Do not touch shell startup files,
-invoke native fallback, inspect or record credential values, terminate unowned
-processes, or clean up user-owned MicroSandbox state. Both declared harness
-units run unless a hard invariant fires; there are no retries.
+## Next action requiring operator direction
 
-If evidence exposes a local defect inside accepted behavior, repair it with
-focused tests. If the repair would change an accepted FIP or broaden into
-lifecycle, distribution, Linux, remote, publication, or a generic abstraction,
-stop. Close the experiment, update conformance and this handoff, inspect the
-Jujutsu stack, then stop at the goal boundary.
+Choose a bounded control that can distinguish native harness semantics from
+the isolated terminal path before changing product code. Two plausible controls
+are running native Codex and Tact UIs under the same observer, or attaching a
+deterministic guest terminal probe through the existing SDK seam. Either choice
+must be newly declared; do not resume Experiment 0003.
+
+Preserve the optional shim activation, fail-closed behavior, credential
+boundary, package runtime-integrity check, no-prompt rule, observer ownership
+checks, and Jujutsu checkpoint discipline. Native Linux verification and the
+broader FIP-0001 gaps remain outstanding.

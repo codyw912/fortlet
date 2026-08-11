@@ -1,6 +1,10 @@
 # GOAL: Interactive packaged session acceptance
 
-Status: active.
+Status: blocked on 2026-08-11 during Deliverable 3. Both real packaged UIs
+passed PTY, resize, concurrent-capsule, and responsiveness checks, but neither
+terminated within 15 seconds after the single declared `SIGINT`. The repeated-
+failure trigger is active; do not attempt a third signal variation without
+operator direction and a control that falsifies the shared assumption.
 
 Prove that packaged `codex` and `tact` shims support ordinary interactive
 terminal use through Fortlet's existing fail-closed capsule-session path. Build
@@ -12,6 +16,10 @@ validated design at
 `docs/plans/2026-08-11-interactive-session-acceptance-design.md`.
 
 ## Deliverable 1 — Rehearse the PTY observer
+
+Completed 2026-08-11: checkpoint `ad7fdd0e` adds the bounded observer, six
+focused tests, deterministic fixture rehearsal, structured events, buffered-
+startup exclusion, and owned cleanup.
 
 1. Implement the smallest repository test tool that can launch an immutable
    packaged shim under a PTY, set and change its dimensions, control its child
@@ -28,6 +36,9 @@ validated design at
 
 ## Deliverable 2 — Prepare the interactive screen
 
+Completed 2026-08-11: all standard gates, exact package checks, and doctor
+passed; Experiment 0003 was declared at checkpoint `920aac22`.
+
 1. Run the complete standard verification set and package checks.
 2. Run `nix run . -- doctor` without printing credential values.
 3. If the rehearsal exposes a Fortlet defect, repair only that defect and ship
@@ -40,6 +51,9 @@ validated design at
    retries, and the protocol below.
 
 ## Deliverable 3 — Exercise both real harness UIs
+
+Completed as a terminally rejected experiment on 2026-08-11. Both units ran
+without retry. See `experiments/0003-interactive-packaged-sessions.md`.
 
 For each harness unit, in fixed order:
 
