@@ -111,7 +111,24 @@ engineering is capped at 30 minutes.
 
 ## Rehearsal
 
-Pending before dispatch.
+Completed on 2026-08-11 before dispatch:
+
+1. The launcher and selected native-binary SHA-256 hashes matched their frozen
+   values exactly.
+2. Name-only checks reported `CODEX_THREAD_ID`,
+   `CODEX_SANDBOX_NETWORK_DISABLED`, and `CODEX_CI` present;
+   `CODEX_SANDBOX` was already absent. No value was read or recorded.
+3. A Jujutsu path diff from observer checkpoint `ad7fdd0e` through the current
+   revision showed no change to `src`, `examples/pty_observer.rs`,
+   `tests/fixtures/pty-observer.sh`, `package.nix`, `Cargo.toml`, or
+   `Cargo.lock`.
+4. `cargo test --example pty_observer` passed all six tests, and the fixture
+   rehearsal emitted the complete sequence with signal 2, 7 initial bytes, and
+   13 resized bytes.
+5. `cargo test`, formatting, strict all-target Clippy, explicit conformance,
+   exact-tree `nix flake check`, and `nix run . -- doctor` passed. The flake
+   retained the known app-`meta` warning and incompatible `x86_64-linux`
+   omission; doctor printed no credential values.
 
 ## Results
 
