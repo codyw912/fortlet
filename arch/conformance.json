@@ -66,7 +66,7 @@
         "tests/native.rs"
       ],
       "gaps": [
-        "The required runner-executed local smoke evidence for both packaged shims is pending.",
+        "Runner evidence reached Fortlet through both packaged shims, but MicroSandbox VM creation failed before either guest harness executed.",
         "Interactive TTY, resize, and signal preservation are inherited from the explicit launch path but are not independently exercised through the shims."
       ]
     }

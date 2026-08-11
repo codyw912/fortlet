@@ -1,6 +1,9 @@
 # GOAL: Optional transparent harness shims
 
-Status: active. Issued 2026-08-11 by the operator.
+Status: blocked on 2026-08-11 during Deliverable 3. Both declared packaged-shim
+smoke units reached Fortlet but failed at MicroSandbox VM creation with the same
+`Internal(Vm(VmSetup(VmCreate)))` error. The repeated-failure escalation trigger
+is active; obtain operator direction before further runtime attempts.
 
 Deliver the smallest daily-use vertical slice of FIP-0001: optional,
 package-owned `codex` and `tact` shims that transparently enter Fortlet's

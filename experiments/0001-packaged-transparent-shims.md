@@ -1,6 +1,6 @@
 # Experiment 0001: Packaged transparent shim smoke
 
-Status: in-flight
+Status: completed — rejected
 Design: FIP-0002
 Charter scope: `local-foundation/v1`
 
@@ -117,8 +117,64 @@ declared runner commands are the remaining contact-with-reality step.
 
 ## Results
 
-Pending dispatch.
+Dispatch began after checkpoint `98b4b639` at 2026-08-11 12:09:43 EDT.
+
+### Codex unit
+
+Command:
+
+```bash
+env PATH=/nix/store/6282j3n2vxhmyq1q1pnhskfvkar7k2m7-fortlet-0.1.0/libexec/fortlet/shims:/usr/bin:/bin codex --version
+```
+
+Exit: `1`.
+
+Output:
+
+```text
+fortlet: preparing _base bookworm-1 (first use)
+fortlet: environment stage failed; check network access or remove the reported incomplete layer and retry: cannot create provisioning capsule fortlet-provision-20263-18cacc18083fdf20: failed to start "fortlet-provision-20263-18cacc18083fdf20": VM enter: build error: start: build_microvm: Internal(Vm(VmSetup(VmCreate)))
+```
+
+The declared running-capsule query exited `0` with no names. No Codex version
+was produced and no retry was made.
+
+### Tact unit
+
+Command:
+
+```bash
+env PATH=/nix/store/6282j3n2vxhmyq1q1pnhskfvkar7k2m7-fortlet-0.1.0/libexec/fortlet/shims:/usr/bin:/bin tact --version
+```
+
+Exit: `1`.
+
+Output:
+
+```text
+fortlet: preparing _base bookworm-1 (first use)
+fortlet: environment stage failed; check network access or remove the reported incomplete layer and retry: cannot create provisioning capsule fortlet-provision-20270-18cacc1e2c6579e0: failed to start "fortlet-provision-20270-18cacc1e2c6579e0": VM enter: build error: start: build_microvm: Internal(Vm(VmSetup(VmCreate)))
+```
+
+The declared running-capsule query exited `0` with no names. No Tact version
+was produced and no retry was made.
+
+Both immutable packaged shims demonstrably entered Fortlet: each emitted the
+Fortlet first-use message and the staged environment error, and neither emitted
+a host harness version. Both stopped before a project-and-harness capsule or
+guest harness existed. No credential value or unexpected mount information was
+printed.
 
 ## Terminal Closure
 
-Pending dispatch.
+1. Outcome: rejected — both packaged shims entered Fortlet, but neither could
+   pass base-layer provisioning to execute its guest harness.
+2. Root cause: MicroSandbox SDK diagnosis passed, but actual provisioning VM
+   creation failed twice with `Internal(Vm(VmSetup(VmCreate)))`. The repeated
+   failure invalidates the assumption that doctor health establishes a usable
+   VM-creation boundary and activates the charter escalation trigger.
+3. Actual total cost: zero money, zero paid quota, zero remote mutation, two of
+   two declared units, zero retries, and 70 seconds elapsed from declaration to
+   terminal observation versus the 30-minute ceiling.
+4. Next action: stop. The operator must choose whether to resume with a bounded
+   MicroSandbox VM-creation diagnosis before any successor smoke experiment.

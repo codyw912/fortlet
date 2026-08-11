@@ -22,4 +22,4 @@ Keep one line per record, newest last, outcome included — this list is the
 scannable failure/win history of the project:
 
 - `0000-template.md` — the record template.
-- `0001-packaged-transparent-shims.md` — in flight; packaged Codex and Tact shim smoke.
+- `0001-packaged-transparent-shims.md` — rejected; both shims entered Fortlet, but MicroSandbox VM creation failed before guest launch.
