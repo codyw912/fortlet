@@ -14,6 +14,10 @@ at `docs/plans/2026-08-11-exact-codex-exit-parity-design.md`, and Experiments
 
 ## Deliverable 1 — Add the bounded exit-command observer path
 
+Completed at checkpoint `147e956d`: both observer actions pass nine focused
+tests, including exact `/exit\r` bytes, distinctive exit code 23, structured
+event order, and owned cleanup after an ignored exit command.
+
 1. Preserve the existing signal observer and all evidence it produced.
 2. Add an explicit observer mode that writes exactly `/exit\r` to its owned PTY
    after the existing startup, resize, and hold sequence.

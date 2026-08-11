@@ -28,3 +28,4 @@ scannable failure/win history of the project:
 - `0004-native-ui-signal-control.md` — rejected as a two-harness control; native Tact reproduced the packaged timeout, while native Codex closed before signal.
 - `0005-native-codex-marker-control.md` — rejected; removing inherited outer-Codex markers did not prevent native Codex from closing before signal.
 - `0006-external-native-codex-control.md` — accepted; external native Codex reached signal and reproduced the packaged first-interrupt timeout.
+- `0007-exact-codex-exit-parity.md` — declared; compare native and packaged Codex under the documented `/exit` action.
