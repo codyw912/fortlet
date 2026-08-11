@@ -1,8 +1,9 @@
-# Session Handoff — Interactive evidence gained; signal exit blocked
+# Session Handoff — Native signal control authorized
 
-Audience: a fresh agent session. `GOAL.md` is normative and blocked by the
-charter's repeated-failure trigger. Do not run another signal variation until
-the operator authorizes a control that tests the shared assumption.
+Audience: a fresh agent session. `GOAL.md` is normative. The charter's
+repeated-failure trigger still prohibits another packaged signal variation,
+but the operator authorized the native-harness control declared as Experiment
+0004. Do not change Fortlet or resume Experiment 0003.
 
 ## Verified implementation state
 
@@ -48,13 +49,26 @@ an in-UI cancellation, or Fortlet/MicroSandbox may fail to propagate the signal
 as intended. A third signal or timeout variation would repeat the mask-level
 failure prohibited by the self-correction playbook.
 
-## Next action requiring operator direction
+## Active next action
 
-Choose a bounded control that can distinguish native harness semantics from
-the isolated terminal path before changing product code. Two plausible controls
-are running native Codex and Tact UIs under the same observer, or attaching a
-deterministic guest terminal probe through the existing SDK seam. Either choice
-must be newly declared; do not resume Experiment 0003.
+Experiment 0004 directly launches the resolved native Codex and Tact commands
+under the unchanged observer. It freezes Experiment 0003's dimensions,
+settling, 20-second window, one foreground-group `SIGINT`, 15-second exit
+bound, order, zero input, and zero retries. It intentionally omits capsule
+labels and responsiveness checks because no Fortlet capsule participates.
+
+The native identities are Codex 0.147.0 at the canonical npm launcher path and
+Tact 0.3.7 at `/Users/cody/.local/bin/tact`; exact paths and SHA-256 hashes are
+in the experiment record. Run the focused observer tests and deterministic
+fixture rehearsal immediately before dispatch, then run Codex completely and
+Tact completely. Both units run unless a hard invariant fires.
+
+If both native UIs also remain alive, the one-`SIGINT` termination assumption
+is rejected and Experiment 0003 does not establish a Fortlet signal defect. If
+a native UI exits but its packaged counterpart did not, attribution narrows
+toward the isolated attachment path. Mixed evidence supports only per-harness
+conclusions. Close the control terminally, update conformance and this handoff,
+mark the goal complete or blocked, and stop; any repair belongs to a successor.
 
 Preserve the optional shim activation, fail-closed behavior, credential
 boundary, package runtime-integrity check, no-prompt rule, observer ownership

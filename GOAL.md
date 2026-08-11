@@ -1,10 +1,11 @@
 # GOAL: Interactive packaged session acceptance
 
-Status: blocked on 2026-08-11 during Deliverable 3. Both real packaged UIs
-passed PTY, resize, concurrent-capsule, and responsiveness checks, but neither
-terminated within 15 seconds after the single declared `SIGINT`. The repeated-
-failure trigger is active; do not attempt a third signal variation without
-operator direction and a control that falsifies the shared assumption.
+Status: active on 2026-08-11 under operator-authorized Deliverable 4. Both real
+packaged UIs passed PTY, resize, concurrent-capsule, and responsiveness checks,
+but neither terminated within 15 seconds after the single declared `SIGINT`.
+The repeated-failure trigger remains active against another packaged signal
+variation; the authorized next action is a native-harness control that tests
+the shared one-`SIGINT` assumption without changing Fortlet.
 
 Prove that packaged `codex` and `tact` shims support ordinary interactive
 terminal use through Fortlet's existing fail-closed capsule-session path. Build
@@ -75,6 +76,26 @@ Both units run even if one fails unless a hard invariant fires. Afterward,
 close the experiment terminally, update conformance, rewrite the handoff, mark
 this goal complete or blocked, then STOP and report.
 
+## Deliverable 4 — Falsify the shared signal assumption
+
+Authorized by the operator on 2026-08-11 after Experiment 0003's repeated
+failure trigger.
+
+1. Predeclare a new bounded control; do not resume Experiment 0003 and do not
+   change product code or the observer.
+2. Run the directly resolved native Codex and Tact UIs under the unchanged PTY
+   observer with Experiment 0003's dimensions, settling, hold, one-`SIGINT`,
+   exit bound, zero-input rule, order, and zero-retry discipline.
+3. Record exact native executable identities before dispatch. Do not activate
+   Fortlet shims or use `fortlet native` for the control.
+4. If both native UIs also remain alive, reject the shared termination
+   assumption rather than attributing the packaged result to Fortlet. If a
+   native UI exits while its packaged counterpart did not, record the narrowed
+   propagation defect. Mixed evidence establishes no broad cross-harness claim.
+5. Close the control terminally, update conformance and the handoff honestly,
+   mark this goal complete or blocked, then STOP and report. Any product repair
+   requires a successor mission justified by the control.
+
 ## Definition of Done
 
 1. The PTY observer proves its own dimensions, resize, signal, status, timeout,
@@ -91,6 +112,11 @@ this goal complete or blocked, then STOP and report.
 6. Product defects discovered by the protocol have focused regression evidence;
    claims not established remain explicit conformance gaps.
 7. The complete verification set is green; then STOP and report.
+
+Deliverable 4 may close this diagnostic continuation honestly without making
+criterion 4 true. In that case the terminal record and conformance map must
+state whether the missing claim is a Fortlet defect, a rejected acceptance
+assumption, or still unattributed.
 
 ## Binding rules
 
@@ -109,8 +135,10 @@ this goal complete or blocked, then STOP and report.
 
 1. Engineering ceiling: 2 hours. Stop earlier as soon as the Definition of Done
    is met; report actual measured effort.
-2. Experiment ceiling: zero money, zero paid quota, zero submitted prompts, two
-   harness units, zero retries, and at most 30 minutes after dispatch begins.
+2. Each experiment ceiling: zero money, zero paid quota, zero submitted
+   prompts, two harness units, zero retries, and at most 30 minutes after
+   dispatch begins. Deliverable 4 remains inside the original cumulative
+   two-hour engineering ceiling.
 3. Local Fortlet-owned test capsules, processes, temporary files, and state are
    allowed. Mutation or termination of unowned state is not.
 4. Stop on any need to weaken an invariant, change an accepted FIP,

@@ -25,3 +25,4 @@ scannable failure/win history of the project:
 - `0001-packaged-transparent-shims.md` — rejected; both shims entered Fortlet, but MicroSandbox VM creation failed before guest launch.
 - `0002-preserved-runtime-shim-smoke.md` — accepted; preserved runtime entitlements restored VM creation and both packaged shims returned pinned guest versions.
 - `0003-interactive-packaged-sessions.md` — rejected; both UIs passed PTY, resize, concurrency, and responsiveness checks, but neither exited after one bounded `SIGINT`.
+- `0004-native-ui-signal-control.md` — declared; compares both native UIs under the unchanged observer to falsify the shared one-`SIGINT` assumption.
