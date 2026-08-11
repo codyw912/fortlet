@@ -26,3 +26,4 @@ scannable failure/win history of the project:
 - `0002-preserved-runtime-shim-smoke.md` — accepted; preserved runtime entitlements restored VM creation and both packaged shims returned pinned guest versions.
 - `0003-interactive-packaged-sessions.md` — rejected; both UIs passed PTY, resize, concurrency, and responsiveness checks, but neither exited after one bounded `SIGINT`.
 - `0004-native-ui-signal-control.md` — rejected as a two-harness control; native Tact reproduced the packaged timeout, while native Codex closed before signal.
+- `0005-native-codex-marker-control.md` — declared; removes only inherited outer-Codex markers to test whether native Codex reaches the fixed signal boundary.

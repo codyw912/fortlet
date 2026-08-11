@@ -1,164 +1,104 @@
-# GOAL: Interactive packaged session acceptance
+# GOAL: Attribute native Codex first-interrupt behavior
 
-Status: blocked on 2026-08-11 after terminal closure of Deliverable 4. The
-native Tact UI reproduced the packaged Tact UI's one-`SIGINT` timeout, rejecting
-that termination assumption for Tact. Native Codex closed its PTY during
-startup settling before resize or signal, so the Codex comparison and exact
-exit preservation remain unresolved. Do not retry or change Fortlet under this
-goal.
+Status: active. Authorized by the operator on 2026-08-11 after validating the
+design in `docs/plans/2026-08-11-native-codex-marker-control-design.md`.
 
-Prove that packaged `codex` and `tact` shims support ordinary interactive
-terminal use through Fortlet's existing fail-closed capsule-session path. Build
-only the test-side machinery and product repairs required by falsifiable PTY,
-resize, concurrent-attachment, signal, and exit evidence.
+Determine whether inherited outer-Codex session markers caused Experiment
+0004's native Codex UI to close before its signal boundary. Run one bounded
+native Codex control with only those markers removed. Do not change Fortlet,
+the PTY observer, accepted architecture, or native harness state.
 
-Before designing or implementing, read FIP-0001 and FIP-0002 in full and the
-validated design at
-`docs/plans/2026-08-11-interactive-session-acceptance-design.md`.
+Before dispatch, read FIP-0001 and FIP-0002 in full, the validated design, and
+Experiments 0003 and 0004.
 
-## Deliverable 1 — Rehearse the PTY observer
+## Deliverable 1 — Freeze and qualify the control
 
-Completed 2026-08-11: checkpoint `ad7fdd0e` adds the bounded observer, six
-focused tests, deterministic fixture rehearsal, structured events, buffered-
-startup exclusion, and owned cleanup.
+1. Verify the exact Codex 0.147.0 launcher and native-binary hashes declared in
+   Experiment 0005.
+2. Record only whether the four declared marker names are initially present;
+   never record environment values.
+3. Confirm the product and observer are unchanged from the verified Experiment
+   0004 stack.
+4. Run the complete standard verification set, the six observer tests, and the
+   deterministic fixture rehearsal before dispatch.
+5. Checkpoint the predeclared experiment before any native UI launch.
 
-1. Implement the smallest repository test tool that can launch an immutable
-   packaged shim under a PTY, set and change its dimensions, control its child
-   process group, send a signal, bound execution, and record exit status.
-2. Make the tool emit bounded structured events. Do not persist raw harness
-   screen content or account/project metadata in repository records.
-3. Rehearse the complete observation and cleanup path against a deterministic
-   fixture that reports terminal dimensions, reacts to resize, traps signals,
-   and exits predictably.
-4. Add focused automated coverage for the driver. It is test tooling, not a
-   Fortlet command or a generic runtime abstraction.
-5. The driver may terminate only its own process group and remove only
-   temporary state it created.
+## Deliverable 2 — Run one native Codex unit
 
-## Deliverable 2 — Prepare the interactive screen
+Launch the exact native Codex npm entry point under the unchanged observer from
+`/Users/cody/dev/fortlet`, removing only these inherited names from the
+observer and child environment:
 
-Completed 2026-08-11: all standard gates, exact package checks, and doctor
-passed; Experiment 0003 was declared at checkpoint `920aac22`.
+- `CODEX_THREAD_ID`
+- `CODEX_SANDBOX`
+- `CODEX_SANDBOX_NETWORK_DISABLED`
+- `CODEX_CI`
 
-1. Run the complete standard verification set and package checks.
-2. Run `nix run . -- doctor` without printing credential values.
-3. If the rehearsal exposes a Fortlet defect, repair only that defect and ship
-   focused regression evidence and conformance in the same checkpoint.
-4. Stop for a proposal if a repair would change an accepted public, terminal,
-   credential, or capsule contract. Otherwise FIP-0001 and FIP-0002 already
-   authorize this mission.
-5. Predeclare the next numbered experiment with one fixed Codex unit and one
-   fixed Tact unit, an exact immutable package output, zero prompts, zero
-   retries, and the protocol below.
+Keep the real workspace sandbox and `CODEX_MANAGED_*` launcher behavior intact.
+Use an 80-by-24 PTY, settle for 100 milliseconds, resize to 120 by 40, allow a
+20-second unattended hold, send one `SIGINT` to the verified observer-owned
+foreground process group, and wait at most 15 seconds for exit. Write no prompt,
+newline, or other input. Do not retry or adapt the environment, signal, or
+timings.
 
-## Deliverable 3 — Exercise both real harness UIs
+Close the unit by the first matching rule:
 
-Completed as a terminally rejected experiment on 2026-08-11. Both units ran
-without retry. See `experiments/0003-interactive-packaged-sessions.md`.
+1. If it reaches signal and remains alive, native Codex matches the packaged
+   first-interrupt behavior; do not attribute Experiment 0003 to Fortlet.
+2. If it reaches signal and exits, record the exact status and the narrowed
+   packaged-path discrepancy; do not repair it under this goal.
+3. If it closes before signal again, reject the marker-removal mechanism. A
+   future external-terminal control requires a new goal and experiment.
 
-For each harness unit, in fixed order:
-
-1. Launch its packaged shim UI in an 80 by 24 PTY without submitting a prompt
-   or newline.
-2. Observe sustained process life and terminal output without gating on exact
-   UI wording.
-3. Resize to 120 by 40 and require subsequent terminal activity consistent
-   with a redraw.
-4. While the UI remains attached, run the same packaged shim with `--version`
-   and use a read-only label query to verify both invocations select the same
-   project-and-harness capsule.
-5. Send `SIGINT` to the foreground process group, require bounded termination,
-   and record the exact exit status.
-6. Use a final non-interactive invocation to prove the managed capsule remains
-   responsive.
-
-Both units run even if one fails unless a hard invariant fires. Afterward,
-close the experiment terminally, update conformance, rewrite the handoff, mark
-this goal complete or blocked, then STOP and report.
-
-## Deliverable 4 — Falsify the shared signal assumption
-
-Authorized by the operator on 2026-08-11 after Experiment 0003's repeated
-failure trigger.
-
-Completed as a terminally rejected two-harness control on 2026-08-11. Tact
-matched its packaged signal behavior, while Codex did not reach the signal
-boundary. See `experiments/0004-native-ui-signal-control.md`.
-
-1. Predeclare a new bounded control; do not resume Experiment 0003 and do not
-   change product code or the observer.
-2. Run the directly resolved native Codex and Tact UIs under the unchanged PTY
-   observer with Experiment 0003's dimensions, settling, hold, one-`SIGINT`,
-   exit bound, zero-input rule, order, and zero-retry discipline.
-3. Record exact native executable identities before dispatch. Do not activate
-   Fortlet shims or use `fortlet native` for the control.
-4. If both native UIs also remain alive, reject the shared termination
-   assumption rather than attributing the packaged result to Fortlet. If a
-   native UI exits while its packaged counterpart did not, record the narrowed
-   propagation defect. Mixed evidence establishes no broad cross-harness claim.
-5. Close the control terminally, update conformance and the handoff honestly,
-   mark this goal complete or blocked, then STOP and report. Any product repair
-   requires a successor mission justified by the control.
+After the unit, verify owned cleanup, close Experiment 0005 terminally, update
+conformance and the handoff, mark this goal complete or blocked, then STOP and
+report.
 
 ## Definition of Done
 
-1. The PTY observer proves its own dimensions, resize, signal, status, timeout,
-   and owned-cleanup behavior against a deterministic fixture.
-2. Both real packaged shims exercise the interactive SDK attachment path with
-   observable activity before and after resize.
-3. Each concurrent invocation selects the same managed capsule as its matching
-   interactive session.
-4. Signal delivery terminates each observed session within its declared bound,
-   with exact status recorded, and the capsule remains responsive afterward.
-5. No prompt is submitted, no intentional model inference or paid quota is
-   used, and no native fallback, credential value, unexpected mount, unowned
-   process control, or shell-configuration mutation occurs.
-6. Product defects discovered by the protocol have focused regression evidence;
-   claims not established remain explicit conformance gaps.
-7. The complete verification set is green; then STOP and report.
-
-Deliverable 4 may close this diagnostic continuation honestly without making
-criterion 4 true. In that case the terminal record and conformance map must
-state whether the missing claim is a Fortlet defect, a rejected acceptance
-assumption, or still unattributed.
+1. The experiment freezes one exact Codex identity and changes only the four
+   declared environment names relative to Experiment 0004.
+2. The unchanged observer is qualified immediately before dispatch.
+3. The single unit is recorded without raw PTY bytes, retries, or adaptive
+   input, and one of the three decision rules is applied without inference.
+4. No provider credential value, paid quota, host setup mutation, unowned
+   process control, native fallback, or product change occurs.
+5. Conformance and the handoff state only what the result establishes; then
+   STOP and report.
 
 ## Binding rules
 
-1. Preserve every charter invariant and every FIP-0001/FIP-0002 constraint.
-2. Never write prompt text or a newline to a real harness UI during this goal.
-3. Never silently fall back to a host harness or expose provider credentials,
-   SSH keys, signing agents, or publication authority to a capsule.
-4. Successful wrapper startup remains silent; first-use provisioning progress
-   is allowed and must not be mistaken for a wrapper banner.
-5. Do not introduce lifecycle commands, lease redesign, standalone
-   distribution, Linux verification, new harnesses, remote execution,
-   publication, or a generic runtime/terminal abstraction.
+1. Preserve every charter invariant and FIP-0001/FIP-0002 constraint.
+2. Unsetting a marker must not weaken or bypass the execution sandbox; the
+   workspace-only write boundary remains enforced externally.
+3. Do not unset `CODEX_MANAGED_BY_NPM` or `CODEX_MANAGED_PACKAGE_ROOT`; the npm
+   launcher may manage them normally.
+4. Never persist raw native UI output, environment values, account metadata, or
+   credentials.
+5. Do not alter the observer, Fortlet, package, harness configuration, shell
+   startup files, or native Codex state.
 6. Use reviewable Jujutsu checkpoints and inspect `main..@` before handoff.
 
 ## Budget and escalation
 
-1. Engineering ceiling: 2 hours. Stop earlier as soon as the Definition of Done
-   is met; report actual measured effort.
-2. Each experiment ceiling: zero money, zero paid quota, zero submitted
-   prompts, two harness units, zero retries, and at most 30 minutes after
-   dispatch begins. Deliverable 4 remains inside the original cumulative
-   two-hour engineering ceiling.
-3. Local Fortlet-owned test capsules, processes, temporary files, and state are
-   allowed. Mutation or termination of unowned state is not.
-4. Stop on any need to weaken an invariant, change an accepted FIP,
-   intentionally initiate model inference, or expand the product boundary.
-5. Two consecutive terminal failures sharing an assumption trigger escalation.
+1. Engineering ceiling: 30 minutes from implementation start.
+2. Experiment ceiling: zero money, zero paid quota, zero prompts, one unit,
+   zero retries, and at most 10 minutes after dispatch begins.
+3. Stop on any need to weaken an invariant, initiate model inference, change an
+   accepted FIP, mutate state outside the project, or control an unowned
+   process.
+4. Any early close settles the unit; it does not authorize a second launch.
 
 ## Verification
 
-Run from `nix develop`:
+Run from `nix develop` before dispatch:
 
-- PTY observer fixture tests and rehearsal command declared by Deliverable 1
+- `cargo test --example pty_observer`
+- `cargo run --quiet --example pty_observer -- fixture`
 - `cargo test`
 - `cargo fmt --all -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
 - `cargo test --test conformance`
 - `nix flake check`
 - `nix run . -- doctor`
-- The packaged interactive commands and label queries declared in the
-  experiment record
+- Exact identity and marker-name checks declared in Experiment 0005
