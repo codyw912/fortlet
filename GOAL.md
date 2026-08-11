@@ -1,127 +1,118 @@
-# GOAL: Optional transparent harness shims
+# GOAL: Interactive packaged session acceptance
 
-Status: completed 2026-08-11. The package now preserves the fixed-output
-MicroSandbox runtime byte-for-byte, the complete verification set is green,
-and Experiment 0002 proved both packaged shims return their pinned Linux guest
-versions without native fallback. Interactive shim terminal semantics remain
-an explicit conformance gap rather than an exercised claim.
+Status: active.
 
-Deliver the smallest daily-use vertical slice of FIP-0001: optional,
-package-owned `codex` and `tact` shims that transparently enter Fortlet's
-fail-closed capsule-session path while preserving the explicit Fortlet CLI and
-an intentional native escape hatch.
+Prove that packaged `codex` and `tact` shims support ordinary interactive
+terminal use through Fortlet's existing fail-closed capsule-session path. Build
+only the test-side machinery and product repairs required by falsifiable PTY,
+resize, concurrent-attachment, signal, and exit evidence.
 
-Before designing or implementing, read FIP-0001 in full and the validated
-design at `docs/plans/2026-08-11-transparent-shim-slice-design.md`.
+Before designing or implementing, read FIP-0001 and FIP-0002 in full and the
+validated design at
+`docs/plans/2026-08-11-interactive-session-acceptance-design.md`.
 
-## Deliverable 1 — Accept the shim contract
+## Deliverable 1 — Rehearse the PTY observer
 
-Completed 2026-08-11: accepted FIP-0002 and added its initial conformance entry
-before implementation.
+1. Implement the smallest repository test tool that can launch an immutable
+   packaged shim under a PTY, set and change its dimensions, control its child
+   process group, send a signal, bound execution, and record exit status.
+2. Make the tool emit bounded structured events. Do not persist raw harness
+   screen content or account/project metadata in repository records.
+3. Rehearse the complete observation and cleanup path against a deterministic
+   fixture that reports terminal dimensions, reacts to resize, traps signals,
+   and exits predictably.
+4. Add focused automated coverage for the driver. It is test tooling, not a
+   Fortlet command or a generic runtime abstraction.
+5. The driver may terminate only its own process group and remove only
+   temporary state it created.
 
-Record and accept the next numbered FIP extending FIP-0001 with:
+## Deliverable 2 — Prepare the interactive screen
 
-1. An immutable, package-owned shim directory separate from the ordinary
-   binary directory.
-2. Optional activation through explicit `PATH` ordering, including declarative
-   Nix and Home Manager use.
-3. Invocation-name dispatch for both registered harnesses.
-4. `fortlet native <harness> -- <arguments>` as the explicit, recursion-safe
-   host escape hatch, with no automatic native fallback.
-5. No shell startup-file writes, aliases, functions, `eval`, or interactive
-   shell dependency.
+1. Run the complete standard verification set and package checks.
+2. Run `nix run . -- doctor` without printing credential values.
+3. If the rehearsal exposes a Fortlet defect, repair only that defect and ship
+   focused regression evidence and conformance in the same checkpoint.
+4. Stop for a proposal if a repair would change an accepted public, terminal,
+   credential, or capsule contract. Otherwise FIP-0001 and FIP-0002 already
+   authorize this mission.
+5. Predeclare the next numbered experiment with one fixed Codex unit and one
+   fixed Tact unit, an exact immutable package output, zero prompts, zero
+   retries, and the protocol below.
 
-Add its initial conformance entry in the same checkpoint. The proposal MUST be
-Accepted before implementation begins.
+## Deliverable 3 — Exercise both real harness UIs
 
-## Deliverable 2 — Implement the optional transparent slice
+For each harness unit, in fixed order:
 
-Completed 2026-08-11: implemented optional packaged `codex` and `tact` shims,
-explicit recursion-safe native execution, staged launch failures, focused
-coverage, and partial conformance evidence. Live packaged smoke remains in
-Deliverable 3.
+1. Launch its packaged shim UI in an 80 by 24 PTY without submitting a prompt
+   or newline.
+2. Observe sustained process life and terminal output without gating on exact
+   UI wording.
+3. Resize to 120 by 40 and require subsequent terminal activity consistent
+   with a redraw.
+4. While the UI remains attached, run the same packaged shim with `--version`
+   and use a read-only label query to verify both invocations select the same
+   project-and-harness capsule.
+5. Send `SIGINT` to the foreground process group, require bounded termination,
+   and record the exact exit status.
+6. Use a final non-interactive invocation to prove the managed capsule remains
+   responsive.
 
-1. Package `codex` and `tact` launchers in the dedicated shim directory and
-   keep harness registration as their source of truth.
-2. Route shim invocation through the existing capsule-session transaction,
-   preserving arguments, current directory, terminal behavior, signals, and
-   exit status.
-3. Keep `fortlet doctor` and `fortlet run <harness> -- <arguments>` fully usable
-   without shim activation.
-4. Implement the explicit native escape hatch without a shell and without
-   recursion into Fortlet's own shims.
-5. Make failures on the affected launch path identify their stage and one
-   actionable next step. Successful wrapper startup remains silent.
-6. Add focused automated coverage and update conformance with the code and
-   tests that change it.
-
-## Deliverable 3 — Prove the packaged workflow
-
-Completed 2026-08-11: the package integrity check prevents runtime stripping,
-all standard gates passed, and accepted Experiment 0002 exercised both shims
-through VM creation and guest harness execution.
-
-1. Verify both launchers exist in the packaged immutable shim directory and
-   work without shell initialization.
-2. Run the complete standard verification set.
-3. After the gates are green, predeclare and run one bounded local smoke
-   experiment for `codex --version` and `tact --version` through the activated
-   packaged shims.
-4. Record actual evidence and effort, update the runbook and conformance
-   honestly, rewrite the handoff for the successor, then STOP and report.
+Both units run even if one fails unless a hard invariant fires. Afterward,
+close the experiment terminally, update conformance, rewrite the handoff, mark
+this goal complete or blocked, then STOP and report.
 
 ## Definition of Done
 
-1. With the shim directory first on `PATH`, ordinary `codex` and `tact`
-   invocations enter Fortlet and never silently fall back to host execution.
-2. Without shim activation, the explicit Fortlet CLI remains fully supported.
-3. `fortlet native` deliberately reaches the next matching host executable or
-   fails with one actionable correction; it cannot recurse into a Fortlet shim.
-4. Shim activation requires no mutation of user shell files and works from a
-   minimal non-interactive environment.
-5. Automated and local smoke evidence cover both harnesses, argument flow,
-   project selection, isolation, and exit status. Claims not exercised remain
-   labeled as claims or explicit conformance gaps.
-6. `arch/conformance.json` passes its checker and records the pre-existing
-   adapter-ownership, failure-UX, and insufficient-coverage gaps that remain.
-7. The complete verification set is green; then STOP and report. Lifecycle
-   commands, lease implementation, general installation management, standalone
-   distribution, remote execution, publication, and new harnesses are not
-   authorized by this goal.
+1. The PTY observer proves its own dimensions, resize, signal, status, timeout,
+   and owned-cleanup behavior against a deterministic fixture.
+2. Both real packaged shims exercise the interactive SDK attachment path with
+   observable activity before and after resize.
+3. Each concurrent invocation selects the same managed capsule as its matching
+   interactive session.
+4. Signal delivery terminates each observed session within its declared bound,
+   with exact status recorded, and the capsule remains responsive afterward.
+5. No prompt is submitted, no intentional model inference or paid quota is
+   used, and no native fallback, credential value, unexpected mount, unowned
+   process control, or shell-configuration mutation occurs.
+6. Product defects discovered by the protocol have focused regression evidence;
+   claims not established remain explicit conformance gaps.
+7. The complete verification set is green; then STOP and report.
 
 ## Binding rules
 
-1. Preserve every hard invariant and direction constraint in the operator
-   charter and FIP-0001.
-2. Do not write or propose edits to shell startup files; activation guidance is
-   declarative and user-controlled.
-3. Never fall back from an isolated launch to a host harness.
-4. Do not mount host credentials, SSH keys, signing agents, or publication
-   authority into a capsule.
-5. Do not introduce a generic runtime abstraction or broaden this into
-   lifecycle, distribution, remote, or publication work.
-6. Architecture-track implementation starts only after its proposal is
-   Accepted; conformance changes stay with the behavior and tests they describe.
-7. Use reviewable Jujutsu checkpoints and inspect `main..@` before handoff.
+1. Preserve every charter invariant and every FIP-0001/FIP-0002 constraint.
+2. Never write prompt text or a newline to a real harness UI during this goal.
+3. Never silently fall back to a host harness or expose provider credentials,
+   SSH keys, signing agents, or publication authority to a capsule.
+4. Successful wrapper startup remains silent; first-use provisioning progress
+   is allowed and must not be mistaken for a wrapper banner.
+5. Do not introduce lifecycle commands, lease redesign, standalone
+   distribution, Linux verification, new harnesses, remote execution,
+   publication, or a generic runtime/terminal abstraction.
+6. Use reviewable Jujutsu checkpoints and inspect `main..@` before handoff.
 
 ## Budget and escalation
 
-1. Up to 8 hours of actual engineering effort; this is a ceiling, not a target.
-   Stop as soon as the Definition of Done is met and report actual effort.
-2. Zero external spend, paid quota, remote mutation, or repository publication.
-3. Local Fortlet-owned test capsules and state are allowed under the charter.
-4. Stop on any need to weaken an invariant, change FIP-0001, mutate user-owned
-   shell configuration, or expand the product boundary.
+1. Engineering ceiling: 2 hours. Stop earlier as soon as the Definition of Done
+   is met; report actual measured effort.
+2. Experiment ceiling: zero money, zero paid quota, zero submitted prompts, two
+   harness units, zero retries, and at most 30 minutes after dispatch begins.
+3. Local Fortlet-owned test capsules, processes, temporary files, and state are
+   allowed. Mutation or termination of unowned state is not.
+4. Stop on any need to weaken an invariant, change an accepted FIP,
+   intentionally initiate model inference, or expand the product boundary.
 5. Two consecutive terminal failures sharing an assumption trigger escalation.
 
 ## Verification
 
 Run from `nix develop`:
 
+- PTY observer fixture tests and rehearsal command declared by Deliverable 1
 - `cargo test`
 - `cargo fmt --all -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
 - `cargo test --test conformance`
 - `nix flake check`
 - `nix run . -- doctor`
-- The packaged shim smoke commands declared in the experiment record
+- The packaged interactive commands and label queries declared in the
+  experiment record

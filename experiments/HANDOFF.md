@@ -1,64 +1,59 @@
-# Session Handoff — Transparent shim mission complete
+# Session Handoff — Interactive acceptance mission authorized
 
-Audience: a fresh agent session. `GOAL.md` is normative and complete. Do not
-start follow-on implementation until the operator and agent choose a new goal.
+Audience: a fresh agent session. `GOAL.md` is normative and active. Verify the
+claimed baseline before relying on it, then implement only the bounded
+interactive acceptance mission.
 
-## Completed outcome
+## Verified predecessor state
 
 1. FIP-0002 is Accepted and defines optional package-owned `codex` and `tact`
    shims plus the explicit recursion-safe `fortlet native` escape hatch.
-2. Shim activation is only a user-controlled `PATH` decision. Fortlet never
-   writes shell startup files, uses shell aliases or functions, or silently
-   falls back to a host harness.
-3. Checkpoint `29d42a82` implements invocation-name dispatch, native execution,
+2. Checkpoint `29d42a82` implements transparent dispatch, native execution,
    staged failures, package shims, and focused tests.
-4. Checkpoint `85d4766b` preserves the fixed-output MicroSandbox runtime and
-   adds byte-for-byte package checks for `msb` and libkrunfw.
+3. Checkpoint `85d4766b` preserves the fixed-output MicroSandbox runtime and
+   checks `msb` and libkrunfw byte-for-byte against the release archive.
+4. Accepted Experiment 0002 proved packaged `codex --version` and
+   `tact --version` return pinned Linux guest versions without native fallback
+   or credential output.
+5. The predecessor mission's complete verification set passed on
+   `aarch64-darwin`; native `x86_64-linux` verification remains outstanding.
 
-## Packaging failure and repair
+## Why this mission exists
 
-Experiment 0001 rejected the original package after both shims reached Fortlet
-but failed with `Internal(Vm(VmSetup(VmCreate)))`. Read-only diagnosis found
-that Nix's `strip -S` fixup changed the release runtime and removed `msb`'s
-`com.apple.security.hypervisor` entitlement even though `doctor` remained
-green. The release archive was byte-identical to the previously working user
-installation.
+The package, shims, VM creation, provisioning, guest tools, and non-interactive
+exit path are proven. Interactive TTY, resize, signal, and concurrent-attachment
+behavior is still inherited from the explicit session path rather than
+independently exercised through packaged shims. That is the nearest remaining
+daily-use uncertainty.
 
-The repair disables stripping for the Fortlet output and compares both runtime
-files with the immutable archive during install checks. Repaired package output
-`/nix/store/xvhq837ac4fmw6144vl2magmlr8miqgl-fortlet-0.1.0` retains the exact
-release hashes and Hypervisor entitlement.
+The operator validated
+`docs/plans/2026-08-11-interactive-session-acceptance-design.md` and authorized
+one prompt-free real UI launch for each harness. The engineering ceiling is two
+hours.
 
-## Accepted runtime evidence
+## Intended evidence path
 
-Experiment 0002 is terminally accepted:
+1. Build a test-side PTY observer and rehearse it end-to-end with a deterministic
+   fixture before trusting it against Fortlet.
+2. Emit structured events rather than repository-persisted raw UI content.
+3. Run all standard gates and doctor before declaring live dispatch.
+4. Declare a new experiment; never resume terminal Experiment 0001 or accepted
+   Experiment 0002.
+5. Exercise Codex and Tact with fixed initial and resized dimensions, a
+   concurrent `--version` attach, managed-label evidence, `SIGINT`, bounded exit,
+   and a final responsiveness check.
 
-1. Packaged `codex --version` crossed VM creation, provisioned `_base` and Codex,
-   returned `codex-cli 0.147.0`, and left a running Fortlet-managed Codex
-   capsule.
-2. Conditional packaged `tact --version` returned `tact 0.3.7` for
-   `aarch64-unknown-linux-gnu` and left a running Fortlet-managed Tact capsule.
-3. Both commands exited zero, used the immutable shim directory, emitted no
-   credential values, and did not resolve a host harness.
-4. Actual experiment cost was zero money, two units, zero retries, and 80
-   seconds versus the 30-minute ceiling.
+## Safety and stopping rules
 
-## Verification and honest gaps
+Do not write prompt text or a newline to either real UI or intentionally
+initiate model inference. Automatic authentication or metadata traffic remains
+host-brokered and must use no paid quota. Do not touch shell startup files,
+invoke native fallback, inspect or record credential values, terminate unowned
+processes, or clean up user-owned MicroSandbox state. Both declared harness
+units run unless a hard invariant fires; there are no retries.
 
-The complete standard verification set and `nix run . -- doctor` passed on
-`aarch64-darwin`. Package install checks exercise empty-environment discovery,
-fail-closed dispatch, and runtime byte integrity. Native `x86_64-linux` package
-verification remains outstanding.
-
-FIP-0002 remains partial because interactive TTY, resize, and signal behavior
-is inherited from the explicit session path but has not been independently
-exercised through the shims. FIP-0001 retains its broader lifecycle,
-standalone-distribution, adapter-ownership, project/broad-root, terminal, and
-publication gaps in `arch/conformance.json`.
-
-## Next action
-
-Choose a new `GOAL.md` with the operator. Preserve the optional activation,
-credential boundary, no-fallback rule, package runtime-integrity check, and
-Jujutsu checkpoint discipline. Do not turn the remaining conformance list into
-an inferred mission; prioritize the next daily-use bottleneck together.
+If evidence exposes a local defect inside accepted behavior, repair it with
+focused tests. If the repair would change an accepted FIP or broaden into
+lifecycle, distribution, Linux, remote, publication, or a generic abstraction,
+stop. Close the experiment, update conformance and this handoff, inspect the
+Jujutsu stack, then stop at the goal boundary.
