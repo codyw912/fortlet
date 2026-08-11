@@ -1,6 +1,6 @@
 # Experiment 0007: Exact Codex exit parity
 
-Status: declared
+Status: in-flight
 Design: FIP-0001 and FIP-0002
 Charter scope: `local-foundation/v1`
 
@@ -166,9 +166,13 @@ Local rehearsal completed on 2026-08-11 before any live UI dispatch:
 7. An anchored status query found Experiment 0007 as the sole active record;
    the record template was excluded from that query.
 
-The external Fish marker-name check remains pending. No live command may be
-issued until the operator reports all four names absent and that result is
-checkpointed here.
+8. Immediately before dispatch, the operator's name-only check in the external
+   Fish shell reported `CODEX_THREAD_ID`, `CODEX_SANDBOX`,
+   `CODEX_SANDBOX_NETWORK_DISABLED`, and `CODEX_CI` all absent. No environment
+   value was read or recorded.
+
+The complete rehearsal is now qualified. No live command had been issued when
+this result was recorded.
 
 ## Results
 
