@@ -1,6 +1,6 @@
 # Experiment 0004: Native UI signal control
 
-Status: declared
+Status: completed — rejected
 Design: FIP-0001 and FIP-0002
 Charter scope: `local-foundation/v1`
 
@@ -133,8 +133,68 @@ observer:
 
 ## Results
 
-Pending.
+Dispatch ran from 2026-08-11 15:08:07 EDT through 15:09:10 EDT.
+
+### Codex unit
+
+The observer emitted:
+
+```json
+{"event":"started"}
+{"event":"activity_initial"}
+```
+
+It then exited `1` with `PTY closed while startup output was settling`, before
+resize, hold, signal, or summary. No input byte had been written and no retry
+was made. The host environment contained the marker names `CODEX_THREAD_ID`,
+`CODEX_SANDBOX`, `CODEX_CI`, and related Codex-managed variables, so nested
+session interference is plausible, but the observer intentionally did not
+persist raw UI bytes and the cause of the early close is not established.
+
+### Tact unit
+
+The observer emitted:
+
+```json
+{"event":"started"}
+{"event":"activity_initial"}
+{"event":"resized"}
+{"event":"activity_resized"}
+{"event":"concurrent_window"}
+{"event":"signal"}
+```
+
+It then exited `1` with `PTY child did not exit before timeout`, emitting no
+`exited` event or numeric summary. This matches the packaged Tact unit's
+behavior at the one-`SIGINT` boundary. No retry was made.
+
+After both units, a read-only process-table query found no surviving observer,
+Codex-launcher, or Tact process beyond the query itself. The control retained
+workspace-only write permissions; no prompt, newline, intentional model
+inference, paid quota, credential value, Fortlet invocation, shell mutation,
+or unowned process control was observed.
+
+After terminal closure, the full runbook verification set passed: `cargo test`,
+formatting, strict all-target Clippy, explicit conformance, exact-tree
+`nix flake check`, and `nix run . -- doctor`. The flake retained its known
+warning that the app lacks `meta` and its declared omission of incompatible
+`x86_64-linux` checks; doctor reported the ready SDK 0.6.8 host and valid
+credential metadata without printing credential values.
 
 ## Terminal Closure
 
-Pending.
+1. Outcome: rejected as a two-harness control — Tact reproduced its packaged
+   timeout, but Codex closed during startup settling and supplied no signal
+   comparison.
+2. Root cause: the shared one-`SIGINT` termination assumption is false for Tact,
+   so Experiment 0003's Tact result is not evidence of a Fortlet-specific
+   defect. Codex remains unattributed because its native control did not reach
+   resize or signal; nested-session markers were present but are not causal
+   evidence.
+3. Actual total cost: zero money, zero paid quota, zero prompts, zero remote
+   mutation, two of two declared units, zero retries, and 63 seconds elapsed
+   versus the 30-minute ceiling.
+4. Next action: stop this goal. A successor may declare either a native Codex
+   control outside an existing Codex session or a deterministic guest terminal
+   probe, but must not retry Experiment 0004 or repair Fortlet from this
+   incomplete attribution.

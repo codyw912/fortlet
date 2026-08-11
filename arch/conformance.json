@@ -66,10 +66,11 @@
         "tests/native.rs",
         "experiments/0002-preserved-runtime-shim-smoke.md",
         "examples/pty_observer.rs",
-        "experiments/0003-interactive-packaged-sessions.md"
+        "experiments/0003-interactive-packaged-sessions.md",
+        "experiments/0004-native-ui-signal-control.md"
       ],
       "gaps": [
-        "Runner evidence proves both packaged shims attach through real PTYs, produce activity after resize, share the expected capsule with concurrent invocations, and remain responsive, but one foreground-group SIGINT did not terminate either UI within 15 seconds; signal and exit preservation remain unresolved."
+        "Runner evidence proves both packaged shims attach through real PTYs, produce activity after resize, share the expected capsule with concurrent invocations, and remain responsive. A native control shows Tact also remains alive after its first foreground-group SIGINT, so that timeout is native UI behavior rather than evidence of a Fortlet-specific defect. Native Codex closed before the control reached signal; Codex signal comparison and exact packaged exit-status preservation remain unresolved."
       ]
     }
   ]

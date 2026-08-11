@@ -1,11 +1,11 @@
 # GOAL: Interactive packaged session acceptance
 
-Status: active on 2026-08-11 under operator-authorized Deliverable 4. Both real
-packaged UIs passed PTY, resize, concurrent-capsule, and responsiveness checks,
-but neither terminated within 15 seconds after the single declared `SIGINT`.
-The repeated-failure trigger remains active against another packaged signal
-variation; the authorized next action is a native-harness control that tests
-the shared one-`SIGINT` assumption without changing Fortlet.
+Status: blocked on 2026-08-11 after terminal closure of Deliverable 4. The
+native Tact UI reproduced the packaged Tact UI's one-`SIGINT` timeout, rejecting
+that termination assumption for Tact. Native Codex closed its PTY during
+startup settling before resize or signal, so the Codex comparison and exact
+exit preservation remain unresolved. Do not retry or change Fortlet under this
+goal.
 
 Prove that packaged `codex` and `tact` shims support ordinary interactive
 terminal use through Fortlet's existing fail-closed capsule-session path. Build
@@ -80,6 +80,10 @@ this goal complete or blocked, then STOP and report.
 
 Authorized by the operator on 2026-08-11 after Experiment 0003's repeated
 failure trigger.
+
+Completed as a terminally rejected two-harness control on 2026-08-11. Tact
+matched its packaged signal behavior, while Codex did not reach the signal
+boundary. See `experiments/0004-native-ui-signal-control.md`.
 
 1. Predeclare a new bounded control; do not resume Experiment 0003 and do not
    change product code or the observer.

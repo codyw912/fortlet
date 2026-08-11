@@ -1,9 +1,8 @@
-# Session Handoff — Native signal control authorized
+# Session Handoff — Native Tact attributed; Codex control blocked
 
-Audience: a fresh agent session. `GOAL.md` is normative. The charter's
-repeated-failure trigger still prohibits another packaged signal variation,
-but the operator authorized the native-harness control declared as Experiment
-0004. Do not change Fortlet or resume Experiment 0003.
+Audience: a fresh agent session. `GOAL.md` is normative and blocked after the
+terminal closure of Experiment 0004. Do not resume Experiments 0003 or 0004,
+retry a signal variation, or change Fortlet from the incomplete attribution.
 
 ## Verified implementation state
 
@@ -49,26 +48,35 @@ an in-UI cancellation, or Fortlet/MicroSandbox may fail to propagate the signal
 as intended. A third signal or timeout variation would repeat the mask-level
 failure prohibited by the self-correction playbook.
 
-## Active next action
+## Experiment 0004 terminal result
 
-Experiment 0004 directly launches the resolved native Codex and Tact commands
-under the unchanged observer. It freezes Experiment 0003's dimensions,
-settling, 20-second window, one foreground-group `SIGINT`, 15-second exit
-bound, order, zero input, and zero retries. It intentionally omits capsule
-labels and responsiveness checks because no Fortlet capsule participates.
+The unchanged observer and fixture re-qualified immediately before dispatch.
+The direct native identities were Codex 0.147.0 and Tact 0.3.7; exact paths and
+SHA-256 hashes are frozen in the experiment record.
 
-The native identities are Codex 0.147.0 at the canonical npm launcher path and
-Tact 0.3.7 at `/Users/cody/.local/bin/tact`; exact paths and SHA-256 hashes are
-in the experiment record. Run the focused observer tests and deterministic
-fixture rehearsal immediately before dispatch, then run Codex completely and
-Tact completely. Both units run unless a hard invariant fires.
+Native Codex emitted initial activity, then closed its PTY while startup output
+was settling. It never reached resize or signal. The host environment contained
+Codex nested-session marker names, but because raw UI bytes were intentionally
+not retained, the early close is unattributed. No retry was made.
 
-If both native UIs also remain alive, the one-`SIGINT` termination assumption
-is rejected and Experiment 0003 does not establish a Fortlet signal defect. If
-a native UI exits but its packaged counterpart did not, attribution narrows
-toward the isolated attachment path. Mixed evidence supports only per-harness
-conclusions. Close the control terminally, update conformance and this handoff,
-mark the goal complete or blocked, and stop; any repair belongs to a successor.
+Native Tact emitted activity before and after resize, reached the 20-second
+hold, received the one observer-owned foreground-group `SIGINT`, and remained
+alive beyond the 15-second exit bound. This matches packaged Tact and rejects
+the assumption that its first interrupt should terminate. It is affirmative
+evidence against attributing Experiment 0003's Tact result to Fortlet.
+
+Owned cleanup left no matching observer or harness process. The two-unit
+control cost zero money, zero paid quota, zero prompts, zero retries, and 63
+seconds. After closure, the complete runbook verification set and doctor
+passed; the known app-`meta` warning and native `x86_64-linux` omission remain.
+
+## Successor boundary
+
+The Codex signal comparison and exact packaged exit-status preservation remain
+unproven. A successor goal may predeclare either a native Codex control outside
+an existing Codex session or a deterministic guest terminal probe. It must not
+resume either terminal experiment, infer a Fortlet repair from Tact's matching
+native behavior, or weaken the no-prompt and process-ownership rules.
 
 Preserve the optional shim activation, fail-closed behavior, credential
 boundary, package runtime-integrity check, no-prompt rule, observer ownership
