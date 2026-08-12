@@ -45,12 +45,14 @@ enum TerminationAction {
     SignalInterrupt,
     ExitCommand,
     TypedExitCommand,
+    CtrlCKey,
 }
 
 enum Mode {
     Fixture,
     FixtureExit,
     FixtureTypedExit,
+    FixtureCtrlC,
     Observe {
         program: PathBuf,
         cwd: PathBuf,
@@ -66,6 +68,11 @@ enum Mode {
         cwd: PathBuf,
         hold: Duration,
     },
+    ObserveCtrlC {
+        program: PathBuf,
+        cwd: PathBuf,
+        hold: Duration,
+    },
 }
 
 fn parse_args(args: impl IntoIterator<Item = OsString>) -> Result<Mode> {
@@ -74,6 +81,7 @@ fn parse_args(args: impl IntoIterator<Item = OsString>) -> Result<Mode> {
         [mode] if mode == "fixture" => Ok(Mode::Fixture),
         [mode] if mode == "fixture-exit" => Ok(Mode::FixtureExit),
         [mode] if mode == "fixture-typed-exit" => Ok(Mode::FixtureTypedExit),
+        [mode] if mode == "fixture-ctrl-c" => Ok(Mode::FixtureCtrlC),
         [mode, program, cwd, hold] if mode == "observe" => Ok(Mode::Observe {
             program: PathBuf::from(program),
             cwd: PathBuf::from(cwd),
@@ -89,10 +97,16 @@ fn parse_args(args: impl IntoIterator<Item = OsString>) -> Result<Mode> {
             cwd: PathBuf::from(cwd),
             hold: parse_hold(hold)?,
         }),
+        [mode, program, cwd, hold] if mode == "observe-ctrl-c" => Ok(Mode::ObserveCtrlC {
+            program: PathBuf::from(program),
+            cwd: PathBuf::from(cwd),
+            hold: parse_hold(hold)?,
+        }),
         _ => bail!(
             "usage: pty_observer fixture | fixture-exit | fixture-typed-exit | \
-             observe <program> <cwd> <hold-seconds> | observe-exit <program> <cwd> \
-             <hold-seconds> | observe-typed-exit <program> <cwd> <hold-seconds>"
+             fixture-ctrl-c | observe <program> <cwd> <hold-seconds> | observe-exit \
+             <program> <cwd> <hold-seconds> | observe-typed-exit <program> <cwd> \
+             <hold-seconds> | observe-ctrl-c <program> <cwd> <hold-seconds>"
         ),
     }
 }
@@ -152,6 +166,10 @@ fn observe_with_events(
             write_typed_exit_command(&mut master)?;
             emit("typed_exit_command");
         }
+        TerminationAction::CtrlCKey => {
+            write_ctrl_c_key(&mut master)?;
+            emit("ctrl_c_key");
+        }
     }
     let status = child.wait(config.exit_timeout)?;
     emit("exited");
@@ -168,6 +186,12 @@ fn write_exit_command(output: &mut impl Write) -> Result<()> {
     output
         .write_all(b"/exit\r")
         .context("cannot write exit command to PTY")
+}
+
+fn write_ctrl_c_key(output: &mut impl Write) -> Result<()> {
+    output
+        .write_all(&[0x03])
+        .context("cannot write Ctrl-C key to PTY")
 }
 
 const TYPED_EXIT_KEY_DELAY: Duration = Duration::from_millis(20);
@@ -454,6 +478,24 @@ fn main() -> Result<()> {
                 termination: TerminationAction::TypedExitCommand,
             },
         ),
+        Mode::FixtureCtrlC => (
+            CommandSpec {
+                program: PathBuf::from("/bin/sh"),
+                args: vec![fixture.display().to_string(), "ctrl-c-key".into()],
+                cwd: None,
+            },
+            ObserverConfig {
+                startup_timeout: Duration::from_secs(2),
+                resize: Some(TerminalSize {
+                    rows: 40,
+                    cols: 120,
+                }),
+                resize_timeout: Duration::from_secs(2),
+                hold: Duration::ZERO,
+                exit_timeout: Duration::from_secs(2),
+                termination: TerminationAction::CtrlCKey,
+            },
+        ),
         Mode::Observe { program, cwd, hold } => (
             CommandSpec {
                 program,
@@ -506,6 +548,24 @@ fn main() -> Result<()> {
                 hold,
                 exit_timeout: Duration::from_secs(15),
                 termination: TerminationAction::TypedExitCommand,
+            },
+        ),
+        Mode::ObserveCtrlC { program, cwd, hold } => (
+            CommandSpec {
+                program,
+                args: Vec::new(),
+                cwd: Some(cwd),
+            },
+            ObserverConfig {
+                startup_timeout: Duration::from_secs(90),
+                resize: Some(TerminalSize {
+                    rows: 40,
+                    cols: 120,
+                }),
+                resize_timeout: Duration::from_secs(15),
+                hold,
+                exit_timeout: Duration::from_secs(15),
+                termination: TerminationAction::CtrlCKey,
             },
         ),
     };
@@ -706,6 +766,10 @@ mod tests {
             parse_args([OsString::from("fixture-typed-exit")]),
             Ok(Mode::FixtureTypedExit)
         ));
+        assert!(matches!(
+            parse_args([OsString::from("fixture-ctrl-c")]),
+            Ok(Mode::FixtureCtrlC)
+        ));
         let mode = parse_args([
             OsString::from("observe"),
             OsString::from("/immutable/shim"),
@@ -722,8 +786,10 @@ mod tests {
             Mode::Fixture
             | Mode::FixtureExit
             | Mode::FixtureTypedExit
+            | Mode::FixtureCtrlC
             | Mode::ObserveExit { .. }
-            | Mode::ObserveTypedExit { .. } => {
+            | Mode::ObserveTypedExit { .. }
+            | Mode::ObserveCtrlC { .. } => {
                 panic!("expected live observation mode")
             }
         }
@@ -745,6 +811,15 @@ mod tests {
         ])
         .expect("live typed-exit observer arguments should parse");
         assert!(matches!(mode, Mode::ObserveTypedExit { .. }));
+
+        let mode = parse_args([
+            OsString::from("observe-ctrl-c"),
+            OsString::from("/immutable/shim"),
+            OsString::from("/project"),
+            OsString::from("5"),
+        ])
+        .expect("live Ctrl-C-key observer arguments should parse");
+        assert!(matches!(mode, Mode::ObserveCtrlC { .. }));
     }
 
     #[test]
@@ -793,6 +868,15 @@ mod tests {
             [b"/".as_slice(), b"e", b"x", b"i", b"t", b"\r"]
         );
         assert_eq!(delays, [Duration::from_millis(20); 5]);
+    }
+
+    #[test]
+    fn ctrl_c_key_writes_one_control_byte_once() {
+        let mut output = RecordingWriter::default();
+
+        write_ctrl_c_key(&mut output).expect("Ctrl-C key should be writable");
+
+        assert_eq!(output.writes, [vec![0x03]]);
     }
 
     #[test]
@@ -882,6 +966,49 @@ mod tests {
     }
 
     #[test]
+    fn fixture_ctrl_c_key_preserves_distinctive_status_and_events() {
+        let fixture = fixture();
+        let mut events = Vec::new();
+        let observation = observe_with_events(
+            &CommandSpec {
+                program: PathBuf::from("/bin/sh"),
+                args: vec![fixture.display().to_string(), "ctrl-c-key".into()],
+                cwd: None,
+            },
+            &ObserverConfig {
+                startup_timeout: Duration::from_secs(2),
+                resize: Some(TerminalSize {
+                    rows: 40,
+                    cols: 120,
+                }),
+                resize_timeout: Duration::from_secs(2),
+                hold: Duration::ZERO,
+                exit_timeout: Duration::from_secs(2),
+                termination: TerminationAction::CtrlCKey,
+            },
+            |event| events.push(event),
+        )
+        .expect("fixture should accept the Ctrl-C key");
+
+        assert!(observation.initial_bytes > 0);
+        assert!(observation.resized_bytes > 0);
+        assert_eq!(observation.exit_code, Some(23));
+        assert_eq!(observation.exit_signal, None);
+        assert_eq!(
+            events,
+            [
+                "started",
+                "activity_initial",
+                "resized",
+                "activity_resized",
+                "concurrent_window",
+                "ctrl_c_key",
+                "exited",
+            ]
+        );
+    }
+
+    #[test]
     fn exit_timeout_removes_the_owned_fixture_process() {
         let fixture = fixture();
         let temporary = tempfile::tempdir().expect("temporary directory should exist");
@@ -941,6 +1068,41 @@ mod tests {
             },
         )
         .expect_err("fixture that ignores typed exit should time out");
+
+        assert!(error.to_string().contains("did not exit"));
+        let pid: libc::pid_t = fs::read_to_string(pid_file)
+            .expect("fixture should record its pid")
+            .parse()
+            .expect("fixture pid should be numeric");
+        assert_eq!(unsafe { libc::kill(pid, 0) }, -1);
+        assert_eq!(io::Error::last_os_error().raw_os_error(), Some(libc::ESRCH));
+    }
+
+    #[test]
+    fn ctrl_c_key_timeout_removes_the_owned_fixture_process() {
+        let fixture = fixture();
+        let temporary = tempfile::tempdir().expect("temporary directory should exist");
+        let pid_file = temporary.path().join("fixture.pid");
+        let error = observe(
+            &CommandSpec {
+                program: PathBuf::from("/bin/sh"),
+                args: vec![
+                    fixture.display().to_string(),
+                    "ignore-ctrl-c".into(),
+                    pid_file.display().to_string(),
+                ],
+                cwd: None,
+            },
+            &ObserverConfig {
+                startup_timeout: Duration::from_secs(2),
+                resize: None,
+                resize_timeout: Duration::from_secs(2),
+                hold: Duration::ZERO,
+                exit_timeout: Duration::from_millis(50),
+                termination: TerminationAction::CtrlCKey,
+            },
+        )
+        .expect_err("fixture that ignores Ctrl-C key should time out");
 
         assert!(error.to_string().contains("did not exit"));
         let pid: libc::pid_t = fs::read_to_string(pid_file)
