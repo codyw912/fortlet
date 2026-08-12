@@ -1,47 +1,94 @@
-# GOAL: Add project capsule status and stop
+# GOAL: Publish the public alpha repository
 
-Status: completed on 2026-08-12.
+Status: authorized on 2026-08-12.
 
-Checkpoint `bfafd305` implements the accepted FIP-0003 management slice.
-Experiment 0010 then accepted the immutable public-CLI path against one exact
-owned local capsule and removed all of its disposable state.
+Publish Fortlet's complete verified history as a public GitHub repository at
+`github.com/codyw912/fortlet`. This mission establishes a durable remote before
+the next product GOAL; it does not add product behavior, CI, releases,
+distribution artifacts, issues, or project policy.
 
-## Completed deliverables
+## Deliverable 1 — Verify public readiness
 
-1. Launch, status, and stop share one pure capsule descriptor for deterministic
-   runtime names and labels.
-2. Management validates stored configuration and the managed, schema, project,
-   and tool ownership labels before reporting or mutation. Diagnostic Fortlet
-   version skew remains manageable; launch retains exact-version
-   reconciliation.
-3. `fortlet status [harness]` reports all registered harnesses in registry
-   order or one selected harness as `harness<TAB>state`.
-4. `fortlet stop <harness>` shares Fortlet's capsule lock with launch, performs
-   a final ownership check, uses MicroSandbox's bounded stop, preserves reusable
-   state, and reports `absent`, `already-stopped`, or `stopped`.
-5. Both commands share `run`'s project selection and broad-root rules without
-   reading credentials, provisioning layers, preparing capsule state, or
-   launching a harness.
-6. Deterministic unit and real-CLI failure tests cover the complete command
-   decision surface without a VM or credential.
-7. Experiment 0010 proved `absent -> running -> stopped -> absent` through the
-   immutable public CLI and verified all four ownership labels before exact
-   cleanup.
-8. README, overview, runbook, and conformance describe the implemented surface;
-   FIP-0003 is conformant.
+Completed before authorization:
+
+1. The working copy is clean and the complete history uses the operator's
+   GitHub no-reply author address.
+2. MIT and Apache-2.0 license texts are present and Cargo declares the matching
+   dual license.
+3. Current-tree and full-history scans found no credential, private-key, GitHub
+   token, bearer-token, or API-key patterns.
+4. All `/Users/cody` occurrences were shown to and accepted by the operator.
+   They occur only in retained experiment/design evidence and disclose no
+   credential value.
+5. GitHub identity `codyw912` is authenticated over SSH and
+   `github.com/codyw912/fortlet` does not exist.
+
+## Deliverable 2 — Rehearse and publish
+
+1. Declare Experiment 0011 before remote mutation.
+2. Run the complete standard verification set against the exact outgoing tree.
+3. Advance the local `main` bookmark by fast-forward from its existing
+   checkpoint to the publication tip.
+4. Inspect the complete outgoing history and exact destination.
+5. Create public repository `codyw912/fortlet` with description
+   `Project-scoped isolation for coding-agent CLIs` and add it as `origin`.
+6. Push only bookmark `main` through Jujutsu. Do not use mutating Git commands.
+7. Verify the remote default branch, visibility, URL, and exact tip through
+   read-only GitHub queries.
+
+## Deliverable 3 — Close and publish the record
+
+1. Close Experiment 0011 with exact remote and revision evidence.
+2. Rewrite `experiments/HANDOFF.md`, mark this GOAL complete, and checkpoint
+   the terminal record.
+3. Advance `main` to the closure checkpoint, inspect the one-checkpoint
+   outgoing delta, push `main` once more, and verify exact remote equality.
+4. Leave a clean working copy and STOP. Reset/recovery remains the intended
+   next product GOAL but is not authorized under this mission.
+
+## Definition of Done
+
+1. `https://github.com/codyw912/fortlet` exists and is public.
+2. Remote `main` contains the complete local history through the terminal
+   publication checkpoint.
+3. Local `main`, remote `main`, and the verified closure revision are equal.
+4. No branch, tag, release, issue, package, workflow, or other remote resource
+   is created.
+5. The complete standard verification set is green before initial publication.
+6. Experiment 0011 is terminally closed; then STOP.
+
+## Binding rules
+
+1. Preserve every charter invariant and accepted FIP.
+2. Publish the complete history; do not rewrite, squash, redact, or omit failed
+   experiments.
+3. Use Jujutsu for bookmarks and pushes. Do not use `git add`, `git commit`, or
+   another mutating Git command.
+4. Do not expose credential values in commands, output, records, or remote
+   metadata.
+5. Repository creation and the two declared `main` pushes are the only remote
+   mutations authorized.
+6. If SSH signing blocks on 1Password, pause for operator approval and retry
+   only after approval.
+7. Stop on a destination mismatch, non-fast-forward, unexpected remote
+   resource, credential anomaly, failed verification gate, or need to rewrite
+   history.
+
+## Budget and escalation
+
+1. Engineering ceiling: one hour.
+2. External budget: zero money, one public repository creation, two `main`
+   pushes, zero other remote mutations, and no paid quota.
+3. Experiment 0011 is the only active experiment.
 
 ## Verification
 
-The complete standard set passed after terminal experiment closure: 34 unit
-tests, one conformance test, two management-failure integration tests, two
-native integration tests, ten pre-runtime integration tests, formatting,
-strict all-target/all-feature Clippy, and `nix flake check`. Nix emitted the
-existing missing app metadata warning and omitted incompatible
-`x86_64-linux`; native Linux verification remains outstanding.
+Before initial publication run:
 
-## Terminal boundary
+- `cargo test`;
+- `cargo fmt --all -- --check`;
+- `cargo clippy --all-targets --all-features -- -D warnings`;
+- `cargo test --test conformance`;
+- `nix flake check`.
 
-No experiment is active. Do not add global inventory, removal, restart, logs,
-tool updates, explicit leases, environments, distribution, or another product
-surface under this completed mission. Choose and authorize a new GOAL with the
-operator before further implementation.
+After each push, verify GitHub visibility, default branch, and exact remote tip.
