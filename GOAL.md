@@ -1,6 +1,11 @@
 # GOAL: Prove fail-closed pre-runtime launch errors
 
-Status: active on 2026-08-12.
+Status: completed on 2026-08-12.
+
+Checkpoint `f5f1d341` proves ten real-CLI failure cases through local
+environment-layer validation. It also moves known guest-mount credential
+checks before capsule-state creation, so an exposed project credential now
+fails without creating later transaction artifacts.
 
 Prove Fortlet's real CLI failure behavior from process entry through the last
 deterministic pre-runtime boundary. Fix only diagnostic inconsistencies that
@@ -13,6 +18,11 @@ terminal result from Experiments 0001 through 0009 and the project-resolution
 contract established at checkpoint `e764dfc1`.
 
 ## Deliverable 1 — Build an isolated real-CLI failure harness
+
+Completed at checkpoint `f5f1d341`: the Unix integration fixture clears each
+subprocess environment, supplies only temporary paths and fake auth, and
+asserts nonzero status, exact stage/action context, stable cause, and artifact
+boundaries.
 
 1. Add one Unix integration-test module that invokes the compiled `fortlet`
    binary through its public `run` interface.
@@ -28,6 +38,10 @@ contract established at checkpoint `e764dfc1`.
 
 ## Deliverable 2 — Prove early transaction failures
 
+Completed at checkpoint `f5f1d341`: six cases cover unsupported harness,
+missing project, missing/malformed/expired auth, and project-mounted auth. The
+last case exposed and fixed the credential-validation ordering defect.
+
 Use test-first vertical slices to prove:
 
 1. an unknown harness fails at the `harness` stage before project, credential,
@@ -41,6 +55,10 @@ Use test-first vertical slices to prove:
 
 ## Deliverable 3 — Prove the deepest deterministic failures
 
+Completed at checkpoint `f5f1d341`: four cases cover invalid local capsule
+state, invalid guest projection, incomplete base layer, and incomplete harness
+layer without entering provisioning or runtime reconciliation.
+
 1. Precreate an invalid project/harness state location and prove local capsule
    preparation fails at the `capsule` stage.
 2. Precreate a symlinked or otherwise invalid guest auth projection and prove
@@ -51,6 +69,10 @@ Use test-first vertical slices to prove:
    harness execution, or network-backed provisioning.
 
 ## Deliverable 4 — Document, conform, and close
+
+Completed at checkpoint `f5f1d341` and the terminal closure checkpoint: the
+runbook documents the deterministic gate, conformance retains the two live
+runtime failure gaps, and the complete standard verification set passed.
 
 1. Document the deterministic pre-runtime failure gate and its exact boundary
    in `docs/RUNBOOK.md`.

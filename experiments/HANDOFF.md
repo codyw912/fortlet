@@ -1,49 +1,53 @@
-# Session Handoff — Fail-closed pre-runtime launch errors
+# Session Handoff — Pre-runtime launch failure evidence is complete
 
-Audience: a fresh agent session. `GOAL.md` is normative and active. The current
-mission is deterministic, repository-local, and governed by FIP-0001. It must
-not launch a real harness or MicroSandbox capsule.
+Audience: a fresh agent session. `GOAL.md` is normative and complete. No
+experiment is active, and Experiments 0001 through 0009 remain terminally
+closed.
 
-## Verified baseline
+## Verified result
 
-1. Project resolution and broad-root safety closed at checkpoints `e764dfc1`
-   and `77e8fd9c`. Fifteen project tests prove the selected-root contract.
-2. The full standard gate passed at closure. The successor working copy was
-   clean, and no experiment was active.
-3. Experiments 0001 through 0009 remain terminally closed. Codex-specific exit
-   automation must not be resumed.
-4. `session::launch` wraps project, harness, credentials, capsule, environment,
-   and terminal operations with a stage name and one correction. Only the
-   generic `stage` formatter currently has direct test coverage.
-5. Several real pre-runtime failures can be forced entirely through temporary
-   paths: invalid harness/project/auth, invalid local capsule state or guest
-   auth projection, and incomplete environment layers.
+1. Checkpoint `f5f1d341` adds ten Unix integration cases that invoke the real
+   compiled `fortlet run` interface with a cleared subprocess environment.
+2. Harness, project, credential loading, credential mount boundary, local
+   capsule-state preparation, guest auth projection, and incomplete base and
+   harness layer failures all exit nonzero with their stage, one primary
+   correction, and a useful cause.
+3. Every fixture uses temporary home, project, state, data, and fake-auth paths.
+   The fake token is structurally valid where needed but unusable and never
+   appears in assertions or diagnostics.
+4. The project-mounted credential case exposed a transaction-ordering defect:
+   local capsule state was created before a known mount exposure was rejected.
+   Known project and data mounts are now validated first; the capsule-state
+   mount is validated once its path has been safely prepared.
+5. Incomplete layers fail synchronously before provisioning. No test reaches a
+   runtime credential fingerprint, MicroSandbox reconciliation, terminal
+   attachment, harness execution, or network operation.
 
-## Mission guidance
+## Verification
 
-Read FIP-0001 and
-`docs/plans/2026-08-12-pre-runtime-failure-evidence-design.md` in full before
-implementation. Invoke the compiled binary from Unix integration tests. Clear
-each subprocess environment and supply isolated paths plus fake credentials.
+The focused pre-runtime suite passed with ten cases. The full suite passed with
+25 unit tests, one conformance test, two native integration tests, and all ten
+pre-runtime integration tests. Formatting, strict all-target/all-feature
+Clippy, the standalone conformance gate, and `nix flake check` passed. Nix
+emitted the existing missing app metadata warning and omitted incompatible
+`x86_64-linux`; native Linux verification remains outstanding.
 
-Advance each case only to its intended deterministic failure. Assert the outer
-stage and correction, a stable cause fragment, nonzero exit, and absence of
-later artifacts. Environment cases must reject preseeded incomplete layers
-before any provisioning capsule or network operation can begin.
+No real credential, harness, MicroSandbox capsule, provisioning run, network
+operation, model prompt, paid quota, external money, or live experiment was
+used. Engineering remained within the two-hour ceiling; numeric elapsed time
+was not captured and is not backfilled.
 
-## What not to do
+## Successor boundary
 
-1. Do not add an injected runtime, orchestration trait, test-only product flag,
-   generic error framework, or live fault campaign.
-2. Do not use real credentials or inherit the operator's home, XDG paths,
-   runner markers, or shell environment.
-3. Do not launch MicroSandbox, Codex, Tact, provisioning, or a network request.
-4. Do not claim live capsule reconciliation or terminal attachment failure
-   evidence; those remain explicit conformance gaps.
+Do not reopen deterministic pre-runtime failures, project resolution, or
+Codex-specific exit work without new evidence. Live capsule reconciliation and
+terminal attachment failure behavior remain unproved, but proving them would
+require a separately designed injection seam or live fault experiment and
+should not be inferred as the automatic next goal.
 
-## Completion boundary
-
-Keep code, tests, runbook, and conformance changes in one reviewable checkpoint.
-Run the complete verification set, rewrite this handoff for the successor, mark
-`GOAL.md` complete, inspect `main..@`, then stop. The ceiling is two engineering
-hours with no external budget or experiment.
+Other FIP-0001 gaps remain: harness-owned persistent paths and credential
+policy, capsule topology and concurrency coverage, lifecycle leases and
+management commands, standalone installation, declarative environments, and
+native Linux package verification. Preserve fail-closed ordering, optional shim
+activation, broad-root protection, credential isolation, package runtime
+integrity, and Jujutsu discipline.
