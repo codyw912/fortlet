@@ -19,6 +19,12 @@ nix run . -- run codex --
 nix run . -- run tact --
 ```
 
+Fortlet resolves the nearest Jujutsu, Git, or recognized development-
+environment root and preserves a launch from its subdirectories. A selected
+home directory or filesystem root uses Fortlet's persistent scratch workspace
+by default, including when selected with `--project`. Exposing either broad
+root requires the separate, deliberate `--allow-broad-mount` flag.
+
 Nix is the current reproducible alpha installation path, not an intended
 general-user requirement. Fortlet's release distribution should also provide
 standalone platform artifacts; Nix remains an optional first-class path for

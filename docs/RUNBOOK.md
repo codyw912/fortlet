@@ -35,6 +35,13 @@ cargo run -- doctor
 cargo run -- run codex --
 ```
 
+Project resolution prefers the nearest Jujutsu root, then Git root, then a
+recognized devenv or flake root. It canonicalizes the selected root and
+preserves a launch from a subdirectory. Home-directory and filesystem-root
+projects use Fortlet's persistent scratch workspace unless the user passes
+`--allow-broad-mount`; `--project "$HOME"` and `--project /` do not imply that
+override.
+
 `doctor` reads authentication metadata but never prints token values. Real
 launches require a healthy MicroSandbox host and a valid ChatGPT credential.
 
