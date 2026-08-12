@@ -100,6 +100,16 @@
         "experiments/0010-project-capsule-status-and-stop.md"
       ],
       "gaps": []
+    },
+    {
+      "proposal": "0004",
+      "title": "Project capsule reset",
+      "status": "unimplemented",
+      "modules": [],
+      "tests": [],
+      "gaps": [
+        "Project-scoped capsule reset and Fortlet-owned stale-capsule recovery guidance are not implemented."
+      ]
     }
   ]
 }
