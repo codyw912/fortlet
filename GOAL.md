@@ -1,6 +1,11 @@
 # GOAL: Prove project resolution and broad-root safety
 
-Status: active on 2026-08-12.
+Status: completed on 2026-08-12.
+
+Checkpoint `e764dfc1` deterministically proves project selection,
+canonicalization, identity, broad-root scratch substitution, explicit
+overrides, and fail-closed errors. It also fixes explicit and marker-selected
+home roots that previously bypassed scratch protection.
 
 Close the project-resolution and broad-root portion of FIP-0001's conformance
 gap with deterministic automated evidence. Fix only behavior that the tests
@@ -13,6 +18,10 @@ every terminal result from Experiments 0001 through 0009.
 
 ## Deliverable 1 — Make resolution policy deterministic to test
 
+Completed at checkpoint `e764dfc1`: `project::resolve` remains the production
+boundary and delegates to explicit policy inputs without process-global test
+mutation.
+
 1. Preserve `project::resolve` as the production boundary that reads the real
    current directory and `HOME`.
 2. Extract the smallest parameterized resolver that accepts the current
@@ -23,6 +32,10 @@ every terminal result from Experiments 0001 through 0009.
    a failing contract test proves it insufficient.
 
 ## Deliverable 2 — Prove project selection and canonicalization
+
+Completed at checkpoint `e764dfc1`: focused tests prove explicit selection,
+working-directory preservation, every marker variant and class priority,
+ordinary fallback, symlink canonicalization, and canonical identity.
 
 Use test-first vertical slices to prove:
 
@@ -36,6 +49,11 @@ Use test-first vertical slices to prove:
 6. identity is stable and derived from the final canonical root.
 
 ## Deliverable 3 — Enforce and prove broad-root safety
+
+Completed at checkpoint `e764dfc1`: protection now applies after project-root
+selection. Tests cover direct, explicit, and marker-selected home roots,
+filesystem root, explicit overrides, scratch identity, and fail-closed path
+errors.
 
 1. Apply broad-root protection to the selected project root, not only to the
    original current directory.
@@ -51,6 +69,11 @@ Use test-first vertical slices to prove:
    include useful path context.
 
 ## Deliverable 4 — Document, conform, and close
+
+Completed at checkpoints `e764dfc1` and the terminal closure checkpoint:
+README and runbook guidance distinguish `--project` from
+`--allow-broad-mount`; conformance removes only the proved gap; the complete
+gate passed.
 
 1. Document that explicit broad projects still require
    `--allow-broad-mount`.
