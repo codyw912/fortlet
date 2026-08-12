@@ -33,3 +33,4 @@ scannable failure/win history of the project:
 - `0009-idle-ctrl-c-key-exit-parity.md` — rejected; one Ctrl-C PTY key reached both UIs, but neither terminated within the fixed bound.
 - `0010-project-capsule-status-and-stop.md` — accepted; the public CLI proved absent, running, stopped, and absent around bounded stop and exact owned cleanup.
 - `0011-public-alpha-repository.md` — accepted; the complete signed history is public on GitHub with only `main` and no extra remote resources.
+- `0012-project-capsule-reset.md` — declared; active-refusal, terminal reset, persistence, idempotence, and cleanup await implementation and rehearsal.
