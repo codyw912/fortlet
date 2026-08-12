@@ -1,6 +1,6 @@
 # Experiment 0008: Human-paced Codex exit parity
 
-Status: in-flight
+Status: completed — rejected
 Design: FIP-0001 and FIP-0002
 Charter scope: `local-foundation/v1`
 
@@ -233,8 +233,56 @@ parent; it did not match the declared live command and was not controlled.
 
 ### Packaged Codex unit
 
-Pending the second declared zero-retry unit.
+The operator ran the exact frozen packaged command once from the same qualified
+external Fish shell and returned this complete structural output:
+
+```text
+{"event":"started"}
+{"event":"activity_initial"}
+{"event":"resized"}
+{"event":"activity_resized"}
+{"event":"concurrent_window"}
+{"event":"typed_exit_command"}
+Error: PTY child did not exit before timeout
+96:97: syntax error: Expected “"” but found unknown token. (-2741)
+```
+
+Packaged Codex reached the same structural boundaries as native Codex and
+remained alive beyond the same 15-second exit bound. It emitted neither
+`exited` nor a numeric summary, so it also supplies no exit status. The matching
+timeout exposes no Fortlet-specific discrepancy. The same unattributed `-2741`
+diagnostic followed the observer error and is retained but excluded from the
+decision.
+
+Narrowed, read-only process-table checks found no matching live observer or
+frozen packaged Fortlet command afterward. No retry or additional operator
+input was reported for either unit. The observer retained no raw screen bytes,
+and no model prompt, intentional inference, paid quota, credential value, shell
+mutation, unexpected external mutation, or unowned process control was
+observed.
+
+After both units, the complete post-closure gate passed: `cargo test`,
+formatting, strict all-target Clippy, explicit conformance, exact-tree
+`nix flake check`, and `nix run . -- doctor`. The flake retained only its known
+app-`meta` warning and incompatible `x86_64-linux` omission; doctor printed no
+credential values.
 
 ## Terminal Closure
 
-Pending.
+1. Outcome: rejected — fixed 20-millisecond pacing reached both native and
+   packaged `typed_exit_command` actions, but neither Codex process terminated
+   within the fixed bound. No exact status exists to compare, and the matching
+   results expose no packaged-path discrepancy.
+2. Root cause: source inspection disproved Experiment 0007's atomic-input
+   assumption, but separately timed PTY writes still did not establish that the
+   real UI accepted and submitted `/exit`. Composer readiness, PTY-to-event-loop
+   arrival timing, and another unobserved native input condition remain
+   indistinguishable; none justifies a Fortlet repair.
+3. Actual total cost: zero money, zero paid quota, zero model prompts, two of
+   two units, and zero retries. Numeric wall time was not captured, so no
+   estimate is backfilled. Both invocations enforced every declared stage
+   bound, and no overrun was reported.
+4. Next action: stop this goal. Preserve the paced observer as test tooling and
+   the atomic observer as negative evidence. Any successor seeking exact exit
+   status must directly establish native composer readiness or event receipt;
+   do not retry or adapt blind `/exit` timing and do not infer a Fortlet repair.

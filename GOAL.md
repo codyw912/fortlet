@@ -1,6 +1,9 @@
 # GOAL: Verify human-paced Codex exit parity
 
-Status: active on 2026-08-11.
+Status: completed on 2026-08-11 — rejected as an exact termination proof.
+Native and packaged Codex both reached the fixed human-paced typed-exit action
+and remained alive beyond the same 15-second bound. No Fortlet discrepancy was
+observed, but neither unit supplied an exit status to compare.
 
 Determine whether Fortlet's packaged Codex shim preserves native Codex's exact
 termination result when both receive Codex's accepted human-paced `/exit`
@@ -46,6 +49,11 @@ timeout cleanup while preserving both earlier actions.
 
 ## Deliverable 2 — Qualify Experiment 0008
 
+Completed at checkpoints `51ad5e71` and `ab84daeb`: exact source, observer,
+native, and package identities; all deterministic rehearsals; the complete
+gate; package smoke; doctor; sole-active-record check; and the external Fish
+marker check passed before dispatch.
+
 1. Freeze the official Codex source tag and commit that establish the input
    mechanism, plus the exact native launcher and selected-binary hashes.
 2. Freeze one exact packaged Codex shim produced from the tested observer
@@ -58,6 +66,10 @@ timeout cleanup while preserving both earlier actions.
    rehearsed declaration before giving the operator either live command.
 
 ## Deliverable 3 — Compare native and packaged typed exit
+
+Completed as rejected evidence in Experiment 0008. Both zero-retry units
+reached `typed_exit_command`, timed out identically, and left no matching live
+launch process. Exact termination and status preservation remain unresolved.
 
 The operator runs native Codex, then packaged Codex, from
 `/Users/cody/dev/fortlet` in the same external Fish shell. The four known runner

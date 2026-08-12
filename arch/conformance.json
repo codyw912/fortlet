@@ -70,10 +70,11 @@
         "experiments/0004-native-ui-signal-control.md",
         "experiments/0005-native-codex-marker-control.md",
         "experiments/0006-external-native-codex-control.md",
-        "experiments/0007-exact-codex-exit-parity.md"
+        "experiments/0007-exact-codex-exit-parity.md",
+        "experiments/0008-human-paced-codex-exit-parity.md"
       ],
       "gaps": [
-        "Runner evidence proves both packaged shims attach through real PTYs, produce activity after resize, share the expected capsule with concurrent invocations, and remain responsive. Native controls show both Tact and externally launched Codex remain alive after their first foreground-group SIGINT. Native and packaged Codex also both remained alive after the observer wrote exact `/exit\\r` bytes. These matching timeouts expose no Fortlet-specific discrepancy, but exact eventual termination and packaged exit-status preservation remain unresolved."
+        "Runner evidence proves both packaged shims attach through real PTYs, produce activity after resize, share the expected capsule with concurrent invocations, and remain responsive. Native controls show both Tact and externally launched Codex remain alive after their first foreground-group SIGINT. Native and packaged Codex also both remained alive after atomic `/exit\\r` input and after separate `/`, `e`, `x`, `i`, `t`, and Enter writes with fixed 20-millisecond pacing. These matching timeouts expose no Fortlet-specific discrepancy, but native command acceptance, exact eventual termination, and packaged exit-status preservation remain unresolved."
       ]
     }
   ]
