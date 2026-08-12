@@ -1,6 +1,6 @@
 # Experiment 0009: Idle Ctrl-C key exit parity
 
-Status: declared
+Status: in-flight
 Design: FIP-0001 and FIP-0002
 Charter scope: `local-foundation/v1`
 
@@ -188,11 +188,13 @@ Local rehearsal completed on 2026-08-11 before any live UI dispatch:
    declarations. A path-restricted Jujutsu diff from `cc52a2e9` showed no
    observer, fixture, product, package, manifest, or lockfile change. An
    anchored status query found Experiment 0009 as the sole active record.
-8. The required name-only check in the operator's external Fish shell remains
-   pending. No live command will be issued until all four names are absent.
+8. Immediately before dispatch, the operator's name-only check in the external
+   Fish shell reported `CODEX_THREAD_ID`, `CODEX_SANDBOX`,
+   `CODEX_SANDBOX_NETWORK_DISABLED`, and `CODEX_CI` all absent. No environment
+   value was read or recorded.
 
-Qualification is complete except for that external marker check. No live UI
-unit has been dispatched.
+The complete rehearsal is qualified. No live UI unit had been dispatched when
+this result was recorded.
 
 ## Results
 
