@@ -10,10 +10,10 @@ Checkpoint `21ca0022` accepts the project-scoped status-and-stop contract. At
 that baseline Fortlet can create and reuse deterministic project-and-harness
 capsules, but exposes no product command that observes or stops them.
 
-The treatment will be the exact implementation checkpoint produced by the
-current GOAL. Its revision and immutable package output MUST be recorded here
-before dispatch. The host is `aarch64-darwin`, MicroSandbox is SDK 0.6.8, and
-Codex is pinned to 0.147.0.
+The treatment is implementation checkpoint `bfafd305` (`add project capsule
+status and stop`) and immutable package output
+`/nix/store/5w8rn5bhck9k063k3qdjmd1mvbqq03ki-fortlet-0.1.0`. The host is
+`aarch64-darwin`, MicroSandbox is SDK 0.6.8, and Codex is pinned to 0.147.0.
 
 ## Hypothesis and Production Mechanism
 
@@ -25,9 +25,9 @@ SDK's bounded stop should move it to stopped state without deleting it.
 
 ## Declared Scope
 
-Use one newly created temporary project directory whose exact path is recorded
-before dispatch. Use the treatment's public explicit CLI only, in this fixed
-order:
+Use one newly created temporary project directory at
+`/private/tmp/fortlet-management-0010`. Use the treatment's public explicit CLI
+only, in this fixed order:
 
 1. `status codex` reports `absent` for the temporary project.
 2. `run codex -- --version` creates the owned capsule and reports pinned Codex
@@ -106,11 +106,32 @@ metadata, cleanup result, and elapsed time.
 
 ## Rehearsal
 
-Pending. Before dispatch, record the exact treatment identity and package,
-prove the generated target absent, verify immutable layers already complete,
-exercise all command decisions through deterministic tests, and pass the
-complete standard verification set. Rehearsal MUST NOT create a capsule, read
-a real credential, launch a harness, or contact the network.
+Completed on 2026-08-12 without creating a capsule, reading a real credential,
+launching a harness, or contacting the network:
+
+1. The exact treatment checkpoint and package output above were recorded. The
+   package was already built by `nix flake check`; `nix build .#fortlet
+   --no-link --print-out-paths` returned the same immutable output.
+2. The complete standard verification set passed: 34 unit tests, one
+   conformance test, two management-failure integration tests, two native
+   integration tests, ten pre-runtime integration tests, formatting, strict
+   all-target/all-feature Clippy, and `nix flake check`. Nix emitted the known
+   missing app metadata warning and omitted incompatible `x86_64-linux`.
+3. The existing immutable-layer markers
+   `.fortlet-base.json` for `_base/bookworm-1` and `.fortlet-tool.json` for
+   `codex/0.147.0` were present under Fortlet's data root. Dispatch therefore
+   does not need provisioning.
+4. The exact temporary project path did not exist. A separate deliberately
+   missing project invocation failed at the project stage without contacting
+   MicroSandbox, confirming the pre-runtime guard.
+5. Deterministic tests exercised shared descriptor derivation, ownership and
+   version skew, malformed configuration, every lifecycle mapping, command
+   output, idempotent outcomes, runtime-error context, parsing, and public-CLI
+   harness and project failures.
+
+Pre-dispatch setup will create the empty temporary project directory. The first
+declared command will then prove its generated capsule target absent before the
+harness launch.
 
 ## Results
 
