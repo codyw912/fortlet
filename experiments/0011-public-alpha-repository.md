@@ -90,9 +90,27 @@ and verify equality. Do not retry a failed mutation under changed scope.
 
 ## Rehearsal
 
-Pending. Record the declaration checkpoint, run all gates, advance local
-`main`, and inspect the exact outgoing history and destination without network
-mutation.
+Completed on 2026-08-12 without remote mutation:
+
+1. Checkpoint `5028d8cf` records the authorized mission and this experiment
+   declaration before repository creation or push.
+2. The exact outgoing tree passed 34 unit tests, one conformance test, two
+   management-failure integration tests, two native integration tests, ten
+   pre-runtime integration tests, formatting, strict all-target/all-feature
+   Clippy, and `nix flake check`. Nix emitted the known missing app metadata
+   warning and omitted incompatible `x86_64-linux`.
+3. GitHub reported authenticated account `codyw912`, SSH Git protocol, and no
+   existing `codyw912/fortlet` repository. No credential value was persisted.
+4. The clean local stack from existing `main` through declaration was
+   inspected in full: 51 linear checkpoints, all authored with the operator's
+   GitHub no-reply address. The declaration's qualification checkpoint adds
+   only this rehearsal record before `main` is fast-forwarded.
+5. Current-tree and full-history secret-pattern scans were clean. The complete
+   tracked file list, licenses, Cargo metadata, public README/overview, and all
+   accepted `/Users/cody` occurrences were inspected.
+6. Local `main` is an ancestor of the qualified publication tip, so moving it
+   is a fast-forward. The exact outgoing stack will be inspected once more
+   after the qualification checkpoint and bookmark move.
 
 ## Results
 
