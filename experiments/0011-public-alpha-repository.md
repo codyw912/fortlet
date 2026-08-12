@@ -114,8 +114,58 @@ Completed on 2026-08-12 without remote mutation:
 
 ## Results
 
-Pending declared dispatch.
+The initial publication completed on 2026-08-12.
+
+1. GitHub created `https://github.com/codyw912/fortlet` with public visibility,
+   the declared description, and SSH origin
+   `git@github.com:codyw912/fortlet.git`. Before the first push its default
+   branch was correctly empty.
+2. Jujutsu pushed only bookmark `main`. Publication signed 55 previously
+   unsigned commits, preserving their stable Jujutsu change IDs and content
+   while changing their Git object IDs, then advanced the public tip to
+   `2742eff2fd238114bde553c29f286fbb2a2e01b6` (`qualify public alpha repository
+   publication`).
+3. Local `main`, `main@origin`, and GitHub `refs/heads/main` all resolved to
+   that exact object. GitHub reported public visibility and default branch
+   `main`.
+4. The complete remote ref query returned only `refs/heads/main`. GitHub
+   reported zero releases, Actions workflows, webhooks, and deployments.
+5. No destination, visibility, authentication, history, or credential anomaly
+   occurred.
+
+### Historical checkpoint citation map
+
+Earlier records intentionally cite the short object IDs observed when their
+experiments ran. First publication added SSH signatures and therefore changed
+those Git object IDs without changing their stable Jujutsu change identities.
+This map keeps every cited local checkpoint resolvable in the public history:
+
+| Recorded ID | Signed public ID | Description |
+| --- | --- | --- |
+| `20a050fa` | `6cb246d3` | define optional Nix product boundary |
+| `29d42a82` | `c6ccd07a` | implement optional transparent harness shims |
+| `98b4b639` | `7493b2aa` | declare packaged transparent shim smoke |
+| `85d4766b` | `9f58c75f` | preserve packaged MicroSandbox runtime integrity |
+| `ad7fdd0e` | `e79fd005` | add bounded interactive PTY observer |
+| `147e956d` | `a2c28b61` | add exact exit command PTY observation |
+| `31b4f073` | `c49b2eca` | add human-paced typed exit observation |
+| `cc52a2e9` | `df5f85a6` | add idle Ctrl-C key observation |
+| `21ca0022` | `290df260` | accept project capsule status and stop contract |
+| `bfafd305` | `7f662b8e` | add project capsule status and stop |
+| `a01c4ead` | `73f9774f` | close project capsule management mission |
+| `5028d8cf` | `07fc2a96` | authorize public alpha repository publication |
 
 ## Terminal Closure
 
-Pending.
+1. Outcome: accepted — the complete verified history is public at the exact
+   declared repository, and initial local/remote `main` equality was proved.
+2. Root cause: an exact public-readiness audit, one Jujutsu bookmark, and
+   explicit destination checks kept publication bounded to the intended
+   complete history and repository.
+3. Actual total cost: zero money, one of one public repository creation, one of
+   two declared `main` pushes before this closure checkpoint, zero other remote
+   mutations, and within the one-hour ceiling. Numeric elapsed time was not
+   captured and is not backfilled.
+4. Next action: push this terminal closure as the declared second and final
+   `main` update, verify exact equality, then design reset/recovery with the
+   operator under a new product GOAL.

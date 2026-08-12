@@ -1,94 +1,42 @@
 # GOAL: Publish the public alpha repository
 
-Status: authorized on 2026-08-12.
+Status: completed on 2026-08-12.
 
-Publish Fortlet's complete verified history as a public GitHub repository at
-`github.com/codyw912/fortlet`. This mission establishes a durable remote before
-the next product GOAL; it does not add product behavior, CI, releases,
-distribution artifacts, issues, or project policy.
+Fortlet's complete verified and signed history is public at
+`https://github.com/codyw912/fortlet`. Experiment 0011 records the readiness
+audit, exact destination, initial push, remote verification, and mapping from
+historical pre-signing checkpoint citations to signed public object IDs.
 
-## Deliverable 1 — Verify public readiness
+## Completed deliverables
 
-Completed before authorization:
-
-1. The working copy is clean and the complete history uses the operator's
-   GitHub no-reply author address.
-2. MIT and Apache-2.0 license texts are present and Cargo declares the matching
-   dual license.
-3. Current-tree and full-history scans found no credential, private-key, GitHub
-   token, bearer-token, or API-key patterns.
-4. All `/Users/cody` occurrences were shown to and accepted by the operator.
-   They occur only in retained experiment/design evidence and disclose no
-   credential value.
-5. GitHub identity `codyw912` is authenticated over SSH and
-   `github.com/codyw912/fortlet` does not exist.
-
-## Deliverable 2 — Rehearse and publish
-
-1. Declare Experiment 0011 before remote mutation.
-2. Run the complete standard verification set against the exact outgoing tree.
-3. Advance the local `main` bookmark by fast-forward from its existing
-   checkpoint to the publication tip.
-4. Inspect the complete outgoing history and exact destination.
-5. Create public repository `codyw912/fortlet` with description
-   `Project-scoped isolation for coding-agent CLIs` and add it as `origin`.
-6. Push only bookmark `main` through Jujutsu. Do not use mutating Git commands.
-7. Verify the remote default branch, visibility, URL, and exact tip through
-   read-only GitHub queries.
-
-## Deliverable 3 — Close and publish the record
-
-1. Close Experiment 0011 with exact remote and revision evidence.
-2. Rewrite `experiments/HANDOFF.md`, mark this GOAL complete, and checkpoint
-   the terminal record.
-3. Advance `main` to the closure checkpoint, inspect the one-checkpoint
-   outgoing delta, push `main` once more, and verify exact remote equality.
-4. Leave a clean working copy and STOP. Reset/recovery remains the intended
-   next product GOAL but is not authorized under this mission.
-
-## Definition of Done
-
-1. `https://github.com/codyw912/fortlet` exists and is public.
-2. Remote `main` contains the complete local history through the terminal
-   publication checkpoint.
-3. Local `main`, remote `main`, and the verified closure revision are equal.
-4. No branch, tag, release, issue, package, workflow, or other remote resource
-   is created.
-5. The complete standard verification set is green before initial publication.
-6. Experiment 0011 is terminally closed; then STOP.
-
-## Binding rules
-
-1. Preserve every charter invariant and accepted FIP.
-2. Publish the complete history; do not rewrite, squash, redact, or omit failed
-   experiments.
-3. Use Jujutsu for bookmarks and pushes. Do not use `git add`, `git commit`, or
-   another mutating Git command.
-4. Do not expose credential values in commands, output, records, or remote
-   metadata.
-5. Repository creation and the two declared `main` pushes are the only remote
-   mutations authorized.
-6. If SSH signing blocks on 1Password, pause for operator approval and retry
-   only after approval.
-7. Stop on a destination mismatch, non-fast-forward, unexpected remote
-   resource, credential anomaly, failed verification gate, or need to rewrite
-   history.
-
-## Budget and escalation
-
-1. Engineering ceiling: one hour.
-2. External budget: zero money, one public repository creation, two `main`
-   pushes, zero other remote mutations, and no paid quota.
-3. Experiment 0011 is the only active experiment.
+1. Public-readiness scans found no credential or private-key material in the
+   current tree or history. The operator reviewed and accepted the retained
+   personal filesystem paths in experiment evidence.
+2. The exact outgoing tree passed the complete standard verification set.
+3. Local `main` was fast-forwarded through the publication qualification
+   checkpoint without rewriting or omitting failed experiments.
+4. Public repository `codyw912/fortlet` was created with the declared
+   description and SSH `origin`.
+5. Only Jujutsu bookmark `main` was pushed. GitHub reported public visibility,
+   default branch `main`, exact local/remote tip equality, and no additional
+   refs, releases, workflows, webhooks, or deployments.
+6. Experiment 0011 is terminally closed. Its closure checkpoint is the second
+   and final authorized `main` update; after exact equality verification this
+   mission stops.
 
 ## Verification
 
-Before initial publication run:
+Before initial publication, the full suite passed with 34 unit tests, one
+conformance test, two management-failure integration tests, two native
+integration tests, and ten pre-runtime integration tests. Formatting, strict
+all-target/all-feature Clippy, the standalone conformance gate, and
+`nix flake check` passed. Nix emitted the existing missing app metadata warning
+and omitted incompatible `x86_64-linux`; native Linux verification remains
+outstanding.
 
-- `cargo test`;
-- `cargo fmt --all -- --check`;
-- `cargo clippy --all-targets --all-features -- -D warnings`;
-- `cargo test --test conformance`;
-- `nix flake check`.
+## Terminal boundary
 
-After each push, verify GitHub visibility, default branch, and exact remote tip.
+No experiment remains active after the final equality check. Do not add CI,
+releases, repository policy, reset/recovery, or another product surface under
+this completed mission. Reset/recovery remains the intended next product GOAL
+and requires its own accepted design and authorization.
