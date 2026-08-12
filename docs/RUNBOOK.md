@@ -70,6 +70,10 @@ cargo test --bin fortlet management
 cargo test --test management_failures
 ```
 
+Experiment 0010 records the bounded real-runtime screen: one uniquely scoped
+owned Codex capsule was observed absent, running, stopped, and absent through
+the immutable public CLI, with exact ownership verification before cleanup.
+
 ## Deterministic launch-failure evidence
 
 The pre-runtime integration gate invokes the compiled CLI with a cleared

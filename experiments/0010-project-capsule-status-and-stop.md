@@ -1,6 +1,6 @@
 # Experiment 0010: Project capsule status and stop
 
-Status: declared
+Status: completed — accepted
 Design: FIP-0003
 Charter scope: `local-foundation/v1`
 
@@ -135,8 +135,67 @@ harness launch.
 
 ## Results
 
-Pending declared dispatch.
+Dispatch ran from 2026-08-12 14:47:26 EDT through 14:49:45 EDT against
+checkpoint `bfafd305` and package output
+`/nix/store/5w8rn5bhck9k063k3qdjmd1mvbqq03ki-fortlet-0.1.0`.
+
+The initial public status command exited zero with:
+
+```text
+codex	absent
+```
+
+The single no-prompt launch exited zero with:
+
+```text
+codex-cli 0.147.0
+```
+
+It emitted no provisioning message, prompt, credential value, or native
+harness output. The next public status command exited zero with:
+
+```text
+codex	running
+```
+
+The public stop command exited zero with:
+
+```text
+codex	stopped
+```
+
+The following public status command also exited zero with
+`codex<TAB>stopped`, proving that stop preserved the runtime record rather than
+removing it.
+
+The canonical temporary path produced project identity
+`fdd59fd584330873`; effective UID 501 therefore selected exact capsule
+`fortlet-501-codex-fdd59fd584330873`. A stopped MicroSandbox JSON query
+AND-matched `fortlet.managed=true`, `fortlet.schema=1`,
+`fortlet.project=fdd59fd584330873`, and `fortlet.tool=codex`, returning exactly
+that one stopped record.
+
+After the ownership check, exact-name MicroSandbox removal succeeded. The
+enumerated project state and capsule lock were removed, a repeated four-label
+query returned `[]`, and no matching Fortlet state path remained. Final public
+status exited zero with:
+
+```text
+codex	absent
+```
+
+The empty temporary project was then removed and its absence verified.
 
 ## Terminal Closure
 
-Pending.
+1. Outcome: accepted — the immutable public CLI observed one uniquely scoped
+   owned capsule as absent, running, stopped, and absent around a successful
+   bounded stop and exact cleanup.
+2. Root cause: launch, status, and stop shared the same project+harness capsule
+   descriptor, while management ownership checks authorized the existing
+   record and the MicroSandbox stop operation preserved it in terminal state.
+3. Actual total cost: zero money, zero paid quota, zero model prompts, zero
+   remote mutation, one of one Codex `--version` launch, one of one owned local
+   capsule, zero retries, and 2 minutes 19 seconds versus the 15-minute ceiling.
+4. Next action: mark FIP-0003 conformant, close the project capsule management
+   mission, and choose the next product goal with the operator.

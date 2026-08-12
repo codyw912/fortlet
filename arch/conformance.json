@@ -37,6 +37,7 @@
         "src/session.rs",
         "tests/native.rs",
         "tests/management_failures.rs",
+        "experiments/0010-project-capsule-status-and-stop.md",
         "tests/pre_runtime_failures.rs",
         "tests/conformance.rs"
       ],
@@ -85,7 +86,7 @@
     {
       "proposal": "0003",
       "title": "Project capsule status and stop",
-      "status": "partial",
+      "status": "conformant",
       "modules": [
         "src/cli.rs",
         "src/management.rs",
@@ -95,11 +96,10 @@
         "src/cli.rs",
         "src/management.rs",
         "src/runtime.rs",
-        "tests/management_failures.rs"
+        "tests/management_failures.rs",
+        "experiments/0010-project-capsule-status-and-stop.md"
       ],
-      "gaps": [
-        "Deterministic evidence covers command parsing, project and harness failures, shared descriptors, ownership and version skew, malformed stored configuration, every status mapping, idempotent stop decisions, output, and runtime errors; public-CLI evidence against one real owned capsule is pending Experiment 0010."
-      ]
+      "gaps": []
     }
   ]
 }

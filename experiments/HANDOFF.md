@@ -1,53 +1,75 @@
-# Session Handoff — Pre-runtime launch failure evidence is complete
+# Session Handoff — Project capsule status and stop are complete
 
 Audience: a fresh agent session. `GOAL.md` is normative and complete. No
-experiment is active, and Experiments 0001 through 0009 remain terminally
-closed.
+experiment is active; Experiments 0001 through 0010 are terminally closed.
 
 ## Verified result
 
-1. Checkpoint `f5f1d341` adds ten Unix integration cases that invoke the real
-   compiled `fortlet run` interface with a cleared subprocess environment.
-2. Harness, project, credential loading, credential mount boundary, local
-   capsule-state preparation, guest auth projection, and incomplete base and
-   harness layer failures all exit nonzero with their stage, one primary
-   correction, and a useful cause.
-3. Every fixture uses temporary home, project, state, data, and fake-auth paths.
-   The fake token is structurally valid where needed but unusable and never
-   appears in assertions or diagnostics.
-4. The project-mounted credential case exposed a transaction-ordering defect:
-   local capsule state was created before a known mount exposure was rejected.
-   Known project and data mounts are now validated first; the capsule-state
-   mount is validated once its path has been safely prepared.
-5. Incomplete layers fail synchronously before provisioning. No test reaches a
-   runtime credential fingerprint, MicroSandbox reconciliation, terminal
-   attachment, harness execution, or network operation.
+1. FIP-0003 is accepted and conformant. Checkpoint `bfafd305` adds
+   `fortlet status [harness]` and `fortlet stop <harness>` with the same
+   `--project` and `--allow-broad-mount` semantics as launch.
+2. Status reports `harness<TAB>state`, selects all registered harnesses in
+   registry order by default, and performs no credential read, provisioning,
+   capsule-state preparation, harness launch, or runtime mutation.
+3. Stop is project+harness scoped and idempotent. It shares the capsule lock
+   with launch, rechecks stored configuration and ownership before mutation,
+   invokes MicroSandbox's bounded stop, and leaves the stopped capsule and
+   persistent harness state reusable.
+4. Launch, status, and stop share a pure descriptor. Management authorization
+   requires managed, schema, project, and tool labels. Fortlet version is
+   diagnostic for management, so an older owned capsule remains stoppable;
+   launch still rejects stale runtime configuration.
+5. Malformed configuration, deterministic-name collisions, ownership
+   mismatches, runtime failures, unknown harnesses, and project failures are
+   fail-closed with stage and correction context.
+6. README, overview, and runbook now describe optional transparent shims,
+   explicit launch, native escape, and project-scoped status and stop as the
+   current product surface.
+
+## Live evidence and cleanup
+
+Experiment 0010 used immutable package
+`/nix/store/5w8rn5bhck9k063k3qdjmd1mvbqq03ki-fortlet-0.1.0` and one temporary
+project. The public CLI observed Codex absent, launched only `codex --version`
+at pinned 0.147.0, observed running, stopped it, observed stopped, and observed
+absent after cleanup. A four-label AND query proved exact Fortlet ownership
+before removal.
+
+The experiment used zero money, paid quota, model prompts, remote mutation, or
+retries. Its one capsule, Fortlet project state, lock, and empty temporary
+project were removed and their absence verified.
 
 ## Verification
 
-The focused pre-runtime suite passed with ten cases. The full suite passed with
-25 unit tests, one conformance test, two native integration tests, and all ten
-pre-runtime integration tests. Formatting, strict all-target/all-feature
-Clippy, the standalone conformance gate, and `nix flake check` passed. Nix
-emitted the existing missing app metadata warning and omitted incompatible
-`x86_64-linux`; native Linux verification remains outstanding.
+After terminal closure, the full suite passed with 34 unit tests, one
+conformance test, two management-failure integration tests, two native
+integration tests, and ten pre-runtime integration tests. Formatting, strict
+all-target/all-feature Clippy, the standalone conformance gate, and
+`nix flake check` passed. Nix emitted the existing missing app metadata warning
+and omitted incompatible `x86_64-linux`; native Linux verification remains
+outstanding.
 
-No real credential, harness, MicroSandbox capsule, provisioning run, network
-operation, model prompt, paid quota, external money, or live experiment was
-used. Engineering remained within the two-hour ceiling; numeric elapsed time
-was not captured and is not backfilled.
+## Current product boundary
+
+Implemented daily-use surfaces are `doctor`, explicit `run`, optional
+package-owned `codex` and `tact` shims, explicit `native`, project-scoped
+`status`, and project-scoped `stop`. Reusable project+harness capsules,
+immutable base and harness layers, brokered ChatGPT credentials, safe project
+resolution, broad-root protection, and deterministic pre-runtime diagnostics
+are established.
+
+FIP-0001 remains partial. Exact gaps are harness-owned persistent paths and
+credential policy; live capsule-reconciliation and terminal-attachment failure
+evidence; capsule topology, concurrency, and terminal coverage; restart, logs,
+and tool-update commands; explicit interactive/background leases; declarative
+project environments and private overlays; host-side publication; standalone
+non-Nix installation; and native `x86_64-linux` package verification. FIP-0002
+also retains the documented automated Codex exit-status evidence gap.
 
 ## Successor boundary
 
-Do not reopen deterministic pre-runtime failures, project resolution, or
-Codex-specific exit work without new evidence. Live capsule reconciliation and
-terminal attachment failure behavior remain unproved, but proving them would
-require a separately designed injection seam or live fault experiment and
-should not be inferred as the automatic next goal.
-
-Other FIP-0001 gaps remain: harness-owned persistent paths and credential
-policy, capsule topology and concurrency coverage, lifecycle leases and
-management commands, standalone installation, declarative environments, and
-native Linux package verification. Preserve fail-closed ordering, optional shim
-activation, broad-root protection, credential isolation, package runtime
-integrity, and Jujutsu discipline.
+Do not broaden FIP-0003 into global inventory or destructive removal without a
+new accepted design. Do not reopen deterministic pre-runtime failures,
+project resolution, transparent shim activation, or Codex PTY exit attempts
+without new evidence. The next GOAL should select one bounded product gap with
+the operator; no gap above is automatically authorized.
