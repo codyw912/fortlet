@@ -9,13 +9,14 @@ running directly on the host.
 Fortlet is an alpha Rust implementation. The verified baseline resolves safe
 project roots, provisions immutable Codex and Tact environments, brokers
 ChatGPT credentials through MicroSandbox, creates reusable project-and-harness
-capsules, and preserves interactive terminal behavior. A reproducible Nix
-package exists for `aarch64-darwin` and is declared for `x86_64-linux`; native
-Linux verification remains outstanding.
+capsules, preserves interactive terminal behavior, provides optional
+transparent Codex and Tact shims, and exposes project-scoped capsule status and
+stop commands. A reproducible Nix package exists for `aarch64-darwin` and is
+declared for `x86_64-linux`; native Linux verification remains outstanding.
 
-The next product boundary is transparent harness shims and a small management
-surface. Publication, service orchestration, automatic harness discovery, and
-remote execution remain designed directions rather than implemented features.
+Global inventory, removal, restart, logs, explicit workload leases,
+publication, service orchestration, automatic harness discovery, and remote
+execution remain designed directions rather than implemented features.
 
 ## Core idea
 
@@ -84,8 +85,10 @@ not available through a simpler mechanism.
 
 ## Open design questions
 
-1. What is the smallest transparent shim installation and update model?
-2. Which lifecycle verbs belong in the first management surface?
-3. How should background-process leases be observed and expired?
+1. What global inventory and safe capsule-removal contract should follow the
+   project-scoped management surface?
+2. How should background-process leases be observed and expired?
+3. How should standalone installation expose optional shims without shell
+   mutation?
 4. What workspace transfer and credential delegation model should a future
    self-hosted execution host use?

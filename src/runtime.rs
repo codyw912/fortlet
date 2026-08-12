@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::env;
 use std::fs::{self, File};
 use std::io::{IsTerminal, Write};
@@ -31,10 +32,77 @@ const TERMINAL_ENVIRONMENT: &[&str] = &[
 ];
 
 pub struct Capsule<'a> {
-    pub name: String,
+    pub descriptor: CapsuleDescriptor,
     pub state: PathBuf,
     pub project: &'a Project,
     pub harness: &'a dyn Harness,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CapsuleDescriptor {
+    pub name: String,
+    labels: BTreeMap<String, String>,
+}
+
+impl CapsuleDescriptor {
+    pub fn new(project: &Project, harness: &dyn Harness) -> Self {
+        let labels = [
+            (label("managed"), "true".to_owned()),
+            (label("schema"), SCHEMA_VERSION.to_owned()),
+            (label("project"), project.identity.as_str().to_owned()),
+            (label("tool"), harness.name().to_owned()),
+            (label("version"), harness.version().to_owned()),
+        ]
+        .into_iter()
+        .collect();
+        Self {
+            name: format!(
+                "fortlet-{}-{}-{}",
+                effective_uid(),
+                harness.name(),
+                project.identity.as_str()
+            ),
+            labels,
+        }
+    }
+
+    fn labels(&self) -> BTreeMap<String, String> {
+        self.labels.clone()
+    }
+
+    pub fn validate_management(
+        &self,
+        stored_name: &str,
+        labels: &BTreeMap<String, String>,
+    ) -> Result<()> {
+        let identity_keys = [
+            label("managed"),
+            label("schema"),
+            label("project"),
+            label("tool"),
+        ];
+        let identity_matches = stored_name == self.name
+            && identity_keys
+                .iter()
+                .all(|key| labels.get(key) == self.labels.get(key));
+        if !identity_matches {
+            bail!(
+                "expected capsule is not owned by Fortlet for this project and harness; inspect it with msb and retry"
+            );
+        }
+        Ok(())
+    }
+
+    fn validate_launch(&self, stored_name: &str, labels: &BTreeMap<String, String>) -> Result<()> {
+        self.validate_management(stored_name, labels)?;
+        if labels.get(&label("version")) != self.labels.get(&label("version")) {
+            bail!(
+                "capsule {} has stale configuration; remove it with msb and retry",
+                self.name
+            );
+        }
+        Ok(())
+    }
 }
 
 pub struct MicroSandboxRuntime<'a> {
@@ -61,12 +129,7 @@ impl<'a> MicroSandboxRuntime<'a> {
             .with_context(|| format!("cannot create harness state {}", state.display()))?;
         let state = state.canonicalize()?;
         Ok(Capsule {
-            name: format!(
-                "fortlet-{}-{}-{}",
-                effective_uid(),
-                harness.name(),
-                project.identity.as_str()
-            ),
+            descriptor: CapsuleDescriptor::new(project, harness),
             state,
             project,
             harness,
@@ -79,16 +142,14 @@ impl<'a> MicroSandboxRuntime<'a> {
         layers: &EnvironmentLayers,
         credentials: &Credentials,
     ) -> Result<Sandbox> {
-        let _lock = lock(
-            &self
-                .paths
-                .locks()
-                .join(format!("capsule-{}.lock", capsule.name)),
-        )?;
+        let _lock = lock_capsule(self.paths, &capsule.descriptor)?;
         credentials.expose_to_broker();
-        match Sandbox::get(&capsule.name).await {
+        match Sandbox::get(&capsule.descriptor.name).await {
             Ok(handle) => {
-                validate_labels(capsule, &handle.config()?.spec.labels)?;
+                let config = handle.config()?;
+                capsule
+                    .descriptor
+                    .validate_launch(&config.spec.name, &config.spec.labels)?;
                 let fingerprint = credentials.fingerprint();
                 let fingerprint_changed =
                     read_fingerprint(capsule).as_deref() != Some(fingerprint.as_str());
@@ -155,7 +216,7 @@ impl<'a> MicroSandboxRuntime<'a> {
 async fn create_capsule(capsule: &Capsule<'_>, layers: &EnvironmentLayers) -> Result<Sandbox> {
     let guest_home = "/home/agent";
     let project_path = capsule.project.root.display().to_string();
-    let mut builder = Sandbox::builder(&capsule.name)
+    let mut builder = Sandbox::builder(&capsule.descriptor.name)
         .image(BASE_IMAGE)
         .cpus(4)
         .memory(8192)
@@ -181,14 +242,7 @@ async fn create_capsule(capsule: &Capsule<'_>, layers: &EnvironmentLayers) -> Re
         )
         .script("hold", HOLD_SCRIPT)
         .entrypoint(["hold"])
-        .label(format!("{PRODUCT}.managed"), "true")
-        .label(format!("{PRODUCT}.schema"), SCHEMA_VERSION)
-        .label(
-            format!("{PRODUCT}.project"),
-            capsule.project.identity.as_str(),
-        )
-        .label(format!("{PRODUCT}.tool"), capsule.harness.name())
-        .label(format!("{PRODUCT}.version"), capsule.harness.version());
+        .labels(capsule.descriptor.labels());
 
     for (key, value) in capsule.harness.environment(capsule.project) {
         builder = builder.env(key, value);
@@ -213,33 +267,11 @@ async fn create_capsule(capsule: &Capsule<'_>, layers: &EnvironmentLayers) -> Re
     builder
         .create_detached()
         .await
-        .with_context(|| format!("cannot create capsule {}", capsule.name))
+        .with_context(|| format!("cannot create capsule {}", capsule.descriptor.name))
 }
 
-fn validate_labels(
-    capsule: &Capsule<'_>,
-    labels: &std::collections::BTreeMap<String, String>,
-) -> Result<()> {
-    let expected = [
-        (format!("{PRODUCT}.managed"), "true"),
-        (format!("{PRODUCT}.schema"), SCHEMA_VERSION),
-        (
-            format!("{PRODUCT}.project"),
-            capsule.project.identity.as_str(),
-        ),
-        (format!("{PRODUCT}.tool"), capsule.harness.name()),
-        (format!("{PRODUCT}.version"), capsule.harness.version()),
-    ];
-    if expected
-        .iter()
-        .any(|(key, value)| labels.get(key).map(String::as_str) != Some(*value))
-    {
-        bail!(
-            "capsule {} has stale configuration; remove it with msb and retry",
-            capsule.name
-        );
-    }
-    Ok(())
+fn label(suffix: &str) -> String {
+    format!("{PRODUCT}.{suffix}")
 }
 
 fn tool_executable(capsule: &Capsule<'_>) -> String {
@@ -276,6 +308,14 @@ fn lock(path: &Path) -> Result<File> {
     Ok(file)
 }
 
+pub fn lock_capsule(paths: &AppPaths, descriptor: &CapsuleDescriptor) -> Result<File> {
+    lock(
+        &paths
+            .locks()
+            .join(format!("capsule-{}.lock", descriptor.name)),
+    )
+}
+
 #[cfg(unix)]
 fn effective_uid() -> u32 {
     unsafe { libc::geteuid() }
@@ -284,4 +324,75 @@ fn effective_uid() -> u32 {
 #[cfg(unix)]
 fn effective_gid() -> u32 {
     unsafe { libc::getegid() }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::harness;
+    use crate::project::ProjectIdentity;
+
+    fn project() -> Project {
+        Project {
+            identity: ProjectIdentity::from_local_root(Path::new("/tmp/fortlet-descriptor-test")),
+            root: "/tmp/fortlet-descriptor-test".into(),
+            cwd: "/tmp/fortlet-descriptor-test".into(),
+            kind: "test",
+            scratch: false,
+        }
+    }
+
+    #[test]
+    fn descriptor_is_shared_identity_and_complete_creation_metadata() {
+        let project = project();
+        let harness = harness::find("codex").unwrap();
+        let descriptor = CapsuleDescriptor::new(&project, harness);
+
+        assert_eq!(
+            descriptor.name,
+            format!(
+                "fortlet-{}-codex-{}",
+                effective_uid(),
+                project.identity.as_str()
+            )
+        );
+        assert_eq!(descriptor.labels.get(&label("managed")).unwrap(), "true");
+        assert_eq!(
+            descriptor.labels.get(&label("version")).unwrap(),
+            harness.version()
+        );
+    }
+
+    #[test]
+    fn management_accepts_version_skew_but_launch_does_not() {
+        let descriptor = CapsuleDescriptor::new(&project(), harness::find("codex").unwrap());
+        let mut labels = descriptor.labels();
+        labels.insert(label("version"), "older-release".into());
+
+        descriptor
+            .validate_management(&descriptor.name, &labels)
+            .unwrap();
+        assert!(descriptor
+            .validate_launch(&descriptor.name, &labels)
+            .is_err());
+    }
+
+    #[test]
+    fn management_rejects_name_and_ownership_mismatches() {
+        let descriptor = CapsuleDescriptor::new(&project(), harness::find("codex").unwrap());
+        assert!(descriptor
+            .validate_management("fortlet-collision", &descriptor.labels())
+            .is_err());
+
+        for key in ["managed", "schema", "project", "tool"] {
+            let mut labels = descriptor.labels();
+            labels.insert(label(key), "wrong".into());
+            assert!(
+                descriptor
+                    .validate_management(&descriptor.name, &labels)
+                    .is_err(),
+                "{key}"
+            );
+        }
+    }
 }

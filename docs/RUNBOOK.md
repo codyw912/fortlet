@@ -26,6 +26,8 @@ builds offline. Native Linux verification is still outstanding.
 nix run . -- doctor
 nix run . -- run codex --
 nix run . -- run tact --
+nix run . -- status
+nix run . -- stop codex
 ```
 
 For a development binary inside `nix develop`:
@@ -33,6 +35,8 @@ For a development binary inside `nix develop`:
 ```bash
 cargo run -- doctor
 cargo run -- run codex --
+cargo run -- status codex
+cargo run -- stop codex
 ```
 
 Project resolution prefers the nearest Jujutsu root, then Git root, then a
@@ -44,6 +48,27 @@ override.
 
 `doctor` reads authentication metadata but never prints token values. Real
 launches require a healthy MicroSandbox host and a valid ChatGPT credential.
+
+## Project capsule management
+
+`fortlet status [harness]` reports `codex` and `tact` in registry order, or one
+selected harness. Each output row is the harness, a tab, and `absent` or its
+lowercase MicroSandbox lifecycle state. `fortlet stop <harness>` stops only the
+owned capsule for the resolved project and reports `absent`, `already-stopped`,
+or `stopped`.
+
+Both commands accept `--project <path>` and `--allow-broad-mount` with the same
+project rules as `run`. They do not read provider credentials, provision tool
+layers, launch a harness, or expose internal capsule names. Stop preserves the
+capsule record and persistent harness state for a later run.
+
+The deterministic management gate uses fake lifecycle observations and
+isolated real-CLI failures without starting a VM:
+
+```bash
+cargo test --bin fortlet management
+cargo test --test management_failures
+```
 
 ## Deterministic launch-failure evidence
 

@@ -19,6 +19,7 @@
         "src/cli.rs",
         "src/environment.rs",
         "src/harness/mod.rs",
+        "src/management.rs",
         "src/native.rs",
         "src/paths.rs",
         "src/project.rs",
@@ -29,11 +30,13 @@
         "package.nix",
         "src/auth.rs",
         "src/cli.rs",
+        "src/management.rs",
         "src/native.rs",
         "src/paths.rs",
         "src/project.rs",
         "src/session.rs",
         "tests/native.rs",
+        "tests/management_failures.rs",
         "tests/pre_runtime_failures.rs",
         "tests/conformance.rs"
       ],
@@ -41,7 +44,7 @@
         "Harness adapters do not yet own persistent paths or credential policy.",
         "Deterministic CLI evidence covers actionable failures through local environment-layer validation; live MicroSandbox capsule reconciliation and terminal attachment failure evidence remains outstanding.",
         "Automated coverage does not yet exercise capsule topology and concurrency or terminal semantics.",
-        "Status, stop, restart, logs, and tool-update management commands are not implemented.",
+        "Restart, logs, and tool-update management commands are not implemented.",
         "Interactive and background workload leases are not yet represented explicitly.",
         "Declarative project environment activation and private overlays are not implemented.",
         "The host-side publication transaction is not implemented.",
@@ -82,11 +85,20 @@
     {
       "proposal": "0003",
       "title": "Project capsule status and stop",
-      "status": "unimplemented",
-      "modules": [],
-      "tests": [],
+      "status": "partial",
+      "modules": [
+        "src/cli.rs",
+        "src/management.rs",
+        "src/runtime.rs"
+      ],
+      "tests": [
+        "src/cli.rs",
+        "src/management.rs",
+        "src/runtime.rs",
+        "tests/management_failures.rs"
+      ],
       "gaps": [
-        "Project-scoped status and stop commands are not implemented."
+        "Deterministic evidence covers command parsing, project and harness failures, shared descriptors, ownership and version skew, malformed stored configuration, every status mapping, idempotent stop decisions, output, and runtime errors; public-CLI evidence against one real owned capsule is pending Experiment 0010."
       ]
     }
   ]

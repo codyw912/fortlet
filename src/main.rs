@@ -2,6 +2,7 @@ mod auth;
 mod cli;
 mod environment;
 mod harness;
+mod management;
 mod native;
 mod paths;
 mod project;

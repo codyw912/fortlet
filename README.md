@@ -5,9 +5,9 @@ while preserving their ordinary terminal experience. The host workspace stays
 live, provider credentials are brokered rather than mounted, and failure to
 establish the isolation boundary prevents the agent from starting.
 
-Fortlet is an early Rust prototype. It currently supports explicit Codex and
-Tact launches; transparent command shims and the broader management surface are
-the next product milestone.
+Fortlet is an early Rust prototype. It supports explicit Codex and Tact
+launches, optional transparent command shims, and project-scoped capsule status
+and stop commands.
 
 ## Quick start
 
@@ -17,6 +17,8 @@ The reproducible Nix package includes the matching MicroSandbox host runtime:
 nix run . -- doctor
 nix run . -- run codex --
 nix run . -- run tact --
+nix run . -- status
+nix run . -- stop codex
 ```
 
 Fortlet resolves the nearest Jujutsu, Git, or recognized development-
@@ -45,19 +47,19 @@ credential file itself must remain outside all guest mounts.
 
 ## Product direction
 
-Normal use should remain the native harness commands:
+Users may explicitly activate Fortlet's package-owned shim directory so normal
+use remains the native harness commands:
 
 ```text
 codex
-claude
 tact
 ```
 
-Fortlet will provide transparent fail-closed shims, one capsule per project
-and harness, declarative tool environments, concurrent same-harness sessions,
-and an explicit host-side publication boundary. Local execution comes first;
-the architecture leaves room for a self-hosted remote execution host without
-pretending that transport already exists.
+The shims are optional; `fortlet run` remains fully usable without them.
+Fortlet provides one capsule per project and harness. Declarative project tool
+environments, explicit workload leases, standalone distribution, and a
+host-side publication boundary remain future work. Local execution comes
+first; remote execution requires its own architecture.
 
 See [OVERVIEW.md](OVERVIEW.md) for durable product scope and
 [GOAL.md](GOAL.md) for the current mission.
