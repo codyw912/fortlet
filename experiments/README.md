@@ -31,3 +31,4 @@ scannable failure/win history of the project:
 - `0007-exact-codex-exit-parity.md` — rejected; exact `/exit\r` input reached both UIs, but neither terminated within the fixed bound.
 - `0008-human-paced-codex-exit-parity.md` — rejected; fixed paced `/exit` input reached both UIs, but neither terminated within the fixed bound.
 - `0009-idle-ctrl-c-key-exit-parity.md` — rejected; one Ctrl-C PTY key reached both UIs, but neither terminated within the fixed bound.
+- `0010-project-capsule-status-and-stop.md` — declared; public-CLI running-to-stopped lifecycle and owned cleanup await implementation and rehearsal.

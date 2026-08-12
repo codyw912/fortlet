@@ -1,127 +1,117 @@
-# GOAL: Prove fail-closed pre-runtime launch errors
+# GOAL: Add project capsule status and stop
 
-Status: completed on 2026-08-12.
+Status: authorized on 2026-08-12.
 
-Checkpoint `f5f1d341` proves ten real-CLI failure cases through local
-environment-layer validation. It also moves known guest-mount credential
-checks before capsule-state creation, so an exposed project credential now
-fails without creating later transaction artifacts.
+Implement the accepted FIP-0003 management slice: let users observe the
+existing project-and-harness capsule states and safely stop one owned capsule
+without removing reusable state. Do not expand into global inventory, remove,
+restart, logs, tool updates, explicit leases, or other product surfaces.
 
-Prove Fortlet's real CLI failure behavior from process entry through the last
-deterministic pre-runtime boundary. Fix only diagnostic inconsistencies that
-the process-level tests expose. Do not start MicroSandbox, provision packages,
-contact a network service, or execute Codex or Tact.
+Before implementation, read FIP-0001 and FIP-0003 in full and the validated
+design at `docs/plans/2026-08-12-capsule-status-and-stop-design.md`. Preserve
+FIP-0002's optional shim and native-escape behavior and every terminal result
+from Experiments 0001 through 0009.
 
-Before implementation, read FIP-0001 in full and the validated design at
-`docs/plans/2026-08-12-pre-runtime-failure-evidence-design.md`. Preserve every
-terminal result from Experiments 0001 through 0009 and the project-resolution
-contract established at checkpoint `e764dfc1`.
+## Deliverable 1 — Share capsule identity and ownership
 
-## Deliverable 1 — Build an isolated real-CLI failure harness
+1. Extract a pure capsule descriptor that derives the existing deterministic
+   capsule name and labels without preparing state, provisioning, reading
+   credentials, or contacting MicroSandbox.
+2. Use the descriptor from launch, status, and stop so management cannot drift
+   from the capsule that launch owns.
+3. Separate ownership labels from diagnostic version metadata. Launch MAY
+   retain its current exact-version reconciliation rule; management MUST accept
+   otherwise owned capsules across Fortlet version changes.
+4. Parse stored runtime configuration and fail closed on malformed data, name
+   collision, or ownership mismatch before mutation.
 
-Completed at checkpoint `f5f1d341`: the Unix integration fixture clears each
-subprocess environment, supplies only temporary paths and fake auth, and
-asserts nonzero status, exact stage/action context, stable cause, and artifact
-boundaries.
+## Deliverable 2 — Implement project-scoped status
 
-1. Add one Unix integration-test module that invokes the compiled `fortlet`
-   binary through its public `run` interface.
-2. Give each subprocess temporary `HOME`, `XDG_STATE_HOME`, `XDG_DATA_HOME`,
-   `FORTLET_AUTH_FILE`, project, state, and data paths as needed.
-3. Clear inherited environment before adding only the test's required values.
-   Do not inherit real credentials, runner markers, shell initialization, or
-   operator paths.
-4. Use only structurally valid but unusable fake credentials. Never print or
-   assert credential values.
-5. Provide shared assertions for nonzero exit, outer stage, one primary
-   correction, representative cause, and absence of later-stage artifacts.
+1. Add `fortlet status [harness]` with `--project` and
+   `--allow-broad-mount`.
+2. With no harness, report every registered harness in registry order; with a
+   harness, report only that registered harness.
+3. Report exactly `harness<TAB>state`, using `absent` or the lowercase
+   MicroSandbox lifecycle state.
+4. Keep status observational: no credentials, environment provisioning,
+   capsule-state preparation, harness launch, or runtime mutation.
+5. Treat a successfully observed crashed capsule as successful status output.
 
-## Deliverable 2 — Prove early transaction failures
+## Deliverable 3 — Implement bounded idempotent stop
 
-Completed at checkpoint `f5f1d341`: six cases cover unsupported harness,
-missing project, missing/malformed/expired auth, and project-mounted auth. The
-last case exposed and fixed the credential-validation ordering defect.
+1. Add `fortlet stop <harness>` with the same project options.
+2. Treat absent and terminal capsules as successful idempotent outcomes.
+3. Stop a nonterminal owned capsule with MicroSandbox's bounded graceful-stop
+   operation and report success only after the SDK succeeds.
+4. Print exactly `harness<TAB>absent`, `harness<TAB>already-stopped`, or
+   `harness<TAB>stopped`.
+5. Never remove capsule records, roots, credentials, project files, or
+   persistent harness state.
 
-Use test-first vertical slices to prove:
+## Deliverable 4 — Prove, document, conform, and close
 
-1. an unknown harness fails at the `harness` stage before project, credential,
-   environment, or capsule work;
-2. a missing explicit project fails at the `project` stage before credentials
-   or runtime state;
-3. missing auth, malformed auth, an expired fake token, and an auth file inside
-   the selected project mount fail at the `credentials` stage; and
-4. each failure reports its existing actionable correction plus a useful cause
-   without creating later-stage artifacts.
-
-## Deliverable 3 — Prove the deepest deterministic failures
-
-Completed at checkpoint `f5f1d341`: four cases cover invalid local capsule
-state, invalid guest projection, incomplete base layer, and incomplete harness
-layer without entering provisioning or runtime reconciliation.
-
-1. Precreate an invalid project/harness state location and prove local capsule
-   preparation fails at the `capsule` stage.
-2. Precreate a symlinked or otherwise invalid guest auth projection and prove
-   it fails at the `credentials` stage after local capsule-state creation.
-3. Seed incomplete base and registered-harness layers separately and prove both
-   fail at the `environment` stage before provisioning begins.
-4. Prove no test reaches MicroSandbox reconciliation, terminal attachment,
-   harness execution, or network-backed provisioning.
-
-## Deliverable 4 — Document, conform, and close
-
-Completed at checkpoint `f5f1d341` and the terminal closure checkpoint: the
-runbook documents the deterministic gate, conformance retains the two live
-runtime failure gaps, and the complete standard verification set passed.
-
-1. Document the deterministic pre-runtime failure gate and its exact boundary
-   in `docs/RUNBOOK.md`.
-2. Update `arch/conformance.json` in the same checkpoint as the code and tests.
-   Replace only the broad failure-stage gap. Retain an exact gap for live
-   capsule reconciliation and terminal attachment failures.
-3. Run the complete verification set, rewrite `experiments/HANDOFF.md`, mark
+1. Add deterministic evidence for descriptor reuse, ownership and version
+   skew, every status mapping, rendering, idempotent stop, CLI parsing,
+   project/harness failures, and actionable runtime failures.
+2. Document status and stop in `docs/RUNBOOK.md` and update stale README or
+   overview descriptions that materially misstate the implemented product
+   surface.
+3. Update `arch/conformance.json` in the implementation checkpoint. Remove
+   only the status-and-stop gap; retain exact gaps for the remaining FIP-0001
+   and FIP-0002 work.
+4. Rehearse Experiment 0010 without runtime contact, run the complete standard
+   verification set, then dispatch its one owned local capsule unit exactly as
+   declared.
+5. Close Experiment 0010 terminally, rewrite `experiments/HANDOFF.md`, mark
    this GOAL complete, inspect `main..@`, then STOP and report.
 
 ## Definition of Done
 
-1. Real subprocess tests cover harness, project, credential, local capsule,
-   projection, and local environment validation failures.
-2. Every case proves nonzero exit, stage, one primary correction, useful cause,
-   and absence of later-stage artifacts.
-3. Tests use no real credential, inherited operator environment, VM, harness,
-   network service, or external experiment.
-4. Documentation and conformance state only the deterministic boundary proved.
-5. The complete verification set is green; then STOP.
+1. The public CLI implements FIP-0003 exactly and remains usable without
+   transparent shims.
+2. Management cannot act on a capsule until Fortlet ownership is verified.
+3. Status has no capsule/runtime mutation and stop preserves reusable state.
+4. Deterministic tests cover the complete command decision surface without a
+   VM or real credential.
+5. Experiment 0010 records the actual public-CLI running -> stopped path and
+   owned cleanup, whether accepted or honestly rejected.
+6. Documentation and conformance state only the evidence obtained.
+7. The complete standard verification set is green; then STOP.
 
 ## Binding rules
 
-1. Preserve every charter invariant and FIP-0001 constraint.
-2. Do not change FIP-0001 or expand into runtime injection, live fault
-   campaigns, capsule topology, terminal semantics, lifecycle, management
-   commands, environments, or packaging.
-3. Do not introduce a generic runtime abstraction, injectable orchestrator,
-   test-only product flag, or network-backed fixture.
-4. Tests may mutate only their owned temporary directories and subprocess
-   environments.
-5. Do not launch Codex, Tact, MicroSandbox capsules, paid services, or external
-   experiments.
-6. Prefer public CLI assertions over private implementation assertions.
-7. Keep conformance changes in the same checkpoint as their code and tests.
+1. Preserve every charter invariant and FIP-0001, FIP-0002, and FIP-0003
+   constraint.
+2. Use the MicroSandbox SDK directly. A narrow local management seam for
+   deterministic tests is allowed; a generic runtime abstraction is not.
+3. Do not read credentials from status or stop, expose capsule names or project
+   identities in normal command output, or silently fall back to native tools.
+4. Do not add removal, restart, logs, global inventory, management by raw
+   capsule name, structured output, lease representation, or packaging work.
+5. Tests may mutate only owned temporary directories and subprocess
+   environments. They MUST NOT start a VM, use a real credential, launch a
+   harness, or contact a network service.
+6. Experiment 0010 is the only authorized live runtime contact. Verify its
+   exact generated target and ownership before creation and cleanup.
+7. Keep conformance changes in the same checkpoint as code and tests. Keep
+   experiment results in their later terminal-closure checkpoint.
 8. Use reviewable Jujutsu checkpoints and inspect `main..@` before handoff.
 
 ## Budget and escalation
 
 1. Engineering ceiling: two hours from implementation start.
 2. External budget: zero money, zero paid quota, zero model prompts, zero
-   harness launches, zero MicroSandbox capsules, and no live experiment.
-3. Stop on any network attempt, credential anomaly, outside-project mutation,
-   need to change an accepted FIP, or need to exercise a live runtime failure.
+   remote mutation, one local Codex `--version` launch, one Fortlet-owned local
+   capsule, and zero retries.
+3. Stop on any undeclared network attempt, credential anomaly, outside-scope
+   mutation, unowned capsule, need to change an accepted FIP, repeated live
+   failure, or experiment scope change.
 
 ## Verification
 
 Run before claiming completion:
 
-- focused pre-runtime failure integration tests during development;
+- focused management tests during development;
 - `cargo test`;
 - `cargo fmt --all -- --check`;
 - `cargo clippy --all-targets --all-features -- -D warnings`;
