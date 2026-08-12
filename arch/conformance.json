@@ -78,6 +78,16 @@
       "gaps": [
         "Runner evidence proves both packaged shims attach through real PTYs, produce activity after resize, share the expected capsule with concurrent invocations, and remain responsive. Native controls show both Tact and externally launched Codex remain alive after their first foreground-group SIGINT. Native and packaged Codex also both remained alive after atomic `/exit\\r`, paced `/exit`, and one `0x03` PTY key under the bounded observer. These matching timeouts expose no Fortlet-specific discrepancy. Manual native evidence confirms one Ctrl-C exits at an idle empty composer, but automated native idle readiness, exact eventual termination, and packaged exit-status preservation remain unresolved."
       ]
+    },
+    {
+      "proposal": "0003",
+      "title": "Project capsule status and stop",
+      "status": "unimplemented",
+      "modules": [],
+      "tests": [],
+      "gaps": [
+        "Project-scoped status and stop commands are not implemented."
+      ]
     }
   ]
 }

@@ -49,3 +49,4 @@ cargo test --test conformance
 1. [FIP-0000: Proposal Template](proposals/0000-template.md)
 2. [FIP-0001: Project-scoped capsule architecture](proposals/0001-project-capsule-architecture.md)
 3. [FIP-0002: Optional transparent harness shims](proposals/0002-optional-transparent-harness-shims.md)
+4. [FIP-0003: Project capsule status and stop](proposals/0003-project-capsule-status-and-stop.md)
