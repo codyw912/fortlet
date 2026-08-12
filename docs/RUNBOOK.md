@@ -28,6 +28,7 @@ nix run . -- run codex --
 nix run . -- run tact --
 nix run . -- status
 nix run . -- stop codex
+nix run . -- reset codex
 ```
 
 For a development binary inside `nix develop`:
@@ -37,6 +38,7 @@ cargo run -- doctor
 cargo run -- run codex --
 cargo run -- status codex
 cargo run -- stop codex
+cargo run -- reset codex
 ```
 
 Project resolution prefers the nearest Jujutsu root, then Git root, then a
@@ -55,12 +57,18 @@ launches require a healthy MicroSandbox host and a valid ChatGPT credential.
 selected harness. Each output row is the harness, a tab, and `absent` or its
 lowercase MicroSandbox lifecycle state. `fortlet stop <harness>` stops only the
 owned capsule for the resolved project and reports `absent`, `already-stopped`,
-or `stopped`.
+or `stopped`. `fortlet reset <harness>` removes only an owned stopped or
+crashed capsule's disposable runtime state and reports `absent` or `reset`.
+Reset refuses every active or transitional state and directs the user to stop
+the capsule first.
 
-Both commands accept `--project <path>` and `--allow-broad-mount` with the same
-project rules as `run`. They do not read provider credentials, provision tool
-layers, launch a harness, or expose internal capsule names. Stop preserves the
-capsule record and persistent harness state for a later run.
+All three commands accept `--project <path>` and `--allow-broad-mount` with the
+same project rules as `run`. Repeat an explicit `--project <path>` on stop and
+reset so they select the same launch target. They do not read provider
+credentials, provision tool layers, launch a harness, or expose internal
+capsule names. Stop preserves the capsule record; reset preserves the project,
+persistent harness state, credential projection and fingerprint, and immutable
+tool layers for a later run.
 
 The deterministic management gate uses fake lifecycle observations and
 isolated real-CLI failures without starting a VM:
@@ -73,6 +81,9 @@ cargo test --test management_failures
 Experiment 0010 records the bounded real-runtime screen: one uniquely scoped
 owned Codex capsule was observed absent, running, stopped, and absent through
 the immutable public CLI, with exact ownership verification before cleanup.
+Experiment 0012 is declared to verify active reset refusal, explicit stop,
+terminal removal, persistence, and idempotent absence through the immutable
+public CLI.
 
 ## Deterministic launch-failure evidence
 

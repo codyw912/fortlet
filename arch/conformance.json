@@ -104,11 +104,20 @@
     {
       "proposal": "0004",
       "title": "Project capsule reset",
-      "status": "unimplemented",
-      "modules": [],
-      "tests": [],
+      "status": "partial",
+      "modules": [
+        "src/cli.rs",
+        "src/management.rs",
+        "src/runtime.rs"
+      ],
+      "tests": [
+        "src/cli.rs",
+        "src/management.rs",
+        "src/runtime.rs",
+        "tests/management_failures.rs"
+      ],
       "gaps": [
-        "Project-scoped capsule reset and Fortlet-owned stale-capsule recovery guidance are not implemented."
+        "The declared local runtime experiment has not yet verified active refusal, terminal SDK removal, persistent-state preservation, and idempotent absence through the immutable public CLI."
       ]
     }
   ]

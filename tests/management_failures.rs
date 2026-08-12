@@ -88,3 +88,37 @@ fn stop_rejects_missing_project_without_credentials_or_runtime_state() {
     );
     fixture.assert_no_fortlet_state();
 }
+
+#[test]
+fn reset_rejects_unknown_harness_before_project_or_runtime_state() {
+    let fixture = Fixture::new();
+    let output = fixture.command(&[
+        "reset",
+        "unknown",
+        "--project",
+        fixture.project.to_str().unwrap(),
+    ]);
+
+    assert_failure(
+        output,
+        "harness",
+        "choose a registered harness: codex or tact",
+        "unsupported harness \"unknown\"; expected codex or tact",
+    );
+    fixture.assert_no_fortlet_state();
+}
+
+#[test]
+fn reset_rejects_missing_project_without_credentials_or_runtime_state() {
+    let fixture = Fixture::new();
+    let missing = fixture.project.join("missing");
+    let output = fixture.command(&["reset", "codex", "--project", missing.to_str().unwrap()]);
+
+    assert_failure(
+        output,
+        "project",
+        "run from a readable project directory or pass --project <path>",
+        "cannot resolve project path",
+    );
+    fixture.assert_no_fortlet_state();
+}

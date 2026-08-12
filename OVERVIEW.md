@@ -10,11 +10,12 @@ Fortlet is an alpha Rust implementation. The verified baseline resolves safe
 project roots, provisions immutable Codex and Tact environments, brokers
 ChatGPT credentials through MicroSandbox, creates reusable project-and-harness
 capsules, preserves interactive terminal behavior, provides optional
-transparent Codex and Tact shims, and exposes project-scoped capsule status and
-stop commands. A reproducible Nix package exists for `aarch64-darwin` and is
-declared for `x86_64-linux`; native Linux verification remains outstanding.
+transparent Codex and Tact shims, and exposes project-scoped capsule status,
+stop, and terminal reset commands. A reproducible Nix package exists for
+`aarch64-darwin` and is declared for `x86_64-linux`; native Linux verification
+remains outstanding.
 
-Global inventory, removal, restart, logs, explicit workload leases,
+Global inventory, cross-project removal, restart, logs, explicit workload leases,
 publication, service orchestration, automatic harness discovery, and remote
 execution remain designed directions rather than implemented features.
 

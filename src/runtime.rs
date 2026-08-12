@@ -41,6 +41,7 @@ pub struct Capsule<'a> {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CapsuleDescriptor {
     pub name: String,
+    tool: String,
     labels: BTreeMap<String, String>,
 }
 
@@ -62,6 +63,7 @@ impl CapsuleDescriptor {
                 harness.name(),
                 project.identity.as_str()
             ),
+            tool: harness.name().to_owned(),
             labels,
         }
     }
@@ -97,8 +99,9 @@ impl CapsuleDescriptor {
         self.validate_management(stored_name, labels)?;
         if labels.get(&label("version")) != self.labels.get(&label("version")) {
             bail!(
-                "capsule {} has stale configuration; remove it with msb and retry",
-                self.name
+                "capsule has stale configuration; run `fortlet stop {}` followed by `fortlet reset {}` and retry",
+                self.tool,
+                self.tool
             );
         }
         Ok(())
@@ -372,9 +375,14 @@ mod tests {
         descriptor
             .validate_management(&descriptor.name, &labels)
             .unwrap();
-        assert!(descriptor
+        let error = descriptor
             .validate_launch(&descriptor.name, &labels)
-            .is_err());
+            .unwrap_err();
+        assert_eq!(
+            error.to_string(),
+            "capsule has stale configuration; run `fortlet stop codex` followed by `fortlet reset codex` and retry"
+        );
+        assert!(!error.to_string().contains(&descriptor.name));
     }
 
     #[test]
