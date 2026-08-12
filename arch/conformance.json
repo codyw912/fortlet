@@ -71,10 +71,11 @@
         "experiments/0005-native-codex-marker-control.md",
         "experiments/0006-external-native-codex-control.md",
         "experiments/0007-exact-codex-exit-parity.md",
-        "experiments/0008-human-paced-codex-exit-parity.md"
+        "experiments/0008-human-paced-codex-exit-parity.md",
+        "experiments/0009-idle-ctrl-c-key-exit-parity.md"
       ],
       "gaps": [
-        "Runner evidence proves both packaged shims attach through real PTYs, produce activity after resize, share the expected capsule with concurrent invocations, and remain responsive. Native controls show both Tact and externally launched Codex remain alive after their first foreground-group SIGINT. Native and packaged Codex also both remained alive after atomic `/exit\\r` input and after separate `/`, `e`, `x`, `i`, `t`, and Enter writes with fixed 20-millisecond pacing. These matching timeouts expose no Fortlet-specific discrepancy, but native command acceptance, exact eventual termination, and packaged exit-status preservation remain unresolved."
+        "Runner evidence proves both packaged shims attach through real PTYs, produce activity after resize, share the expected capsule with concurrent invocations, and remain responsive. Native controls show both Tact and externally launched Codex remain alive after their first foreground-group SIGINT. Native and packaged Codex also both remained alive after atomic `/exit\\r`, paced `/exit`, and one `0x03` PTY key under the bounded observer. These matching timeouts expose no Fortlet-specific discrepancy. Manual native evidence confirms one Ctrl-C exits at an idle empty composer, but automated native idle readiness, exact eventual termination, and packaged exit-status preservation remain unresolved."
       ]
     }
   ]

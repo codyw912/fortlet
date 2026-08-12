@@ -1,6 +1,9 @@
 # GOAL: Verify idle Ctrl-C key exit parity
 
-Status: active on 2026-08-11.
+Status: completed on 2026-08-11 — rejected as an exact termination proof.
+Native and packaged Codex both reached the one-byte Ctrl-C-key action and
+remained alive beyond the same 15-second bound. No Fortlet discrepancy was
+observed, but neither unit supplied an exit status to compare.
 
 Determine whether Fortlet's packaged Codex shim preserves native Codex's exact
 termination result when both receive one Ctrl-C terminal key at an idle, empty
@@ -45,6 +48,11 @@ earlier action.
 
 ## Deliverable 2 — Qualify Experiment 0009
 
+Completed at checkpoints `a20e1a90` and `de380540`: exact source, observer,
+native, and package identities; all deterministic rehearsals; the complete
+gate; package smoke; doctor; sole-active-record check; and the external Fish
+marker check passed before dispatch.
+
 1. Freeze the official Codex source tag and commit that establish the idle
    Ctrl-C mechanism, plus the exact native launcher and selected-binary hashes.
 2. Freeze one exact packaged Codex shim produced from the tested observer
@@ -57,6 +65,10 @@ earlier action.
    rehearsed declaration before giving the operator either live command.
 
 ## Deliverable 3 — Compare native and packaged Ctrl-C key exit
+
+Completed as rejected evidence in Experiment 0009. Both zero-retry units
+reached `ctrl_c_key`, timed out identically, and left no matching live launch
+process. Exact termination and status preservation remain unresolved.
 
 The operator runs native Codex, then packaged Codex, from
 `/Users/cody/dev/fortlet` in the same external Fish shell. The four known runner

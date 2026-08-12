@@ -1,6 +1,6 @@
 # Experiment 0009: Idle Ctrl-C key exit parity
 
-Status: in-flight
+Status: completed — rejected
 Design: FIP-0001 and FIP-0002
 Charter scope: `local-foundation/v1`
 
@@ -229,8 +229,57 @@ native npm launcher afterward.
 
 ### Packaged Codex unit
 
-Pending the second declared zero-retry unit.
+The operator ran the exact frozen packaged command once from the same qualified
+external Fish shell and returned this complete structural output:
+
+```text
+{"event":"started"}
+{"event":"activity_initial"}
+{"event":"resized"}
+{"event":"activity_resized"}
+{"event":"concurrent_window"}
+{"event":"ctrl_c_key"}
+Error: PTY child did not exit before timeout
+92:93: syntax error: Expected “"” but found unknown token. (-2741)
+```
+
+Packaged Codex reached the same structural boundaries as native Codex and
+remained alive beyond the same 15-second exit bound. It emitted neither
+`exited` nor a numeric summary, so it also supplies no exit status. The matching
+timeout exposes no Fortlet-specific discrepancy. The same unattributed `-2741`
+diagnostic followed the observer error and is retained but excluded from the
+decision.
+
+Narrowed, read-only process-table checks found no matching live observer or
+frozen packaged Fortlet command afterward. No retry or additional operator
+input was reported for either unit. The observer retained no raw screen bytes,
+and no model prompt, intentional inference, paid quota, credential value, shell
+mutation, unexpected external mutation, or unowned process control was
+observed.
 
 ## Terminal Closure
 
-Pending.
+1. Outcome: rejected — one `0x03` PTY key reached both native and packaged
+   `ctrl_c_key` actions, but neither Codex process terminated within the fixed
+   bound. No exact status exists to compare, and the matching results expose no
+   packaged-path discrepancy.
+2. Root cause: manual native behavior and pinned source establish one idle
+   Ctrl-C as a valid exit interaction, but structural PTY activity plus the
+   fixed hold did not establish the same idle input state under the observer.
+   The observer cannot distinguish a consumed modal/startup action from another
+   PTY-to-key interpretation condition without UI-state evidence; neither
+   possibility justifies a Fortlet repair.
+3. Actual total cost: zero money, zero paid quota, zero model prompts, two of
+   two units, and zero retries. Numeric wall time was not captured, so no
+   estimate is backfilled. Both invocations enforced every declared stage
+   bound, and no overrun was reported.
+4. Next action: stop Codex-specific automated exit work. Preserve the four
+   observer modes and terminal results. Use manual idle Ctrl-C as a lightweight
+   daily-use smoke check and deterministic guest processes for automated status
+   propagation; return the next goal to a broader FIP-0001/FIP-0002 product gap.
+
+The post-closure gate passed: the complete Rust test suite, formatting check,
+strict all-target/all-feature Clippy, conformance test, `nix flake check`, and
+`nix run . -- doctor` all succeeded. Nix reported only the known omission of
+the incompatible `x86_64-linux` system; `doctor` reported the expected dirty
+tree while these closure records were not yet checkpointed.
