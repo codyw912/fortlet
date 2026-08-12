@@ -1,6 +1,6 @@
 # GOAL: Add project capsule reset and recovery
 
-Status: authorized on 2026-08-12.
+Status: completed on 2026-08-12.
 
 Implement accepted FIP-0004: let users remove an owned terminal capsule's
 disposable MicroSandbox state without raw `msb` commands, implicit process
@@ -120,3 +120,13 @@ Run before claiming completion:
 - `cargo clippy --all-targets --all-features -- -D warnings`;
 - `cargo test --test conformance`;
 - `nix flake check`.
+
+## Completion
+
+Implementation checkpoint `3eada810` added the accepted reset contract, its
+deterministic evidence, recovery guidance, documentation, and partial
+conformance. The complete standard verification set passed before dispatch.
+Experiment 0012 then accepted one immutable public-CLI unit covering active
+refusal, explicit stop, terminal reset, persistence, idempotence, and exact
+cleanup. Its terminal-closure checkpoint marks FIP-0004 conformant. No remote
+mutation occurred.

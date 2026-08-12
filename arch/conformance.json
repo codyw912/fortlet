@@ -104,7 +104,7 @@
     {
       "proposal": "0004",
       "title": "Project capsule reset",
-      "status": "partial",
+      "status": "conformant",
       "modules": [
         "src/cli.rs",
         "src/management.rs",
@@ -114,11 +114,10 @@
         "src/cli.rs",
         "src/management.rs",
         "src/runtime.rs",
-        "tests/management_failures.rs"
+        "tests/management_failures.rs",
+        "experiments/0012-project-capsule-reset.md"
       ],
-      "gaps": [
-        "The declared local runtime experiment has not yet verified active refusal, terminal SDK removal, persistent-state preservation, and idempotent absence through the immutable public CLI."
-      ]
+      "gaps": []
     }
   ]
 }

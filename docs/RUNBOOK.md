@@ -81,9 +81,10 @@ cargo test --test management_failures
 Experiment 0010 records the bounded real-runtime screen: one uniquely scoped
 owned Codex capsule was observed absent, running, stopped, and absent through
 the immutable public CLI, with exact ownership verification before cleanup.
-Experiment 0012 is declared to verify active reset refusal, explicit stop,
-terminal removal, persistence, and idempotent absence through the immutable
-public CLI.
+Experiment 0012 records the bounded real-runtime screen: the immutable public
+CLI refused active reset, removed the same owned capsule after explicit stop,
+preserved project and harness state, and reported subsequent absence
+idempotently before exact cleanup.
 
 ## Deterministic launch-failure evidence
 

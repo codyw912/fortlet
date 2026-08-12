@@ -1,6 +1,6 @@
 # Experiment 0012: Project capsule reset
 
-Status: declared
+Status: completed — accepted
 Design: FIP-0004
 Charter scope: `local-foundation/v1`
 
@@ -124,16 +124,87 @@ metadata, preservation checks, cleanup result, and elapsed time.
 
 ## Rehearsal
 
-Pending. Before dispatch, record the exact treatment identity and package,
-prove the temporary project absent, verify immutable layers complete, exercise
-all reset decisions through deterministic tests, and pass the complete
-standard verification set. Rehearsal MUST NOT create a capsule, read a real
-credential, launch a harness, or contact the network.
+Completed on 2026-08-12 without creating a capsule, reading a real credential,
+launching a harness, or contacting the network:
+
+1. The treatment was checkpoint `3eada810cedd` (`implement safe project
+   capsule reset`) and immutable package output
+   `/nix/store/7iqradjm2f8pwwc04zzvja2vrikjwnx4-fortlet-0.1.0`.
+2. The complete standard gate passed: 39 unit tests, one conformance test, four
+   management-failure integration tests, two native integration tests, ten
+   pre-runtime integration tests, formatting, strict all-target/all-feature
+   Clippy, and `nix flake check`. Nix emitted only the known missing app
+   metadata and incompatible `x86_64-linux` warnings.
+3. The existing immutable-layer markers for `_base/bookworm-1` and
+   `codex/0.147.0` were present under Fortlet's data root, so dispatch required
+   no provisioning.
+4. The exact temporary project was absent. The immutable CLI rejected that
+   missing explicit project at the project stage before runtime access.
+5. Deterministic tests exercised every SDK state, side-effect-free absence,
+   lock/refetch ordering, ownership, version skew, malformed configuration,
+   output, parsing, and lookup, lock, and removal failures.
 
 ## Results
 
-Pending declared dispatch.
+Dispatch ran from 2026-08-12 17:35:54 EDT through 17:40:18 EDT against the
+treatment and package above.
+
+The execution harness initially denied the immutable CLI access to
+`~/.microsandbox` while it opened the migration lock. This preflight invocation
+did not reach MicroSandbox and created neither the generated Fortlet harness
+state nor its capsule lock. The required elevated invocation then began the
+declared live unit. This harness-level correction is retained here rather than
+silently omitted; it consumed no capsule, launch, credential read, or runtime
+retry.
+
+The canonical temporary project produced identity `463f816302bcded3` and
+exact capsule `fortlet-501-codex-463f816302bcded3`. Initial public reset exited
+zero with `codex<TAB>absent`; both the exact harness-state path and capsule lock
+remained absent. The single no-prompt launch exited zero with:
+
+```text
+codex-cli 0.147.0
+```
+
+Reset while running exited nonzero with exactly:
+
+```text
+fortlet: capsule stage failed; run `fortlet stop codex` and retry reset: capsule is running
+```
+
+Public status remained `codex<TAB>running`, proving refusal did not stop or
+remove the capsule. Public stop then returned `codex<TAB>stopped`.
+
+An empty non-secret `experiment-0012-sentinel` file was created in the exact
+owned persistent harness-state directory. Presence-only checks found the
+project, sentinel, public credential projection, credential fingerprint, and
+both immutable layer markers. A stopped MicroSandbox query AND-matched
+`fortlet.managed=true`, `fortlet.schema=1`,
+`fortlet.project=463f816302bcded3`, and `fortlet.tool=codex`, returning exactly
+`fortlet-501-codex-463f816302bcded3` before removal.
+
+Terminal public reset exited zero with `codex<TAB>reset`. Public status then
+returned `codex<TAB>absent`, and the repeated four-label query returned no
+runtime record. Before any cleanup, all six preservation checks still passed.
+A second reset exited zero with `codex<TAB>absent`.
+
+Final names-only inspection confirmed the exact empty temporary project,
+generated capsule lock, and owned harness-state tree. Cleanup removed only
+those enumerated artifacts. Their final absence was verified at 17:40:18 EDT.
 
 ## Terminal Closure
 
-Pending.
+1. Outcome: accepted — the immutable public CLI refused active reset, removed
+   the exact owned terminal capsule, preserved every declared durable surface,
+   and reported subsequent absence idempotently.
+2. Root cause: reset shares launch's descriptor and lock, reauthorizes fresh
+   stored configuration under that lock, permits version skew, and delegates
+   only stopped or crashed removal to the SDK handle without touching
+   project, harness-state, credential, or layer paths.
+3. Actual total cost: zero money, zero paid quota, zero model prompts, zero
+   remote mutation, one of one Codex `--version` launch, one of one owned local
+   capsule, zero live-runtime retries, and 4 minutes 24 seconds versus the
+   15-minute ceiling. One execution-harness permission preflight was denied
+   before runtime contact and recorded above.
+4. Next action: mark FIP-0004 conformant, close the reset mission, rewrite the
+   handoff, and stop for operator selection of the next product goal.

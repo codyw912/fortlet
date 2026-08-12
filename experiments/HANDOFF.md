@@ -1,58 +1,74 @@
-# Session Handoff — Public alpha repository is established
+# Session Handoff — Project capsule reset is conformant
 
 Audience: a fresh agent session. `GOAL.md` is normative and complete. No
-experiment is active after the terminal publication push; Experiments 0001
-through 0011 are terminally closed.
+experiment is active; Experiments 0001 through 0012 are terminally closed.
 
 ## Verified result
 
-1. The complete Fortlet history is public at
-   `https://github.com/codyw912/fortlet`, with SSH origin
-   `git@github.com:codyw912/fortlet.git` and default branch `main`.
-2. The repository readiness audit found dual MIT/Apache-2.0 licensing, GitHub
-   no-reply authorship, no credential/private-key patterns in the tree or
-   history, and only operator-accepted personal paths in retained experiment
-   evidence.
-3. Publication preserved the full decision and negative-experiment history.
-   Jujutsu added SSH signatures to previously unsigned commits on initial
-   push; Experiment 0011 maps every cited pre-signing checkpoint ID to its
-   signed public object ID.
-4. Initial publication produced exact equality among local `main`,
-   `main@origin`, and GitHub `refs/heads/main`. Only `main` existed; GitHub
-   reported zero releases, Actions workflows, webhooks, and deployments.
-5. No CI, release, package, issue, tag, secret, deploy key, repository policy,
-   or other remote resource was added. Those require separate authorization.
+1. FIP-0004 is implemented by project-scoped `fortlet reset <harness>` with
+   the same explicit project and broad-mount selection as run, status, and
+   stop.
+2. Reset returns absence before creating Fortlet state or a capsule lock. A
+   present target is locked, fetched again, parsed, and checked for exact name
+   plus managed, schema, project, and tool ownership. Version skew remains
+   acceptable for management.
+3. Reset removes only owned stopped or crashed capsules through the
+   MicroSandbox SDK handle. Created, starting, running, draining, and paused
+   capsules fail with the direct `fortlet stop <harness>` correction; reset
+   never stops or kills work implicitly.
+4. Launch's stale-configuration guidance now uses public Fortlet stop and
+   reset commands without exposing the internal capsule name or project
+   identity.
+5. Experiment 0012 accepted one immutable public-CLI unit. It proved initial
+   side-effect-free absence, running refusal, explicit stop, exact four-label
+   ownership, terminal reset, runtime-record absence, project and persistent
+   state preservation, idempotent second reset, and exact cleanup.
+6. The complete standard verification set passed immediately before the live
+   unit. FIP-0003 and FIP-0004 are conformant; FIP-0001 and FIP-0002 remain
+   partial for their explicitly listed gaps.
 
 ## Product state
 
-FIP-0003 is accepted and conformant. Implemented daily-use surfaces are
-`doctor`, explicit `run`, optional package-owned `codex` and `tact` shims,
-explicit `native`, project-scoped `status`, and project-scoped `stop`.
-Reusable project+harness capsules, immutable base and harness layers, brokered
-ChatGPT credentials, safe project resolution, broad-root protection, and
-deterministic pre-runtime diagnostics are established.
+The public alpha repository remains at `https://github.com/codyw912/fortlet`
+with SSH origin `git@github.com:codyw912/fortlet.git`. The reset mission made
+no remote mutation, so the new local stack is not published.
 
-Experiment 0010 proved one immutable public-CLI capsule path from absent to
-running to stopped to absent with exact ownership verification and complete
-cleanup. The full standard gate passed again immediately before public
-publication.
+Daily-use surfaces are `doctor`, explicit `run`, optional package-owned
+`codex` and `tact` shims, explicit `native`, project-scoped `status`, bounded
+`stop`, and terminal `reset`. Reusable project+harness capsules, immutable base
+and harness layers, brokered ChatGPT credentials, safe project resolution,
+broad-root protection, deterministic pre-runtime diagnostics, and explicit
+disposable-root recovery are established.
 
 ## Remaining gaps
 
-FIP-0001 remains partial. Exact gaps are harness-owned persistent paths and
-credential policy; live capsule-reconciliation and terminal-attachment failure
-evidence; capsule topology, concurrency, and terminal coverage; restart, logs,
-and tool-update commands; explicit interactive/background leases; declarative
-project environments and private overlays; host-side publication; standalone
-non-Nix installation; and native `x86_64-linux` package verification. FIP-0002
-retains the documented automated Codex exit-status evidence gap.
+FIP-0001 remains partial. Exact gaps are harness-adapter ownership of
+persistent paths and credential policy; live capsule-reconciliation and
+terminal-attachment failure evidence; capsule topology, concurrency, and
+terminal coverage; restart, logs, and tool-update commands; explicit
+interactive/background leases; declarative project environments and private
+overlays; host-side publication; standalone non-Nix installation; and native
+`x86_64-linux` package verification. FIP-0002 retains the documented automated
+Codex exit-status evidence gap.
+
+## Operational notes
+
+Run Cargo verification inside `nix develop`; a vanilla host shell may not
+provide macOS `libiconv`. Commands that access `~/.microsandbox` also require
+the assistant execution environment's explicit filesystem escalation even
+when the operator has already authorized the experiment. Experiment 0012
+records one denied preflight before runtime contact so this is not rediscovered
+or silently hidden.
+
+Use Jujutsu for all local history. Inspect the unpublished stack with
+`jj log -r 'main..@'`. Do not push, create a PR, or mutate GitHub without a new
+operator authorization.
 
 ## Successor boundary
 
-The operator selected project-scoped reset/recovery as the next product
-direction. Design it under a new accepted FIP before implementation. The
-smallest likely contract is an owned, project+harness-scoped reset that refuses
-active capsules, removes only disposable MicroSandbox state, preserves project
-files and persistent harness state, and replaces raw `msb` recovery guidance.
-Do not infer global inventory, state purging, restart, logs, leases, CI,
-distribution, or additional GitHub mutation as part of that goal.
+The reset/recovery mission is complete. The next GOAL should be selected with
+the operator rather than inferred. Product-focused candidates are the first
+observable workload-lease contract, a similarly narrow restart/log surface,
+or deeper capsule topology and terminal evidence. Standalone installation was
+explicitly deferred until later. Any new public CLI or lifecycle contract
+requires an accepted FIP before implementation.
