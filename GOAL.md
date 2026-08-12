@@ -1,142 +1,104 @@
-# GOAL: Verify idle Ctrl-C key exit parity
+# GOAL: Prove project resolution and broad-root safety
 
-Status: completed on 2026-08-11 — rejected as an exact termination proof.
-Native and packaged Codex both reached the one-byte Ctrl-C-key action and
-remained alive beyond the same 15-second bound. No Fortlet discrepancy was
-observed, but neither unit supplied an exit status to compare.
+Status: active on 2026-08-12.
 
-Determine whether Fortlet's packaged Codex shim preserves native Codex's exact
-termination result when both receive one Ctrl-C terminal key at an idle, empty
-composer. Extend only repository test tooling; do not change Fortlet product
-behavior, package behavior, harness configuration, or accepted architecture.
+Close the project-resolution and broad-root portion of FIP-0001's conformance
+gap with deterministic automated evidence. Fix only behavior that the tests
+show conflicts with the accepted design. Do not add commands, change capsule
+topology, alter harness behavior, or perform a live experiment.
 
-Before implementation, read FIP-0001 and FIP-0002 in full, the validated design
-at `docs/plans/2026-08-11-idle-ctrl-c-exit-parity-design.md`, and Experiment
-0008. Preserve every terminal result from Experiments 0003 through 0008.
+Before implementation, read FIP-0001 in full and the validated design at
+`docs/plans/2026-08-12-project-resolution-and-broad-root-design.md`. Preserve
+every terminal result from Experiments 0001 through 0009.
 
-## Source-established premise
+## Deliverable 1 — Make resolution policy deterministic to test
 
-The operator confirmed that native Codex 0.147.0 exits after one manually typed
-Ctrl-C at an idle, empty composer. During an active conversation, the first
-Ctrl-C interrupts work and a later Ctrl-C exits.
+1. Preserve `project::resolve` as the production boundary that reads the real
+   current directory and `HOME`.
+2. Extract the smallest parameterized resolver that accepts the current
+   directory and home directory explicitly.
+3. Use real temporary directory trees in tests. Do not mutate process-global
+   environment, call `chdir`, or introduce a filesystem abstraction.
+4. Keep project-stage error wrapping at the session boundary unchanged unless
+   a failing contract test proves it insufficient.
 
-Official Codex tag `rust-v0.147.0`, peeled commit
-`be6e8eac029b183056b7e4402879f15d2c85f61b`, agrees. Its formal double-press
-quit shortcut is disabled. With no modal, composer text, or cancellable work,
-one Ctrl-C key requests an immediate shutdown-first exit. This is not the same
-mechanism as sending operating-system `SIGINT` to a process group.
+## Deliverable 2 — Prove project selection and canonicalization
 
-## Deliverable 1 — Add one Ctrl-C key observer path
+Use test-first vertical slices to prove:
 
-Completed at checkpoint `cc52a2e9`: all four observer actions pass fifteen
-focused tests. The new action proves one `0x03` byte in one write, distinctive
-code 23, structural events, and owned timeout cleanup while preserving every
-earlier action.
+1. an explicit project root wins;
+2. a current directory inside an explicit root is preserved, while an
+   unrelated current directory starts at that root;
+3. discovery selects the nearest root within each marker class and applies
+   class priority in this order: Jujutsu, Git, devenv, flake;
+4. an unmarked directory resolves to itself;
+5. selected roots and working directories are canonicalized; and
+6. identity is stable and derived from the final canonical root.
 
-1. Preserve the signal, atomic-exit, and typed-exit modes and all evidence they
-   produced.
-2. Add separate deterministic and live Ctrl-C-key modes. After the unchanged
-   startup, resize, and fixed hold sequence, write exactly one `0x03` byte to
-   the observer-owned PTY.
-3. Emit a distinct `ctrl_c_key` structural event, discard all raw PTY screen
-   bytes, and retain the existing exit bound and owned cleanup.
-4. Use test-first vertical slices to prove the public modes, exact single-byte
-   and single-write delivery, event order, distinctive fixture exit code 23,
-   timeout cleanup, and unchanged existing modes.
-5. Simplify without changing behavior, run the focused gate, and checkpoint the
-   tested observer before declaring a live experiment.
+## Deliverable 3 — Enforce and prove broad-root safety
 
-## Deliverable 2 — Qualify Experiment 0009
+1. Apply broad-root protection to the selected project root, not only to the
+   original current directory.
+2. Replace a selected home directory or filesystem root with the persistent
+   Fortlet scratch workspace unless `allow_broad_mount` is true.
+3. Apply the same rule when the broad root came from `--project` or marker
+   discovery. `--project $HOME` and `--project /` are not implicit overrides.
+4. When scratch is selected, use it as both root and working directory and
+   derive identity from its canonical path.
+5. Prove explicit broad-mount authorization retains the selected broad root
+   and corresponding working directory.
+6. Prove scratch creation and canonicalization failures are fail-closed and
+   include useful path context.
 
-Completed at checkpoints `a20e1a90` and `de380540`: exact source, observer,
-native, and package identities; all deterministic rehearsals; the complete
-gate; package smoke; doctor; sole-active-record check; and the external Fish
-marker check passed before dispatch.
+## Deliverable 4 — Document, conform, and close
 
-1. Freeze the official Codex source tag and commit that establish the idle
-   Ctrl-C mechanism, plus the exact native launcher and selected-binary hashes.
-2. Freeze one exact packaged Codex shim produced from the tested observer
-   checkpoint.
-3. Declare Experiment 0009 with exact commands, identities, timings, decision
-   rules, and a two-unit zero-retry budget.
-4. Run the complete standard verification set, all deterministic observer
-   rehearsals, exact package checks, and `nix run . -- doctor` before dispatch.
-5. Confirm Experiment 0009 is the sole active record and checkpoint the
-   rehearsed declaration before giving the operator either live command.
-
-## Deliverable 3 — Compare native and packaged Ctrl-C key exit
-
-Completed as rejected evidence in Experiment 0009. Both zero-retry units
-reached `ctrl_c_key`, timed out identically, and left no matching live launch
-process. Exact termination and status preservation remain unresolved.
-
-The operator runs native Codex, then packaged Codex, from
-`/Users/cody/dev/fortlet` in the same external Fish shell. The four known runner
-marker names must be absent. Each unit uses an 80-by-24 PTY, 100-millisecond
-settle, 120-by-40 resize, a 5-second unattended hold, one `0x03` PTY write, and
-a 15-second exit bound.
-
-The operator supplies no additional input and returns each complete structural
-result verbatim. Both declared units run once unless a hard invariant fires:
-
-1. Exact matching exit codes and signals accept packaged idle Ctrl-C parity;
-   the source-established expected result is `exit_code:0` and
-   `exit_signal:null` for both.
-2. Any native-versus-packaged termination or status mismatch records a
-   packaged-path discrepancy but authorizes no repair under this goal.
-3. Failure of native Codex to terminate normally rejects the automated idle
-   readiness premise; record the packaged unit too, without retry or adaptation.
-
-After the results, verify owned cleanup, close Experiment 0009 terminally,
-update conformance and the experiment index, rewrite the handoff, mark this goal
-complete or blocked, then STOP and report.
+1. Document that explicit broad projects still require
+   `--allow-broad-mount`.
+2. Update `arch/conformance.json` in the same checkpoint as the code and tests.
+   Remove only the project-resolution and broad-root coverage gap; retain
+   capsule topology, concurrency, and terminal-semantic gaps.
+3. Run the complete verification set, rewrite `experiments/HANDOFF.md`, mark
+   this GOAL complete, inspect `main..@`, then STOP and report.
 
 ## Definition of Done
 
-1. Deterministic evidence proves one `0x03` byte in one PTY write, event order,
-   status preservation, and owned cleanup.
-2. One exact native Codex identity and one exact packaged Codex shim receive the
-   same source-established idle interaction from the same external Fish shell.
-3. The full gate passes before live dispatch, and both unedited structural
-   results are recorded with zero retries.
-4. No model prompt, intentional inference, or paid quota occurs.
-5. Conformance states only what the results prove; then STOP.
+1. Deterministic tests cover explicit selection, marker precedence, ordinary
+   fallback, nested working directories, canonicalization, and stable identity.
+2. Deterministic tests cover home and filesystem-root protection for direct,
+   explicit, and marker-selected broad roots, plus the explicit override.
+3. Broad-root scratch failure is fail-closed with actionable project-stage
+   context.
+4. Documentation and conformance describe exactly the behavior proved.
+5. The complete verification set is green; then STOP.
 
 ## Binding rules
 
-1. Preserve every charter invariant and FIP-0001/FIP-0002 constraint.
-2. Send exactly one Ctrl-C terminal key byte. Do not send process signals, a
-   second key, EOF, slash commands, adaptive input, or screen-text matching.
-3. Keep all existing observer paths available unchanged for reproducibility.
-4. Do not store or print raw PTY content, environment values, account metadata,
-   or credential values.
-5. Do not change Fortlet, the package contract, live timings, or observer
-   behavior after Experiment 0009 is declared.
-6. The observer may control only the process group it created and verified.
-7. Ordinary Codex-managed and Fortlet-managed state writes are allowed for the
-   two launches. Shell startup-file, Fish, Nix, PATH-manager,
-   Codex-configuration, and outside-project mutation are not authorized.
-8. Use reviewable Jujutsu checkpoints and inspect `main..@` before handoff.
+1. Preserve every charter invariant and FIP-0001 constraint.
+2. Do not change FIP-0001, add a new architecture mechanism, or expand into
+   capsule topology, leases, management commands, environments, or packaging.
+3. Do not mutate the operator's actual home, root directory, environment, or
+   process working directory in tests.
+4. Do not launch Codex, Tact, MicroSandbox capsules, paid services, or external
+   experiments.
+5. Prefer the smallest production refactor that permits deterministic evidence.
+6. Keep conformance changes in the same checkpoint as their code and tests.
+7. Use reviewable Jujutsu checkpoints and inspect `main..@` before handoff.
 
 ## Budget and escalation
 
-1. Engineering ceiling: 45 minutes from mission setup.
-2. Experiment ceiling: zero money, zero paid quota, zero model prompts, two
-   units, zero retries, and at most 10 minutes after dispatch begins.
-3. Stop on credential output, unexpected external mutation, unowned process
-   control, paid activity, or any need to change a declared live command.
+1. Engineering ceiling: two hours from implementation start.
+2. External budget: zero money, zero paid quota, zero model prompts, and no
+   live experiment.
+3. Stop on any need to change an accepted FIP, weaken broad-root protection,
+   mutate outside the project, or expand beyond this mission.
 
 ## Verification
 
-Run before issuing either operator command:
+Run before claiming completion:
 
-- `cargo test --example pty_observer`
-- All deterministic observer fixture modes declared by Experiment 0009
-- `cargo test`
-- `cargo fmt --all -- --check`
-- `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test --test conformance`
-- `nix flake check`
-- `nix run . -- doctor`
-- Exact source, native identity, package identity, marker-name, unchanged-path,
-  and one-active-experiment checks declared in Experiment 0009
+- focused `project` module tests during development;
+- `cargo test`;
+- `cargo fmt --all -- --check`;
+- `cargo clippy --all-targets --all-features -- -D warnings`;
+- `cargo test --test conformance`;
+- `nix flake check`.
