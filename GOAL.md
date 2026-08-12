@@ -25,6 +25,11 @@ mechanism as sending operating-system `SIGINT` to a process group.
 
 ## Deliverable 1 — Add one Ctrl-C key observer path
 
+Completed at checkpoint `cc52a2e9`: all four observer actions pass fifteen
+focused tests. The new action proves one `0x03` byte in one write, distinctive
+code 23, structural events, and owned timeout cleanup while preserving every
+earlier action.
+
 1. Preserve the signal, atomic-exit, and typed-exit modes and all evidence they
    produced.
 2. Add separate deterministic and live Ctrl-C-key modes. After the unchanged

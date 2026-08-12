@@ -30,3 +30,4 @@ scannable failure/win history of the project:
 - `0006-external-native-codex-control.md` — accepted; external native Codex reached signal and reproduced the packaged first-interrupt timeout.
 - `0007-exact-codex-exit-parity.md` — rejected; exact `/exit\r` input reached both UIs, but neither terminated within the fixed bound.
 - `0008-human-paced-codex-exit-parity.md` — rejected; fixed paced `/exit` input reached both UIs, but neither terminated within the fixed bound.
+- `0009-idle-ctrl-c-key-exit-parity.md` — declared; compare one idle Ctrl-C PTY key in native and packaged Codex.
