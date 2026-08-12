@@ -45,6 +45,23 @@ override.
 `doctor` reads authentication metadata but never prints token values. Real
 launches require a healthy MicroSandbox host and a valid ChatGPT credential.
 
+## Deterministic launch-failure evidence
+
+The pre-runtime integration gate invokes the compiled CLI with a cleared
+subprocess environment and temporary home, project, state, data, and fake-auth
+paths:
+
+```bash
+cargo test --test pre_runtime_failures
+```
+
+It proves actionable, fail-closed errors for unsupported harnesses, invalid
+projects, credential loading and mount boundaries, local capsule-state
+preparation, guest auth projection, and incomplete base or harness layers. The
+environment-layer fixtures are rejected before provisioning begins. This gate
+does not exercise live MicroSandbox reconciliation or terminal attachment;
+those failure paths remain outstanding.
+
 ## Optional transparent shims
 
 The Nix package exposes `codex` and `tact` in a dedicated directory without

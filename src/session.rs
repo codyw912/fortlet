@@ -53,6 +53,11 @@ pub async fn launch(request: LaunchRequest) -> Result<i32> {
         "credentials",
         "refresh the host Codex login and retry",
     )?;
+    stage(
+        require_outside_mounts(&credentials, &[&project.root, &paths.data]),
+        "credentials",
+        "move the host credential file outside every guest mount and retry",
+    )?;
     let runtime = MicroSandboxRuntime::new(&paths);
     let capsule = stage(
         runtime.capsule(&project, harness),
@@ -65,7 +70,7 @@ pub async fn launch(request: LaunchRequest) -> Result<i32> {
         "remove the reported invalid guest projection and retry",
     )?;
     stage(
-        require_outside_mounts(&credentials, &[&project.root, &capsule.state, &paths.data]),
+        require_outside_mounts(&credentials, &[&capsule.state]),
         "credentials",
         "move the host credential file outside every guest mount and retry",
     )?;

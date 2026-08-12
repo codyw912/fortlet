@@ -34,11 +34,12 @@
         "src/project.rs",
         "src/session.rs",
         "tests/native.rs",
+        "tests/pre_runtime_failures.rs",
         "tests/conformance.rs"
       ],
       "gaps": [
         "Harness adapters do not yet own persistent paths or credential policy.",
-        "Automated coverage checks staged error formatting but does not exercise each live launch failure stage.",
+        "Deterministic CLI evidence covers actionable failures through local environment-layer validation; live MicroSandbox capsule reconciliation and terminal attachment failure evidence remains outstanding.",
         "Automated coverage does not yet exercise capsule topology and concurrency or terminal semantics.",
         "Status, stop, restart, logs, and tool-update management commands are not implemented.",
         "Interactive and background workload leases are not yet represented explicitly.",
