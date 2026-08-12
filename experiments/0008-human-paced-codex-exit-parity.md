@@ -200,7 +200,40 @@ this result was recorded.
 
 ## Results
 
-Pending.
+### Native Codex unit
+
+The operator ran the exact native command once from the qualified external
+Fish shell and returned this complete structural output:
+
+```text
+{"event":"started"}
+{"event":"activity_initial"}
+{"event":"resized"}
+{"event":"activity_resized"}
+{"event":"concurrent_window"}
+{"event":"typed_exit_command"}
+Error: PTY child did not exit before timeout
+96:97: syntax error: Expected “"” but found unknown token. (-2741)
+```
+
+Native Codex reached initial activity, actual resize activity, the unattended
+hold, and the fixed paced typed-exit action, then remained alive beyond the
+15-second exit bound. The observer emitted neither `exited` nor a numeric
+summary, so this unit supplies no native exit status and rejects the declared
+native normal-termination premise. It consumes the sole native run and is not
+retried or adapted.
+
+The final `-2741` line appeared after the observer timeout diagnostic, as in
+Experiments 0006 and 0007. Its AppleScript-style provenance remains
+unestablished, so it is retained but excluded from the decision. Narrowed,
+read-only process-table checks found no matching live observer command or exact
+native npm launcher after the result. The pre-existing process table did
+contain an unrelated six-hour-old observer test executable under its Cargo
+parent; it did not match the declared live command and was not controlled.
+
+### Packaged Codex unit
+
+Pending the second declared zero-retry unit.
 
 ## Terminal Closure
 
