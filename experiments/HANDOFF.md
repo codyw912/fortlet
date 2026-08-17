@@ -1,11 +1,11 @@
-# Session Handoff — Portable `openpty` successor is locally qualified
+# Session Handoff — Hosted Rust is green; primary PR remains draft
 
 Audience: a fresh agent session. `GOAL.md` is normative and active. Experiments
 0013 and 0014 are terminally rejected after their single declared hosted units.
-Experiments 0001 through 0014 are terminally closed, and Experiment 0015 is the
-one active successor. Its local implementation is qualified; no remote
-correction, push, or run is authorized without a new exact transaction
-approval.
+Experiments 0001 through 0015 are terminally closed. Experiment 0015 accepted
+its one hosted unit, so the primary PR's required Rust verification is green.
+No branch push, PR update, readiness, merge, setting change, or other remote
+mutation is currently authorized.
 
 ## Verified result
 
@@ -47,15 +47,20 @@ approval.
    remote mutation occurred.
 10. Experiment 0015 replaces the syntactic mutable reference with a named raw
     pointer derived from the same mutable winsize. Its focused 15-test observer
-    suite and the complete standard local verification set pass on
-    `aarch64-darwin`; no remote mutation has tested Linux yet.
+    suite and complete standard local verification set pass on
+    `aarch64-darwin`.
+11. The separately approved correction pushed only the existing goal branch to
+    signed tip `e2e4a6d8b24e974add01a720ddaf73c71de7963a`. All 18 PR commits have
+    valid GitHub SSH signatures. Exactly one new hosted run, `32052509798`, job
+    `95455045523`, passed package and Rust installation, tests, formatting,
+    strict Linux Clippy, conformance, and cleanup in 3 minutes 19 seconds.
 
 ## Product state
 
 The public repository remains at `https://github.com/codyw912/fortlet` with SSH
 origin `git@github.com:codyw912/fortlet.git`. Remote `main` remains at
 `e95b0cdb1308f732d3f45db7a85027d45bcd4048`; the primary goal bookmark is at
-`0b75f02dd5422362dd49acff776aecff1e94ad7b`, and PR #1 remains open and draft.
+`e2e4a6d8b24e974add01a720ddaf73c71de7963a`, and PR #1 remains open and draft.
 No readiness, merge, protection, or settings mutation has occurred.
 
 Daily-use surfaces are `doctor`, explicit `run`, optional package-owned
@@ -86,16 +91,15 @@ records one denied preflight before runtime contact so this is not rediscovered
 or silently hidden.
 
 Use Jujutsu for all local history. Do not push, rerun, or mutate the existing
-PR or GitHub without a new exact operator authorization. Experiment 0014's one
-correction push and one replacement hosted run are exhausted. Experiment 0015
-authorizes local implementation and verification only until its exact remote
-transaction is separately presented and approved.
+PR or GitHub without a new exact operator authorization. Experiments 0014 and
+0015 have exhausted their correction pushes and hosted runs.
 
 ## Current mission boundary
 
-The Experiment 0015 correction is locally qualified. Refresh and present the
-exact stack, diff, destination, remote PR/head/run baseline, signatures,
-verification state, rejected control, and Jujutsu dry-run before requesting
-approval for its one correction push. The operator still owns readiness and
-both bootstrap merges. Do not push, rerun, update PR metadata, mark readiness,
-merge, or change repository settings on inferred authority.
+Record Experiment 0015's terminal acceptance locally and stop. The next remote
+candidate is a separately reviewed update to PR #1's reviewed revision and
+verification evidence, followed by a separately reviewed bootstrap readiness
+mutation if every locally knowable primary deliverable is complete. The
+operator still owns readiness and both bootstrap merges. Do not push, rerun,
+update PR metadata, mark readiness, merge, or change repository settings on
+inferred authority.

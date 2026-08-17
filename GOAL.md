@@ -78,6 +78,12 @@ bookmark and observe one automatically created replacement hosted unit. This
 authority creates no new workflow, dependency, bookmark, pull request,
 readiness, merge, settings, or retry permission.
 
+Experiment 0015 accepted and exhausted that authority on 2026-08-17. Its one
+signed correction push produced one replacement hosted run, and tests,
+formatting, strict Linux Clippy, and conformance all passed. No further branch
+push, PR update, readiness, merge, settings, or retry authority carries forward
+from that result.
+
 ## Deliverable 4 — Protect main and close bootstrap publication
 
 1. Present exact repository-setting and branch-protection payloads for operator

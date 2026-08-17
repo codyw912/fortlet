@@ -36,4 +36,4 @@ scannable failure/win history of the project:
 - `0012-project-capsule-reset.md` — accepted; the public CLI refused active reset, removed the owned terminal capsule, preserved durable state, reported absence idempotently, and cleaned up exactly.
 - `0013-pull-request-workflow-bootstrap.md` — rejected; the exact draft PR opened, but its sole initial hosted unit could not link Linux `libcap-ng`.
 - `0014-hosted-linux-linker-closure.md` — rejected; the Ubuntu package closed linking and tests passed, but strict hosted Linux Clippy found a platform-specific `openpty` mutability error.
-- `0015-portable-openpty-winsize.md` — declared; express the PTY winsize as one raw pointer valid for the Apple and Linux `openpty` bindings.
+- `0015-portable-openpty-winsize.md` — accepted; one raw winsize pointer passed the complete PTY suite and every hosted Linux Rust gate across the Apple and Linux `openpty` bindings.
