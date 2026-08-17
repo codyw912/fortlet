@@ -158,7 +158,7 @@
       "modules": [],
       "tests": [],
       "gaps": [
-        "FIP-0006 is in Review; no project manifest, isolated project-layer provisioning, activation, reconciliation, or acceptance evidence is implemented."
+        "FIP-0006 is accepted; no project manifest, isolated project-layer provisioning, activation, reconciliation, or acceptance evidence is implemented."
       ]
     }
   ]

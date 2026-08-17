@@ -1,6 +1,6 @@
 # GOAL: Add opt-in project environments
 
-Status: design review. FIP-0006 MUST be accepted before implementation.
+Status: active. FIP-0006 accepted on 2026-08-17.
 
 Make Fortlet useful for ordinary work in real repositories by adding the
 smallest safe project-tool environment: projects that opt in can supply a
@@ -8,9 +8,7 @@ versioned immutable layer whose tools and declared environment reach both
 supported harnesses. A project without configuration must behave exactly as it
 does today.
 
-Before implementation, read FIP-0001, FIP-0005, and FIP-0006 in full. FIP-0006
-is currently in Review; resolve its mechanism and acceptance with the operator
-before writing product code.
+Before implementation, read FIP-0001, FIP-0005, and FIP-0006 in full.
 
 ## Deliverable 1 — Accept the project-environment contract
 
@@ -21,8 +19,8 @@ before writing product code.
    tools without executing repository-controlled text on the host or exposing
    provider credentials during provisioning.
 3. Keep conformance `unimplemented` until code and tests establish observable
-   requirements. Then STOP for operator acceptance if the chosen mechanism is
-   materially larger than FIP-0006 describes.
+   requirements. STOP if the implementation is materially larger than
+   FIP-0006 describes.
 
 ## Deliverable 2 — Build immutable project layers
 

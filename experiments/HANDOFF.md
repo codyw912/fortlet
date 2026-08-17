@@ -35,9 +35,9 @@ client. In Fortlet's own repository an isolated agent therefore cannot assume
 that `cargo`, `rustc`, or `jj` exists. This is the primary current obstacle to
 ordinary project work.
 
-## Design under review
+## Accepted design
 
-FIP-0006 is in Review and conformance is `unimplemented`. It proposes one
+FIP-0006 is Accepted and conformance is `unimplemented`. It defines one
 opt-in root manifest, `.fortlet/environment.json`, plus a fixed adjacent POSIX
 recipe, `.fortlet/environment.sh`. The manifest contains only layer-relative
 path entries and literal variables. The host snapshots and hashes both files
@@ -56,15 +56,9 @@ the FIP deliberately does not claim cross-machine bit reproducibility.
 
 ## What to do next
 
-Review FIP-0006 with the operator. Do not write product code until its status is
-Accepted. The key review questions are whether guest-only repository shell is
-an acceptable first trust boundary, whether exact two-file identity plus a
-verified output digest is sufficient, and whether unauthenticated public
-network access is acceptable for the first slice.
-
-After acceptance, implement only the GOAL's manifest, isolated immutable layer,
-activation, reconciliation, Fortlet toolchain fixture, deterministic evidence,
-and one bounded experiment. Do not expand into services, private overlays,
+Implement only the GOAL's manifest, isolated immutable layer, activation,
+reconciliation, Fortlet toolchain fixture, deterministic evidence, and one
+bounded experiment. Do not expand into services, private overlays,
 general Nix integration, installation, logs, restart, leases, tool-update
 commands, or extra harnesses. Publication uses one exact FIP-0005 packet; the
 operator remains the sole merge authority.

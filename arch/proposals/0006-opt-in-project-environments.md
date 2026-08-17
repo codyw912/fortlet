@@ -1,7 +1,7 @@
 # FIP-0006: Opt-in project environments
 
-Status: Review
-Recorded: 2026-08-17 for operator review
+Status: Accepted
+Recorded: 2026-08-17 from the operator-validated project-environment design
 Requires: FIP-0001
 
 ## Summary
