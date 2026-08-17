@@ -13,6 +13,9 @@ fn hosted_verification_is_read_only_and_targets_main_pull_requests() {
     assert!(!WORKFLOW.contains("secrets."));
     assert!(!WORKFLOW.contains("microsandbox"));
     assert!(!WORKFLOW.contains("fortlet run"));
+    assert!(!WORKFLOW.contains("actions/cache"));
+    assert!(!WORKFLOW.contains("container:"));
+    assert!(!WORKFLOW.contains("nix"));
 }
 
 #[test]
@@ -23,6 +26,8 @@ fn hosted_verification_pins_tools_and_runs_exact_rust_gates() {
         .contains("rustup toolchain install 1.97.1 --profile minimal --component clippy,rustfmt"));
 
     let commands = [
+        "sudo apt-get update",
+        "sudo apt-get install --yes --no-install-recommends libcap-ng-dev",
         "rustup toolchain install 1.97.1 --profile minimal --component clippy,rustfmt",
         "cargo +1.97.1 test",
         "cargo +1.97.1 fmt --all -- --check",
@@ -31,9 +36,28 @@ fn hosted_verification_pins_tools_and_runs_exact_rust_gates() {
     ];
     let actual = WORKFLOW
         .lines()
-        .filter_map(|line| line.trim().strip_prefix("run: "))
+        .filter_map(|line| {
+            let trimmed = line.trim();
+            trimmed
+                .strip_prefix("run: ")
+                .filter(|command| *command != "|")
+                .or_else(|| trimmed.starts_with("sudo apt-get ").then_some(trimmed))
+        })
         .collect::<Vec<_>>();
     assert_eq!(actual, commands);
+    assert_eq!(WORKFLOW.matches("run:").count(), 6);
+
+    let checkout = WORKFLOW
+        .find("uses: actions/checkout@")
+        .expect("checkout step");
+    let linker_dependency = WORKFLOW
+        .find("- name: Install Linux linker dependency")
+        .expect("Linux dependency step");
+    let rust_toolchain = WORKFLOW
+        .find("- name: Install pinned Rust toolchain")
+        .expect("Rust toolchain step");
+    assert!(checkout < linker_dependency);
+    assert!(linker_dependency < rust_toolchain);
 }
 
 #[test]
