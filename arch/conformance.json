@@ -150,6 +150,16 @@
         "experiments/0016-bootstrap-publication-closure.md"
       ],
       "gaps": []
+    },
+    {
+      "proposal": "0006",
+      "title": "Opt-in project environments",
+      "status": "unimplemented",
+      "modules": [],
+      "tests": [],
+      "gaps": [
+        "FIP-0006 is in Review; no project manifest, isolated project-layer provisioning, activation, reconciliation, or acceptance evidence is implemented."
+      ]
     }
   ]
 }

@@ -1,71 +1,70 @@
-# Session Handoff — Publication authority simplification
+# Session Handoff — Opt-in project environments
 
 Audience: a fresh agent session. `GOAL.md` is normative and active. Read
-FIP-0001 and FIP-0005 in full before continuing. Experiments 0001 through 0016
-are terminally closed; no experiment is active.
+FIP-0001, FIP-0005, and FIP-0006 in full before continuing. Experiments 0001
+through 0016 are terminally closed; no experiment is active.
 
 ## Verified baseline
 
 1. Public repository `codyw912/fortlet` has protected default branch `main`.
    GitHub permits squash merging only, requires pull requests and strict
-   `Rust verification`, enforces the rules for administrators, requires linear
+   `Rust verification`, enforces rules for administrators, requires linear
    history, and blocks force-push plus deletion.
-2. Primary PR #1 landed the exact reviewed product and workflow tree as signed
-   two-parent commit `e0f919f80ed90589735f15ff7779ed229122ab1f`.
-   FIP-0005's dated amendment accepts only that historical bootstrap landing;
-   it authorizes no later merge-method exception.
-3. Closure PR #2 passed its sole hosted run `32062492778`, job `95486740889`,
-   then the operator squash-merged it as validly signed one-parent commit
-   `e9f2591f86ab9c12fff518c34deabb4abd89d6ab`.
-4. Fetched `main` is byte-identical to reviewed closure tip
-   `1a2c12a8bb425d82bc4f38519250d4552c08b24e`. The bootstrap publication GOAL
-   is complete and archived under `governance/goals/`.
-5. The primary and closure remote goal branches still exist. No cleanup,
-   rewrite, revert, release, tag, package, secret, deployment, settings change,
-   or unrelated remote mutation followed the closure merge.
+2. The publication-policy correction landed through PR #3 as signed squash
+   commit `633ea638013ba675e82ea7b06b1d3a287d7aa003`. Its tree is byte-identical
+   to reviewed tip `063e82455b8a9046afa6a8b2a236a6856235e8ab`; the hosted run
+   passed, and the declared landed bookmarks were removed locally and remotely.
+3. The working copy began this mission as an empty revision on that fetched
+   `main`. The completed policy goal is archived under `governance/goals/`.
+4. The last complete local gate recorded 39 unit tests, 21 integration tests,
+   formatting, strict all-target/all-feature Clippy, conformance, and
+   `nix flake check` on `aarch64-darwin`. Nix emitted only the known missing app
+   metadata warning and omitted incompatible `x86_64-linux`.
 
-## Active governance correction
-
-The operator found FIP-0005's per-mutation approvals too ceremonial and
-accepted a bounded transaction instead. The active GOAL records that decision.
-The local amendment and its derived instructions preserve one exact review but
-reduce the normal path to two operator interactions: approve one publication
-packet, then manually squash-merge when the PR is ready.
-
-The packet names one signed tree, bookmark, destination, draft title and body,
-expected initial hosted run, readiness criteria, and optional landed bookmarks
-for cleanup. Approval covers one push, one draft PR, observation of that initial
-run, declared evidence-only body changes, readiness only after success, and
-named cleanup only after operator merge plus exact tree equality. It never
-covers merge, changed code or scope, another push or PR, a retry, substantive
-metadata, settings, unrelated resources, unexpected remote state, or failure
-recovery.
-
-## Product state
+## Product state and blocker
 
 Daily-use surfaces are `doctor`, explicit `run`, optional package-owned
 `codex` and `tact` shims, explicit `native`, project-scoped `status`, bounded
-`stop`, and terminal `reset`. Reusable project+harness capsules, immutable base
-and harness layers, brokered ChatGPT credentials, safe project resolution,
-broad-root protection, deterministic pre-runtime diagnostics, disposable-root
-recovery, and the explicit host publication workflow are established.
+`stop`, and terminal `reset`. Fortlet creates immutable base and harness layers
+and mounts them into one reusable capsule per project+harness with a persistent
+harness home and brokered credentials.
 
-FIP-0001 remains partial for adapter ownership of persistent paths and
-credential policy; live reconciliation and terminal-attachment failures;
-topology, concurrency, and terminal coverage; restart, logs, and tool updates;
-explicit workload leases; declarative environments and private overlays;
-standalone non-Nix installation; and native `x86_64-linux` package
-verification. FIP-0002 retains its recorded automated Codex exit-status gap.
+No project tool environment is activated. The fixed `node:24-bookworm` capsule
+and harness layer do not guarantee a repository's compiler, test runner, or VCS
+client. In Fortlet's own repository an isolated agent therefore cannot assume
+that `cargo`, `rustc`, or `jj` exists. This is the primary current obstacle to
+ordinary project work.
 
-## Current mission boundary
+## Design under review
 
-The governance correction is locally complete and the GOAL is conditionally
-complete. Its focused four-test publication contract and complete runbook set
-pass: 39 unit tests, 21 integration tests, formatting, strict
-all-target/all-feature Clippy, conformance, and `nix flake check` on
-`aarch64-darwin`. Nix emitted only the known missing app metadata warning and
-omitted incompatible `x86_64-linux`.
+FIP-0006 is in Review and conformance is `unimplemented`. It proposes one
+opt-in root manifest, `.fortlet/environment.json`, plus a fixed adjacent POSIX
+recipe, `.fortlet/environment.sh`. The manifest contains only layer-relative
+path entries and literal variables. The host snapshots and hashes both files
+but does not execute them. The recipe snapshot runs only in a credential-free
+provisioning capsule with an empty `/out`; successful output is validated,
+content-digested, published atomically, and mounted read-only at
+`/opt/fortlet/project`.
 
-Checkpoint and sign the reviewable stack, then present one publication packet.
-Do not mutate GitHub before that approval. This policy correction governs its
-own publication. The operator remains the sole merge authority.
+The proposal prefers this slice over a pinned OCI project image because an OCI
+contract would require every project to build and publish an image and may add
+registry lifecycle or login. It prefers it over Nix/devenv activation because
+FIP-0001 keeps Nix optional for ordinary users and host-platform closures do
+not directly supply a Linux guest. Public provisioning network is allowed
+without authentication; recipes remain responsible for pinning downloads, so
+the FIP deliberately does not claim cross-machine bit reproducibility.
+
+## What to do next
+
+Review FIP-0006 with the operator. Do not write product code until its status is
+Accepted. The key review questions are whether guest-only repository shell is
+an acceptable first trust boundary, whether exact two-file identity plus a
+verified output digest is sufficient, and whether unauthenticated public
+network access is acceptable for the first slice.
+
+After acceptance, implement only the GOAL's manifest, isolated immutable layer,
+activation, reconciliation, Fortlet toolchain fixture, deterministic evidence,
+and one bounded experiment. Do not expand into services, private overlays,
+general Nix integration, installation, logs, restart, leases, tool-update
+commands, or extra harnesses. Publication uses one exact FIP-0005 packet; the
+operator remains the sole merge authority.
