@@ -1,6 +1,6 @@
 # GOAL: Establish goal-scoped pull request publication
 
-Status: authorized on 2026-08-16; hosted-CI successor correction authorized on
+Status: authorized on 2026-08-16; hosted-CI portability successor authorized on
 2026-08-17.
 
 Implement accepted FIP-0005 and publish the already-completed project capsule
@@ -69,6 +69,14 @@ closed the linker defect and hosted tests passed, but the one replacement unit
 rejected on a Linux-only strict Clippy error in the PTY observer's `openpty`
 winsize argument. No further source correction, push, rerun, or remote mutation
 is authorized by this section.
+
+The operator separately authorized Experiment 0015 on 2026-08-17. It may make
+only the minimum platform-correct `openpty` winsize-pointer change, exercise the
+existing PTY observer fixtures, and run the complete local verification set.
+After a new exact approval, it may push one correction to the existing primary
+bookmark and observe one automatically created replacement hosted unit. This
+authority creates no new workflow, dependency, bookmark, pull request,
+readiness, merge, settings, or retry permission.
 
 ## Deliverable 4 — Protect main and close bootstrap publication
 

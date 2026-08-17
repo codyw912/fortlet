@@ -1,9 +1,10 @@
-# Session Handoff — Hosted Linux Clippy successor needs authorization
+# Session Handoff — Portable `openpty` successor is authorized
 
 Audience: a fresh agent session. `GOAL.md` is normative and active. Experiments
 0013 and 0014 are terminally rejected after their single declared hosted units.
-Experiments 0001 through 0014 are terminally closed. No further hosted
-correction, push, or run is currently authorized.
+Experiments 0001 through 0014 are terminally closed, and Experiment 0015 is the
+one authorized successor. No remote correction, push, or run is authorized
+without a new exact transaction approval.
 
 ## Verified result
 
@@ -81,15 +82,16 @@ or silently hidden.
 
 Use Jujutsu for all local history. Do not push, rerun, or mutate the existing
 PR or GitHub without a new exact operator authorization. Experiment 0014's one
-correction push and one replacement hosted run are exhausted.
+correction push and one replacement hosted run are exhausted. Experiment 0015
+authorizes local implementation and verification only until its exact remote
+transaction is separately presented and approved.
 
 ## Current mission boundary
 
-Stop at Experiment 0014's rejected result. The minimum next candidate is a new
-successor that makes the PTY observer's `openpty` winsize argument correct for
-both Linux strict Clippy and Darwin compilation, verifies locally, and—only
-after another exact approval—pushes once and observes one new hosted unit. That
-successor is not yet declared or authorized. The operator still owns readiness
-and both bootstrap merges. Do not edit the source, push, rerun, update PR
-metadata, mark readiness, merge, or change repository settings on inferred
-authority.
+Implement Experiment 0015's single raw winsize-pointer correction in the PTY
+observer, run its focused example tests and the complete local verification
+set, then present the exact stack, diff, destination, verification state, and
+rejected control before requesting approval for one correction push. The
+operator still owns readiness and both bootstrap merges. Do not push, rerun,
+update PR metadata, mark readiness, merge, or change repository settings on
+inferred authority.
