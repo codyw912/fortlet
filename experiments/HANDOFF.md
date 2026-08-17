@@ -54,6 +54,11 @@ mutation is currently authorized.
     valid GitHub SSH signatures. Exactly one new hosted run, `32052509798`, job
     `95455045523`, passed package and Rust installation, tests, formatting,
     strict Linux Clippy, conformance, and cleanup in 3 minutes 19 seconds.
+12. A separately approved PR-body-only update first received GitHub GraphQL
+    HTTP 503. REST read-back proved that attempt made no change, so it was not
+    silently retried. The operator approved one unchanged retry; it succeeded,
+    and REST read-back matched the reviewed body while title, open draft state,
+    `main` base, goal-branch head, and signed head SHA remained unchanged.
 
 ## Product state
 
@@ -61,7 +66,9 @@ The public repository remains at `https://github.com/codyw912/fortlet` with SSH
 origin `git@github.com:codyw912/fortlet.git`. Remote `main` remains at
 `e95b0cdb1308f732d3f45db7a85027d45bcd4048`; the primary goal bookmark is at
 `e2e4a6d8b24e974add01a720ddaf73c71de7963a`, and PR #1 remains open and draft.
-No readiness, merge, protection, or settings mutation has occurred.
+Its body now records the exact reviewed tip, current local and hosted evidence,
+and Experiments 0013 through 0015. No readiness, merge, protection, or settings
+mutation has occurred.
 
 Daily-use surfaces are `doctor`, explicit `run`, optional package-owned
 `codex` and `tact` shims, explicit `native`, project-scoped `status`, bounded
@@ -96,10 +103,9 @@ PR or GitHub without a new exact operator authorization. Experiments 0014 and
 
 ## Current mission boundary
 
-Record Experiment 0015's terminal acceptance locally and stop. The next remote
-candidate is a separately reviewed update to PR #1's reviewed revision and
-verification evidence, followed by a separately reviewed bootstrap readiness
-mutation if every locally knowable primary deliverable is complete. The
-operator still owns readiness and both bootstrap merges. Do not push, rerun,
-update PR metadata, mark readiness, merge, or change repository settings on
-inferred authority.
+Experiment 0015's terminal acceptance is recorded locally, and PR #1's evidence
+body is current. The next remote candidate is a separately reviewed bootstrap
+readiness mutation if refreshed state still proves every locally knowable
+primary deliverable complete. The operator still owns readiness and both
+bootstrap merges. Do not push, rerun, update PR metadata, mark readiness,
+merge, or change repository settings on inferred authority.
