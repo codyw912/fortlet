@@ -1,6 +1,7 @@
 # GOAL: Establish goal-scoped pull request publication
 
-Status: authorized on 2026-08-16.
+Status: authorized on 2026-08-16; hosted-CI successor correction authorized on
+2026-08-17.
 
 Implement accepted FIP-0005 and publish the already-completed project capsule
 reset stack through the one-time two-PR bootstrap. Establish reviewable draft
@@ -50,6 +51,18 @@ Experiment 0011.
    readiness mutation for operator approval.
 4. Stop for the operator's manual squash merge. After notification, fetch and
    prove `main` has the reviewed primary tree before changing settings.
+
+### Authorized hosted-CI successor
+
+Experiment 0013's sole initial hosted unit rejected because the clean
+`ubuntu-24.04` runner lacked the `libcap-ng` development linker file required
+by the Linux MicroSandbox dependency. The operator authorized one successor on
+2026-08-17: declare Experiment 0014, install only `libcap-ng-dev` without
+recommended packages before the existing Rust gates, extend deterministic
+workflow evidence, run the complete local verification set, and—after a new
+exact approval—push one correction to the existing primary bookmark and
+observe one replacement hosted unit. This authority creates no new bookmark,
+pull request, readiness, merge, settings, or retry permission.
 
 ## Deliverable 4 — Protect main and close bootstrap publication
 
@@ -107,12 +120,14 @@ Experiment 0011.
 1. Engineering ceiling: two hours, excluding waits for operator merge and
    hosted CI.
 2. External budget: zero money, zero paid quota, two named bookmarks, two pull
-   requests, two operator squash merges, and only the explicitly approved
-   remote transactions declared by Experiment 0013.
+   requests, two operator squash merges, the one separately approved
+   Experiment 0014 correction push and replacement hosted unit, and only the
+   other explicitly approved remote transactions declared by this GOAL.
 3. Stop on any credential anomaly, unsigned outgoing revision, unexpected
-   remote change, CI failure, stale base, branch or tree mismatch, unavailable
-   required protection, need for an extra push or PR, need to change an
-   accepted FIP, or request for any undeclared GitHub resource.
+   remote change, successor CI failure, stale base, branch or tree mismatch,
+   unavailable required protection, need for a push beyond Experiment 0014's
+   one correction or any extra PR, need to change an accepted FIP, or request
+   for any undeclared GitHub resource.
 
 ## Verification
 
@@ -125,4 +140,3 @@ publication transaction:
 - `cargo clippy --all-targets --all-features -- -D warnings`;
 - `cargo test --test conformance`;
 - `nix flake check`.
-

@@ -1,8 +1,9 @@
-# Session Handoff — Pull request workflow bootstrap is authorized
+# Session Handoff — Hosted Linux linker successor is authorized
 
 Audience: a fresh agent session. `GOAL.md` is normative and active. Experiment
-0013 is declared but has not contacted GitHub mutably; Experiments 0001 through
-0012 are terminally closed.
+0013 is terminally rejected after its one declared hosted unit; Experiment 0014
+is the authorized successor. Experiments 0001 through 0013 are terminally
+closed.
 
 ## Verified result
 
@@ -27,12 +28,21 @@ Audience: a fresh agent session. `GOAL.md` is normative and active. Experiment
 6. The complete standard verification set passed immediately before the live
    unit. FIP-0003 and FIP-0004 are conformant; FIP-0001 and FIP-0002 remain
    partial for their explicitly listed gaps.
+7. The primary publication bookmark is public at signed tip
+   `650ead13e926086f10f4453da83a7704fdad6bad`, and draft pull request
+   `https://github.com/codyw912/fortlet/pull/1` stores the exact reviewed
+   metadata. All ten outgoing commits have valid GitHub SSH signatures.
+8. Hosted run `32039976577` rejected at its first `cargo test`: Linux linking
+   required `-lcap-ng`, but the clean `ubuntu-24.04` runner lacked the
+   development linker file. It was not rerun or corrected remotely.
 
 ## Product state
 
-The public alpha repository remains at `https://github.com/codyw912/fortlet`
-with SSH origin `git@github.com:codyw912/fortlet.git`. The reset mission made
-no remote mutation, so the new local stack is not published.
+The public repository remains at `https://github.com/codyw912/fortlet` with SSH
+origin `git@github.com:codyw912/fortlet.git`. Remote `main` remains at
+`e95b0cdb1308f732d3f45db7a85027d45bcd4048`; only the primary goal bookmark and
+draft PR were added. No readiness, merge, protection, or settings mutation has
+occurred.
 
 Daily-use surfaces are `doctor`, explicit `run`, optional package-owned
 `codex` and `tact` shims, explicit `native`, project-scoped `status`, bounded
@@ -61,15 +71,16 @@ when the operator has already authorized the experiment. Experiment 0012
 records one denied preflight before runtime contact so this is not rediscovered
 or silently hidden.
 
-Use Jujutsu for all local history. Inspect the unpublished stack with
-`jj log -r 'main..@'`. Do not push, create a PR, or mutate GitHub without a new
-operator authorization.
+Use Jujutsu for all local history. Inspect the unpublished successor above the
+primary bookmark with `jj log -r 'goal/project-capsule-reset..@'`. Do not push
+or mutate the existing PR or GitHub without a new exact operator authorization.
 
 ## Current mission boundary
 
-Implement accepted FIP-0005 locally, verify it, and rehearse Experiment 0013.
-Every GitHub mutation requires a fresh presentation of exact revisions, diff,
-destination, metadata or settings payload, verification state, and known
-failures followed by explicit operator approval. The operator merges both
-bootstrap PRs. Do not push, open or update a PR, mark readiness, merge, or
-change repository settings on inferred authority.
+Implement Experiment 0014's minimum `libcap-ng-dev` workflow dependency and
+deterministic evidence, then run the complete local verification set. Present
+the exact successor stack and diff, same bookmark destination, verification
+state, rejected run, and expected PR-head update before requesting approval for
+the one correction push. The operator still owns readiness and both bootstrap
+merges. Do not push, update PR metadata, mark readiness, merge, or change
+repository settings on inferred authority.

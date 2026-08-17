@@ -34,4 +34,5 @@ scannable failure/win history of the project:
 - `0010-project-capsule-status-and-stop.md` — accepted; the public CLI proved absent, running, stopped, and absent around bounded stop and exact owned cleanup.
 - `0011-public-alpha-repository.md` — accepted; the complete signed history is public on GitHub with only `main` and no extra remote resources.
 - `0012-project-capsule-reset.md` — accepted; the public CLI refused active reset, removed the owned terminal capsule, preserved durable state, reported absence idempotently, and cleaned up exactly.
-- `0013-pull-request-workflow-bootstrap.md` — declared; primary PR publication, hosted Rust CI, squash landing, and protected-main enforcement await implementation and dispatch.
+- `0013-pull-request-workflow-bootstrap.md` — rejected; the exact draft PR opened, but its sole initial hosted unit could not link Linux `libcap-ng`.
+- `0014-hosted-linux-linker-closure.md` — declared; add the one missing Ubuntu development package and test one replacement hosted Rust unit.
