@@ -1,6 +1,6 @@
 # Experiment 0013: Pull request workflow bootstrap
 
-Status: declared
+Status: rejected
 Design: FIP-0001, FIP-0005
 Charter scope: `local-foundation/v1` plus explicit operator publication
 authorization on 2026-08-16
@@ -161,8 +161,39 @@ Completed on 2026-08-16 without remote mutation:
 
 ## Results
 
-Pending declared dispatch.
+The declared initial hosted unit rejected on 2026-08-17.
+
+1. Jujutsu published only `goal/project-capsule-reset`. Signing on push updated
+   all ten outgoing Git object IDs while preserving their change IDs and trees;
+   GitHub reports every resulting SSH signature valid. The reviewed signed tip
+   is `650ead13e926086f10f4453da83a7704fdad6bad`, and remote `main` remained at
+   `e95b0cdb1308f732d3f45db7a85027d45bcd4048`.
+2. Draft pull request `https://github.com/codyw912/fortlet/pull/1` stored the
+   exact approved title, body, `main` base, goal-bookmark head, signed head SHA,
+   and draft state. No readiness, merge, or settings mutation occurred.
+3. The one declared initial workflow run was
+   `https://github.com/codyw912/fortlet/actions/runs/32039976577`, job
+   `95417454658`. Checkout and Rust `1.97.1` installation passed. The first
+   `cargo test` step failed after 2 minutes 38 seconds with linker error
+   `rust-lld: error: unable to find library -lcap-ng`; formatting, Clippy, and
+   conformance consequently did not run.
+4. Root cause: the Linux MicroSandbox dependency links `libcap-ng`, while the
+   clean `ubuntu-24.04` runner does not provide its development linker file.
+   Ubuntu Noble publishes that file in `libcap-ng-dev`. This is a hosted Linux
+   dependency-closure defect in the workflow, not a Rust test failure.
+5. The run was not rerun, the branch was not updated, and no second workflow
+   run exists. Repository inventory otherwise remained within the declared
+   branch, pull request, and workflow resources.
 
 ## Terminal Closure
 
-Pending.
+1. Outcome: rejected — the sole initial hosted unit failed, so this experiment
+   cannot meet its all-or-nothing acceptance criteria.
+2. Root cause: the workflow declared Rust gates but omitted the Linux
+   `libcap-ng` development dependency required to link the product test binary.
+3. Actual cost: zero money, one of one branch pushes, one of one draft pull
+   requests, one of one initial hosted runs, zero readiness changes, zero
+   merges, zero repository-setting mutations, and no silent retry.
+4. Next action: only a separately authorized successor may add and test the
+   minimum Linux dependency installation, then present an exact correction
+   push and replacement hosted unit. This experiment authorizes no such push.
