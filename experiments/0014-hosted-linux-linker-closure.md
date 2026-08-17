@@ -1,6 +1,6 @@
 # Experiment 0014: Hosted Linux linker closure
 
-Status: declared
+Status: rejected
 Design: FIP-0001, FIP-0005
 Charter scope: `local-foundation/v1` plus explicit operator successor
 authorization on 2026-08-17
@@ -117,8 +117,40 @@ Jujutsu push dry-run must be refreshed and presented for separate approval.
 
 ## Results
 
-Pending declared treatment.
+1. The operator approved the exact correction push after reviewing its stack,
+   diff, destination, local evidence, and rejected control. Jujutsu pushed only
+   `goal/project-capsule-reset`; remote `main` remained at
+   `e95b0cdb1308f732d3f45db7a85027d45bcd4048` and the existing draft pull
+   request remained open and draft.
+2. GitHub stored the corrected branch at signed SHA
+   `0b75f02dd5422362dd49acff776aecff1e94ad7b`. The four new remote commits had
+   valid GitHub SSH-signature verification, and no unrelated ref or remote
+   resource changed.
+3. Exactly one replacement `pull_request` run was created: run `32042472155`,
+   job `95424137789`, for that exact corrected SHA. Checkout, the declared APT
+   package installation, Rust installation, `cargo test`, and formatting all
+   passed. This accepts the narrow linker hypothesis: `libcap-ng-dev` supplied
+   the missing Linux linker input without a cache, image, Nix installation, or
+   product feature bypass.
+4. Strict all-target/all-feature Clippy then failed at
+   `examples/pty_observer.rs:233` under `clippy::unnecessary_mut_passed` because
+   Linux's `libc::openpty` does not require a mutable reference for the
+   `winsize` argument. Conformance was consequently skipped. The same source
+   passed the complete local macOS Clippy gate, so the hosted run exposed a
+   platform-specific source-lint gap rather than another CI bootstrap defect.
+5. The run was not retried and no second correction, readiness mutation,
+   merge, setting change, or other remote mutation occurred.
 
 ## Terminal Closure
 
-Pending.
+Rejected on 2026-08-17. The production mechanism closed the missing-linker
+control and let the Linux test suite pass, but the declared unit required every
+hosted gate to pass. Its Linux-only Clippy failure therefore rejects the unit
+under Acceptance Criterion 5 and exhausts the authorized correction push and
+replacement run.
+
+Any follow-up must be a separately declared and authorized successor. Its
+minimum hypothesis would be that a platform-correct `openpty` winsize argument
+can satisfy strict Linux Clippy while preserving Darwin compilation and
+behavior. Experiment 0014 grants no authority to implement, push, rerun, mark
+the pull request ready, merge, or mutate repository settings.

@@ -64,6 +64,12 @@ exact approval—push one correction to the existing primary bookmark and
 observe one replacement hosted unit. This authority creates no new bookmark,
 pull request, readiness, merge, settings, or retry permission.
 
+Experiment 0014 exhausted that authority on 2026-08-17. Its package step
+closed the linker defect and hosted tests passed, but the one replacement unit
+rejected on a Linux-only strict Clippy error in the PTY observer's `openpty`
+winsize argument. No further source correction, push, rerun, or remote mutation
+is authorized by this section.
+
 ## Deliverable 4 — Protect main and close bootstrap publication
 
 1. Present exact repository-setting and branch-protection payloads for operator

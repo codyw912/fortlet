@@ -1,9 +1,9 @@
-# Session Handoff — Hosted Linux linker successor is authorized
+# Session Handoff — Hosted Linux Clippy successor needs authorization
 
-Audience: a fresh agent session. `GOAL.md` is normative and active. Experiment
-0013 is terminally rejected after its one declared hosted unit; Experiment 0014
-is the authorized successor. Experiments 0001 through 0013 are terminally
-closed.
+Audience: a fresh agent session. `GOAL.md` is normative and active. Experiments
+0013 and 0014 are terminally rejected after their single declared hosted units.
+Experiments 0001 through 0014 are terminally closed. No further hosted
+correction, push, or run is currently authorized.
 
 ## Verified result
 
@@ -29,20 +29,28 @@ closed.
    unit. FIP-0003 and FIP-0004 are conformant; FIP-0001 and FIP-0002 remain
    partial for their explicitly listed gaps.
 7. The primary publication bookmark is public at signed tip
-   `650ead13e926086f10f4453da83a7704fdad6bad`, and draft pull request
+   `0b75f02dd5422362dd49acff776aecff1e94ad7b`, and draft pull request
    `https://github.com/codyw912/fortlet/pull/1` stores the exact reviewed
-   metadata. All ten outgoing commits have valid GitHub SSH signatures.
+   metadata. All fourteen outgoing commits have valid GitHub SSH signatures.
 8. Hosted run `32039976577` rejected at its first `cargo test`: Linux linking
    required `-lcap-ng`, but the clean `ubuntu-24.04` runner lacked the
-   development linker file. It was not rerun or corrected remotely.
+   development linker file. That run was not rerun; its separately authorized
+   successor correction is recorded below.
+9. The separately approved Experiment 0014 correction installed only
+   `libcap-ng-dev`. Replacement run `32042472155`, job `95424137789`, checked
+   out the exact corrected tip; package installation, Rust installation,
+   `cargo test`, and formatting passed. Strict Clippy then rejected
+   `examples/pty_observer.rs:233` because Linux `openpty` does not need a
+   mutable winsize reference, and conformance was skipped. No rerun or later
+   remote mutation occurred.
 
 ## Product state
 
 The public repository remains at `https://github.com/codyw912/fortlet` with SSH
 origin `git@github.com:codyw912/fortlet.git`. Remote `main` remains at
-`e95b0cdb1308f732d3f45db7a85027d45bcd4048`; only the primary goal bookmark and
-draft PR were added. No readiness, merge, protection, or settings mutation has
-occurred.
+`e95b0cdb1308f732d3f45db7a85027d45bcd4048`; the primary goal bookmark is at
+`0b75f02dd5422362dd49acff776aecff1e94ad7b`, and PR #1 remains open and draft.
+No readiness, merge, protection, or settings mutation has occurred.
 
 Daily-use surfaces are `doctor`, explicit `run`, optional package-owned
 `codex` and `tact` shims, explicit `native`, project-scoped `status`, bounded
@@ -71,16 +79,17 @@ when the operator has already authorized the experiment. Experiment 0012
 records one denied preflight before runtime contact so this is not rediscovered
 or silently hidden.
 
-Use Jujutsu for all local history. Inspect the unpublished successor above the
-primary bookmark with `jj log -r 'goal/project-capsule-reset..@'`. Do not push
-or mutate the existing PR or GitHub without a new exact operator authorization.
+Use Jujutsu for all local history. Do not push, rerun, or mutate the existing
+PR or GitHub without a new exact operator authorization. Experiment 0014's one
+correction push and one replacement hosted run are exhausted.
 
 ## Current mission boundary
 
-Implement Experiment 0014's minimum `libcap-ng-dev` workflow dependency and
-deterministic evidence, then run the complete local verification set. Present
-the exact successor stack and diff, same bookmark destination, verification
-state, rejected run, and expected PR-head update before requesting approval for
-the one correction push. The operator still owns readiness and both bootstrap
-merges. Do not push, update PR metadata, mark readiness, merge, or change
-repository settings on inferred authority.
+Stop at Experiment 0014's rejected result. The minimum next candidate is a new
+successor that makes the PTY observer's `openpty` winsize argument correct for
+both Linux strict Clippy and Darwin compilation, verifies locally, and—only
+after another exact approval—pushes once and observes one new hosted unit. That
+successor is not yet declared or authorized. The operator still owns readiness
+and both bootstrap merges. Do not edit the source, push, rerun, update PR
+metadata, mark readiness, merge, or change repository settings on inferred
+authority.
