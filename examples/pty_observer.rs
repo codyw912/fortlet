@@ -224,13 +224,15 @@ fn open_pty(rows: u16, cols: u16) -> Result<(File, File)> {
         ws_xpixel: 0,
         ws_ypixel: 0,
     };
+    // Apple declares this pointer mutable; Linux declares it const.
+    let size_pointer = std::ptr::from_mut(&mut size);
     let result = unsafe {
         libc::openpty(
             &mut master,
             &mut slave,
             std::ptr::null_mut(),
             std::ptr::null_mut(),
-            &mut size,
+            size_pointer,
         )
     };
     if result == -1 {
