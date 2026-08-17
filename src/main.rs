@@ -6,6 +6,7 @@ mod management;
 mod native;
 mod paths;
 mod project;
+mod project_environment;
 mod runtime;
 mod session;
 
