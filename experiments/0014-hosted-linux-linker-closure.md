@@ -88,8 +88,32 @@ approval; verify the signed tip and single run; stop on its terminal result.
 
 ## Rehearsal
 
-Pending local implementation and complete verification. No remote mutation is
-authorized by this declaration.
+Completed locally on 2026-08-17 without remote mutation:
+
+1. Checkpoint `b0ecd9f0` changes only `.github/workflows/verify.yml` and
+   `tests/publication_workflow.rs`: five workflow lines and the deterministic
+   contract evidence. No product, package, permission, runner, action, Rust,
+   Cargo-gate, PR-metadata, or remote setting changed.
+2. Before treatment, the focused contract test rejected because its observed
+   command list lacked both declared APT commands. After treatment and
+   formatting, all three workflow-contract tests and focused strict Clippy
+   passed.
+3. The implementation checkpoint passed 39 unit tests, 20 integration tests,
+   formatting, strict all-target/all-feature Clippy, the dedicated conformance
+   test, and `nix flake check` on `aarch64-darwin`. Nix emitted the known
+   missing app metadata warning and omitted incompatible `x86_64-linux`.
+4. Static workflow evidence proves checkout precedes the package step, both
+   exact APT commands precede the pinned toolchain and every Cargo command,
+   and the successor adds no cache, container, hosted Nix, secret, VM,
+   MicroSandbox runtime, or harness use.
+5. Ubuntu Noble's package inventory identifies `libcap-ng-dev` as the
+   development package and lists the `libcap-ng.so` linker file supplied for
+   supported architectures. The hosted replacement run remains the only
+   production test of that mechanism.
+
+This rehearsal does not authorize the correction push. The exact qualified
+tip, outgoing stack and diff, remote PR/head/run baseline, signatures, and
+Jujutsu push dry-run must be refreshed and presented for separate approval.
 
 ## Results
 
