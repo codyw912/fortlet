@@ -1,6 +1,6 @@
 # Experiment 0018: Clean-baseline project environment
 
-Status: declared
+Status: rejected
 Design: FIP-0001 and FIP-0006
 Charter scope: `local-foundation/v1`
 
@@ -143,8 +143,34 @@ Codex and Tact status is absent, and the stopped-capsule list is empty.
 
 ## Results
 
-Pending dispatch.
+Rejected by the sole live unit. The exact immutable command emitted the one
+expected first-use preparation message, then exited 1 after about 27 seconds.
+The project recipe exited 2 while extracting the pinned Rust 1.97.1 standalone
+distribution in its temporary directory. `tar` repeatedly reported
+`No space left on device`, beginning while writing the bundled LLVM library.
+An earlier `apt-get download` warning said its download ran unsandboxed as root
+because `_apt` could not access the temporary destination; the download
+continued, so that warning was not the terminal failure.
+
+Codex never launched and no version output appeared. Fortlet published no
+project environment layer and created no managed harness capsule. Post-failure
+`msb list --format json` returned an empty list, showing that the provisioning
+capsule had already been removed; public status remained `codex<TAB>absent`.
+The unit used one project-layer build, zero model prompts, zero paid quota, zero
+remote mutations, and no second live unit.
 
 ## Terminal Closure
 
-Pending terminal outcome.
+Rejected after the sole dispatch. Root cause: the provisioning capsule's
+writable root was too small for the recipe's temporary full Rust archive plus
+expanded standalone distribution, even though the final output was a separate
+host-backed mount. This falsifies the current recipe/resource combination, not
+the environment identity, publication, or capsule-activation mechanisms.
+
+Failure cleanup is complete and recoverable state was preserved: no capsule or
+published environment layer remains, while the project, persistent Codex state,
+base layer, and harness layer are unchanged. Live elapsed time was about 27
+seconds. Next action: design a fresh successor that reduces temporary root-disk
+pressure—preferably by extracting only required Rust components or streaming
+the archive into the output mount—then run deterministic recipe coverage before
+declaring another single live unit. Never resume this terminal record.

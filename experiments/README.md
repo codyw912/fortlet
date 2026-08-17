@@ -39,4 +39,4 @@ scannable failure/win history of the project:
 - `0015-portable-openpty-winsize.md` — accepted; one raw winsize pointer passed the complete PTY suite and every hosted Linux Rust gate across the Apple and Linux `openpty` bindings.
 - `0016-bootstrap-publication-closure.md` — accepted; PR #1's exact historical exception is bounded by squash-only settings, protected `main`, unchanged refs, and locally qualified closure evidence.
 - `0017-opt-in-project-environment.md` — rejected before dispatch; a pre-existing stopped Codex capsule violated the required absent baseline, so no VM, recipe, or model prompt ran.
-- `0018-clean-baseline-project-environment.md` — declared; a fresh bounded unit will test the pinned project environment from a verified absent capsule baseline.
+- `0018-clean-baseline-project-environment.md` — rejected; the sole clean-baseline unit exhausted the provisioning root disk while unpacking the full Rust distribution, before layer publication or Codex launch.
