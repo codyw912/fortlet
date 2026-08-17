@@ -1,12 +1,13 @@
-# Session Handoff — Primary tree landed with a merge-method mismatch
+# Session Handoff — Bootstrap merge exception is authorized
 
 Audience: a fresh agent session. `GOAL.md` is normative and active. Experiments
 0013 and 0014 are terminally rejected after their single declared hosted units.
 Experiments 0001 through 0015 are terminally closed. Experiment 0015 accepted
 its one hosted unit, so the primary PR's required Rust verification is green.
-PR #1 has merged, but GitHub created a two-parent merge commit instead of the
-required squash commit. No repair, bookmark removal, closure PR, branch push,
-PR update, setting change, or other remote mutation is currently authorized.
+PR #1's exact reviewed tree landed through a two-parent merge commit. The
+operator authorized FIP-0005's one-time primary-bootstrap exception and
+Experiment 0016; no remote setting, protection, bookmark, closure PR, branch,
+or other mutation is authorized without its separate exact approval.
 
 ## Verified result
 
@@ -72,6 +73,10 @@ PR update, setting change, or other remote mutation is currently authorized.
     two parents—the previous `main` and reviewed branch tip—and GitHub stores
     the merge-commit subject. The required squash-history criterion therefore
     fails despite the correct tree.
+15. The operator chose to preserve `main` and authorized a dated FIP-0005
+    amendment accepting only that exact tree-equal primary landing. It forbids
+    rewrite or revert repair and retains squash-only landing for the closure PR
+    and every future goal. Experiment 0016 is the declared closure successor.
 
 ## Product state
 
@@ -115,8 +120,10 @@ PR or GitHub without a new exact operator authorization. Experiments 0014 and
 
 ## Current mission boundary
 
-STOP on the primary landing mismatch. The reviewed tree landed exactly, but
-the two-parent commit violates FIP-0005's squash-only public-history contract
-and this GOAL's Definition of Done. Do not remove the goal bookmark, change
-merge settings or protection, create a closure PR, revert, or rewrite `main`
-without a new operator decision and any required design authorization.
+Implement Experiment 0016 locally: verify the amendment and current remote
+baseline, rehearse the exact squash-only repository settings and `main`
+protection payloads, and run the required local gates. Present each remote
+mutation for separate exact approval. Never rewrite or revert `main`, permit a
+second merge-method exception, remove a bookmark before tree equality, or infer
+authority for settings, protection, a closure branch or PR, readiness, merge,
+or cleanup.

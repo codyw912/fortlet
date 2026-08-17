@@ -1,7 +1,7 @@
 # GOAL: Establish goal-scoped pull request publication
 
-Status: authorized on 2026-08-16; stopped on 2026-08-17 after the primary PR
-landed as a merge commit instead of the required squash commit.
+Status: authorized on 2026-08-16; resumed on 2026-08-17 under FIP-0005's
+operator-authorized primary-bootstrap merge exception.
 
 Implement accepted FIP-0005 and publish the already-completed project capsule
 reset stack through the one-time two-PR bootstrap. Establish reviewable draft
@@ -112,6 +112,13 @@ STOP. Tree equality passed, but the concise-history and squash-landing
 criteria failed. Do not remove the goal bookmark, change merge settings or
 protection, create the closure PR, revert, or rewrite `main` without a new
 operator decision and any required design authorization.
+
+The operator chose to preserve public `main` and authorized FIP-0005's dated
+primary-bootstrap exception. The exact signed tree-equal landing now counts as
+the primary bootstrap landing. Resume Deliverable 4 through a declared
+successor experiment. Do not rewrite or revert `main`; configure squash-only
+merging and protection before the closure PR merges, and permit no future
+merge-method exception.
 
 ## Definition of Done
 
