@@ -38,4 +38,4 @@ scannable failure/win history of the project:
 - `0014-hosted-linux-linker-closure.md` — rejected; the Ubuntu package closed linking and tests passed, but strict hosted Linux Clippy found a platform-specific `openpty` mutability error.
 - `0015-portable-openpty-winsize.md` — accepted; one raw winsize pointer passed the complete PTY suite and every hosted Linux Rust gate across the Apple and Linux `openpty` bindings.
 - `0016-bootstrap-publication-closure.md` — accepted; PR #1's exact historical exception is bounded by squash-only settings, protected `main`, unchanged refs, and locally qualified closure evidence.
-- `0017-opt-in-project-environment.md` — declared; one bounded local unit will provision Fortlet's pinned project tools and run a focused test without a model prompt.
+- `0017-opt-in-project-environment.md` — rejected before dispatch; a pre-existing stopped Codex capsule violated the required absent baseline, so no VM, recipe, or model prompt ran.

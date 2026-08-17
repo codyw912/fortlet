@@ -1,6 +1,6 @@
 # Experiment 0017: Opt-in project environment
 
-Status: declared
+Status: rejected
 Design: FIP-0001 and FIP-0006
 Charter scope: `local-foundation/v1`
 
@@ -127,19 +127,49 @@ preservation, cleanup, and elapsed time.
 
 ## Rehearsal
 
-The zero-runtime rehearsal is in progress. Before dispatch it MUST record:
+The zero-runtime rehearsal completed against the treatment stack
+`b2d637f6e76d` (immutable inputs), `8a289b5052b9` (capsule activation), and
+`ed2e3596e29a` (documentation):
 
 1. Focused manifest, identity, isolation-plan, output-validation, update,
-   concurrency, activation, both-harness, and public pre-runtime failure tests.
-2. `cargo test`, formatting, strict all-target/all-feature Clippy,
-   conformance, and `nix flake check`.
-3. The immutable package output and exact treatment stack.
-4. Read-only base, harness, project-layer, and capsule preconditions.
+   concurrency, activation, both-harness, and public pre-runtime failure tests
+   passed.
+2. The complete verification set passed: 52 unit tests, 22 integration tests,
+   formatting, strict all-target/all-feature Clippy, conformance, and
+   `nix flake check`. The check retained its known app-metadata warning and
+   omitted incompatible `x86_64-linux` while validating `aarch64-darwin`.
+3. The immutable package output was
+   `/nix/store/l4cdam1i3077z0f7s6rx6abjyfz0vr6d-fortlet-0.1.0`.
+4. Two earlier pre-dispatch package checks failed because `package.nix` first
+   omitted `.fortlet`, then omitted `README.md` from its filtered source. No
+   runtime unit was dispatched. After the shared source-filter assumption
+   triggered charter escalation, the operator authorized adding the exact
+   conformance inputs `.fortlet`, `package.nix`, `README.md`, and `OVERVIEW.md`;
+   the single authorized rerun passed.
+5. Read-only filesystem checks found the existing base marker and Codex 0.147.0
+   harness marker, and found no project environment directory. `fortlet doctor`
+   reported MicroSandbox SDK 0.6.8 ready, valid authentication with at least one
+   hour remaining, a safe credential boundary, and both harnesses registered.
+6. The required public baseline check returned `codex<TAB>stopped`, not the
+   declared `codex<TAB>absent`.
 
 ## Results
 
-Pending dispatch.
+Rejected before dispatch. The immutable CLI command
+`fortlet status codex --project /Users/cody/dev/fortlet` returned a pre-existing
+stopped capsule. Acceptance criterion 2 and the declared ownership risk require
+an absent public baseline and prohibit both dispatch and cleanup when it is not
+absent. Fortlet therefore did not create a VM, execute the project recipe,
+download toolchain inputs, launch Codex, spend a model prompt, or publish a
+project environment layer. The live-unit elapsed time and retry count are both
+zero.
 
 ## Terminal Closure
 
-Pending terminal outcome.
+Rejected at the pre-dispatch gate. Root cause: local MicroSandbox state retained
+a stopped project-and-Codex capsule from earlier work, so the unit could not
+distinguish newly created runtime state from its baseline. The exact capsule was
+not inspected, started, stopped, reset, or removed because this experiment
+explicitly forbade cleanup after a non-absent baseline. Next action: use a
+separately authorized public reset to establish absence, then declare a new
+experiment number with a fresh identity; never resume this terminal record.
