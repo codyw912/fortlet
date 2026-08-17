@@ -46,6 +46,31 @@ MicroSandbox must be usable on the execution host. Codex authentication is
 read from the host and exposed through MicroSandbox's credential broker; the
 credential file itself must remain outside all guest mounts.
 
+## Project tool environments
+
+A repository opts into project tools with two fixed files at its resolved root:
+`.fortlet/environment.json` and `.fortlet/environment.sh`. The manifest
+declares layer-relative `PATH` entries and literal environment variables. The
+adjacent POSIX recipe installs tools beneath `$FORTLET_OUTPUT`.
+
+Fortlet reads and hashes both exact files on the host but never executes the
+recipe there. On first use, it runs the snapshotted recipe in a dedicated
+MicroSandbox capsule with public network access, no live project mount, no
+persistent home, and no provider, SSH, signing, publication, or registry
+credentials. The validated output is content-digested, published atomically,
+and mounted read-only at `/opt/fortlet/project`. A repository without the
+manifest keeps the existing base-plus-harness environment.
+
+Changing either file selects a new immutable layer. If an old capsule exists,
+run `fortlet stop <harness>` and `fortlet reset <harness>` before launching
+the new environment. A failed build leaves the prior layer and capsule intact;
+the old environment can be selected again by restoring its two files. Public
+downloads can drift unless the recipe pins and verifies them.
+
+This repository's recipe pins Rust, Cargo, Jujutsu, and the Linux development
+library needed to build Fortlet. It serves as the first project-environment
+fixture; Nix remains the host development and package-reproduction system.
+
 ## Product direction
 
 Users may explicitly activate Fortlet's package-owned shim directory so normal
@@ -59,9 +84,9 @@ tact
 The shims are optional; `fortlet run` remains fully usable without them.
 Fortlet provides one capsule per project and harness. Its repository uses an
 explicit host-side publication boundary; an automated publication command,
-declarative project tool environments, explicit workload leases, and
-standalone distribution remain future work. Local execution comes first;
-remote execution requires its own architecture.
+private project overlays, explicit workload leases, and standalone distribution
+remain future work. Local execution comes first; remote execution requires its
+own architecture.
 
 See [OVERVIEW.md](OVERVIEW.md) for durable product scope and
 [GOAL.md](GOAL.md) for the current mission.

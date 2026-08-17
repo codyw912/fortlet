@@ -11,7 +11,8 @@ project roots, provisions immutable Codex and Tact environments, brokers
 ChatGPT credentials through MicroSandbox, creates reusable project-and-harness
 capsules, preserves interactive terminal behavior, provides optional
 transparent Codex and Tact shims, and exposes project-scoped capsule status,
-stop, and terminal reset commands. A reproducible Nix package exists for
+stop, terminal reset, and opt-in immutable project-tool layers. A reproducible
+Nix package exists for
 `aarch64-darwin` and is declared for `x86_64-linux`; native Linux verification
 remains outstanding.
 
@@ -26,7 +27,8 @@ implemented features.
    implementation detail on successful launches.
 2. Isolation fails closed. Fortlet never silently falls back to an unisolated
    host launch.
-3. The workspace is shared live, but host credentials and publication
+3. The workspace is shared live, but project-tool provisioning receives only
+   its snapshotted recipe and empty output; host credentials and publication
    authority stay outside the guest.
 4. Capsules are disposable machines with explicit persistent paths, not
    long-lived opaque development pets.
@@ -56,6 +58,13 @@ but projects are not required to use them. Advanced users may opt into
 Nix-backed environments, overlays, and caching. Any opinionated runtime use of
 Nix must provide a concrete security, reproducibility, or UX advantage that is
 not available through a simpler mechanism.
+
+The initial project environment is intentionally smaller: a fixed JSON
+manifest and adjacent POSIX recipe produce one content-verified layer inside a
+credential-free provisioning capsule. Public downloads are allowed without
+authentication and remain the recipe's responsibility to pin. Services,
+private inputs, arbitrary repository inputs, and activation hooks are not part
+of that contract.
 
 ## Workflow bindings (from ADAPTATION.md)
 

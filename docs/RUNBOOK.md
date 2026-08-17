@@ -51,6 +51,62 @@ override.
 `doctor` reads authentication metadata but never prints token values. Real
 launches require a healthy MicroSandbox host and a valid ChatGPT credential.
 
+## Project tool environments
+
+Only `.fortlet/environment.json` at the resolved project root opts a repository
+into a project environment. It requires the fixed adjacent
+`.fortlet/environment.sh`. The schema-1 manifest contains exactly `schema`,
+`path`, and `environment`; path entries are relative to the immutable layer
+and environment values are literal:
+
+```json
+{
+  "schema": 1,
+  "path": ["bin"],
+  "environment": {
+    "CARGO_HOME": "/home/agent/.cargo"
+  }
+}
+```
+
+On first use Fortlet snapshots and hashes both files, then executes the recipe
+with `/bin/sh -eu` inside a dedicated provisioning capsule. The recipe sees
+only `$FORTLET_OUTPUT` (`/out`), `$FORTLET_TARGET`, the image's base
+environment, unauthenticated public network access, and an empty output mount.
+It does not receive the manifest, live project, persistent home, host
+environment, provider broker, SSH or signing material, publication authority,
+or registry credentials.
+
+Successful output is validated, content-digested, atomically published, and
+re-verified before every read-only mount at `/opt/fortlet/project`. Manifest
+paths precede the base and harness paths, while the harness executable remains
+an absolute Fortlet-owned path. `HOME`, `PATH`, terminal, credential, Fortlet,
+MicroSandbox, and harness-owned variables cannot be overridden.
+
+Changing either file changes capsule configuration. Stop and reset each
+affected harness before launching the new identity:
+
+```bash
+fortlet stop codex
+fortlet reset codex
+fortlet run codex --
+```
+
+A failed update preserves previous layers and the existing capsule. Restore the
+old manifest and recipe to select that layer again. There is no project
+environment update, rollback, purge, private-input, service, or Nix activation
+command in this slice. Recipes must pin and verify public downloads when
+cross-machine reproducibility matters.
+
+The deterministic gate does not start a VM or execute the checked-in recipe on
+the host:
+
+```bash
+cargo test --bin fortlet project_environment
+cargo test --bin fortlet environment
+cargo test --test pre_runtime_failures invalid_project_environment
+```
+
 ## Project capsule management
 
 `fortlet status [harness]` reports `codex` and `tact` in registry order, or one
@@ -97,11 +153,11 @@ cargo test --test pre_runtime_failures
 ```
 
 It proves actionable, fail-closed errors for unsupported harnesses, invalid
-projects, credential loading and mount boundaries, local capsule-state
-preparation, guest auth projection, and incomplete base or harness layers. The
-environment-layer fixtures are rejected before provisioning begins. This gate
-does not exercise live MicroSandbox reconciliation or terminal attachment;
-those failure paths remain outstanding.
+projects and project-environment manifests, credential loading and mount
+boundaries, local capsule-state preparation, guest auth projection, and
+incomplete base or harness layers. The environment-layer fixtures are rejected
+before provisioning begins. This gate does not exercise live MicroSandbox
+reconciliation or terminal attachment; those failure paths remain outstanding.
 
 ## Optional transparent shims
 
