@@ -41,8 +41,12 @@ operator by default. Hosted Rust verification and protected-branch rules guard
 5. The pull request description MUST identify the GOAL and governing FIPs,
    included and excluded scope, experiments, exact reviewed revision,
    verification evidence, and known limitations.
-6. The bootstrap pull request MAY combine the unpublished project capsule reset
-   stack with the repository artifacts that establish this workflow.
+6. Bootstrap MUST use one primary pull request combining the unpublished
+   project capsule reset stack with the repository artifacts that establish
+   this workflow, followed by one closure pull request recording evidence that
+   can exist only after the primary merge and protection changes.
+7. The two-pull-request bootstrap MUST be a one-time exception. Later GOALs
+   MUST use exactly one pull request each.
 
 ### Publication authority
 
@@ -83,8 +87,9 @@ operator by default. Hosted Rust verification and protected-branch rules guard
 2. `main` MUST require a pull request and the named hosted Rust verification
    check before merge.
 3. `main` MUST reject force-push and deletion.
-4. Protection MUST be installed only after the required workflow exists on
-   `main`.
+4. Protection MUST be installed after the primary bootstrap pull request puts
+   the required workflow on `main` and before the bootstrap closure pull
+   request is merged.
 5. After squash merge, the fetched `main` tree MUST equal the exact reviewed
    branch-tip tree before the goal bookmark is removed or successor work begins.
 6. The squash commit ID MAY differ from every reviewed Jujutsu revision and
@@ -97,8 +102,8 @@ operator by default. Hosted Rust verification and protected-branch rules guard
 2. `main` MUST NOT be force-pushed to repair a publication failure.
 3. Automated evidence MUST validate the workflow and template structure without
    credentials, a VM, a harness, or remote mutation.
-4. A predeclared experiment MUST verify the bootstrap pull request, hosted Rust
-   result, operator squash merge, landing tree equality, merge settings,
+4. A predeclared experiment MUST verify both bootstrap pull requests, hosted
+   Rust results, operator squash merges, landing tree equality, merge settings,
    protected branch, and absence of unrelated remote mutation.
 
 ## Consequences
@@ -110,7 +115,10 @@ does not independently verify Nix packaging or native Darwin behavior.
 
 Squash merging changes commit identity, so landing is complete only after tree
 equality rather than commit ancestry is verified. Repository protection cannot
-be fully established until the bootstrap workflow has landed on `main`.
+be fully established until the primary bootstrap workflow has landed on
+`main`. One small closure PR is then necessary to commit evidence of events the
+primary PR could not observe; this is deliberately not a reusable exception to
+one GOAL per PR.
 
 ## Alternatives Considered
 
@@ -133,4 +141,3 @@ be fully established until the bootstrap workflow has landed on `main`.
    CODEOWNERS policy.
 3. Whether a future trusted publication command should automate the exact
    presentation, approval, push, PR, and landing transaction.
-

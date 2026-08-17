@@ -25,9 +25,14 @@ when Jujutsu stack shaping requires it; `main` may never be force-pushed. A PR
 becomes ready only after goal closure, complete local verification, recorded
 Nix evidence, and passing hosted Rust verification.
 
-The first PR is a bootstrap exception. It contains the unpublished project
-capsule reset stack plus the workflow infrastructure that governs its review.
-Its final tree retains the completed reset GOAL and Experiment 0012 records.
+Bootstrap uses two pull requests because a pull request cannot contain evidence
+of its own later merge and repository protection. The primary PR contains the
+unpublished project capsule reset stack plus the workflow infrastructure that
+governs its review. Its final tree retains the completed reset GOAL as an
+archived record and retains Experiment 0012. After the operator merges it and
+protection is installed, one small closure PR records landing-tree equality,
+remote settings, Experiment 0013 terminal results, completed publication GOAL,
+and FIP-0005 conformance. This is a one-time exception; later GOALs use one PR.
 
 ## Review and merge contract
 
@@ -59,7 +64,7 @@ start MicroSandbox, a VM, or a harness.
 host system and terminal result. Hosted Nix or cross-platform verification is
 a later goal rather than a prerequisite for establishing reviewable history.
 
-After the bootstrap PR lands, GitHub permits squash merging only. `main`
+After the primary bootstrap PR lands, GitHub permits squash merging only. `main`
 requires a pull request and the named Rust verification check; force-push and
 deletion are blocked. Protection is applied after the workflow exists on
 `main`, so it never requires an unknown check.
@@ -87,11 +92,11 @@ hidden by changing evidence.
 
 Deterministic evidence validates the checked-in workflow structure and pull
 request template. The complete local runbook gate must pass before the first
-remote mutation. A predeclared publication experiment records the exact
-bootstrap branch, PR metadata, remote state before and after, CI result, manual
-squash merge, landing tree equality, repository merge settings, branch
+remote mutation. A predeclared publication experiment records the exact primary
+and closure branches, PR metadata, remote state before and after, CI results,
+manual squash merges, landing tree equality, repository merge settings, branch
 protection, and absence of unrelated remote changes.
 
-The workflow is conformant only after the bootstrap PR and post-merge
-protection are verified. Until then FIP-0005 remains unimplemented or partial.
-
+The workflow is conformant only after the primary bootstrap PR, post-merge
+protection, and closure PR are verified. Until then FIP-0005 remains
+unimplemented or partial.
