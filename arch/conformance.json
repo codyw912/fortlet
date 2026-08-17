@@ -118,6 +118,16 @@
         "experiments/0012-project-capsule-reset.md"
       ],
       "gaps": []
+    },
+    {
+      "proposal": "0005",
+      "title": "Goal-scoped pull request publication",
+      "status": "unimplemented",
+      "modules": [],
+      "tests": [],
+      "gaps": [
+        "The pull request template, hosted Rust workflow, documented Jujutsu lifecycle, bootstrap pull request, squash-only merge settings, and protected main branch are not implemented."
+      ]
     }
   ]
 }

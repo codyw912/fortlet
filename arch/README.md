@@ -51,3 +51,4 @@ cargo test --test conformance
 3. [FIP-0002: Optional transparent harness shims](proposals/0002-optional-transparent-harness-shims.md)
 4. [FIP-0003: Project capsule status and stop](proposals/0003-project-capsule-status-and-stop.md)
 5. [FIP-0004: Project capsule reset](proposals/0004-project-capsule-reset.md)
+6. [FIP-0005: Goal-scoped pull request publication](proposals/0005-goal-pull-request-publication.md)
