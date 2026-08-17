@@ -142,7 +142,22 @@ present the exact `main` protection payload as its own transaction.
 
 ## Results
 
-Pending declared treatment.
+1. The operator approved the exact repository PATCH after reviewing its
+   endpoint, six-field JSON body, control, local gates, and exclusions. GitHub
+   accepted it on 2026-08-17.
+2. Independent REST read-back reports squash merging enabled, merge commits
+   disabled, rebase merging disabled, auto-merge disabled, and squash defaults
+   `PR_TITLE` plus `PR_BODY`. Default branch, visibility, archive state,
+   merged-branch deletion, and every unmentioned repository field remained
+   outside the transaction.
+3. Remote refs remained exactly `main` at
+   `e0f919f80ed90589735f15ff7779ed229122ab1f` and the primary goal branch at
+   `e2e4a6d8b24e974add01a720ddaf73c71de7963a`. `main` protection still returned
+   `404 Branch not protected`, confirming that the second settings resource was
+   not mutated implicitly.
+
+The experiment remains in flight. The separately rehearsed `main` protection
+PUT requires its own exact operator approval.
 
 ## Terminal Closure
 

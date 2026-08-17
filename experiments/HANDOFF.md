@@ -77,6 +77,10 @@ or other mutation is authorized without its separate exact approval.
     amendment accepting only that exact tree-equal primary landing. It forbids
     rewrite or revert repair and retains squash-only landing for the closure PR
     and every future goal. Experiment 0016 is the declared closure successor.
+16. The separately approved repository PATCH succeeded. Read-back permits only
+    squash merging, keeps auto-merge off, and uses `PR_TITLE` plus `PR_BODY` for
+    squash commits. Both branch refs are unchanged, and `main` protection
+    remains absent pending its own approval.
 
 ## Product state
 
@@ -120,10 +124,8 @@ PR or GitHub without a new exact operator authorization. Experiments 0014 and
 
 ## Current mission boundary
 
-Experiment 0016's amendment, remote baseline, repository-settings payload,
-`main` protection payload, and complete local gates are qualified. Present the
-repository PATCH for separate exact approval and verify its read-back before
-presenting the protection PUT as a second transaction. Never rewrite or revert
-`main`, permit a second merge-method exception, remove a bookmark before tree
-equality, or infer authority for settings, protection, a closure branch or PR,
-readiness, merge, or cleanup.
+Experiment 0016's repository PATCH is verified. Present the already-qualified
+`main` protection PUT for separate exact approval and read it back completely
+before shaping the closure stack. Never rewrite or revert `main`, permit a
+second merge-method exception, remove a bookmark before tree equality, or infer
+authority for protection, a closure branch or PR, readiness, merge, or cleanup.
