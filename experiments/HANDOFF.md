@@ -1,10 +1,11 @@
-# Session Handoff — Portable `openpty` successor is authorized
+# Session Handoff — Portable `openpty` successor is locally qualified
 
 Audience: a fresh agent session. `GOAL.md` is normative and active. Experiments
 0013 and 0014 are terminally rejected after their single declared hosted units.
 Experiments 0001 through 0014 are terminally closed, and Experiment 0015 is the
-one authorized successor. No remote correction, push, or run is authorized
-without a new exact transaction approval.
+one active successor. Its local implementation is qualified; no remote
+correction, push, or run is authorized without a new exact transaction
+approval.
 
 ## Verified result
 
@@ -44,6 +45,10 @@ without a new exact transaction approval.
    `examples/pty_observer.rs:233` because Linux `openpty` does not need a
    mutable winsize reference, and conformance was skipped. No rerun or later
    remote mutation occurred.
+10. Experiment 0015 replaces the syntactic mutable reference with a named raw
+    pointer derived from the same mutable winsize. Its focused 15-test observer
+    suite and the complete standard local verification set pass on
+    `aarch64-darwin`; no remote mutation has tested Linux yet.
 
 ## Product state
 
@@ -88,10 +93,9 @@ transaction is separately presented and approved.
 
 ## Current mission boundary
 
-Implement Experiment 0015's single raw winsize-pointer correction in the PTY
-observer, run its focused example tests and the complete local verification
-set, then present the exact stack, diff, destination, verification state, and
-rejected control before requesting approval for one correction push. The
-operator still owns readiness and both bootstrap merges. Do not push, rerun,
-update PR metadata, mark readiness, merge, or change repository settings on
-inferred authority.
+The Experiment 0015 correction is locally qualified. Refresh and present the
+exact stack, diff, destination, remote PR/head/run baseline, signatures,
+verification state, rejected control, and Jujutsu dry-run before requesting
+approval for its one correction push. The operator still owns readiness and
+both bootstrap merges. Do not push, rerun, update PR metadata, mark readiness,
+merge, or change repository settings on inferred authority.

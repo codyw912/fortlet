@@ -1,6 +1,6 @@
 # Experiment 0015: Portable `openpty` winsize pointer
 
-Status: declared
+Status: in-flight
 Design: FIP-0001, FIP-0005
 Charter scope: `local-foundation/v1` plus explicit operator successor
 authorization on 2026-08-17
@@ -101,7 +101,33 @@ approval; verify the signed tip and single run; stop on its terminal result.
 
 ## Rehearsal
 
-Pending local treatment.
+Completed locally on 2026-08-17 without remote mutation:
+
+1. Stable change `nqzsqukqvzkwuwlrmwmsotnzqzlnsxux` (then commit
+   `dca8c70f565e945094a2124849dc035a0cb3e882`) changes only
+   `examples/pty_observer.rs`: it derives a named raw pointer from the existing
+   mutable winsize and passes that pointer to the unchanged `openpty` call. The
+   diff is three insertions and one deletion, including the platform-contract
+   rationale.
+2. The source and locked `libc` 0.2.189 definitions confirm the control:
+   Apple's binding accepts `*mut winsize`, glibc Linux accepts
+   `*const winsize`, and a Rust raw mutable pointer coerces to either required
+   parameter without an immutable-to-mutable cast.
+3. `cargo test --example pty_observer` passed all 15 tests, exercising PTY
+   creation, activity, resize, signal, command and key input, exit status,
+   timeout, and owned child cleanup. Focused strict Clippy also passed.
+4. The implementation checkpoint passed 39 unit tests, 20 integration tests,
+   formatting, strict all-target/all-feature Clippy, the dedicated conformance
+   test, and `nix flake check` on `aarch64-darwin`. Nix emitted the known
+   missing app metadata warning and omitted incompatible `x86_64-linux`.
+5. Simplification review retained the named pointer and one non-obvious comment
+   because both make the cross-platform FFI reason explicit. No dependency,
+   lint allowance, conditional compilation, workflow, runner, package, test
+   apparatus, product runtime, or remote resource changed.
+
+This rehearsal does not authorize the correction push. The exact qualified
+tip, outgoing stack and diff, remote PR/head/run baseline, signatures, and
+Jujutsu push dry-run must be refreshed and presented for separate approval.
 
 ## Results
 
