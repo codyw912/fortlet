@@ -1,7 +1,8 @@
-# Session Handoff — Project capsule reset is conformant
+# Session Handoff — Pull request workflow bootstrap is authorized
 
-Audience: a fresh agent session. `GOAL.md` is normative and complete. No
-experiment is active; Experiments 0001 through 0012 are terminally closed.
+Audience: a fresh agent session. `GOAL.md` is normative and active. Experiment
+0013 is declared but has not contacted GitHub mutably; Experiments 0001 through
+0012 are terminally closed.
 
 ## Verified result
 
@@ -64,11 +65,11 @@ Use Jujutsu for all local history. Inspect the unpublished stack with
 `jj log -r 'main..@'`. Do not push, create a PR, or mutate GitHub without a new
 operator authorization.
 
-## Successor boundary
+## Current mission boundary
 
-The reset/recovery mission is complete. The next GOAL should be selected with
-the operator rather than inferred. Product-focused candidates are the first
-observable workload-lease contract, a similarly narrow restart/log surface,
-or deeper capsule topology and terminal evidence. Standalone installation was
-explicitly deferred until later. Any new public CLI or lifecycle contract
-requires an accepted FIP before implementation.
+Implement accepted FIP-0005 locally, verify it, and rehearse Experiment 0013.
+Every GitHub mutation requires a fresh presentation of exact revisions, diff,
+destination, metadata or settings payload, verification state, and known
+failures followed by explicit operator approval. The operator merges both
+bootstrap PRs. Do not push, open or update a PR, mark readiness, merge, or
+change repository settings on inferred authority.

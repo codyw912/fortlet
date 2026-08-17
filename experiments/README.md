@@ -34,3 +34,4 @@ scannable failure/win history of the project:
 - `0010-project-capsule-status-and-stop.md` — accepted; the public CLI proved absent, running, stopped, and absent around bounded stop and exact owned cleanup.
 - `0011-public-alpha-repository.md` — accepted; the complete signed history is public on GitHub with only `main` and no extra remote resources.
 - `0012-project-capsule-reset.md` — accepted; the public CLI refused active reset, removed the owned terminal capsule, preserved durable state, reported absence idempotently, and cleaned up exactly.
+- `0013-pull-request-workflow-bootstrap.md` — declared; primary PR publication, hosted Rust CI, squash landing, and protected-main enforcement await implementation and dispatch.

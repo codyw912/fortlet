@@ -1,132 +1,128 @@
-# GOAL: Add project capsule reset and recovery
+# GOAL: Establish goal-scoped pull request publication
 
-Status: completed on 2026-08-12.
+Status: authorized on 2026-08-16.
 
-Implement accepted FIP-0004: let users remove an owned terminal capsule's
-disposable MicroSandbox state without raw `msb` commands, implicit process
-termination, or persistent-state loss. Do not expand into automatic stop,
-persistent-state purge, global inventory, restart, logs, leases, CI,
-distribution, or remote publication.
+Implement accepted FIP-0005 and publish the already-completed project capsule
+reset stack through the one-time two-PR bootstrap. Establish reviewable draft
+pull requests, hosted Rust verification, squash-only history, and protected
+`main` without weakening FIP-0001's exact per-transaction approval boundary.
 
-Before implementation, read FIP-0001, FIP-0003, and FIP-0004 in full and the
-validated design at
-`docs/plans/2026-08-12-project-capsule-reset-design.md`. Preserve every
-terminal experiment result and the public repository established by Experiment
-0011; no remote mutation is authorized.
+Before implementation, read FIP-0001 and FIP-0005 in full and the validated
+design at
+`docs/plans/2026-08-16-pull-request-publication-workflow-design.md`. Preserve
+every terminal experiment record and the public repository established by
+Experiment 0011.
 
-## Deliverable 1 — Extend the locked management lifecycle
+## Deliverable 1 — Add deterministic PR infrastructure
 
-1. Add reset to the existing narrow local MicroSandbox management seam.
-2. Derive reset targets from the shared capsule descriptor used by launch,
-   status, and stop.
-3. Return absence before creating Fortlet state or a capsule lock.
-4. For a present target, acquire the shared per-capsule lock, fetch current
-   state again, parse stored configuration, and verify name plus managed,
-   schema, project, and tool ownership before any mutation.
-5. Accept version skew for reset while preserving launch's exact-version
-   reconciliation.
+1. Add a concise pull request template covering scope, GOAL/FIPs, exclusions,
+   experiments, reviewed revision, local Nix evidence, hosted checks, and known
+   limitations.
+2. Add one pull-request workflow targeting `main` that runs `cargo test`,
+   formatting check, strict all-target/all-feature Clippy, and conformance on
+   Linux.
+3. Pin trusted workflow actions, grant only read access to repository contents,
+   and provide no secrets, MicroSandbox runtime, VM, or harness execution.
+4. Add deterministic evidence for the workflow triggers, permissions, commands,
+   and template contract without contacting GitHub.
 
-## Deliverable 2 — Implement explicit terminal reset
+## Deliverable 2 — Bind the Jujutsu publication lifecycle
 
-1. Add `fortlet reset <harness>` with `--project` and
-   `--allow-broad-mount`.
-2. Remove only owned `stopped` or `crashed` capsules through the SDK handle.
-3. Refuse `created`, `starting`, `running`, `draining`, and `paused` without
-   stopping or killing anything, and direct the user to
-   `fortlet stop <harness>` before retrying.
-4. Print exactly `harness<TAB>reset` after removal or
-   `harness<TAB>absent` when no capsule exists.
-5. Preserve project files, project+harness state, credential projection,
-   credential fingerprint, and immutable base and harness layers.
+1. Update durable workflow, agent, and runbook instructions for one bookmark
+   and one draft PR per future GOAL, semantic local checkpoints, exact approval
+   before every remote mutation, operator-owned merge, and squash landing.
+2. Record the one-time primary-plus-closure bootstrap and archive the completed
+   reset GOAL so the primary squash retains it.
+3. Document readiness, failure, signature, post-squash tree-equality, bookmark
+   cleanup, and local `nix flake check` evidence.
+4. Keep FIP-0005 partial until the primary PR, remote protection, and closure
+   evidence establish the contract.
 
-## Deliverable 3 — Replace raw-runtime recovery guidance
+## Deliverable 3 — Publish and land the primary bootstrap PR
 
-1. Change launch's stale-capsule correction from raw `msb` removal to
-   `fortlet stop <harness>` followed by `fortlet reset <harness>`.
-2. Keep internal capsule names and project identities out of normal reset
-   output and recovery guidance.
-3. Document that explicit project selection must be repeated across launch,
-   stop, and reset.
+1. Rehearse Experiment 0013 completely without remote mutation, then run the
+   complete standard verification set and repository credential scan.
+2. Present the exact primary bookmark, outgoing stack and diff, origin
+   destination, title, complete draft body, signatures, and remote baseline for
+   operator approval before pushing or creating the PR.
+3. Open exactly one draft PR containing the unpublished reset stack and workflow
+   infrastructure, observe the hosted Rust check, then separately present any
+   readiness mutation for operator approval.
+4. Stop for the operator's manual squash merge. After notification, fetch and
+   prove `main` has the reviewed primary tree before changing settings.
 
-## Deliverable 4 — Prove, document, conform, and close
+## Deliverable 4 — Protect main and close bootstrap publication
 
-1. Add deterministic evidence for every SDK state decision, side-effect-free
-   absence, lock/refetch ordering, ownership and version skew, malformed
-   configuration, output, parsing, and lookup/lock/removal failures.
-2. Add isolated real-CLI failure evidence for harness and project boundaries
-   without a VM or credential.
-3. Update README, overview, runbook, and conformance with only established
-   reset behavior.
-4. Rehearse Experiment 0012 without runtime contact, run the complete standard
-   verification set, then dispatch its one owned local capsule unit exactly as
-   declared.
-5. Close Experiment 0012 terminally, rewrite `experiments/HANDOFF.md`, mark
-   this GOAL complete, inspect `main..@`, then STOP and report.
+1. Present exact repository-setting and branch-protection payloads for operator
+   approval. Enable squash merges only; require PRs and the named Rust check on
+   `main`; block force-push and deletion.
+2. Close Experiment 0013 terminally from observed primary-PR and remote-setting
+   evidence, mark FIP-0005 conformant, conditionally complete this GOAL, and
+   rewrite the handoff.
+3. Present the exact closure bookmark, diff, destination, title, and body for a
+   new approval; create the small closure PR and wait for hosted Rust CI.
+4. Stop for the operator's manual closure squash merge. After notification,
+   fetch and verify its `main` destination and tree equality read-only, remove
+   only landed goal bookmarks, inspect the final state, then STOP and report.
 
 ## Definition of Done
 
-1. The public CLI implements FIP-0004 exactly.
-2. Reset cannot terminate active work and cannot remove an unowned capsule.
-3. Absence is idempotent and does not create state or locks.
-4. Terminal reset removes only disposable runtime state and preserves the
-   project and persistent harness state.
-5. Launch recovery guidance uses only Fortlet commands.
-6. Deterministic tests cover the complete decision surface without a VM or
-   real credential.
-7. Experiment 0012 records the actual public-CLI refusal, stop, reset,
-   preservation, idempotence, and cleanup path, whether accepted or honestly
-   rejected.
-8. FIP-0004 conformance and the complete standard verification set are green;
-   then STOP.
+1. Future authorized GOALs have a documented one-bookmark, one-draft-PR,
+   operator-merge, squash-history workflow.
+2. Hosted Rust verification is deterministic, credential-free, and green;
+   local Nix evidence remains mandatory.
+3. Every remote mutation receives exact operator review and explicit approval.
+4. The primary bootstrap PR lands the reviewed reset and workflow tree on
+   `main`; the closure PR lands terminal publication evidence.
+5. GitHub permits only squash merging and protects `main` with required PR and
+   Rust-check rules while blocking force-push and deletion.
+6. Both squash landings pass destination and tree-equality verification; no
+   unrelated remote resource changes occur.
+7. FIP-0005 is conformant, Experiment 0013 is terminal, the handoff is current,
+   and the complete standard verification set is green; then STOP.
 
 ## Binding rules
 
-1. Preserve every charter invariant and FIP-0001, FIP-0002, FIP-0003, and
-   FIP-0004 constraint.
-2. Use the MicroSandbox SDK directly. Extend only the existing narrow local
-   management seam; do not add a generic runtime abstraction.
-3. Do not read credentials, provision layers, prepare harness state, launch a
-   harness, or create a capsule from reset.
-4. Do not add force, automatic stop, persistent-state deletion, raw-name
-   management, multi-harness reset, global inventory, restart, logs, leases,
-   structured output, CI, packaging, or distribution work.
-5. Tests may mutate only owned temporary directories and subprocess
-   environments. They MUST NOT start a VM, use a real credential, launch a
-   harness, or contact a network service.
-6. Experiment 0012 is the only authorized live runtime contact. Verify its
-   exact generated target and ownership before removal and cleanup.
-7. Keep conformance changes in the same checkpoint as code and tests. Keep
-   experiment results in their later terminal-closure checkpoint.
-8. Use reviewable Jujutsu checkpoints and inspect `main..@` before handoff.
-9. Do not push, create a PR, or perform any GitHub mutation.
+1. Preserve every charter invariant and FIP-0001 through FIP-0005.
+2. Use Jujutsu for local history and bookmark publication. Do not use mutating
+   Git commands.
+3. Each push, PR mutation, merge, or settings mutation is a separate trusted
+   host transaction. Present its exact inputs and wait for explicit operator
+   approval; approval never carries forward.
+4. The operator merges unless they explicitly authorize the agent to merge one
+   named PR. Do not enable auto-merge.
+5. Do not execute repository-controlled hooks, aliases, pagers, credential
+   helpers, or generated shell text during publication.
+6. Do not add releases, tags, packages, secrets, deploy keys, collaborators,
+   webhooks, deployments, unrelated branches, or other repository settings.
+7. Do not add hosted Nix, macOS, VM, harness, runtime, release, or deployment
+   jobs.
+8. The two-PR bootstrap is a one-time exception. Do not generalize it to future
+   GOALs or create a third closure PR.
+9. Keep conformance changes with their establishing evidence. Record remote
+   results honestly; do not silently retry a failed experiment unit.
 
 ## Budget and escalation
 
-1. Engineering ceiling: two hours from implementation start.
-2. External budget: zero money, zero paid quota, zero model prompts, zero
-   remote mutation, one local Codex `--version` launch, one Fortlet-owned local
-   capsule, and zero retries.
-3. Stop on any undeclared network attempt, credential anomaly, outside-scope
-   mutation, unowned capsule, need to change an accepted FIP, repeated live
-   failure, experiment scope change, or need for remote mutation.
+1. Engineering ceiling: two hours, excluding waits for operator merge and
+   hosted CI.
+2. External budget: zero money, zero paid quota, two named bookmarks, two pull
+   requests, two operator squash merges, and only the explicitly approved
+   remote transactions declared by Experiment 0013.
+3. Stop on any credential anomaly, unsigned outgoing revision, unexpected
+   remote change, CI failure, stale base, branch or tree mismatch, unavailable
+   required protection, need for an extra push or PR, need to change an
+   accepted FIP, or request for any undeclared GitHub resource.
 
 ## Verification
 
-Run before claiming completion:
+Run before the primary publication transaction and again before the closure
+publication transaction:
 
-- focused reset tests during development;
+- focused workflow-contract tests;
 - `cargo test`;
 - `cargo fmt --all -- --check`;
 - `cargo clippy --all-targets --all-features -- -D warnings`;
 - `cargo test --test conformance`;
 - `nix flake check`.
 
-## Completion
-
-Implementation checkpoint `3eada810` added the accepted reset contract, its
-deterministic evidence, recovery guidance, documentation, and partial
-conformance. The complete standard verification set passed before dispatch.
-Experiment 0012 then accepted one immutable public-CLI unit covering active
-refusal, explicit stop, terminal reset, persistence, idempotence, and exact
-cleanup. Its terminal-closure checkpoint marks FIP-0004 conformant. No remote
-mutation occurred.
