@@ -81,6 +81,11 @@ or other mutation is authorized without its separate exact approval.
     squash merging, keeps auto-merge off, and uses `PR_TITLE` plus `PR_BODY` for
     squash commits. Both branch refs are unchanged, and `main` protection
     remains absent pending its own approval.
+17. The separately approved `main` protection PUT succeeded. Read-back requires
+    strict GitHub Actions context `Rust verification`, PRs with zero approving
+    reviews, administrator enforcement, and linear history; it blocks
+    force-push and deletion and leaves every undeclared option disabled. The
+    squash-only settings and refs stayed exact, and no ruleset appeared.
 
 ## Product state
 
@@ -88,8 +93,10 @@ The public repository remains at `https://github.com/codyw912/fortlet` with SSH
 origin `git@github.com:codyw912/fortlet.git`. Remote `main` is signed merge
 commit `e0f919f80ed90589735f15ff7779ed229122ab1f`; the primary goal branch remains
 at `e2e4a6d8b24e974add01a720ddaf73c71de7963a`, and PR #1 is closed and merged.
-Merge commits, rebase merges, and squash merges all remain enabled. No branch
-protection, bookmark cleanup, closure PR, revert, or history rewrite occurred.
+Only squash merging is enabled; auto-merge remains off and squash defaults use
+the PR title and body. `main` is protected by strict `Rust verification`, PRs,
+administrator enforcement, and linear history, with force-push and deletion
+blocked. No bookmark cleanup, closure PR, revert, or history rewrite occurred.
 
 Daily-use surfaces are `doctor`, explicit `run`, optional package-owned
 `codex` and `tact` shims, explicit `native`, project-scoped `status`, bounded
@@ -124,8 +131,10 @@ PR or GitHub without a new exact operator authorization. Experiments 0014 and
 
 ## Current mission boundary
 
-Experiment 0016's repository PATCH is verified. Present the already-qualified
-`main` protection PUT for separate exact approval and read it back completely
-before shaping the closure stack. Never rewrite or revert `main`, permit a
-second merge-method exception, remove a bookmark before tree equality, or infer
-authority for protection, a closure branch or PR, readiness, merge, or cleanup.
+Experiment 0016's repository settings and `main` protection are verified. Shape
+the local terminal and closure evidence onto fetched `main`, update conformance
+only with its establishing evidence, and run the complete gates before
+presenting a closure bookmark or PR transaction. Never rewrite or revert
+`main`, permit a second merge-method exception, remove a bookmark before tree
+equality, or infer authority for a closure branch or PR, readiness, merge, or
+cleanup.

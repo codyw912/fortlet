@@ -155,9 +155,23 @@ present the exact `main` protection payload as its own transaction.
    `e2e4a6d8b24e974add01a720ddaf73c71de7963a`. `main` protection still returned
    `404 Branch not protected`, confirming that the second settings resource was
    not mutated implicitly.
+4. The operator separately approved the exact `main` protection PUT after
+   reviewing its endpoint, complete JSON body, verified check identity, local
+   gates, and exclusions. GitHub accepted it on 2026-08-17.
+5. Independent REST read-back reports strict required context
+   `Rust verification`, automatically bound to GitHub Actions app ID `15368`;
+   administrator enforcement; required PRs with zero approving reviews; linear
+   history; and force-push plus deletion disabled. Review dismissal, code-owner
+   review, last-push approval, signatures, push restrictions, creation
+   blocking, conversation resolution, branch locking, and fork syncing remain
+   disabled, with no bypass allowance.
+6. Squash-only repository settings remained exact. Both branch refs were
+   unchanged, and repository rulesets remained empty. No closure branch, PR,
+   workflow run, bookmark cleanup, revert, rewrite, or unrelated remote
+   mutation occurred.
 
-The experiment remains in flight. The separately rehearsed `main` protection
-PUT requires its own exact operator approval.
+The experiment remains in flight. Shape and verify the closure evidence on
+fetched `main` locally before presenting any closure bookmark or PR mutation.
 
 ## Terminal Closure
 
