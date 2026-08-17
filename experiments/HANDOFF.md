@@ -1,11 +1,11 @@
-# Session Handoff — Hosted Rust is green; primary PR remains draft
+# Session Handoff — Primary PR is ready for operator squash merge
 
 Audience: a fresh agent session. `GOAL.md` is normative and active. Experiments
 0013 and 0014 are terminally rejected after their single declared hosted units.
 Experiments 0001 through 0015 are terminally closed. Experiment 0015 accepted
 its one hosted unit, so the primary PR's required Rust verification is green.
-No branch push, PR update, readiness, merge, setting change, or other remote
-mutation is currently authorized.
+PR #1 is ready for review. No merge, branch push, PR update, setting change, or
+other remote mutation is currently authorized.
 
 ## Verified result
 
@@ -59,16 +59,21 @@ mutation is currently authorized.
     silently retried. The operator approved one unchanged retry; it succeeded,
     and REST read-back matched the reviewed body while title, open draft state,
     `main` base, goal-branch head, and signed head SHA remained unchanged.
+13. The operator separately approved the exact draft-to-ready mutation. REST
+    read-back reports PR #1 open, non-draft, cleanly mergeable, targeting
+    unchanged `main` from unchanged signed head
+    `e2e4a6d8b24e974add01a720ddaf73c71de7963a`. The successful hosted run
+    remained current, and no new run or ref appeared.
 
 ## Product state
 
 The public repository remains at `https://github.com/codyw912/fortlet` with SSH
 origin `git@github.com:codyw912/fortlet.git`. Remote `main` remains at
 `e95b0cdb1308f732d3f45db7a85027d45bcd4048`; the primary goal bookmark is at
-`e2e4a6d8b24e974add01a720ddaf73c71de7963a`, and PR #1 remains open and draft.
+`e2e4a6d8b24e974add01a720ddaf73c71de7963a`, and PR #1 is open and ready.
 Its body now records the exact reviewed tip, current local and hosted evidence,
-and Experiments 0013 through 0015. No readiness, merge, protection, or settings
-mutation has occurred.
+and Experiments 0013 through 0015. No merge, protection, or settings mutation
+has occurred.
 
 Daily-use surfaces are `doctor`, explicit `run`, optional package-owned
 `codex` and `tact` shims, explicit `native`, project-scoped `status`, bounded
@@ -103,9 +108,9 @@ PR or GitHub without a new exact operator authorization. Experiments 0014 and
 
 ## Current mission boundary
 
-Experiment 0015's terminal acceptance is recorded locally, and PR #1's evidence
-body is current. The next remote candidate is a separately reviewed bootstrap
-readiness mutation if refreshed state still proves every locally knowable
-primary deliverable complete. The operator still owns readiness and both
-bootstrap merges. Do not push, rerun, update PR metadata, mark readiness,
-merge, or change repository settings on inferred authority.
+STOP for the operator's manual squash merge of PR #1. After the operator
+reports that merge, refresh the PR base and merge state, fetch `origin`, and
+prove fetched `main` has the exact reviewed branch-tip tree before removing any
+bookmark or presenting repository settings. The operator still owns both
+bootstrap merges. Do not merge, push, rerun, update PR metadata, remove a
+bookmark, or change repository settings on inferred authority.
