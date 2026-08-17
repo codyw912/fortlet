@@ -1,11 +1,12 @@
-# Session Handoff — Primary PR is ready for operator squash merge
+# Session Handoff — Primary tree landed with a merge-method mismatch
 
 Audience: a fresh agent session. `GOAL.md` is normative and active. Experiments
 0013 and 0014 are terminally rejected after their single declared hosted units.
 Experiments 0001 through 0015 are terminally closed. Experiment 0015 accepted
 its one hosted unit, so the primary PR's required Rust verification is green.
-PR #1 is ready for review. No merge, branch push, PR update, setting change, or
-other remote mutation is currently authorized.
+PR #1 has merged, but GitHub created a two-parent merge commit instead of the
+required squash commit. No repair, bookmark removal, closure PR, branch push,
+PR update, setting change, or other remote mutation is currently authorized.
 
 ## Verified result
 
@@ -64,16 +65,22 @@ other remote mutation is currently authorized.
     unchanged `main` from unchanged signed head
     `e2e4a6d8b24e974add01a720ddaf73c71de7963a`. The successful hosted run
     remained current, and no new run or ref appeared.
+14. PR #1 reports merged at `2026-08-17T18:58:59Z` into `main` as validly
+    signed commit `e0f919f80ed90589735f15ff7779ed229122ab1f`. A Jujutsu diff from
+    reviewed tip `e2e4a6d8b24e974add01a720ddaf73c71de7963a` to fetched `main` is
+    empty, so destination and exact tree equality pass. The landed commit has
+    two parents—the previous `main` and reviewed branch tip—and GitHub stores
+    the merge-commit subject. The required squash-history criterion therefore
+    fails despite the correct tree.
 
 ## Product state
 
 The public repository remains at `https://github.com/codyw912/fortlet` with SSH
-origin `git@github.com:codyw912/fortlet.git`. Remote `main` remains at
-`e95b0cdb1308f732d3f45db7a85027d45bcd4048`; the primary goal bookmark is at
-`e2e4a6d8b24e974add01a720ddaf73c71de7963a`, and PR #1 is open and ready.
-Its body now records the exact reviewed tip, current local and hosted evidence,
-and Experiments 0013 through 0015. No merge, protection, or settings mutation
-has occurred.
+origin `git@github.com:codyw912/fortlet.git`. Remote `main` is signed merge
+commit `e0f919f80ed90589735f15ff7779ed229122ab1f`; the primary goal branch remains
+at `e2e4a6d8b24e974add01a720ddaf73c71de7963a`, and PR #1 is closed and merged.
+Merge commits, rebase merges, and squash merges all remain enabled. No branch
+protection, bookmark cleanup, closure PR, revert, or history rewrite occurred.
 
 Daily-use surfaces are `doctor`, explicit `run`, optional package-owned
 `codex` and `tact` shims, explicit `native`, project-scoped `status`, bounded
@@ -108,9 +115,8 @@ PR or GitHub without a new exact operator authorization. Experiments 0014 and
 
 ## Current mission boundary
 
-STOP for the operator's manual squash merge of PR #1. After the operator
-reports that merge, refresh the PR base and merge state, fetch `origin`, and
-prove fetched `main` has the exact reviewed branch-tip tree before removing any
-bookmark or presenting repository settings. The operator still owns both
-bootstrap merges. Do not merge, push, rerun, update PR metadata, remove a
-bookmark, or change repository settings on inferred authority.
+STOP on the primary landing mismatch. The reviewed tree landed exactly, but
+the two-parent commit violates FIP-0005's squash-only public-history contract
+and this GOAL's Definition of Done. Do not remove the goal bookmark, change
+merge settings or protection, create a closure PR, revert, or rewrite `main`
+without a new operator decision and any required design authorization.

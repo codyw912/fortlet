@@ -1,7 +1,7 @@
 # GOAL: Establish goal-scoped pull request publication
 
-Status: authorized on 2026-08-16; hosted-CI portability successor authorized on
-2026-08-17.
+Status: authorized on 2026-08-16; stopped on 2026-08-17 after the primary PR
+landed as a merge commit instead of the required squash commit.
 
 Implement accepted FIP-0005 and publish the already-completed project capsule
 reset stack through the one-time two-PR bootstrap. Establish reviewable draft
@@ -97,6 +97,21 @@ from that result.
 4. Stop for the operator's manual closure squash merge. After notification,
    fetch and verify its `main` destination and tree equality read-only, remove
    only landed goal bookmarks, inspect the final state, then STOP and report.
+
+### Observed primary landing mismatch
+
+PR #1 merged into `main` as signed commit
+`e0f919f80ed90589735f15ff7779ed229122ab1f`. Its tree is byte-identical to the
+reviewed branch tip, but the commit has two parents—previous `main`
+`e95b0cdb1308f732d3f45db7a85027d45bcd4048` and reviewed tip
+`e2e4a6d8b24e974add01a720ddaf73c71de7963a`—and the stored subject is
+`Merge pull request #1 from codyw912/goal/project-capsule-reset`. This is a
+merge commit, not the squash commit required by FIP-0005 and this GOAL.
+
+STOP. Tree equality passed, but the concise-history and squash-landing
+criteria failed. Do not remove the goal bookmark, change merge settings or
+protection, create the closure PR, revert, or rewrite `main` without a new
+operator decision and any required design authorization.
 
 ## Definition of Done
 
