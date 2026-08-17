@@ -14,6 +14,11 @@
       "title": "Project-scoped capsule architecture",
       "status": "partial",
       "modules": [
+        ".github/pull_request_template.md",
+        ".github/workflows/verify.yml",
+        "AGENTS.md",
+        "WORKFLOW.md",
+        "docs/RUNBOOK.md",
         "package.nix",
         "src/auth.rs",
         "src/cli.rs",
@@ -27,6 +32,7 @@
         "src/session.rs"
       ],
       "tests": [
+        ".github/workflows/verify.yml",
         "package.nix",
         "src/auth.rs",
         "src/cli.rs",
@@ -39,6 +45,7 @@
         "tests/management_failures.rs",
         "experiments/0010-project-capsule-status-and-stop.md",
         "tests/pre_runtime_failures.rs",
+        "tests/publication_workflow.rs",
         "tests/conformance.rs"
       ],
       "gaps": [
@@ -122,11 +129,21 @@
     {
       "proposal": "0005",
       "title": "Goal-scoped pull request publication",
-      "status": "unimplemented",
-      "modules": [],
-      "tests": [],
+      "status": "partial",
+      "modules": [
+        ".github/pull_request_template.md",
+        ".github/workflows/verify.yml",
+        "AGENTS.md",
+        "WORKFLOW.md",
+        "docs/RUNBOOK.md",
+        "package.nix"
+      ],
+      "tests": [
+        ".github/workflows/verify.yml",
+        "tests/publication_workflow.rs"
+      ],
       "gaps": [
-        "The pull request template, hosted Rust workflow, documented Jujutsu lifecycle, primary and closure bootstrap pull requests, squash-only merge settings, protected main branch, and final read-only landing gate are not implemented."
+        "The local workflow contract is implemented; the primary and closure bootstrap pull requests, hosted run, squash-only merge settings, protected main branch, and final read-only landing gate remain unverified."
       ]
     }
   ]

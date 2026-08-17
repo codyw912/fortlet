@@ -47,6 +47,11 @@ operator by default. Hosted Rust verification and protected-branch rules guard
    can exist only after the primary merge and protection changes.
 7. The two-pull-request bootstrap MUST be a one-time exception. Later GOALs
    MUST use exactly one pull request each.
+8. The primary and closure bootstrap pull requests MAY become ready while the
+   publication GOAL or Experiment 0013 remains active solely to observe that
+   pull request's merge boundary, but only after every locally knowable
+   deliverable and required check is complete. This readiness exception MUST
+   NOT apply to later GOALs.
 
 ### Publication authority
 
@@ -78,7 +83,8 @@ operator by default. Hosted Rust verification and protected-branch rules guard
    MUST be recorded in the pull request until a later FIP moves it into hosted
    verification.
 5. A pull request MUST NOT become ready while its GOAL or experiment is active,
-   a required local gate is failing, or hosted Rust verification is failing.
+   a required local gate is failing, or hosted Rust verification is failing,
+   except for the explicit bootstrap readiness boundary above.
 
 ### Merge and protected main
 

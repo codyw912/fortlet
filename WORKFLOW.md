@@ -140,6 +140,34 @@ While working:
    requests inside the granted scope; no silent multi-day building either.
    Prolonged silence is itself a report-worthy anomaly.
 
+### 2.1 Pull request publication
+
+After a public remote exists, each authorized GOAL uses one descriptive
+Jujutsu bookmark and one draft pull request targeting `main`. Semantic local
+checkpoints remain reviewable on the branch; the operator squash-merges the
+completed GOAL into one public commit. A recorded bootstrap MAY use a second
+closure pull request for evidence that can exist only after the primary merge;
+this exception does not apply to later GOALs.
+
+Every remote mutation is a separate trusted host transaction. Before a push,
+pull request creation or update, readiness change, merge, or repository-setting
+change, present the exact revisions and diff, destination, complete metadata
+change, verification state, and known failures. Wait for explicit operator
+approval; approval does not carry forward. The operator merges unless they
+explicitly authorize the agent to merge one specific pull request.
+
+Before readiness, close the GOAL and any experiment, inspect the bookmark stack,
+run the complete local verification set, record the local Nix host and result,
+and require hosted checks to pass. A recorded bootstrap MAY remain active only
+to observe its own merge boundary after all locally knowable work and checks
+are complete. A failure stops publication; do not bypass a check, silently
+retry, or force-push `main`.
+
+After an operator squash merge, fetch `main` and prove its tree equals the exact
+reviewed branch-tip tree. Commit identity is expected to change. Remove the
+landed bookmark and begin successor work only after destination and tree
+equality are verified.
+
 Session end (or mission completion):
 
 1. Update conformance, close experiment records, regenerate derived docs

@@ -147,6 +147,51 @@ a numeric summary; it never persists raw PTY screen content. Live `observe`,
 `observe-exit`, `observe-typed-exit`, and `observe-ctrl-c` invocation parameters
 and timeouts belong in a predeclared experiment record before dispatch.
 
+## Pull request publication
+
+Each authorized GOAL uses one descriptive Jujutsu bookmark and one draft pull
+request targeting `main`. Local checkpoints may remain semantic and reviewable;
+the operator squash-merges the completed goal into one public commit. FIP-0005
+records one two-PR bootstrap exception, after which every GOAL uses one PR.
+
+Before any remote mutation, inspect the complete outgoing stack and present its
+exact revisions and diff, bookmark and `origin` destination, full PR metadata or
+settings payload, verification state, and known failures:
+
+```bash
+jj status
+jj log -r 'main..@'
+jj diff -r 'main..@' --stat
+jj diff -r 'main..@'
+```
+
+Wait for explicit operator approval for that transaction. Approval does not
+carry forward to the next push, PR update, readiness change, merge, or settings
+change. After approval, create or move only the named goal bookmark and publish
+it with Jujutsu. The operator merges unless they explicitly authorize the agent
+to merge one specific PR. Never push or force-push `main`, enable auto-merge, or
+use mutating Git commands.
+
+Before marking a PR ready, run the complete standard verification set, record
+the local `nix flake check` host and result in the PR, and require the hosted
+`Rust verification` job to pass. A failure stops publication rather than being
+bypassed or silently retried. Only FIP-0005's two bootstrap PRs may become ready
+while the publication mission remains active solely to observe their own merge
+boundary; all locally knowable work and checks must already be complete.
+
+After an operator squash merge, verify the PR targeted `main`, fetch `origin`,
+and compare the reviewed branch-tip tree with fetched `main`:
+
+```bash
+gh pr view <number> --json baseRefName,mergeCommit,state
+jj git fetch --remote origin
+jj diff --from <reviewed-tip> --to main
+```
+
+The final diff must be empty. Squash commit identity is expected to differ from
+the reviewed Jujutsu commits. Delete only the landed goal bookmark after base,
+merge state, and tree equality are established.
+
 ## Experiments
 
 Create a numbered record from `experiments/0000-template.md` before a benchmark,

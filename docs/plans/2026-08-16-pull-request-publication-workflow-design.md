@@ -37,6 +37,13 @@ operator then squash-merges that closure PR; its landing is verified read-only
 and reported without creating an infinite third closure PR. This is a one-time
 exception; later GOALs use one PR.
 
+Both bootstrap PRs also need a narrow readiness exception: the publication
+GOAL and Experiment 0013 necessarily remain active while observing their own
+merge boundary. They may become ready only after every locally knowable
+deliverable and gate for that PR is complete and the sole remaining work is the
+operator merge or post-merge observation. Later GOALs must close their work and
+experiments before readiness.
+
 ## Review and merge contract
 
 The PR title is the eventual squash-commit subject and states completed intent.

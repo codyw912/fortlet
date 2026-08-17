@@ -1,0 +1,35 @@
+name: Rust verification
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rust-verification-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  rust:
+    name: Rust verification
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Check out reviewed revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install pinned Rust toolchain
+        run: rustup toolchain install 1.97.1 --profile minimal --component clippy,rustfmt
+      - name: Run tests
+        run: cargo +1.97.1 test
+      - name: Check formatting
+        run: cargo +1.97.1 fmt --all -- --check
+      - name: Run strict Clippy
+        run: cargo +1.97.1 clippy --all-targets --all-features -- -D warnings
+      - name: Check architecture conformance
+        run: cargo +1.97.1 test --test conformance
+
