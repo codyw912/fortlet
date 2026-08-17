@@ -120,10 +120,10 @@ PR or GitHub without a new exact operator authorization. Experiments 0014 and
 
 ## Current mission boundary
 
-Implement Experiment 0016 locally: verify the amendment and current remote
-baseline, rehearse the exact squash-only repository settings and `main`
-protection payloads, and run the required local gates. Present each remote
-mutation for separate exact approval. Never rewrite or revert `main`, permit a
-second merge-method exception, remove a bookmark before tree equality, or infer
-authority for settings, protection, a closure branch or PR, readiness, merge,
-or cleanup.
+Experiment 0016's amendment, remote baseline, repository-settings payload,
+`main` protection payload, and complete local gates are qualified. Present the
+repository PATCH for separate exact approval and verify its read-back before
+presenting the protection PUT as a second transaction. Never rewrite or revert
+`main`, permit a second merge-method exception, remove a bookmark before tree
+equality, or infer authority for settings, protection, a closure branch or PR,
+readiness, merge, or cleanup.

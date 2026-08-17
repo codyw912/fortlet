@@ -103,7 +103,42 @@ present every transaction exactly; stop on the first mismatch.
 
 ## Rehearsal
 
-Pending local recovery preparation.
+Completed locally on 2026-08-17 without remote mutation:
+
+1. Stable change `rkmwtvtxwltpvqulmwmkppxqowvnnmzl` (then commit
+   `29045650bfb261efbbf489f21cc26b0480da9885`) appends the
+   operator-authorized FIP-0005 amendment and declares this experiment without
+   changing product code, the landed tree, or any remote resource.
+2. Read-only GitHub inspection refreshed the control. Public repository
+   `codyw912/fortlet` has default branch `main` at
+   `e0f919f80ed90589735f15ff7779ed229122ab1f`; the primary goal branch remains
+   at `e2e4a6d8b24e974add01a720ddaf73c71de7963a`. Squash, merge-commit, and
+   rebase methods are enabled; auto-merge and merged-branch deletion are off;
+   the squash defaults are `COMMIT_OR_PR_TITLE` and `COMMIT_MESSAGES`.
+   `main` protection returns `404 Branch not protected`, and repository
+   rulesets are empty.
+3. The repository-settings payload changes only six fields: retain squash,
+   disable merge commits and rebases, retain disabled auto-merge, and set
+   squash title/body defaults to `PR_TITLE` and `PR_BODY`.
+4. The `main` protection payload requires strict context `Rust verification`,
+   applies requirements to administrators, requires PRs with zero approving
+   reviews and no bypasses, requires linear history, blocks force-push and
+   deletion, and leaves creation blocking, conversation resolution, branch
+   locking, fork syncing, and push restrictions disabled. GitHub identifies
+   the successful reviewed-tip check by that exact name from GitHub Actions app
+   ID `15368`.
+5. Both JSON payloads passed exact local `jq` assertions. GitHub's current
+   official REST schemas confirm the merge-setting enums and every protection
+   field, including zero required reviewers and personal-repository omission
+   of dismissal restrictions. No mutation endpoint was called.
+6. The recovery checkpoint passed 39 unit tests, 20 integration tests,
+   formatting, strict all-target/all-feature Clippy, the dedicated conformance
+   test, and `nix flake check` on `aarch64-darwin`. Nix emitted the known
+   missing app metadata warning and omitted incompatible `x86_64-linux`.
+
+This rehearsal authorizes no settings change. Present the exact repository
+payload and endpoint for separate approval, read it back after mutation, then
+present the exact `main` protection payload as its own transaction.
 
 ## Results
 
