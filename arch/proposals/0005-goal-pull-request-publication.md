@@ -102,9 +102,13 @@ operator by default. Hosted Rust verification and protected-branch rules guard
 2. `main` MUST NOT be force-pushed to repair a publication failure.
 3. Automated evidence MUST validate the workflow and template structure without
    credentials, a VM, a harness, or remote mutation.
-4. A predeclared experiment MUST verify both bootstrap pull requests, hosted
-   Rust results, operator squash merges, landing tree equality, merge settings,
-   protected branch, and absence of unrelated remote mutation.
+4. A predeclared experiment MUST verify the primary bootstrap pull request,
+   hosted Rust result, operator squash merge, landing tree equality, merge
+   settings, protected branch, and absence of unrelated remote mutation.
+5. The bootstrap closure pull request MUST carry that terminal experiment
+   record and MUST pass hosted Rust verification. After its operator squash
+   merge, a read-only landing gate MUST verify its `main` destination and tree
+   equality and report the result without requiring another closure commit.
 
 ## Consequences
 
@@ -117,8 +121,9 @@ Squash merging changes commit identity, so landing is complete only after tree
 equality rather than commit ancestry is verified. Repository protection cannot
 be fully established until the primary bootstrap workflow has landed on
 `main`. One small closure PR is then necessary to commit evidence of events the
-primary PR could not observe; this is deliberately not a reusable exception to
-one GOAL per PR.
+primary PR could not observe; its own landing is the irreducible final external
+fact and is verified read-only rather than causing an infinite closure chain.
+This is deliberately not a reusable exception to one GOAL per PR.
 
 ## Alternatives Considered
 

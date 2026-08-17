@@ -126,7 +126,7 @@
       "modules": [],
       "tests": [],
       "gaps": [
-        "The pull request template, hosted Rust workflow, documented Jujutsu lifecycle, primary and closure bootstrap pull requests, squash-only merge settings, and protected main branch are not implemented."
+        "The pull request template, hosted Rust workflow, documented Jujutsu lifecycle, primary and closure bootstrap pull requests, squash-only merge settings, protected main branch, and final read-only landing gate are not implemented."
       ]
     }
   ]

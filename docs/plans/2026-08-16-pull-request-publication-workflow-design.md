@@ -30,9 +30,12 @@ of its own later merge and repository protection. The primary PR contains the
 unpublished project capsule reset stack plus the workflow infrastructure that
 governs its review. Its final tree retains the completed reset GOAL as an
 archived record and retains Experiment 0012. After the operator merges it and
-protection is installed, one small closure PR records landing-tree equality,
-remote settings, Experiment 0013 terminal results, completed publication GOAL,
-and FIP-0005 conformance. This is a one-time exception; later GOALs use one PR.
+protection is installed, Experiment 0013 closes and one small closure PR carries
+the primary landing evidence, remote settings, terminal experiment record,
+conditional publication GOAL completion, and FIP-0005 conformance. The
+operator then squash-merges that closure PR; its landing is verified read-only
+and reported without creating an infinite third closure PR. This is a one-time
+exception; later GOALs use one PR.
 
 ## Review and merge contract
 
@@ -93,10 +96,13 @@ hidden by changing evidence.
 Deterministic evidence validates the checked-in workflow structure and pull
 request template. The complete local runbook gate must pass before the first
 remote mutation. A predeclared publication experiment records the exact primary
-and closure branches, PR metadata, remote state before and after, CI results,
-manual squash merges, landing tree equality, repository merge settings, branch
-protection, and absence of unrelated remote changes.
+branch and PR metadata, remote state before and after, CI result, manual squash
+merge, landing tree equality, repository merge settings, branch protection,
+and absence of unrelated remote changes. The closure PR records those terminal
+results and runs the same hosted Rust verification. Its own merge and tree
+equality are a final read-only landing gate reported to the operator; they do
+not require another repository record.
 
-The workflow is conformant only after the primary bootstrap PR, post-merge
-protection, and closure PR are verified. Until then FIP-0005 remains
+The workflow is conformant on `main` only after the primary bootstrap PR,
+post-merge protection, and closure PR are verified. Until then FIP-0005 remains
 unimplemented or partial.
