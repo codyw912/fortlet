@@ -149,24 +149,33 @@ completed GOAL into one public commit. A recorded bootstrap MAY use a second
 closure pull request for evidence that can exist only after the primary merge;
 this exception does not apply to later GOALs.
 
-Every remote mutation is a separate trusted host transaction. Before a push,
-pull request creation or update, readiness change, merge, or repository-setting
-change, present the exact revisions and diff, destination, complete metadata
-change, verification state, and known failures. Wait for explicit operator
-approval; approval does not carry forward. The operator merges unless they
+After locally knowable work and verification are complete, present one reviewed
+publication packet: the signed revisions and diff, named bookmark and `origin`
+destination, complete draft-PR metadata, expected initial hosted check,
+readiness criteria, known failures, and any exact landed bookmarks proposed for
+cleanup. One approval authorizes only one push of that signed bookmark, creation
+of that draft PR, observation of its initial hosted run, declared evidence-only
+body updates, readiness after success, and named bookmark cleanup after the
+operator merge and exact tree equality. The operator merges unless they
 explicitly authorize the agent to merge one specific pull request.
 
-Before readiness, close the GOAL and any experiment, inspect the bookmark stack,
-run the complete local verification set, record the local Nix host and result,
-and require hosted checks to pass. A recorded bootstrap MAY remain active only
-to observe its own merge boundary after all locally knowable work and checks
-are complete. A failure stops publication; do not bypass a check, silently
-retry, or force-push `main`.
+Changed code or scope, another push or PR, a retry, substantive metadata change,
+repository settings, an unexpected remote change, or any failed transaction
+step is outside the packet and requires a new exact review and approval. Never
+infer authority over unrelated refs or resources.
+
+Before publication, complete all locally knowable GOAL work, close every
+experiment, inspect and sign the bookmark stack, run the complete local
+verification set, and record the local Nix host and result. The GOAL may remain
+conditionally active only for hosted verification, operator merge, and landing
+observation. Mark the PR ready only after its expected hosted check passes. A
+failure stops publication; do not bypass a check, silently retry, or force-push
+`main`.
 
 After an operator squash merge, fetch `main` and prove its tree equals the exact
-reviewed branch-tip tree. Commit identity is expected to change. Remove the
-landed bookmark and begin successor work only after destination and tree
-equality are verified.
+reviewed branch-tip tree. Commit identity is expected to change. If the
+publication packet named landed bookmarks for cleanup, remove only those after
+destination and tree equality are verified; cleanup may otherwise be deferred.
 
 Session end (or mission completion):
 

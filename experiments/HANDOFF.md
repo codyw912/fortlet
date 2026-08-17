@@ -1,148 +1,71 @@
-# Session Handoff — Closure publication is locally qualified
+# Session Handoff — Publication authority simplification
 
-Audience: a fresh agent session. `GOAL.md` is normative and active. Experiments
-0013 and 0014 are terminally rejected after their single declared hosted units.
-Experiments 0001 through 0016 are terminally closed. Experiment 0015 accepted
-its one hosted unit, so the primary PR's required Rust verification is green.
-PR #1's exact reviewed tree landed through a two-parent merge commit. The
-operator authorized FIP-0005's one-time primary-bootstrap exception and
-Experiment 0016, which accepted after exact squash-only settings and protected
-`main` were established. No closure bookmark, push, PR, readiness change,
-merge, cleanup, or other mutation is authorized without its separate exact
-approval.
+Audience: a fresh agent session. `GOAL.md` is normative and active. Read
+FIP-0001 and FIP-0005 in full before continuing. Experiments 0001 through 0016
+are terminally closed; no experiment is active.
 
-## Verified result
+## Verified baseline
 
-1. FIP-0004 is implemented by project-scoped `fortlet reset <harness>` with
-   the same explicit project and broad-mount selection as run, status, and
-   stop.
-2. Reset returns absence before creating Fortlet state or a capsule lock. A
-   present target is locked, fetched again, parsed, and checked for exact name
-   plus managed, schema, project, and tool ownership. Version skew remains
-   acceptable for management.
-3. Reset removes only owned stopped or crashed capsules through the
-   MicroSandbox SDK handle. Created, starting, running, draining, and paused
-   capsules fail with the direct `fortlet stop <harness>` correction; reset
-   never stops or kills work implicitly.
-4. Launch's stale-configuration guidance now uses public Fortlet stop and
-   reset commands without exposing the internal capsule name or project
-   identity.
-5. Experiment 0012 accepted one immutable public-CLI unit. It proved initial
-   side-effect-free absence, running refusal, explicit stop, exact four-label
-   ownership, terminal reset, runtime-record absence, project and persistent
-   state preservation, idempotent second reset, and exact cleanup.
-6. The complete standard verification set passed immediately before the live
-   unit. FIP-0003 and FIP-0004 are conformant; FIP-0001 and FIP-0002 remain
-   partial for their explicitly listed gaps.
-7. The primary publication bookmark is public at signed tip
-   `0b75f02dd5422362dd49acff776aecff1e94ad7b`, and draft pull request
-   `https://github.com/codyw912/fortlet/pull/1` stores the exact reviewed
-   metadata. All fourteen outgoing commits have valid GitHub SSH signatures.
-8. Hosted run `32039976577` rejected at its first `cargo test`: Linux linking
-   required `-lcap-ng`, but the clean `ubuntu-24.04` runner lacked the
-   development linker file. That run was not rerun; its separately authorized
-   successor correction is recorded below.
-9. The separately approved Experiment 0014 correction installed only
-   `libcap-ng-dev`. Replacement run `32042472155`, job `95424137789`, checked
-   out the exact corrected tip; package installation, Rust installation,
-   `cargo test`, and formatting passed. Strict Clippy then rejected
-   `examples/pty_observer.rs:233` because Linux `openpty` does not need a
-   mutable winsize reference, and conformance was skipped. No rerun or later
-   remote mutation occurred.
-10. Experiment 0015 replaces the syntactic mutable reference with a named raw
-    pointer derived from the same mutable winsize. Its focused 15-test observer
-    suite and complete standard local verification set pass on
-    `aarch64-darwin`.
-11. The separately approved correction pushed only the existing goal branch to
-    signed tip `e2e4a6d8b24e974add01a720ddaf73c71de7963a`. All 18 PR commits have
-    valid GitHub SSH signatures. Exactly one new hosted run, `32052509798`, job
-    `95455045523`, passed package and Rust installation, tests, formatting,
-    strict Linux Clippy, conformance, and cleanup in 3 minutes 19 seconds.
-12. A separately approved PR-body-only update first received GitHub GraphQL
-    HTTP 503. REST read-back proved that attempt made no change, so it was not
-    silently retried. The operator approved one unchanged retry; it succeeded,
-    and REST read-back matched the reviewed body while title, open draft state,
-    `main` base, goal-branch head, and signed head SHA remained unchanged.
-13. The operator separately approved the exact draft-to-ready mutation. REST
-    read-back reports PR #1 open, non-draft, cleanly mergeable, targeting
-    unchanged `main` from unchanged signed head
-    `e2e4a6d8b24e974add01a720ddaf73c71de7963a`. The successful hosted run
-    remained current, and no new run or ref appeared.
-14. PR #1 reports merged at `2026-08-17T18:58:59Z` into `main` as validly
-    signed commit `e0f919f80ed90589735f15ff7779ed229122ab1f`. A Jujutsu diff from
-    reviewed tip `e2e4a6d8b24e974add01a720ddaf73c71de7963a` to fetched `main` is
-    empty, so destination and exact tree equality pass. The landed commit has
-    two parents—the previous `main` and reviewed branch tip—and GitHub stores
-    the merge-commit subject. The required squash-history criterion therefore
-    fails despite the correct tree.
-15. The operator chose to preserve `main` and authorized a dated FIP-0005
-    amendment accepting only that exact tree-equal primary landing. It forbids
-    rewrite or revert repair and retains squash-only landing for the closure PR
-    and every future goal. Experiment 0016 is the declared closure successor.
-16. The separately approved repository PATCH succeeded. Read-back permits only
-    squash merging, keeps auto-merge off, and uses `PR_TITLE` plus `PR_BODY` for
-    squash commits. Both branch refs are unchanged, and `main` protection
-    remains absent pending its own approval.
-17. The separately approved `main` protection PUT succeeded. Read-back requires
-    strict GitHub Actions context `Rust verification`, PRs with zero approving
-    reviews, administrator enforcement, and linear history; it blocks
-    force-push and deletion and leaves every undeclared option disabled. The
-    squash-only settings and refs stayed exact, and no ruleset appeared.
-18. Experiment 0016 accepted after the terminal evidence was shaped on fetched
-    `main` and the complete local verification set passed. Its scope correction
-    excludes the closure PR's own run and merge because FIP-0005 requires that
-    PR to carry the terminal record; those remaining rollout steps keep their
-    separate approval and read-only gates.
+1. Public repository `codyw912/fortlet` has protected default branch `main`.
+   GitHub permits squash merging only, requires pull requests and strict
+   `Rust verification`, enforces the rules for administrators, requires linear
+   history, and blocks force-push plus deletion.
+2. Primary PR #1 landed the exact reviewed product and workflow tree as signed
+   two-parent commit `e0f919f80ed90589735f15ff7779ed229122ab1f`.
+   FIP-0005's dated amendment accepts only that historical bootstrap landing;
+   it authorizes no later merge-method exception.
+3. Closure PR #2 passed its sole hosted run `32062492778`, job `95486740889`,
+   then the operator squash-merged it as validly signed one-parent commit
+   `e9f2591f86ab9c12fff518c34deabb4abd89d6ab`.
+4. Fetched `main` is byte-identical to reviewed closure tip
+   `1a2c12a8bb425d82bc4f38519250d4552c08b24e`. The bootstrap publication GOAL
+   is complete and archived under `governance/goals/`.
+5. The primary and closure remote goal branches still exist. No cleanup,
+   rewrite, revert, release, tag, package, secret, deployment, settings change,
+   or unrelated remote mutation followed the closure merge.
+
+## Active governance correction
+
+The operator found FIP-0005's per-mutation approvals too ceremonial and
+accepted a bounded transaction instead. The active GOAL records that decision.
+The local amendment and its derived instructions preserve one exact review but
+reduce the normal path to two operator interactions: approve one publication
+packet, then manually squash-merge when the PR is ready.
+
+The packet names one signed tree, bookmark, destination, draft title and body,
+expected initial hosted run, readiness criteria, and optional landed bookmarks
+for cleanup. Approval covers one push, one draft PR, observation of that initial
+run, declared evidence-only body changes, readiness only after success, and
+named cleanup only after operator merge plus exact tree equality. It never
+covers merge, changed code or scope, another push or PR, a retry, substantive
+metadata, settings, unrelated resources, unexpected remote state, or failure
+recovery.
 
 ## Product state
-
-The public repository remains at `https://github.com/codyw912/fortlet` with SSH
-origin `git@github.com:codyw912/fortlet.git`. Remote `main` is signed merge
-commit `e0f919f80ed90589735f15ff7779ed229122ab1f`; the primary goal branch remains
-at `e2e4a6d8b24e974add01a720ddaf73c71de7963a`, and PR #1 is closed and merged.
-Only squash merging is enabled; auto-merge remains off and squash defaults use
-the PR title and body. `main` is protected by strict `Rust verification`, PRs,
-administrator enforcement, and linear history, with force-push and deletion
-blocked. No bookmark cleanup, closure PR, revert, or history rewrite occurred.
 
 Daily-use surfaces are `doctor`, explicit `run`, optional package-owned
 `codex` and `tact` shims, explicit `native`, project-scoped `status`, bounded
 `stop`, and terminal `reset`. Reusable project+harness capsules, immutable base
 and harness layers, brokered ChatGPT credentials, safe project resolution,
-broad-root protection, deterministic pre-runtime diagnostics, and explicit
-disposable-root recovery are established.
+broad-root protection, deterministic pre-runtime diagnostics, disposable-root
+recovery, and the explicit host publication workflow are established.
 
-## Remaining gaps
-
-FIP-0001 remains partial. Exact gaps are harness-adapter ownership of
-persistent paths and credential policy; live capsule-reconciliation and
-terminal-attachment failure evidence; capsule topology, concurrency, and
-terminal coverage; restart, logs, and tool-update commands; explicit
-interactive/background leases; declarative project environments and private
-overlays; standalone non-Nix installation; and native
-`x86_64-linux` package verification. FIP-0002 retains the documented automated
-Codex exit-status evidence gap.
-
-## Operational notes
-
-Run Cargo verification inside `nix develop`; a vanilla host shell may not
-provide macOS `libiconv`. Commands that access `~/.microsandbox` also require
-the assistant execution environment's explicit filesystem escalation even
-when the operator has already authorized the experiment. Experiment 0012
-records one denied preflight before runtime contact so this is not rediscovered
-or silently hidden.
-
-Use Jujutsu for all local history. Do not push, rerun, or mutate the existing
-PR or GitHub without a new exact operator authorization. Experiments 0014 and
-0015 have exhausted their correction pushes and hosted runs.
+FIP-0001 remains partial for adapter ownership of persistent paths and
+credential policy; live reconciliation and terminal-attachment failures;
+topology, concurrency, and terminal coverage; restart, logs, and tool updates;
+explicit workload leases; declarative environments and private overlays;
+standalone non-Nix installation; and native `x86_64-linux` package
+verification. FIP-0002 retains its recorded automated Codex exit-status gap.
 
 ## Current mission boundary
 
-Experiment 0016 is accepted, the closure evidence is based on fetched `main`,
-and the GOAL is conditionally complete. Inspect and present the exact closure
-stack, diff, signatures, bookmark, destination, draft title and complete body,
-remote baseline, and verification evidence before requesting approval for its
-push. Draft PR creation, readiness, merge, and bookmark cleanup are later
-separate mutations. Never rewrite or revert `main`, permit a second
-merge-method exception, remove a bookmark before tree equality, or infer
-authority for a closure push, PR, readiness, merge, or cleanup.
+The governance correction is locally complete and the GOAL is conditionally
+complete. Its focused four-test publication contract and complete runbook set
+pass: 39 unit tests, 21 integration tests, formatting, strict
+all-target/all-feature Clippy, conformance, and `nix flake check` on
+`aarch64-darwin`. Nix emitted only the known missing app metadata warning and
+omitted incompatible `x86_64-linux`.
+
+Checkpoint and sign the reviewable stack, then present one publication packet.
+Do not mutate GitHub before that approval. This policy correction governs its
+own publication. The operator remains the sole merge authority.

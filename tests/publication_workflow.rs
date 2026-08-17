@@ -1,5 +1,9 @@
 const WORKFLOW: &str = include_str!("../.github/workflows/verify.yml");
 const PULL_REQUEST_TEMPLATE: &str = include_str!("../.github/pull_request_template.md");
+const PUBLICATION_FIP: &str =
+    include_str!("../arch/proposals/0005-goal-pull-request-publication.md");
+const PROJECT_WORKFLOW: &str = include_str!("../WORKFLOW.md");
+const RUNBOOK: &str = include_str!("../docs/RUNBOOK.md");
 
 #[test]
 fn hosted_verification_is_read_only_and_targets_main_pull_requests() {
@@ -79,4 +83,35 @@ fn pull_request_template_requests_the_publication_contract() {
     ] {
         assert!(PULL_REQUEST_TEMPLATE.contains(required), "{required}");
     }
+}
+
+#[test]
+fn publication_authority_is_one_bounded_packet() {
+    assert!(PUBLICATION_FIP
+        .contains("One explicit operator approval MAY authorize only this ordered transaction"));
+    assert!(PUBLICATION_FIP
+        .contains("Routine publication through an approved packet is governed rollout"));
+    assert!(PROJECT_WORKFLOW.contains("present one reviewed\npublication packet"));
+    assert!(RUNBOOK.contains("present one exact publication packet"));
+    assert!(RUNBOOK
+        .contains("Routine publication through an approved FIP-0005 packet is governed rollout"));
+
+    for (name, document) in [
+        ("FIP-0005", PUBLICATION_FIP),
+        ("WORKFLOW.md", PROJECT_WORKFLOW),
+        ("runbook", RUNBOOK),
+    ] {
+        for required in [
+            "initial hosted run",
+            "evidence-only",
+            "operator merge",
+            "new exact review",
+            "approval",
+        ] {
+            assert!(document.contains(required), "{name} is missing {required}");
+        }
+    }
+
+    assert!(!PROJECT_WORKFLOW.contains("Every remote mutation is a separate"));
+    assert!(!RUNBOOK.contains("Approval does not carry forward to the next push"));
 }
