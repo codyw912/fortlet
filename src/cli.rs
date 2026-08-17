@@ -6,7 +6,7 @@ use microsandbox::setup;
 
 use crate::auth::{require_outside_mounts, Credentials};
 use crate::harness;
-use crate::management::{self, StatusRequest, StopRequest};
+use crate::management::{self, ResetRequest, StatusRequest, StopRequest};
 use crate::native;
 use crate::paths::AppPaths;
 use crate::project;
@@ -42,6 +42,13 @@ enum Command {
         allow_broad_mount: bool,
     },
     Stop {
+        harness: String,
+        #[arg(long)]
+        project: Option<PathBuf>,
+        #[arg(long)]
+        allow_broad_mount: bool,
+    },
+    Reset {
         harness: String,
         #[arg(long)]
         project: Option<PathBuf>,
@@ -106,6 +113,22 @@ async fn run_command(command: Command) -> Result<()> {
             println!(
                 "{}",
                 management::stop(StopRequest {
+                    harness,
+                    project,
+                    allow_broad_mount,
+                })
+                .await?
+            );
+            Ok(())
+        }
+        Command::Reset {
+            harness,
+            project,
+            allow_broad_mount,
+        } => {
+            println!(
+                "{}",
+                management::reset(ResetRequest {
                     harness,
                     project,
                     allow_broad_mount,
@@ -271,6 +294,24 @@ mod tests {
                 project: None,
                 allow_broad_mount: false,
             } if harness == "tact"
+        ));
+
+        let reset = Cli::try_parse_from([
+            "fortlet",
+            "reset",
+            "codex",
+            "--project",
+            "/tmp/project",
+            "--allow-broad-mount",
+        ])
+        .unwrap();
+        assert!(matches!(
+            reset.command,
+            Command::Reset {
+                harness,
+                project: Some(ref project),
+                allow_broad_mount: true,
+            } if harness == "codex" && project == Path::new("/tmp/project")
         ));
     }
 }

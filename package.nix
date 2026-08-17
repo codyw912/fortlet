@@ -46,9 +46,14 @@ rustPlatform.buildRustPackage {
   src = lib.fileset.toSource {
     root = ./.;
     fileset = lib.fileset.unions [
+      ./.github/pull_request_template.md
+      ./.github/workflows/verify.yml
+      ./AGENTS.md
       ./Cargo.lock
       ./Cargo.toml
+      ./WORKFLOW.md
       ./arch
+      ./docs/RUNBOOK.md
       ./examples
       ./experiments
       ./package.nix

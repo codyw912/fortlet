@@ -33,3 +33,7 @@ scannable failure/win history of the project:
 - `0009-idle-ctrl-c-key-exit-parity.md` — rejected; one Ctrl-C PTY key reached both UIs, but neither terminated within the fixed bound.
 - `0010-project-capsule-status-and-stop.md` — accepted; the public CLI proved absent, running, stopped, and absent around bounded stop and exact owned cleanup.
 - `0011-public-alpha-repository.md` — accepted; the complete signed history is public on GitHub with only `main` and no extra remote resources.
+- `0012-project-capsule-reset.md` — accepted; the public CLI refused active reset, removed the owned terminal capsule, preserved durable state, reported absence idempotently, and cleaned up exactly.
+- `0013-pull-request-workflow-bootstrap.md` — rejected; the exact draft PR opened, but its sole initial hosted unit could not link Linux `libcap-ng`.
+- `0014-hosted-linux-linker-closure.md` — rejected; the Ubuntu package closed linking and tests passed, but strict hosted Linux Clippy found a platform-specific `openpty` mutability error.
+- `0015-portable-openpty-winsize.md` — declared; express the PTY winsize as one raw pointer valid for the Apple and Linux `openpty` bindings.

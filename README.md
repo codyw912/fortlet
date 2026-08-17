@@ -6,8 +6,8 @@ live, provider credentials are brokered rather than mounted, and failure to
 establish the isolation boundary prevents the agent from starting.
 
 Fortlet is an early Rust prototype. It supports explicit Codex and Tact
-launches, optional transparent command shims, and project-scoped capsule status
-and stop commands.
+launches, optional transparent command shims, and project-scoped capsule
+status, stop, and reset commands.
 
 ## Quick start
 
@@ -19,6 +19,7 @@ nix run . -- run codex --
 nix run . -- run tact --
 nix run . -- status
 nix run . -- stop codex
+nix run . -- reset codex
 ```
 
 Fortlet resolves the nearest Jujutsu, Git, or recognized development-

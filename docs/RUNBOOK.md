@@ -28,6 +28,7 @@ nix run . -- run codex --
 nix run . -- run tact --
 nix run . -- status
 nix run . -- stop codex
+nix run . -- reset codex
 ```
 
 For a development binary inside `nix develop`:
@@ -37,6 +38,7 @@ cargo run -- doctor
 cargo run -- run codex --
 cargo run -- status codex
 cargo run -- stop codex
+cargo run -- reset codex
 ```
 
 Project resolution prefers the nearest Jujutsu root, then Git root, then a
@@ -55,12 +57,18 @@ launches require a healthy MicroSandbox host and a valid ChatGPT credential.
 selected harness. Each output row is the harness, a tab, and `absent` or its
 lowercase MicroSandbox lifecycle state. `fortlet stop <harness>` stops only the
 owned capsule for the resolved project and reports `absent`, `already-stopped`,
-or `stopped`.
+or `stopped`. `fortlet reset <harness>` removes only an owned stopped or
+crashed capsule's disposable runtime state and reports `absent` or `reset`.
+Reset refuses every active or transitional state and directs the user to stop
+the capsule first.
 
-Both commands accept `--project <path>` and `--allow-broad-mount` with the same
-project rules as `run`. They do not read provider credentials, provision tool
-layers, launch a harness, or expose internal capsule names. Stop preserves the
-capsule record and persistent harness state for a later run.
+All three commands accept `--project <path>` and `--allow-broad-mount` with the
+same project rules as `run`. Repeat an explicit `--project <path>` on stop and
+reset so they select the same launch target. They do not read provider
+credentials, provision tool layers, launch a harness, or expose internal
+capsule names. Stop preserves the capsule record; reset preserves the project,
+persistent harness state, credential projection and fingerprint, and immutable
+tool layers for a later run.
 
 The deterministic management gate uses fake lifecycle observations and
 isolated real-CLI failures without starting a VM:
@@ -73,6 +81,10 @@ cargo test --test management_failures
 Experiment 0010 records the bounded real-runtime screen: one uniquely scoped
 owned Codex capsule was observed absent, running, stopped, and absent through
 the immutable public CLI, with exact ownership verification before cleanup.
+Experiment 0012 records the bounded real-runtime screen: the immutable public
+CLI refused active reset, removed the same owned capsule after explicit stop,
+preserved project and harness state, and reported subsequent absence
+idempotently before exact cleanup.
 
 ## Deterministic launch-failure evidence
 
@@ -134,6 +146,51 @@ action, and code 23 preservation. The observer emits structured event lines and
 a numeric summary; it never persists raw PTY screen content. Live `observe`,
 `observe-exit`, `observe-typed-exit`, and `observe-ctrl-c` invocation parameters
 and timeouts belong in a predeclared experiment record before dispatch.
+
+## Pull request publication
+
+Each authorized GOAL uses one descriptive Jujutsu bookmark and one draft pull
+request targeting `main`. Local checkpoints may remain semantic and reviewable;
+the operator squash-merges the completed goal into one public commit. FIP-0005
+records one two-PR bootstrap exception, after which every GOAL uses one PR.
+
+Before any remote mutation, inspect the complete outgoing stack and present its
+exact revisions and diff, bookmark and `origin` destination, full PR metadata or
+settings payload, verification state, and known failures:
+
+```bash
+jj status
+jj log -r 'main..@'
+jj diff -r 'main..@' --stat
+jj diff -r 'main..@'
+```
+
+Wait for explicit operator approval for that transaction. Approval does not
+carry forward to the next push, PR update, readiness change, merge, or settings
+change. After approval, create or move only the named goal bookmark and publish
+it with Jujutsu. The operator merges unless they explicitly authorize the agent
+to merge one specific PR. Never push or force-push `main`, enable auto-merge, or
+use mutating Git commands.
+
+Before marking a PR ready, run the complete standard verification set, record
+the local `nix flake check` host and result in the PR, and require the hosted
+`Rust verification` job to pass. A failure stops publication rather than being
+bypassed or silently retried. Only FIP-0005's two bootstrap PRs may become ready
+while the publication mission remains active solely to observe their own merge
+boundary; all locally knowable work and checks must already be complete.
+
+After an operator squash merge, verify the PR targeted `main`, fetch `origin`,
+and compare the reviewed branch-tip tree with fetched `main`:
+
+```bash
+gh pr view <number> --json baseRefName,mergeCommit,state
+jj git fetch --remote origin
+jj diff --from <reviewed-tip> --to main
+```
+
+The final diff must be empty. Squash commit identity is expected to differ from
+the reviewed Jujutsu commits. Delete only the landed goal bookmark after base,
+merge state, and tree equality are established.
 
 ## Experiments
 
