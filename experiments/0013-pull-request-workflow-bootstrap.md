@@ -109,9 +109,55 @@ failed unit.
 
 ## Rehearsal
 
-Pending. It MUST exercise the complete local and read-only remote path through
-PR metadata, CI configuration, merge/settings payloads, landing comparison,
-terminal record, and closure-PR preparation without remote mutation.
+Completed on 2026-08-16 without remote mutation:
+
+1. Stable change `kqyknyqqkltumxrkozkwsvortpqllvyw` (then commit
+   `cb72898240cbe9421949374997f6b82b9ef76e68`) implements the local publication
+   contract, pinned hosted workflow, template, conformance map, tests, and
+   packaged source boundary. Signing on push is enabled with the SSH backend;
+   the Git object IDs are expected to change when the reviewed bookmark is
+   first published, while Jujutsu change IDs and trees remain stable.
+2. The final exact tree passed 39 unit tests, 20 integration tests, formatting,
+   strict all-target/all-feature Clippy, the dedicated conformance test, and
+   `nix flake check` on `aarch64-darwin`. Nix emitted the known missing app
+   metadata warning and omitted incompatible `x86_64-linux`.
+3. Two earlier local flake attempts rejected the tree before dispatch. The
+   first found that the package source omitted the two `.github` files compiled
+   by the publication test; the second found that it omitted other paths named
+   by conformance. The implementation checkpoint was amended to include the
+   complete minimal conformance surface, and the full verification set then
+   passed. No remote retry or mutation occurred.
+4. Read-only GitHub inspection refreshed the baseline: authenticated account
+   `codyw912` uses SSH; public repository `codyw912/fortlet` has default branch
+   `main` at `e95b0cdb1308f732d3f45db7a85027d45bcd4048`, the expected description,
+   and no other branch or tag. It has no pull request, ruleset, branch
+   protection, Actions workflow, release, webhook, or deployment. Merge,
+   rebase, and squash methods are all currently enabled.
+5. The clean pre-qualification outgoing stack contains nine linear checkpoints
+   and changes 25 paths by 1,909 insertions and 110 deletions. Current-tree and
+   66-revision history scans found no credential material or suspicious
+   credential filename. Their sole textual match is the Rust identifier
+   conversion `access_token: access_token.into()` in `src/auth.rs`, not a
+   credential value. Previously accepted `/Users/cody` evidence paths remain
+   unchanged by this treatment.
+6. The hosted workflow targets only pull requests to `main`, grants only
+   `contents: read`, persists no checkout credential, pins checkout to full SHA
+   `3d3c42e5aac5ba805825da76410c181273ba90b1` and Rust `1.97.1`, and contains
+   no secret, MicroSandbox, VM, runtime, or harness use. The draft PR title is
+   `Add safe capsule reset and establish PR workflow`; its body follows the
+   checked-in template and records the exact signed tip after publication.
+7. The post-merge repository-settings request is exactly a repository `PATCH`
+   enabling only squash merge, disabling merge commits, rebase merge, and
+   auto-merge, and using the PR title and body for the squash commit. The
+   separately approved `main` protection `PUT` requires strict status context
+   `Rust verification` and a pull request with zero required approvals, applies
+   to administrators, requires linear history, and sets force-push and deletion
+   allowances false. Restrictions, branch locking, creation blocking,
+   conversation resolution, and fork syncing remain disabled.
+8. Landing rehearsal uses the PR's reported `main` base and merge state, a
+   Jujutsu fetch, and an empty diff from the exact reviewed signed tip to fetched
+   `main`. The closure PR carries terminal results and final FIP-0005
+   conformance; its landing is the finite final read-only observation.
 
 ## Results
 
@@ -120,4 +166,3 @@ Pending declared dispatch.
 ## Terminal Closure
 
 Pending.
-
