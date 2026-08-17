@@ -14,23 +14,14 @@ use crate::environment::{EnvironmentLayers, BASE_IMAGE};
 use crate::harness::Harness;
 use crate::paths::{AppPaths, PRODUCT};
 use crate::project::Project;
+use crate::project_environment::{
+    ProjectEnvironment, GUEST_ROOT, NO_ENVIRONMENT, TERMINAL_ENVIRONMENT,
+};
 
 const SCHEMA_VERSION: &str = "1";
 const DEFAULT_IDLE_TIMEOUT_SECS: u64 = 4 * 60 * 60;
 const HOLD_SCRIPT: &str = "trap 'exit 0' TERM INT; while :; do sleep 3600 & wait $!; done";
 const SECRET_HOSTS: &[&str] = &["chatgpt.com", "*.chatgpt.com", "openai.com", "*.openai.com"];
-const TERMINAL_ENVIRONMENT: &[&str] = &[
-    "TERM",
-    "COLORTERM",
-    "TERM_PROGRAM",
-    "TERM_PROGRAM_VERSION",
-    "COLORFGBG",
-    "NO_COLOR",
-    "CLICOLOR",
-    "CLICOLOR_FORCE",
-    "FORCE_COLOR",
-];
-
 pub struct Capsule<'a> {
     pub descriptor: CapsuleDescriptor,
     pub state: PathBuf,
@@ -68,6 +59,22 @@ impl CapsuleDescriptor {
         }
     }
 
+    fn for_launch(
+        project: &Project,
+        harness: &dyn Harness,
+        environment: Option<&ProjectEnvironment>,
+    ) -> Self {
+        let mut descriptor = Self::new(project, harness);
+        descriptor.labels.insert(
+            label("environment"),
+            environment
+                .map(ProjectEnvironment::identity)
+                .unwrap_or(NO_ENVIRONMENT)
+                .to_owned(),
+        );
+        descriptor
+    }
+
     fn labels(&self) -> BTreeMap<String, String> {
         self.labels.clone()
     }
@@ -97,7 +104,18 @@ impl CapsuleDescriptor {
 
     fn validate_launch(&self, stored_name: &str, labels: &BTreeMap<String, String>) -> Result<()> {
         self.validate_management(stored_name, labels)?;
-        if labels.get(&label("version")) != self.labels.get(&label("version")) {
+        let stored_environment = labels
+            .get(&label("environment"))
+            .map(String::as_str)
+            .unwrap_or(NO_ENVIRONMENT);
+        let expected_environment = self
+            .labels
+            .get(&label("environment"))
+            .map(String::as_str)
+            .unwrap_or(NO_ENVIRONMENT);
+        if labels.get(&label("version")) != self.labels.get(&label("version"))
+            || stored_environment != expected_environment
+        {
             bail!(
                 "capsule has stale configuration; run `fortlet stop {}` followed by `fortlet reset {}` and retry",
                 self.tool,
@@ -121,6 +139,7 @@ impl<'a> MicroSandboxRuntime<'a> {
         &self,
         project: &'b Project,
         harness: &'b dyn Harness,
+        environment: Option<&ProjectEnvironment>,
     ) -> Result<Capsule<'b>> {
         let state = self
             .paths
@@ -132,7 +151,7 @@ impl<'a> MicroSandboxRuntime<'a> {
             .with_context(|| format!("cannot create harness state {}", state.display()))?;
         let state = state.canonicalize()?;
         Ok(Capsule {
-            descriptor: CapsuleDescriptor::new(project, harness),
+            descriptor: CapsuleDescriptor::for_launch(project, harness, environment),
             state,
             project,
             harness,
@@ -237,17 +256,15 @@ async fn create_capsule(capsule: &Capsule<'_>, layers: &EnvironmentLayers) -> Re
             mount.bind(&layers.base).readonly()
         })
         .env("HOME", guest_home)
-        .env(
-            "PATH",
-            format!(
-                "/opt/{PRODUCT}/base/usr/bin:/opt/{PRODUCT}/tool/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-            ),
-        )
+        .env("PATH", guest_path(layers))
         .script("hold", HOLD_SCRIPT)
         .entrypoint(["hold"])
         .labels(capsule.descriptor.labels());
 
-    for (key, value) in capsule.harness.environment(capsule.project) {
+    if let Some(project) = &layers.project {
+        builder = builder.volume(GUEST_ROOT, |mount| mount.bind(&project.root).readonly());
+    }
+    for (key, value) in capsule_environment(capsule, layers) {
         builder = builder.env(key, value);
     }
     builder = builder
@@ -271,6 +288,47 @@ async fn create_capsule(capsule: &Capsule<'_>, layers: &EnvironmentLayers) -> Re
         .create_detached()
         .await
         .with_context(|| format!("cannot create capsule {}", capsule.descriptor.name))
+}
+
+fn capsule_environment(capsule: &Capsule<'_>, layers: &EnvironmentLayers) -> Vec<(String, String)> {
+    let mut environment = layers
+        .project
+        .as_ref()
+        .map(|project| {
+            project
+                .environment
+                .iter()
+                .map(|(key, value)| (key.clone(), value.clone()))
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_default();
+    environment.extend(capsule.harness.environment(capsule.project));
+    environment
+}
+
+fn guest_path(layers: &EnvironmentLayers) -> String {
+    let mut entries = layers
+        .project
+        .as_ref()
+        .map(|project| {
+            project
+                .path
+                .iter()
+                .map(|entry| format!("{GUEST_ROOT}/{entry}"))
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_default();
+    entries.extend([
+        format!("/opt/{PRODUCT}/base/usr/bin"),
+        format!("/opt/{PRODUCT}/tool/bin"),
+        "/usr/local/sbin".into(),
+        "/usr/local/bin".into(),
+        "/usr/sbin".into(),
+        "/usr/bin".into(),
+        "/sbin".into(),
+        "/bin".into(),
+    ]);
+    entries.join(":")
 }
 
 fn label(suffix: &str) -> String {
@@ -334,6 +392,7 @@ mod tests {
     use super::*;
     use crate::harness;
     use crate::project::ProjectIdentity;
+    use crate::project_environment::PublishedProjectEnvironment;
 
     fn project() -> Project {
         Project {
@@ -401,6 +460,62 @@ mod tests {
                     .is_err(),
                 "{key}"
             );
+        }
+    }
+
+    #[test]
+    fn launch_identity_tracks_project_environment_but_management_does_not() {
+        let project = project();
+        let harness = harness::find("codex").unwrap();
+        let mut configured = CapsuleDescriptor::new(&project, harness);
+        configured
+            .labels
+            .insert(label("environment"), "configured".into());
+        let legacy_labels = CapsuleDescriptor::new(&project, harness).labels();
+
+        CapsuleDescriptor::for_launch(&project, harness, None)
+            .validate_launch(&configured.name, &legacy_labels)
+            .unwrap();
+        configured
+            .validate_management(&configured.name, &legacy_labels)
+            .unwrap();
+        assert!(configured
+            .validate_launch(&configured.name, &legacy_labels)
+            .unwrap_err()
+            .to_string()
+            .contains("stale configuration"));
+    }
+
+    #[test]
+    fn project_paths_and_variables_reach_both_harnesses() {
+        let project = project();
+        let published = PublishedProjectEnvironment {
+            identity: "environment-id".into(),
+            root: "/project-layer".into(),
+            path: vec!["cargo/bin".into(), "jj/bin".into()],
+            environment: BTreeMap::from([("RUST_BACKTRACE".into(), "1".into())]),
+        };
+        let layers = EnvironmentLayers {
+            harness: "/harness-layer".into(),
+            base: "/base-layer".into(),
+            project: Some(published),
+        };
+
+        assert!(guest_path(&layers)
+            .starts_with("/opt/fortlet/project/cargo/bin:/opt/fortlet/project/jj/bin:"));
+        for harness_name in ["codex", "tact"] {
+            let harness = harness::find(harness_name).unwrap();
+            let capsule = Capsule {
+                descriptor: CapsuleDescriptor::new(&project, harness),
+                state: "/state".into(),
+                project: &project,
+                harness,
+            };
+            let environment = capsule_environment(&capsule, &layers);
+            assert!(environment.contains(&("RUST_BACKTRACE".into(), "1".into())));
+            for (key, _) in harness.environment(&project) {
+                assert!(environment.iter().any(|(candidate, _)| candidate == &key));
+            }
         }
     }
 }

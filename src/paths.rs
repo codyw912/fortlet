@@ -33,6 +33,10 @@ impl AppPaths {
         self.data.join("tools")
     }
 
+    pub fn environments(&self) -> PathBuf {
+        self.data.join("environments")
+    }
+
     pub fn locks(&self) -> PathBuf {
         self.state.join("locks")
     }

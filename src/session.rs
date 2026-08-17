@@ -7,6 +7,7 @@ use crate::environment::EnvironmentStore;
 use crate::harness;
 use crate::paths::AppPaths;
 use crate::project;
+use crate::project_environment::ProjectEnvironment;
 use crate::runtime::MicroSandboxRuntime;
 
 pub struct LaunchRequest {
@@ -48,6 +49,11 @@ pub async fn launch(request: LaunchRequest) -> Result<i32> {
             project.root.display()
         );
     }
+    let project_environment = stage(
+        ProjectEnvironment::discover(&project),
+        "project environment",
+        "fix or remove .fortlet/environment.json and retry",
+    )?;
     let credentials = stage(
         Credentials::read_default(),
         "credentials",
@@ -60,7 +66,7 @@ pub async fn launch(request: LaunchRequest) -> Result<i32> {
     )?;
     let runtime = MicroSandboxRuntime::new(&paths);
     let capsule = stage(
-        runtime.capsule(&project, harness),
+        runtime.capsule(&project, harness, project_environment.as_ref()),
         "capsule",
         "check the reported Fortlet state path and retry",
     )?;
@@ -75,7 +81,9 @@ pub async fn launch(request: LaunchRequest) -> Result<i32> {
         "move the host credential file outside every guest mount and retry",
     )?;
     let layers = stage(
-        EnvironmentStore::new(&paths).ensure(harness).await,
+        EnvironmentStore::new(&paths)
+            .ensure(harness, project_environment.as_ref())
+            .await,
         "environment",
         "check network access or remove the reported incomplete layer and retry",
     )?;

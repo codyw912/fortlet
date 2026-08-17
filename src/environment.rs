@@ -8,6 +8,7 @@ use microsandbox::Sandbox;
 
 use crate::harness::Harness;
 use crate::paths::AppPaths;
+use crate::project_environment::{guest_platform, ProjectEnvironment, PublishedProjectEnvironment};
 
 pub const BASE_IMAGE: &str = "node:24-bookworm";
 const BASE_TOOLS_VERSION: &str = "bookworm-1";
@@ -21,6 +22,7 @@ pub struct EnvironmentStore<'a> {
 pub struct EnvironmentLayers {
     pub harness: PathBuf,
     pub base: PathBuf,
+    pub project: Option<PublishedProjectEnvironment>,
 }
 
 impl<'a> EnvironmentStore<'a> {
@@ -28,7 +30,11 @@ impl<'a> EnvironmentStore<'a> {
         Self { paths }
     }
 
-    pub async fn ensure(&self, harness: &dyn Harness) -> Result<EnvironmentLayers> {
+    pub async fn ensure(
+        &self,
+        harness: &dyn Harness,
+        project: Option<&ProjectEnvironment>,
+    ) -> Result<EnvironmentLayers> {
         let base_script = format!(
             r#"set -eu
 temporary="$(mktemp -d)"
@@ -59,10 +65,91 @@ dpkg-deb -x "$1" /out
                 &harness.provision_script(),
             )
             .await?;
+        let project = match project {
+            Some(environment) => Some(self.ensure_project(environment).await?),
+            None => None,
+        };
         Ok(EnvironmentLayers {
             harness: harness_path,
             base,
+            project,
         })
+    }
+
+    async fn ensure_project(
+        &self,
+        environment: &ProjectEnvironment,
+    ) -> Result<PublishedProjectEnvironment> {
+        let destination = self.paths.environments().join(environment.identity());
+        if destination.exists() {
+            environment.verify_published(&destination)?;
+            return Ok(environment.published(destination));
+        }
+        let _lock = lock(
+            &self
+                .paths
+                .locks()
+                .join(format!("project-layer-{}.lock", environment.identity())),
+        )?;
+        if destination.exists() {
+            environment.verify_published(&destination)?;
+            return Ok(environment.published(destination));
+        }
+        if fs::symlink_metadata(&destination).is_ok() {
+            bail!("published project environment is not a real directory");
+        }
+
+        fs::create_dir_all(self.paths.environments())?;
+        let temporary = tempfile::Builder::new()
+            .prefix(".project-environment-")
+            .tempdir_in(self.paths.environments())?;
+        let plan = project_provisioning_plan(temporary.path(), environment)?;
+        let unique = SystemTime::now().duration_since(UNIX_EPOCH)?.as_nanos();
+        let sandbox_name = format!(
+            "fortlet-project-provision-{}-{unique:x}",
+            std::process::id()
+        );
+        eprintln!("fortlet: preparing project environment (first use)");
+        let sandbox = Sandbox::builder(&sandbox_name)
+            .image(BASE_IMAGE)
+            .cpus(4)
+            .memory(8192)
+            .root_disk(8192)
+            .volume("/out", |mount| mount.bind(&plan.output))
+            .script("hold", HOLD_SCRIPT)
+            .entrypoint(["hold"])
+            .create()
+            .await
+            .context("cannot create project environment provisioning capsule")?;
+        let provision = sandbox
+            .exec_with("/bin/sh", |options| {
+                options
+                    .args(["-eu", "-c", plan.recipe.as_str()])
+                    .envs(plan.environment.clone())
+            })
+            .await
+            .context("project environment recipe execution failed");
+        cleanup_provisioning_capsule(&sandbox, &sandbox_name).await;
+        let output = provision?;
+        if !output.status().success {
+            let diagnostic = sanitize_diagnostic(&output.stderr().unwrap_or_default());
+            if diagnostic.is_empty() {
+                bail!("project environment recipe exited {}", output.status().code);
+            }
+            bail!(
+                "project environment recipe exited {}: {diagnostic}",
+                output.status().code
+            );
+        }
+        environment.validate_and_mark(temporary.path())?;
+        fs::rename(temporary.path(), &destination).with_context(|| {
+            format!(
+                "cannot publish project environment into {}",
+                self.paths.environments().display()
+            )
+        })?;
+        environment.verify_published(&destination)?;
+        Ok(environment.published(destination))
     }
 
     async fn ensure_layer(
@@ -140,6 +227,43 @@ dpkg-deb -x "$1" /out
     }
 }
 
+#[derive(Debug, PartialEq, Eq)]
+struct ProjectProvisioningPlan {
+    output: PathBuf,
+    recipe: String,
+    environment: Vec<(String, String)>,
+}
+
+fn project_provisioning_plan(
+    output: &Path,
+    project: &ProjectEnvironment,
+) -> Result<ProjectProvisioningPlan> {
+    Ok(ProjectProvisioningPlan {
+        output: output.to_owned(),
+        recipe: project.recipe().to_owned(),
+        environment: vec![
+            ("FORTLET_OUTPUT".into(), "/out".into()),
+            ("FORTLET_TARGET".into(), guest_platform()?.into()),
+        ],
+    })
+}
+
+fn sanitize_diagnostic(value: &str) -> String {
+    value
+        .chars()
+        .take(2048)
+        .map(|character| {
+            if character == '\n' || character == '\t' || !character.is_control() {
+                character
+            } else {
+                '?'
+            }
+        })
+        .collect::<String>()
+        .trim()
+        .to_owned()
+}
+
 async fn cleanup_provisioning_capsule(sandbox: &Sandbox, name: &str) {
     let _ = sandbox.stop_and_wait().await;
     let _ = Sandbox::remove(name).await;
@@ -152,4 +276,77 @@ fn lock(path: &Path) -> Result<File> {
     let file = File::options().create(true).append(true).open(path)?;
     file.lock_exclusive()?;
     Ok(file)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::project::{Project, ProjectIdentity};
+    use std::sync::mpsc;
+    use std::time::Duration;
+
+    fn project_environment() -> ProjectEnvironment {
+        let root = tempfile::tempdir().unwrap().keep().canonicalize().unwrap();
+        fs::create_dir(root.join(".fortlet")).unwrap();
+        fs::write(
+            root.join(".fortlet/environment.json"),
+            r#"{"schema":1,"path":[],"environment":{}}"#,
+        )
+        .unwrap();
+        fs::write(root.join(".fortlet/environment.sh"), "mkdir -p /out/bin\n").unwrap();
+        let project = Project {
+            identity: ProjectIdentity::from_local_root(&root),
+            root: root.clone(),
+            cwd: root,
+            kind: "test",
+            scratch: false,
+        };
+        ProjectEnvironment::discover(&project).unwrap().unwrap()
+    }
+
+    #[test]
+    fn project_provisioning_receives_only_recipe_output_and_fixed_values() {
+        let environment = project_environment();
+        let plan = project_provisioning_plan(Path::new("/owned/output"), &environment).unwrap();
+
+        assert_eq!(plan.output, Path::new("/owned/output"));
+        assert_eq!(plan.recipe, "mkdir -p /out/bin\n");
+        assert_eq!(
+            plan.environment,
+            vec![
+                ("FORTLET_OUTPUT".into(), "/out".into()),
+                ("FORTLET_TARGET".into(), guest_platform().unwrap().into())
+            ]
+        );
+        assert!(!plan.recipe.contains("/Users/"));
+    }
+
+    #[test]
+    fn diagnostics_are_bounded_and_strip_control_characters() {
+        let diagnostic = format!("bad\u{1b}[31m{}tail", "x".repeat(4096));
+        let sanitized = sanitize_diagnostic(&diagnostic);
+        assert!(!sanitized.contains('\u{1b}'));
+        assert!(sanitized.len() <= 2048);
+    }
+
+    #[test]
+    fn identity_lock_serializes_concurrent_project_builds() {
+        let temporary = tempfile::tempdir().unwrap();
+        let lock_path = temporary.path().join("same-identity.lock");
+        let first = lock(&lock_path).unwrap();
+        let (acquired_sender, acquired_receiver) = mpsc::channel();
+        let worker = std::thread::spawn(move || {
+            let _second = lock(&lock_path).unwrap();
+            acquired_sender.send(()).unwrap();
+        });
+
+        assert!(acquired_receiver
+            .recv_timeout(Duration::from_millis(50))
+            .is_err());
+        drop(first);
+        acquired_receiver
+            .recv_timeout(Duration::from_secs(1))
+            .unwrap();
+        worker.join().unwrap();
+    }
 }
