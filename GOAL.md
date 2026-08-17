@@ -1,7 +1,7 @@
 # GOAL: Establish goal-scoped pull request publication
 
-Status: authorized on 2026-08-16; hosted-CI portability successor authorized on
-2026-08-17.
+Status: conditionally complete on 2026-08-17; the closure PR publication and
+read-only post-merge landing gate remain.
 
 Implement accepted FIP-0005 and publish the already-completed project capsule
 reset stack through the one-time two-PR bootstrap. Establish reviewable draft
@@ -78,19 +78,47 @@ bookmark and observe one automatically created replacement hosted unit. This
 authority creates no new workflow, dependency, bookmark, pull request,
 readiness, merge, settings, or retry permission.
 
+Experiment 0015 accepted and exhausted that authority on 2026-08-17. Its one
+signed correction push produced one replacement hosted run, and tests,
+formatting, strict Linux Clippy, and conformance all passed. No further branch
+push, PR update, readiness, merge, settings, or retry authority carries forward
+from that result.
+
 ## Deliverable 4 — Protect main and close bootstrap publication
 
 1. Present exact repository-setting and branch-protection payloads for operator
    approval. Enable squash merges only; require PRs and the named Rust check on
    `main`; block force-push and deletion.
-2. Close Experiment 0013 terminally from observed primary-PR and remote-setting
-   evidence, mark FIP-0005 conformant, conditionally complete this GOAL, and
-   rewrite the handoff.
+2. Close the successor publication experiment terminally from observed
+   primary-PR and remote-setting evidence, stage FIP-0005 conformance,
+   conditionally complete this GOAL, and rewrite the handoff.
 3. Present the exact closure bookmark, diff, destination, title, and body for a
    new approval; create the small closure PR and wait for hosted Rust CI.
 4. Stop for the operator's manual closure squash merge. After notification,
    fetch and verify its `main` destination and tree equality read-only, remove
    only landed goal bookmarks, inspect the final state, then STOP and report.
+
+### Observed primary landing mismatch
+
+PR #1 merged into `main` as signed commit
+`e0f919f80ed90589735f15ff7779ed229122ab1f`. Its tree is byte-identical to the
+reviewed branch tip, but the commit has two parents—previous `main`
+`e95b0cdb1308f732d3f45db7a85027d45bcd4048` and reviewed tip
+`e2e4a6d8b24e974add01a720ddaf73c71de7963a`—and the stored subject is
+`Merge pull request #1 from codyw912/goal/project-capsule-reset`. This is a
+merge commit, not the squash commit required by FIP-0005 and this GOAL.
+
+STOP. Tree equality passed, but the concise-history and squash-landing
+criteria failed. Do not remove the goal bookmark, change merge settings or
+protection, create the closure PR, revert, or rewrite `main` without a new
+operator decision and any required design authorization.
+
+The operator chose to preserve public `main` and authorized FIP-0005's dated
+primary-bootstrap exception. The exact signed tree-equal landing now counts as
+the primary bootstrap landing. Resume Deliverable 4 through a declared
+successor experiment. Do not rewrite or revert `main`; configure squash-only
+merging and protection before the closure PR merges, and permit no future
+merge-method exception.
 
 ## Definition of Done
 
@@ -105,8 +133,8 @@ readiness, merge, settings, or retry permission.
    Rust-check rules while blocking force-push and deletion.
 6. Both squash landings pass destination and tree-equality verification; no
    unrelated remote resource changes occur.
-7. FIP-0005 is conformant, Experiment 0013 is terminal, the handoff is current,
-   and the complete standard verification set is green; then STOP.
+7. FIP-0005 is conformant, Experiments 0013 and 0016 are terminal, the handoff
+   is current, and the complete standard verification set is green; then STOP.
 
 ## Binding rules
 

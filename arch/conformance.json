@@ -46,6 +46,10 @@
         "experiments/0010-project-capsule-status-and-stop.md",
         "tests/pre_runtime_failures.rs",
         "tests/publication_workflow.rs",
+        "experiments/0013-pull-request-workflow-bootstrap.md",
+        "experiments/0014-hosted-linux-linker-closure.md",
+        "experiments/0015-portable-openpty-winsize.md",
+        "experiments/0016-bootstrap-publication-closure.md",
         "tests/conformance.rs"
       ],
       "gaps": [
@@ -55,7 +59,6 @@
         "Restart, logs, and tool-update management commands are not implemented.",
         "Interactive and background workload leases are not yet represented explicitly.",
         "Declarative project environment activation and private overlays are not implemented.",
-        "The host-side publication transaction is not implemented.",
         "A supported standalone installation path that does not require Nix is not implemented.",
         "Native x86_64-linux package verification is outstanding."
       ]
@@ -129,7 +132,7 @@
     {
       "proposal": "0005",
       "title": "Goal-scoped pull request publication",
-      "status": "partial",
+      "status": "conformant",
       "modules": [
         ".github/pull_request_template.md",
         ".github/workflows/verify.yml",
@@ -140,11 +143,13 @@
       ],
       "tests": [
         ".github/workflows/verify.yml",
-        "tests/publication_workflow.rs"
+        "tests/publication_workflow.rs",
+        "experiments/0013-pull-request-workflow-bootstrap.md",
+        "experiments/0014-hosted-linux-linker-closure.md",
+        "experiments/0015-portable-openpty-winsize.md",
+        "experiments/0016-bootstrap-publication-closure.md"
       ],
-      "gaps": [
-        "The local workflow contract is implemented; the primary and closure bootstrap pull requests, hosted run, squash-only merge settings, protected main branch, and final read-only landing gate remain unverified."
-      ]
+      "gaps": []
     }
   ]
 }

@@ -1,6 +1,6 @@
 # Experiment 0015: Portable `openpty` winsize pointer
 
-Status: in-flight
+Status: accepted
 Design: FIP-0001, FIP-0005
 Charter scope: `local-foundation/v1` plus explicit operator successor
 authorization on 2026-08-17
@@ -131,8 +131,39 @@ Jujutsu push dry-run must be refreshed and presented for separate approval.
 
 ## Results
 
-Pending declared treatment.
+1. The operator approved the exact correction push after reviewing its four
+   checkpoints, complete diff, destination, local evidence, signing plan,
+   remote baseline, and rejected control. Jujutsu pushed only
+   `goal/project-capsule-reset`; remote `main` remained at
+   `e95b0cdb1308f732d3f45db7a85027d45bcd4048` and PR #1 remained open and
+   draft with unchanged title, base, head name, and metadata.
+2. Signing on push rewrote the four local Git commit IDs and stored the
+   corrected branch at signed SHA
+   `e2e4a6d8b24e974add01a720ddaf73c71de7963a`. GitHub reports all 18 commits
+   attached to PR #1 as valid SSH signatures. Remote inventory contained only
+   `main` and the updated goal branch.
+3. Exactly one replacement `pull_request` run was created: run `32052509798`,
+   job `95455045523`, for that exact signed SHA. Checkout, the unchanged Linux
+   package installation, Rust installation, `cargo test`, formatting, strict
+   Clippy, conformance, and cleanup all passed. The job completed successfully
+   in 3 minutes 19 seconds.
+4. This accepts the declared mechanism: the same explicit raw mutable pointer
+   satisfies Apple's mutable `openpty` binding and Linux's const binding while
+   preserving PTY behavior and eliminating the Linux-only lint. No lint
+   allowance, platform branch, dependency, workflow, or test apparatus was
+   needed.
+5. No rerun, second correction, PR metadata or readiness mutation, merge,
+   settings change, or other remote mutation occurred.
 
 ## Terminal Closure
 
-Pending.
+Accepted on 2026-08-17. The platform bindings differ only in winsize-pointer
+constness, and one pointer derived from mutable storage honors both contracts.
+
+Actual cost was zero money, one of one call-site corrections, one of one
+correction pushes, one of one replacement hosted runs, and zero other remote
+mutations. The experiment is terminal and must not be resumed. Its local
+terminal record may travel only through a separately authorized publication
+transaction. The next action is to refresh the primary PR's reviewed revision
+and verification evidence and consider bootstrap readiness under separate
+exact approvals; no additional source correction or branch push is authorized.

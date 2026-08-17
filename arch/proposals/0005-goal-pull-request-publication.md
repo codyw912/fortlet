@@ -152,3 +152,23 @@ This is deliberately not a reusable exception to one GOAL per PR.
    CODEOWNERS policy.
 3. Whether a future trusted publication command should automate the exact
    presentation, approval, push, PR, and landing transaction.
+
+## Amendment — 2026-08-17 primary-bootstrap merge exception
+
+Operator-authorized after observing PR #1's landing. This amendment changes
+only the historical acceptance of the primary bootstrap landing; every other
+FIP-0005 requirement remains in force.
+
+PR #1 landed on `main` as validly signed two-parent merge commit
+`e0f919f80ed90589735f15ff7779ed229122ab1f` instead of a squash commit. Its
+tree is byte-identical to reviewed signed tip
+`e2e4a6d8b24e974add01a720ddaf73c71de7963a`. That exact landing MAY count as
+the primary bootstrap landing despite this FIP's Summary and Decision ordinarily
+requiring each goal to land as one squash commit.
+
+This exception MUST remain explicit in experiment and handoff evidence. `main`
+MUST NOT be rewritten or reverted merely to reshape this landing. Before the
+bootstrap closure PR merges, repository settings MUST disable merge commits
+and rebase merges, retain squash merging, and install FIP-0005's required
+`main` protection. The closure PR and every later goal remain subject to the
+original one-squash-commit rule; this amendment authorizes no second exception.
