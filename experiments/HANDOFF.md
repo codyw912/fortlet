@@ -1,13 +1,15 @@
-# Session Handoff — Bootstrap merge exception is authorized
+# Session Handoff — Closure publication is locally qualified
 
 Audience: a fresh agent session. `GOAL.md` is normative and active. Experiments
 0013 and 0014 are terminally rejected after their single declared hosted units.
-Experiments 0001 through 0015 are terminally closed. Experiment 0015 accepted
+Experiments 0001 through 0016 are terminally closed. Experiment 0015 accepted
 its one hosted unit, so the primary PR's required Rust verification is green.
 PR #1's exact reviewed tree landed through a two-parent merge commit. The
 operator authorized FIP-0005's one-time primary-bootstrap exception and
-Experiment 0016; no remote setting, protection, bookmark, closure PR, branch,
-or other mutation is authorized without its separate exact approval.
+Experiment 0016, which accepted after exact squash-only settings and protected
+`main` were established. No closure bookmark, push, PR, readiness change,
+merge, cleanup, or other mutation is authorized without its separate exact
+approval.
 
 ## Verified result
 
@@ -86,6 +88,11 @@ or other mutation is authorized without its separate exact approval.
     reviews, administrator enforcement, and linear history; it blocks
     force-push and deletion and leaves every undeclared option disabled. The
     squash-only settings and refs stayed exact, and no ruleset appeared.
+18. Experiment 0016 accepted after the terminal evidence was shaped on fetched
+    `main` and the complete local verification set passed. Its scope correction
+    excludes the closure PR's own run and merge because FIP-0005 requires that
+    PR to carry the terminal record; those remaining rollout steps keep their
+    separate approval and read-only gates.
 
 ## Product state
 
@@ -112,7 +119,7 @@ persistent paths and credential policy; live capsule-reconciliation and
 terminal-attachment failure evidence; capsule topology, concurrency, and
 terminal coverage; restart, logs, and tool-update commands; explicit
 interactive/background leases; declarative project environments and private
-overlays; host-side publication; standalone non-Nix installation; and native
+overlays; standalone non-Nix installation; and native
 `x86_64-linux` package verification. FIP-0002 retains the documented automated
 Codex exit-status evidence gap.
 
@@ -131,10 +138,11 @@ PR or GitHub without a new exact operator authorization. Experiments 0014 and
 
 ## Current mission boundary
 
-Experiment 0016's repository settings and `main` protection are verified. Shape
-the local terminal and closure evidence onto fetched `main`, update conformance
-only with its establishing evidence, and run the complete gates before
-presenting a closure bookmark or PR transaction. Never rewrite or revert
-`main`, permit a second merge-method exception, remove a bookmark before tree
-equality, or infer authority for a closure branch or PR, readiness, merge, or
-cleanup.
+Experiment 0016 is accepted, the closure evidence is based on fetched `main`,
+and the GOAL is conditionally complete. Inspect and present the exact closure
+stack, diff, signatures, bookmark, destination, draft title and complete body,
+remote baseline, and verification evidence before requesting approval for its
+push. Draft PR creation, readiness, merge, and bookmark cleanup are later
+separate mutations. Never rewrite or revert `main`, permit a second
+merge-method exception, remove a bookmark before tree equality, or infer
+authority for a closure push, PR, readiness, merge, or cleanup.

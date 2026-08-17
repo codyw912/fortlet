@@ -1,7 +1,7 @@
 # GOAL: Establish goal-scoped pull request publication
 
-Status: authorized on 2026-08-16; resumed on 2026-08-17 under FIP-0005's
-operator-authorized primary-bootstrap merge exception.
+Status: conditionally complete on 2026-08-17; the closure PR publication and
+read-only post-merge landing gate remain.
 
 Implement accepted FIP-0005 and publish the already-completed project capsule
 reset stack through the one-time two-PR bootstrap. Establish reviewable draft
@@ -89,9 +89,9 @@ from that result.
 1. Present exact repository-setting and branch-protection payloads for operator
    approval. Enable squash merges only; require PRs and the named Rust check on
    `main`; block force-push and deletion.
-2. Close Experiment 0013 terminally from observed primary-PR and remote-setting
-   evidence, mark FIP-0005 conformant, conditionally complete this GOAL, and
-   rewrite the handoff.
+2. Close the successor publication experiment terminally from observed
+   primary-PR and remote-setting evidence, stage FIP-0005 conformance,
+   conditionally complete this GOAL, and rewrite the handoff.
 3. Present the exact closure bookmark, diff, destination, title, and body for a
    new approval; create the small closure PR and wait for hosted Rust CI.
 4. Stop for the operator's manual closure squash merge. After notification,
@@ -133,8 +133,8 @@ merge-method exception.
    Rust-check rules while blocking force-push and deletion.
 6. Both squash landings pass destination and tree-equality verification; no
    unrelated remote resource changes occur.
-7. FIP-0005 is conformant, Experiment 0013 is terminal, the handoff is current,
-   and the complete standard verification set is green; then STOP.
+7. FIP-0005 is conformant, Experiments 0013 and 0016 are terminal, the handoff
+   is current, and the complete standard verification set is green; then STOP.
 
 ## Binding rules
 

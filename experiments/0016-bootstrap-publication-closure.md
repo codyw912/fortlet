@@ -1,6 +1,6 @@
 # Experiment 0016: Bootstrap publication closure
 
-Status: declared
+Status: accepted
 Design: FIP-0001, FIP-0005 including its 2026-08-17 amendment
 Charter scope: `local-foundation/v1` plus the active publication GOAL and
 explicit operator primary-bootstrap exception
@@ -170,9 +170,35 @@ present the exact `main` protection payload as its own transaction.
    workflow run, bookmark cleanup, revert, rewrite, or unrelated remote
    mutation occurred.
 
-The experiment remains in flight. Shape and verify the closure evidence on
-fetched `main` locally before presenting any closure bookmark or PR mutation.
+7. The closure evidence was shaped on fetched `main` without product-code
+   changes. The complete standard verification set passed on `aarch64-darwin`:
+   39 unit tests, 20 integration tests, formatting, strict
+   all-target/all-feature Clippy, conformance, and `nix flake check`. Nix
+   emitted only the known missing app metadata warning and omitted the
+   incompatible `x86_64-linux` package.
+
+### Acceptance-boundary correction
+
+The original Declared Scope items 5 and 6 and Acceptance Criteria items 4
+through 6 incorrectly made this experiment depend on the closure pull
+request's own hosted run and merge. No closure bookmark, push, pull request,
+hosted run, readiness change, merge, or cleanup had occurred when this defect
+was found. FIP-0005 requires the closure pull request to carry a terminal
+experiment record and treats its own merge plus tree equality as a final
+read-only landing gate. Therefore this experiment's terminal unit ends with
+the verified primary landing, exact repository controls, unchanged remote
+inventory, and locally qualified closure evidence. Closure publication remains
+governed rollout under the GOAL and FIP-0005; it is not another experimental
+dispatch and cannot reopen this record.
 
 ## Terminal Closure
 
-Pending.
+Accepted on 2026-08-17. PR #1's exact reviewed tree is preserved under the
+operator-authorized historical exception, while squash-only repository
+settings and protected `main` prevent that merge method from recurring. The
+two separately approved settings mutations matched their reviewed payloads,
+changed no refs or unrelated resources, and the closure evidence passes the
+complete local verification set. The remaining closure push, draft PR, hosted
+check, readiness change, operator squash merge, landing comparison, and landed
+bookmark cleanup each retain their separate FIP-0005 approval or read-only
+boundary.
