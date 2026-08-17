@@ -15,9 +15,10 @@ stop, and terminal reset commands. A reproducible Nix package exists for
 `aarch64-darwin` and is declared for `x86_64-linux`; native Linux verification
 remains outstanding.
 
-Global inventory, cross-project removal, restart, logs, explicit workload leases,
-publication, service orchestration, automatic harness discovery, and remote
-execution remain designed directions rather than implemented features.
+Global inventory, cross-project removal, restart, logs, explicit workload
+leases, automated publication, service orchestration, automatic harness
+discovery, and remote execution remain designed directions rather than
+implemented features.
 
 ## Core idea
 
@@ -41,8 +42,8 @@ execution remain designed directions rather than implemented features.
 ## Scope and non-goals
 
 Fortlet owns project discovery, harness dispatch, capsule lifecycle,
-declarative tool layers, credential delegation, terminal attachment, and the
-eventual host-side publication boundary.
+declarative tool layers, credential delegation, terminal attachment, and an
+explicit host-side publication boundary.
 
 Fortlet does not replace an agent harness, provide a hosted control plane,
 require a vendor account, add cross-harness messaging, or promise that

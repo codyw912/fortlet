@@ -57,10 +57,11 @@ tact
 ```
 
 The shims are optional; `fortlet run` remains fully usable without them.
-Fortlet provides one capsule per project and harness. Declarative project tool
-environments, explicit workload leases, standalone distribution, and a
-host-side publication boundary remain future work. Local execution comes
-first; remote execution requires its own architecture.
+Fortlet provides one capsule per project and harness. Its repository uses an
+explicit host-side publication boundary; an automated publication command,
+declarative project tool environments, explicit workload leases, and
+standalone distribution remain future work. Local execution comes first;
+remote execution requires its own architecture.
 
 See [OVERVIEW.md](OVERVIEW.md) for durable product scope and
 [GOAL.md](GOAL.md) for the current mission.

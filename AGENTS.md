@@ -17,9 +17,11 @@ implementation, and conformance changes belong in the same checkpoint as the
 code and tests that establish them.
 
 For publication, follow FIP-0005 and the runbook. Use one goal bookmark and one
-draft pull request, except for its recorded two-PR bootstrap. Before every push
-or GitHub mutation, present the exact revisions and diff, destination, complete
-metadata or settings change, verification state, and known failures; wait for
-explicit operator approval. The operator merges unless they explicitly
-authorize the agent to merge one specific pull request. Never push directly or
-force-push to `main`.
+draft pull request. After locally knowable work and verification are complete,
+present one exact publication packet and wait for approval. That approval
+covers only its named signed branch, draft PR, initial hosted run,
+evidence-only body update, readiness after success, and declared landed-branch
+cleanup. Any changed diff or scope, additional push or PR, retry, settings
+change, unexpected remote state, or failure requires new review and approval.
+The operator merges unless they explicitly authorize the agent to merge one
+specific pull request. Never push directly or force-push to `main`.

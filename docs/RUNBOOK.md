@@ -154,9 +154,11 @@ request targeting `main`. Local checkpoints may remain semantic and reviewable;
 the operator squash-merges the completed goal into one public commit. FIP-0005
 records one two-PR bootstrap exception, after which every GOAL uses one PR.
 
-Before any remote mutation, inspect the complete outgoing stack and present its
-exact revisions and diff, bookmark and `origin` destination, full PR metadata or
-settings payload, verification state, and known failures:
+After all locally knowable work is complete, inspect and sign the outgoing
+stack, then present one exact publication packet containing its revisions and
+diff, bookmark and `origin` destination, full draft-PR metadata, expected
+initial hosted check, readiness criteria, verification state, known failures,
+and any exact landed bookmarks proposed for cleanup:
 
 ```bash
 jj status
@@ -165,19 +167,23 @@ jj diff -r 'main..@' --stat
 jj diff -r 'main..@'
 ```
 
-Wait for explicit operator approval for that transaction. Approval does not
-carry forward to the next push, PR update, readiness change, merge, or settings
-change. After approval, create or move only the named goal bookmark and publish
-it with Jujutsu. The operator merges unless they explicitly authorize the agent
-to merge one specific PR. Never push or force-push `main`, enable auto-merge, or
-use mutating Git commands.
+One explicit approval authorizes only the packet's single signed-bookmark push,
+one draft PR, observation of its one initial hosted run, declared evidence-only
+body refresh, readiness after that run succeeds, and cleanup of named landed
+bookmarks after operator merge plus exact tree equality. It does not authorize
+changed code or scope, another push or PR, a retry, substantive metadata change,
+repository settings, unexpected remote changes, or unrelated resources. Any
+such change or any failed step stops for a new exact review and approval. The
+operator merges unless they explicitly authorize the agent to merge one
+specific PR. Never push or force-push `main`, enable auto-merge, or use mutating
+Git commands.
 
-Before marking a PR ready, run the complete standard verification set, record
-the local `nix flake check` host and result in the PR, and require the hosted
-`Rust verification` job to pass. A failure stops publication rather than being
-bypassed or silently retried. Only FIP-0005's two bootstrap PRs may become ready
-while the publication mission remains active solely to observe their own merge
-boundary; all locally knowable work and checks must already be complete.
+Before publication, run the complete standard verification set and record the
+local `nix flake check` host and result in the PR. Mark the PR ready only after
+the expected `Rust verification` job passes. The GOAL may remain conditionally
+active only for hosted verification, operator merge, and read-only landing
+observation. A failure stops publication rather than being bypassed or silently
+retried.
 
 After an operator squash merge, verify the PR targeted `main`, fetch `origin`,
 and compare the reviewed branch-tip tree with fetched `main`:
@@ -189,16 +195,23 @@ jj diff --from <reviewed-tip> --to main
 ```
 
 The final diff must be empty. Squash commit identity is expected to differ from
-the reviewed Jujutsu commits. Delete only the landed goal bookmark after base,
-merge state, and tree equality are established.
+the reviewed Jujutsu commits. Delete only landed bookmarks named in the
+approved publication packet after base, merge state, and tree equality are
+established; otherwise defer cleanup.
 
 ## Experiments
 
 Create a numbered record from `experiments/0000-template.md` before a benchmark,
-user test, paid run, remote mutation, or other result learned from reality
-rather than the test suite. Declare an effort budget and rehearse the complete
-path without external effects before dispatch. Close the record terminally and
-add its one-line outcome to `experiments/README.md`.
+user test, paid run, novel remote mutation, settings change, retry, or other
+uncertain result learned from reality rather than the test suite. Declare an
+effort budget and rehearse the complete path without external effects before
+dispatch. Close the record terminally and add its one-line outcome to
+`experiments/README.md`.
+
+Routine publication through an approved FIP-0005 packet is governed rollout,
+not a new experiment. Its exact packet, pull request, hosted check, operator
+merge, and landing comparison are the evidence. A failure stops the packet;
+any novel recovery or retry returns to the experiment rule above.
 
 ## Generator-owned artifacts — never hand-edit
 

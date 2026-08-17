@@ -21,11 +21,13 @@ record without granting an agent implicit merge or publication authority.
 
 ## Decision
 
-Use one mutable Jujutsu bookmark and one draft pull request per authorized
-GOAL. Every push or GitHub mutation remains a separately approved host
-transaction. Completed pull requests are squash-merged manually by the
-operator by default. Hosted Rust verification and protected-branch rules guard
-`main`; Nix verification remains a recorded local gate initially.
+Use one Jujutsu bookmark and one draft pull request per authorized GOAL. After
+all locally knowable work and checks pass, the operator reviews one exact
+publication packet. Its approval authorizes the bounded lifecycle for that
+named branch and pull request through readiness and landed-bookmark cleanup;
+it never authorizes merge. Completed pull requests are squash-merged manually
+by the operator by default. Hosted Rust verification and protected-branch rules
+guard `main`; Nix verification remains a recorded local gate initially.
 
 ## Specification
 
@@ -47,28 +49,36 @@ operator by default. Hosted Rust verification and protected-branch rules guard
    can exist only after the primary merge and protection changes.
 7. The two-pull-request bootstrap MUST be a one-time exception. Later GOALs
    MUST use exactly one pull request each.
-8. The primary and closure bootstrap pull requests MAY become ready while the
-   publication GOAL or Experiment 0013 remains active solely to observe that
-   pull request's merge boundary, but only after every locally knowable
-   deliverable and required check is complete. This readiness exception MUST
-   NOT apply to later GOALs.
+8. A pull request MAY become ready when every locally knowable deliverable is
+   complete, every experiment is terminal, and every required check passes.
+   Its GOAL MAY remain conditionally active only for operator merge and
+   read-only landing verification.
 
 ### Publication authority
 
-1. Before every branch push, pull request creation or update, readiness change,
-   merge, or repository-setting mutation, the agent MUST present the exact
-   outgoing revisions and diff, destination, complete metadata change,
-   verification state, and known failures.
-2. Each remote mutation MUST receive explicit operator approval before it
-   occurs. Approval MUST NOT carry over to a later mutation.
-3. The operator MUST be the default merge authority. The agent MUST NOT merge
+1. Before publication, the agent MUST present one exact packet containing the
+   signed outgoing revisions and diff, named bookmark and destination, complete
+   draft pull request metadata, local verification, expected hosted check,
+   readiness criteria, and any exact landed bookmarks proposed for cleanup.
+2. One explicit operator approval MAY authorize only this ordered transaction:
+   push the named signed bookmark once; create one draft pull request; observe
+   its one initial hosted run; update only declared evidence fields in its body;
+   mark it ready only after the expected run succeeds; and, after operator merge
+   plus exact tree equality, delete only the named landed bookmarks declared in
+   the packet.
+3. Approval MUST NOT carry over to any reviewed-tree, scope, bookmark, base,
+   title, substantive-body, run-count, or resource change. An additional push,
+   pull request, retry, repository-setting mutation, unexpected remote change,
+   or failed transaction step MUST stop and receive a new exact review and
+   approval before proceeding.
+4. The operator MUST be the default merge authority. The agent MUST NOT merge
    unless the operator explicitly authorizes that specific pull request merge.
-4. Publication MUST use trusted host-side Jujutsu and GitHub interfaces and
+5. Publication MUST use trusted host-side Jujutsu and GitHub interfaces and
    MUST NOT execute repository-controlled hooks, aliases, pagers, credential
    helpers, or generated shell text.
-5. Publication MUST NOT expose credentials or add agent provenance or local
+6. Publication MUST NOT expose credentials or add agent provenance or local
    setup identifiers to commits, pull requests, or repository metadata.
-6. Goal authority MUST NOT imply authority over releases, tags, packages,
+7. Goal authority MUST NOT imply authority over releases, tags, packages,
    secrets, deploy keys, unrelated branches, repositories, or settings.
 
 ### Verification and readiness
@@ -82,9 +92,10 @@ operator by default. Hosted Rust verification and protected-branch rules guard
 4. `nix flake check` MUST remain a local readiness gate and its host and result
    MUST be recorded in the pull request until a later FIP moves it into hosted
    verification.
-5. A pull request MUST NOT become ready while its GOAL or experiment is active,
-   a required local gate is failing, or hosted Rust verification is failing,
-   except for the explicit bootstrap readiness boundary above.
+5. A pull request MUST NOT become ready while locally knowable GOAL work or an
+   experiment remains active, a required local gate is failing, or hosted Rust
+   verification is failing. Conditional GOAL activity limited to operator merge
+   and read-only landing verification does not block readiness.
 
 ### Merge and protected main
 
@@ -115,13 +126,19 @@ operator by default. Hosted Rust verification and protected-branch rules guard
    record and MUST pass hosted Rust verification. After its operator squash
    merge, a read-only landing gate MUST verify its `main` destination and tree
    equality and report the result without requiring another closure commit.
+6. Routine publication through an approved packet is governed rollout and MUST
+   NOT require a new experiment record merely because it pushes the declared
+   branch, opens the declared PR, or observes the required check. A novel
+   publication mechanism, settings mutation, retry, or uncertain external test
+   remains experiment-track work.
 
 ## Consequences
 
 Public history becomes one commit per goal while Jujutsu remains flexible
-locally. Draft PRs improve visibility, but exact approval before every update
-adds deliberate operator interaction. Initial CI is fast and deterministic but
-does not independently verify Nix packaging or native Darwin behavior.
+locally. Exact packet review preserves the publication boundary without making
+the operator approve each predictable step separately. Initial CI is fast and
+deterministic but does not independently verify Nix packaging or native Darwin
+behavior.
 
 Squash merging changes commit identity, so landing is complete only after tree
 equality rather than commit ancestry is verified. Repository protection cannot
@@ -137,8 +154,10 @@ This is deliberately not a reusable exception to one GOAL per PR.
    produces noisier public history and makes later stack shaping harder.
 2. Opening pull requests only after goal completion reduces publication
    transactions but loses early review visibility.
-3. Goal-scoped standing authority for repeated draft updates is smoother but
-   weakens FIP-0001's exact per-transaction approval boundary.
+3. Standing authority for unknown future draft changes is smoother but weakens
+   FIP-0001's exact boundary. The bounded packet instead authorizes only one
+   reviewed tree, one initial hosted run, declared evidence updates, readiness
+   on success, and named post-landing cleanup.
 4. Full hosted Nix and cross-platform CI would improve independent evidence but
    expands setup, runtime, and supply-chain scope before the basic PR workflow
    is proven.
@@ -172,3 +191,18 @@ bootstrap closure PR merges, repository settings MUST disable merge commits
 and rebase merges, retain squash merging, and install FIP-0005's required
 `main` protection. The closure PR and every later goal remain subject to the
 original one-squash-commit rule; this amendment authorizes no second exception.
+
+## Amendment — 2026-08-17 bounded publication transaction
+
+Operator-accepted after completing the two-pull-request bootstrap. The
+bootstrap demonstrated that treating a branch push, draft creation,
+evidence-only body update, readiness change, and landed-branch cleanup as
+separate approval events adds substantial ceremony without strengthening
+review of the code, destination, or merge authority.
+
+This amendment replaces the original per-mutation approval rule with the
+bounded publication packet defined above. It preserves FIP-0001's exact host
+transaction, fail-closed behavior, protected `main`, required checks, and
+operator-owned merge. It grants no standing authority for an unknown diff,
+retry, additional push or pull request, settings change, unrelated resource,
+or failure recovery. This amendment governs its own publication.
