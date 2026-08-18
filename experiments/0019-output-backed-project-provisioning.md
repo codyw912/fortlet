@@ -1,6 +1,6 @@
 # Experiment 0019: Output-backed project provisioning
 
-Status: declared
+Status: rejected
 Design: FIP-0001 and FIP-0006
 Charter scope: `local-foundation/v1`
 
@@ -140,8 +140,38 @@ the incompatible `x86_64-linux` system while validating `aarch64-darwin`.
 
 ## Results
 
-Pending dispatch.
+Rejected by the sole live unit. The immutable command emitted the expected
+first-use preparation message and progressed beyond experiment 0018's root-disk
+failure, but exited 1 after about 70 seconds with:
+
+```text
+fortlet: environment stage failed; check network access or remove the reported incomplete layer and retry: project environment output contains an absolute link
+```
+
+This shows that output-backed download and extraction removed the prior capacity
+blocker, while Fortlet's post-recipe validator correctly rejected an absolute
+symbolic link in the installed output. Codex never launched, no
+version output appeared, and no provider value was emitted. The unit used one
+project-layer build, zero model prompts, zero paid quota, zero remote mutations,
+and no second live unit.
 
 ## Terminal Closure
 
-Pending terminal outcome.
+Rejected after the sole dispatch. Root cause: the installed output contained an
+absolute link beneath `/out`, conflicting with FIP-0006's accepted requirement
+to reject every absolute or escaping output link. The capacity correction
+itself passed its falsification point, but the repository recipe did not yet
+normalize the installed toolchain into a layer-relative tree.
+
+Bounded cleanup completed automatically. `msb list --format json` returned an
+empty list, public status remained `codex<TAB>absent`, and the environment store
+contained no published layer or staging residue. The project, persistent Codex
+state, base layer, and harness layer remain unchanged. Live elapsed time was
+about 70 seconds. Post-closure inspection of the exact pinned arm64 and amd64
+Debian archives identified the source more precisely: `libcap-ng-dev`, not
+Rust, provides `libcap-ng.so` and `libdrop_ambient.so` links to absolute
+`/lib/<triplet>/...` targets, while `libcap-ng0` provides those targets inside
+the layer. Next action: rewrite only those verified output-internal targets into
+relative links, while continuing to reject other absolute targets; cover the
+normalization deterministically before declaring a fresh experiment. Never
+resume this terminal record.
