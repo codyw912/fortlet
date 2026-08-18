@@ -58,7 +58,7 @@
         "Automated coverage does not yet exercise capsule topology and concurrency or terminal semantics.",
         "Restart, logs, and tool-update management commands are not implemented.",
         "Interactive and background workload leases are not yet represented explicitly.",
-        "Declarative project environment activation and private overlays are not implemented.",
+        "Private project overlays are not implemented.",
         "A supported standalone installation path that does not require Nix is not implemented.",
         "Native x86_64-linux package verification is outstanding."
       ]
@@ -148,6 +148,35 @@
         "experiments/0014-hosted-linux-linker-closure.md",
         "experiments/0015-portable-openpty-winsize.md",
         "experiments/0016-bootstrap-publication-closure.md"
+      ],
+      "gaps": []
+    },
+    {
+      "proposal": "0006",
+      "title": "Opt-in project environments",
+      "status": "conformant",
+      "modules": [
+        ".fortlet/environment.json",
+        ".fortlet/environment.sh",
+        "README.md",
+        "OVERVIEW.md",
+        "docs/RUNBOOK.md",
+        "package.nix",
+        "src/environment.rs",
+        "src/paths.rs",
+        "src/project_environment.rs",
+        "src/runtime.rs",
+        "src/session.rs"
+      ],
+      "tests": [
+        ".fortlet/environment.json",
+        ".fortlet/environment.sh",
+        "package.nix",
+        "src/environment.rs",
+        "src/project_environment.rs",
+        "src/runtime.rs",
+        "tests/pre_runtime_failures.rs",
+        "experiments/0020-relative-debian-project-links.md"
       ],
       "gaps": []
     }

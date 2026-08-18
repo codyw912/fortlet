@@ -1,71 +1,80 @@
-# Session Handoff — Publication authority simplification
+# Session Handoff — Publish opt-in project environments
 
-Audience: a fresh agent session. `GOAL.md` is normative and active. Read
-FIP-0001 and FIP-0005 in full before continuing. Experiments 0001 through 0016
-are terminally closed; no experiment is active.
+Audience: a fresh agent session. `GOAL.md` is normative and locally complete;
+only FIP-0005 publication, operator merge, and landing verification remain.
+Read FIP-0001, FIP-0005, and FIP-0006 in full before continuing. Experiments
+0001 through 0020 are terminally closed; no experiment is active.
 
-## Verified baseline
+## Verified product state
 
-1. Public repository `codyw912/fortlet` has protected default branch `main`.
-   GitHub permits squash merging only, requires pull requests and strict
-   `Rust verification`, enforces the rules for administrators, requires linear
-   history, and blocks force-push plus deletion.
-2. Primary PR #1 landed the exact reviewed product and workflow tree as signed
-   two-parent commit `e0f919f80ed90589735f15ff7779ed229122ab1f`.
-   FIP-0005's dated amendment accepts only that historical bootstrap landing;
-   it authorizes no later merge-method exception.
-3. Closure PR #2 passed its sole hosted run `32062492778`, job `95486740889`,
-   then the operator squash-merged it as validly signed one-parent commit
-   `e9f2591f86ab9c12fff518c34deabb4abd89d6ab`.
-4. Fetched `main` is byte-identical to reviewed closure tip
-   `1a2c12a8bb425d82bc4f38519250d4552c08b24e`. The bootstrap publication GOAL
-   is complete and archived under `governance/goals/`.
-5. The primary and closure remote goal branches still exist. No cleanup,
-   rewrite, revert, release, tag, package, secret, deployment, settings change,
-   or unrelated remote mutation followed the closure merge.
+Fortlet now supports opt-in project environments in addition to explicit
+`run`, optional shims, `native`, `doctor`, project-scoped `status`, bounded
+`stop`, and terminal `reset`. A project without `.fortlet/environment.json`
+retains the existing immutable base-plus-harness behavior.
 
-## Active governance correction
+An opted-in project supplies the fixed manifest and adjacent POSIX recipe.
+Fortlet snapshots and hashes both files, runs the recipe only in a
+credential-free provisioning capsule with an empty `/out`, validates and
+content-digests the result, publishes it atomically, and mounts it read-only at
+`/opt/fortlet/project`. Project paths and literal variables reach both Codex and
+Tact; protected variables remain adapter-owned. Environment identity participates
+in launch configuration, while public stop/reset retain stable management
+identity for recovery.
 
-The operator found FIP-0005's per-mutation approvals too ceremonial and
-accepted a bounded transaction instead. The active GOAL records that decision.
-The local amendment and its derived instructions preserve one exact review but
-reduce the normal path to two operator interactions: approve one publication
-packet, then manually squash-merge when the PR is ready.
+## Acceptance evidence
 
-The packet names one signed tree, bookmark, destination, draft title and body,
-expected initial hosted run, readiness criteria, and optional landed bookmarks
-for cleanup. Approval covers one push, one draft PR, observation of that initial
-run, declared evidence-only body changes, readiness only after success, and
-named cleanup only after operator merge plus exact tree equality. It never
-covers merge, changed code or scope, another push or PR, a retry, substantive
-metadata, settings, unrelated resources, unexpected remote state, or failure
-recovery.
+Experiment 0020 accepted the real immutable public path on `aarch64-darwin`
+with MicroSandbox 0.6.8 and Codex 0.147.0. Package
+`/nix/store/ki9llb8dy1zrwxbypmpk4lbzy3p7ax6n-fortlet-0.1.0` provisioned
+environment identity `a0e90418dca950e944e6243c446e93eb977061cd73333da4996a8d560d021252`.
+The owned Codex capsule mounted that sole layer read-only and exposed:
 
-## Product state
+- Cargo 1.97.1 and rustc 1.97.1 from `/opt/fortlet/project/bin`;
+- Jujutsu 0.43.0 from the same layer;
+- the declared persistent Cargo home and Linux target directory.
 
-Daily-use surfaces are `doctor`, explicit `run`, optional package-owned
-`codex` and `tact` shims, explicit `native`, project-scoped `status`, bounded
-`stop`, and terminal `reset`. Reusable project+harness capsules, immutable base
-and harness layers, brokered ChatGPT credentials, safe project resolution,
-broad-root protection, deterministic pre-runtime diagnostics, disposable-root
-recovery, and the explicit host publication workflow are established.
+The focused in-capsule filter passed 10 tests. Public stop and reset returned
+the project to absent status; no capsule remains. The project, persistent Codex
+state, base layer, harness layer, Cargo cache, and verified project layer are
+preserved. FIP-0006 conformance is `conformant` with no gaps.
 
-FIP-0001 remains partial for adapter ownership of persistent paths and
-credential policy; live reconciliation and terminal-attachment failures;
-topology, concurrency, and terminal coverage; restart, logs, and tool updates;
-explicit workload leases; declarative environments and private overlays;
-standalone non-Nix installation; and native `x86_64-linux` package
-verification. FIP-0002 retains its recorded automated Codex exit-status gap.
+## Paid-for implementation lessons
 
-## Current mission boundary
+1. Nix's filtered package source must include every conformance-referenced file,
+   including `.fortlet`, `package.nix`, `README.md`, and `OVERVIEW.md`.
+2. Large recipe downloads and extraction belong under the host-backed output
+   staging directory, not the provisioning capsule root disk.
+3. Debian `libcap-ng-dev` supplies absolute `/lib/<triplet>/...` development
+   links on both arm64 and amd64. The pinned recipe checks their exact targets
+   and rewrites only those links layer-relatively. Do not weaken Fortlet's
+   general rejection of absolute or escaping links.
+4. The first focused Linux Cargo build downloads public crates and populates
+   `/home/agent/.cargo/fortlet-target`; subsequent capsules reuse that explicit
+   persistent cache.
+5. Experiments 0017 through 0019 retain the honest baseline, capacity, and
+   absolute-link failures that led to accepted experiment 0020. Never rewrite
+   or resume those terminal units.
 
-The governance correction is locally complete and the GOAL is conditionally
-complete. Its focused four-test publication contract and complete runbook set
-pass: 39 unit tests, 21 integration tests, formatting, strict
-all-target/all-feature Clippy, conformance, and `nix flake check` on
-`aarch64-darwin`. Nix emitted only the known missing app metadata warning and
-omitted incompatible `x86_64-linux`.
+## Publication state
 
-Checkpoint and sign the reviewable stack, then present one publication packet.
-Do not mutate GitHub before that approval. This policy correction governs its
-own publication. The operator remains the sole merge authority.
+The local stack starts at fetched public `main`
+`633ea638013ba675e82ea7b06b1d3a287d7aa003` and contains accepted FIP-0006,
+implementation, tests, documentation, four terminal experiment records, and
+the local-completion records. Before requesting the one publication approval:
+
+1. Run the complete verification set after these final record changes.
+2. Inspect and shape `main..@` into reviewable semantic checkpoints; preserve
+   the honest rejected experiments and accepted experiment 0020.
+3. Review the exact diff, sign every outgoing revision, choose one descriptive
+   bookmark, and prepare the complete FIP-0005 packet: bookmark, origin target,
+   draft PR title/body, expected `Rust verification`, readiness criteria, known
+   warnings/failures, and named post-merge bookmark cleanup.
+4. STOP for one operator approval. That approval permits one bookmark push, one
+   draft PR, initial hosted-run observation, evidence-only body refresh,
+   readiness after success, and named bookmark cleanup after operator merge and
+   exact tree-equality verification. The operator merges manually.
+
+Do not add installation, services, private overlays, Nix activation, releases,
+packages, registry authentication, remote execution, or another product goal
+to this stack. Do not push, open a PR, retry a failed remote transaction, change
+repository settings, or merge without the exact authority FIP-0005 requires.

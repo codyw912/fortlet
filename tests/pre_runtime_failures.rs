@@ -79,6 +79,10 @@ impl Fixture {
         self.data.join("fortlet/tools")
     }
 
+    fn environments(&self) -> PathBuf {
+        self.data.join("fortlet/environments")
+    }
+
     fn capsule_state(&self, harness: &str) -> PathBuf {
         let project = self.project.canonicalize().unwrap();
         let digest = Sha256::digest(project.as_os_str().as_encoded_bytes());
@@ -157,6 +161,30 @@ fn missing_auth_fails_before_capsule_or_environment_artifacts() {
     );
     assert!(!fixture.projects().exists());
     assert!(!fixture.tools().exists());
+}
+
+#[test]
+fn invalid_project_environment_fails_before_credentials_or_runtime_artifacts() {
+    let fixture = Fixture::new();
+    fs::create_dir(fixture.project.join(".fortlet")).unwrap();
+    fs::write(
+        fixture.project.join(".fortlet/environment.json"),
+        r#"{"schema":1,"path":["../outside"],"environment":{}}"#,
+    )
+    .unwrap();
+    fs::write(fixture.project.join(".fortlet/environment.sh"), "exit 99\n").unwrap();
+
+    let output = fixture.run("codex", &fixture.project);
+
+    assert_failure(
+        output,
+        "project environment",
+        "fix or remove .fortlet/environment.json and retry",
+        "project environment PATH entry must be a normalized relative path",
+    );
+    assert!(!fixture.projects().exists());
+    assert!(!fixture.tools().exists());
+    assert!(!fixture.environments().exists());
 }
 
 #[test]
