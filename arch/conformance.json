@@ -183,11 +183,23 @@
     {
       "proposal": "0007",
       "title": "Explicit environment preparation",
-      "status": "unimplemented",
-      "modules": [],
-      "tests": [],
+      "status": "partial",
+      "modules": [
+        "README.md",
+        "OVERVIEW.md",
+        "docs/RUNBOOK.md",
+        "src/cli.rs",
+        "src/environment.rs",
+        "src/preparation.rs"
+      ],
+      "tests": [
+        "src/cli.rs",
+        "src/environment.rs",
+        "src/preparation.rs",
+        "tests/prepare.rs"
+      ],
       "gaps": [
-        "The public credential-free prepare command and its daily-session evidence are not implemented."
+        "The predeclared packaged prepare and ordinary interactive daily-session experiment has not yet run."
       ]
     }
   ]

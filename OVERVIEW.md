@@ -11,7 +11,8 @@ project roots, provisions immutable Codex and Tact environments, brokers
 ChatGPT credentials through MicroSandbox, creates reusable project-and-harness
 capsules, preserves interactive terminal behavior, provides optional
 transparent Codex and Tact shims, and exposes project-scoped capsule status,
-stop, terminal reset, and opt-in immutable project-tool layers. A reproducible
+stop, terminal reset, explicit environment preparation, and opt-in immutable
+project-tool layers. A reproducible
 Nix package exists for
 `aarch64-darwin` and is declared for `x86_64-linux`; native Linux verification
 remains outstanding.

@@ -9,6 +9,7 @@ use crate::harness;
 use crate::management::{self, ResetRequest, StatusRequest, StopRequest};
 use crate::native;
 use crate::paths::AppPaths;
+use crate::preparation::{self, PrepareRequest};
 use crate::project;
 use crate::session::{self, LaunchRequest};
 
@@ -33,6 +34,13 @@ enum Command {
         allow_broad_mount: bool,
         #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
         arguments: Vec<String>,
+    },
+    Prepare {
+        harness: String,
+        #[arg(long)]
+        project: Option<PathBuf>,
+        #[arg(long)]
+        allow_broad_mount: bool,
     },
     Status {
         harness: Option<String>,
@@ -88,6 +96,22 @@ async fn run_command(command: Command) -> Result<()> {
         }
         Command::Native { harness, arguments } => {
             native::execute(&harness, &strip_separator(arguments))
+        }
+        Command::Prepare {
+            harness,
+            project,
+            allow_broad_mount,
+        } => {
+            println!(
+                "{}",
+                preparation::prepare(PrepareRequest {
+                    harness,
+                    project,
+                    allow_broad_mount,
+                })
+                .await?
+            );
+            Ok(())
         }
         Command::Status {
             harness,
@@ -308,6 +332,28 @@ mod tests {
         assert!(matches!(
             reset.command,
             Command::Reset {
+                harness,
+                project: Some(ref project),
+                allow_broad_mount: true,
+            } if harness == "codex" && project == Path::new("/tmp/project")
+        ));
+    }
+
+    #[test]
+    fn parses_harness_scoped_preparation() {
+        let prepare = Cli::try_parse_from([
+            "fortlet",
+            "prepare",
+            "codex",
+            "--project",
+            "/tmp/project",
+            "--allow-broad-mount",
+        ])
+        .unwrap();
+
+        assert!(matches!(
+            prepare.command,
+            Command::Prepare {
                 harness,
                 project: Some(ref project),
                 allow_broad_mount: true,

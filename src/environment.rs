@@ -55,14 +55,17 @@ dpkg-deb -x "$1" /out
                 BASE_TOOLS_VERSION,
                 ".fortlet-base.json",
                 &base_script,
+                "base environment",
             )
             .await?;
+        let harness_label = format!("{} environment", harness.name());
         let harness_path = self
             .ensure_layer(
                 harness.name(),
                 harness.version(),
                 ".fortlet-tool.json",
                 &harness.provision_script(),
+                &harness_label,
             )
             .await?;
         let project = match project {
@@ -158,13 +161,14 @@ dpkg-deb -x "$1" /out
         version: &str,
         marker: &str,
         script: &str,
+        label: &str,
     ) -> Result<PathBuf> {
         let destination = self.paths.tools().join(name).join(version);
-        if destination.join(marker).is_file() {
+        if layer_marker_matches(&destination, marker, name, version, label)? {
             return Ok(destination);
         }
         let _lock = lock(&self.paths.locks().join(format!("layer-{name}.lock")))?;
-        if destination.join(marker).is_file() {
+        if layer_marker_matches(&destination, marker, name, version, label)? {
             return Ok(destination);
         }
         if destination.exists() {
@@ -179,7 +183,7 @@ dpkg-deb -x "$1" /out
             .tempdir_in(self.paths.tools())?;
         let unique = SystemTime::now().duration_since(UNIX_EPOCH)?.as_nanos();
         let sandbox_name = format!("fortlet-provision-{}-{unique:x}", std::process::id());
-        eprintln!("fortlet: preparing {name} {version} (first use)");
+        eprintln!("fortlet: preparing {label} (first use)");
         let sandbox = Sandbox::builder(&sandbox_name)
             .image(BASE_IMAGE)
             .cpus(2)
@@ -189,7 +193,7 @@ dpkg-deb -x "$1" /out
             .entrypoint(["hold"])
             .create()
             .await
-            .with_context(|| format!("cannot create provisioning capsule {sandbox_name}"))?;
+            .with_context(|| format!("cannot create {label} provisioning capsule"))?;
         let provision = sandbox
             .exec("/bin/sh", ["-c", script])
             .await
@@ -225,6 +229,35 @@ dpkg-deb -x "$1" /out
         })?;
         Ok(destination)
     }
+}
+
+fn layer_marker_matches(
+    destination: &Path,
+    marker: &str,
+    name: &str,
+    version: &str,
+    label: &str,
+) -> Result<bool> {
+    let marker_path = destination.join(marker);
+    let metadata = match fs::symlink_metadata(&marker_path) {
+        Ok(metadata) => metadata,
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(false),
+        Err(error) => return Err(error.into()),
+    };
+    if !metadata.is_file() || metadata.file_type().is_symlink() {
+        bail!("published {label} marker is not a regular file");
+    }
+    let actual: serde_json::Value = serde_json::from_slice(&fs::read(&marker_path)?)
+        .with_context(|| format!("published {label} marker is invalid"))?;
+    let expected = serde_json::json!({
+        "name": name,
+        "version": version,
+        "image": BASE_IMAGE,
+    });
+    if actual != expected {
+        bail!("published {label} marker does not match its inputs");
+    }
+    Ok(true)
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -327,6 +360,43 @@ mod tests {
         let sanitized = sanitize_diagnostic(&diagnostic);
         assert!(!sanitized.contains('\u{1b}'));
         assert!(sanitized.len() <= 2048);
+    }
+
+    #[test]
+    fn tool_layer_markers_are_regular_and_bound_to_their_inputs() {
+        let temporary = tempfile::tempdir().unwrap();
+        let destination = temporary.path().join("codex/0.147.0");
+        fs::create_dir_all(&destination).unwrap();
+        fs::write(
+            destination.join(".fortlet-tool.json"),
+            serde_json::to_vec(&serde_json::json!({
+                "name": "codex",
+                "version": "0.147.0",
+                "image": BASE_IMAGE,
+            }))
+            .unwrap(),
+        )
+        .unwrap();
+
+        assert!(layer_marker_matches(
+            &destination,
+            ".fortlet-tool.json",
+            "codex",
+            "0.147.0",
+            "codex environment"
+        )
+        .unwrap());
+
+        fs::write(destination.join(".fortlet-tool.json"), "{}").unwrap();
+        let error = layer_marker_matches(
+            &destination,
+            ".fortlet-tool.json",
+            "codex",
+            "0.147.0",
+            "codex environment",
+        )
+        .unwrap_err();
+        assert!(error.to_string().contains("does not match its inputs"));
     }
 
     #[test]

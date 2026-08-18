@@ -24,6 +24,7 @@ builds offline. Native Linux verification is still outstanding.
 
 ```bash
 nix run . -- doctor
+nix run . -- prepare codex
 nix run . -- run codex --
 nix run . -- run tact --
 nix run . -- status
@@ -35,6 +36,7 @@ For a development binary inside `nix develop`:
 
 ```bash
 cargo run -- doctor
+cargo run -- prepare codex
 cargo run -- run codex --
 cargo run -- status codex
 cargo run -- stop codex
@@ -52,6 +54,19 @@ override.
 launches require a healthy MicroSandbox host and a valid ChatGPT credential.
 
 ## Project tool environments
+
+`fortlet prepare <harness> [--project <path>] [--allow-broad-mount]` is an
+optional synchronous warm-up for the immutable base, selected harness, and
+optional project layers. It uses the same project selection as `run` and
+prints `<harness><TAB>ready` only after every selected layer verifies. It does
+not read provider credentials, create a reusable project capsule or persistent
+harness home, project guest authentication, or attach a terminal. A cache hit
+does not contact MicroSandbox or the network and does not rewrite a layer.
+
+Skipping `prepare` is supported: explicit `run` and the transparent shims
+perform the same layer preparation automatically on first launch. Preparation
+does not validate login, runtime health, or terminal readiness and does not
+change an existing capsule after project environment inputs change.
 
 Only `.fortlet/environment.json` at the resolved project root opts a repository
 into a project environment. It requires the fixed adjacent
@@ -104,6 +119,7 @@ the host:
 ```bash
 cargo test --bin fortlet project_environment
 cargo test --bin fortlet environment
+cargo test --test prepare
 cargo test --test pre_runtime_failures invalid_project_environment
 ```
 

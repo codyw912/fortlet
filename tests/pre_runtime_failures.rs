@@ -315,7 +315,11 @@ fn incomplete_harness_layer_fails_before_provisioning_or_runtime_artifacts() {
     let base = fixture.tools().join("_base/bookworm-1");
     let incomplete_harness = fixture.tools().join("codex/0.147.0");
     fs::create_dir_all(&base).unwrap();
-    fs::write(base.join(".fortlet-base.json"), "{}").unwrap();
+    fs::write(
+        base.join(".fortlet-base.json"),
+        r#"{"name":"_base","version":"bookworm-1","image":"node:24-bookworm"}"#,
+    )
+    .unwrap();
     fs::create_dir_all(&incomplete_harness).unwrap();
 
     let output = fixture.run("codex", &fixture.project);
