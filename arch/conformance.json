@@ -154,7 +154,7 @@
     {
       "proposal": "0006",
       "title": "Opt-in project environments",
-      "status": "partial",
+      "status": "conformant",
       "modules": [
         ".fortlet/environment.json",
         ".fortlet/environment.sh",
@@ -175,11 +175,10 @@
         "src/environment.rs",
         "src/project_environment.rs",
         "src/runtime.rs",
-        "tests/pre_runtime_failures.rs"
+        "tests/pre_runtime_failures.rs",
+        "experiments/0020-relative-debian-project-links.md"
       ],
-      "gaps": [
-        "A bounded local acceptance unit has not yet established that Fortlet's checked-in recipe provisions cargo, rustc, and jj and runs a focused repository test through the real MicroSandbox path."
-      ]
+      "gaps": []
     }
   ]
 }

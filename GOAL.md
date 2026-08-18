@@ -1,6 +1,6 @@
 # GOAL: Add opt-in project environments
 
-Status: active. FIP-0006 accepted on 2026-08-17.
+Status: locally complete on 2026-08-17; FIP-0005 publication pending.
 
 Make Fortlet useful for ordinary work in real repositories by adding the
 smallest safe project-tool environment: projects that opt in can supply a
@@ -113,3 +113,12 @@ authentication, or repository settings.
 
 Run focused project-environment tests during development and the complete
 standard verification set from `docs/RUNBOOK.md` before publication.
+
+## Local completion
+
+FIP-0006 is conformant. Experiment 0020 accepted the immutable public path:
+Fortlet provisioned and published its checked-in project layer, exposed pinned
+Rust 1.97.1 and Jujutsu 0.43.0 inside Codex, passed 10 focused Linux tests, and
+removed the owned capsule while preserving durable state and immutable layers.
+The locally knowable work is complete; only the bounded FIP-0005 publication,
+operator merge, and landing verification remain in this goal.

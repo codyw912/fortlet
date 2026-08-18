@@ -1,6 +1,6 @@
 # Experiment 0020: Relative Debian project links
 
-Status: declared
+Status: accepted
 Design: FIP-0001 and FIP-0006
 Charter scope: `local-foundation/v1`
 
@@ -137,8 +137,63 @@ incompatible `x86_64-linux` while validating `aarch64-darwin`.
 
 ## Results
 
-Pending dispatch.
+Accepted. The sole immutable public launch emitted one first-use preparation
+message, provisioned and published environment identity
+`a0e90418dca950e944e6243c446e93eb977061cd73333da4996a8d560d021252`,
+then exited zero with `codex-cli 0.147.0`. Exactly one running capsule existed:
+`fortlet-501-codex-6652b8ca5f1b9273`. Its labels were:
+
+- `fortlet.managed=true`
+- `fortlet.schema=1`
+- `fortlet.project=6652b8ca5f1b9273`
+- `fortlet.tool=codex`
+- `fortlet.version=0.147.0`
+- `fortlet.environment=a0e90418...021252`
+
+The capsule mounted the sole published directory read-only at
+`/opt/fortlet/project`. Its marker bound schema 1, the complete environment
+identity, output digest
+`3a9aab8358bee98478de1a57e2c7c5ed16c64979f839cd3c9e5cbb75e1d4f4e2`,
+`node:24-bookworm`, and `linux/aarch64`. No `.fortlet-work.*` residue existed.
+The complete layer had four links, all relative. The development links were:
+
+```text
+usr/lib/aarch64-linux-gnu/libcap-ng.so -> ../../../lib/aarch64-linux-gnu/libcap-ng.so.0.0.0
+usr/lib/aarch64-linux-gnu/libdrop_ambient.so -> ../../../lib/aarch64-linux-gnu/libdrop_ambient.so.0.0.0
+```
+
+The exact owned-capsule probe reported:
+
+```text
+cargo_path=/opt/fortlet/project/bin/cargo
+cargo 1.97.1 (c980f4866 2026-06-30)
+rustc_path=/opt/fortlet/project/bin/rustc
+rustc 1.97.1 (8bab26f4f 2026-07-14)
+jj_path=/opt/fortlet/project/bin/jj
+jj 0.43.0-89f62ede8c1c611eaf134c0c49252efd65c7945d
+CARGO_HOME=/home/agent/.cargo
+CARGO_TARGET_DIR=/home/agent/.cargo/fortlet-target
+```
+
+It ran from `/Users/cody/dev/fortlet`; the focused filter passed all 10 selected
+tests. The first Linux build populated the declared persistent Cargo cache and
+reported a 3m24s Cargo build. The public launch took about 1m54s by command
+timings; an independent end-to-end experiment timer was not captured. Actual
+cost was one project-layer build, one owned capsule, public toolchain and Cargo
+downloads, zero money, zero paid quota, zero model prompts, zero remote
+mutations, and no second live unit.
 
 ## Terminal Closure
 
-Pending terminal outcome.
+Accepted. Root cause of success: output-backed staging avoided the capsule-root
+capacity limit, and exact normalization preserved both Debian development links
+inside the immutable layer without weakening Fortlet's absolute-link rejection.
+The real public path then proved publication, activation, pinned tools, Cargo
+environment, and focused Linux compilation.
+
+Public `stop` produced `codex<TAB>stopped`; public `reset` removed the exact
+owned capsule; final status was `codex<TAB>absent` and the complete MicroSandbox
+list was empty. The canonical project, persistent Codex state, base marker,
+Codex marker, and verified project layer were all preserved. Next action: mark
+FIP-0006 conformant, finish the mission handoff and complete local verification,
+then prepare the single FIP-0005 publication packet.

@@ -41,4 +41,4 @@ scannable failure/win history of the project:
 - `0017-opt-in-project-environment.md` — rejected before dispatch; a pre-existing stopped Codex capsule violated the required absent baseline, so no VM, recipe, or model prompt ran.
 - `0018-clean-baseline-project-environment.md` — rejected; the sole clean-baseline unit exhausted the provisioning root disk while unpacking the full Rust distribution, before layer publication or Codex launch.
 - `0019-output-backed-project-provisioning.md` — rejected; output-backed extraction cleared the capacity failure, but validation rejected an absolute Debian development link before publication.
-- `0020-relative-debian-project-links.md` — declared; one bounded unit will verify exact layer-relative Debian development links, project-layer publication, and the focused Rust test.
+- `0020-relative-debian-project-links.md` — accepted; one public launch published the verified tool layer, exposed pinned Rust and Jujutsu, passed 10 focused Linux tests, and cleaned up the owned capsule.
