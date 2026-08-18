@@ -652,4 +652,25 @@ mod tests {
             assert!(environment.recipe.contains(pinned), "{pinned}");
         }
     }
+
+    #[test]
+    fn repository_fixture_normalizes_pinned_debian_links() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .canonicalize()
+            .unwrap();
+        let environment = ProjectEnvironment::discover(&project(&root))
+            .unwrap()
+            .unwrap();
+
+        for required in [
+            "debian_triplet=aarch64-linux-gnu",
+            "debian_triplet=x86_64-linux-gnu",
+            "[ \"$link_target\" != \"$expected_target\" ] || [ ! -f \"$FORTLET_OUTPUT$expected_target\" ]",
+            "ln -snf \"../../..$expected_target\" \"$link\"",
+            "/lib/$debian_triplet/libcap-ng.so.0.0.0",
+            "/lib/$debian_triplet/libdrop_ambient.so.0.0.0",
+        ] {
+            assert!(environment.recipe.contains(required), "{required}");
+        }
+    }
 }
