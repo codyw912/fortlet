@@ -1,80 +1,81 @@
-# Session Handoff — Publish opt-in project environments
+# Session Handoff — First daily Fortlet session
 
-Audience: a fresh agent session. `GOAL.md` is normative and locally complete;
-only FIP-0005 publication, operator merge, and landing verification remain.
-Read FIP-0001, FIP-0005, and FIP-0006 in full before continuing. Experiments
-0001 through 0020 are terminally closed; no experiment is active.
+Audience: a fresh agent session. `GOAL.md` is normative and active. Read
+FIP-0001, FIP-0002, FIP-0005, FIP-0006, and draft FIP-0007 in full before
+implementation. Experiments 0001 through 0020 are terminally closed; no
+experiment is active.
 
-## Verified product state
+## Verified landed baseline
 
-Fortlet now supports opt-in project environments in addition to explicit
-`run`, optional shims, `native`, `doctor`, project-scoped `status`, bounded
-`stop`, and terminal `reset`. A project without `.fortlet/environment.json`
-retains the existing immutable base-plus-harness behavior.
+PR #4 landed opt-in project environments on protected `main` as squash commit
+`ad199140ac8acf20cc73b1b5ea5ad6b2f1ce2d05`. Its tree is byte-identical to
+reviewed signed tip `3bda446d7d51eeeddcbfde781fbdde62d7d11994`.
+Hosted Rust verification passed, the declared branch bookmarks were removed,
+and the working copy began this mission as an empty change directly on fetched
+`main`.
 
-An opted-in project supplies the fixed manifest and adjacent POSIX recipe.
-Fortlet snapshots and hashes both files, runs the recipe only in a
-credential-free provisioning capsule with an empty `/out`, validates and
-content-digests the result, publishes it atomically, and mounts it read-only at
-`/opt/fortlet/project`. Project paths and literal variables reach both Codex and
-Tact; protected variables remain adapter-owned. Environment identity participates
-in launch configuration, while public stop/reset retain stable management
-identity for recovery.
+The last exact outgoing verification passed 53 unit tests, 22 integration
+tests, formatting, strict all-target/all-feature Clippy, conformance,
+`nix flake check`, and `nix build .#fortlet` on `aarch64-darwin`. Nix emitted
+only the known missing app-metadata warning and omitted incompatible
+`x86_64-linux` on that host.
 
-## Acceptance evidence
+## Current product surface
 
-Experiment 0020 accepted the real immutable public path on `aarch64-darwin`
-with MicroSandbox 0.6.8 and Codex 0.147.0. Package
-`/nix/store/ki9llb8dy1zrwxbypmpk4lbzy3p7ax6n-fortlet-0.1.0` provisioned
-environment identity `a0e90418dca950e944e6243c446e93eb977061cd73333da4996a8d560d021252`.
-The owned Codex capsule mounted that sole layer read-only and exposed:
+Fortlet provides explicit `run`, optional transparent Codex and Tact shims,
+`native`, `doctor`, project-scoped `status`, bounded `stop`, terminal `reset`,
+and opt-in immutable project-tool layers. Authentication remains host-owned and
+brokered. Project recipes execute only in credential-free provisioning
+capsules, and successful layers are content-verified and mounted read-only.
 
-- Cargo 1.97.1 and rustc 1.97.1 from `/opt/fortlet/project/bin`;
-- Jujutsu 0.43.0 from the same layer;
-- the declared persistent Cargo home and Linux target directory.
+Experiment 0020 proved the real Fortlet repository path: Cargo and rustc 1.97.1
+plus Jujutsu 0.43.0 reached Codex from the project layer, 10 focused Linux tests
+passed, and public stop/reset preserved persistent state plus every immutable
+layer. FIP-0006 is conformant.
 
-The focused in-capsule filter passed 10 tests. Public stop and reset returned
-the project to absent status; no capsule remains. The project, persistent Codex
-state, base layer, harness layer, Cargo cache, and verified project layer are
-preserved. FIP-0006 conformance is `conformant` with no gaps.
+## Recorded daily-use friction
 
-## Paid-for implementation lessons
+First use can spend minutes provisioning immutable inputs while the user is
+trying to launch an agent. Today that work is reachable only from the launch
+pipeline after credential validation and capsule-specific preparation. The
+failed acceptance units also showed that provisioning errors are easier to
+understand as environment preparation than as interactive agent-startup
+failures.
 
-1. Nix's filtered package source must include every conformance-referenced file,
-   including `.fortlet`, `package.nix`, `README.md`, and `OVERVIEW.md`.
-2. Large recipe downloads and extraction belong under the host-backed output
-   staging directory, not the provisioning capsule root disk.
-3. Debian `libcap-ng-dev` supplies absolute `/lib/<triplet>/...` development
-   links on both arm64 and amd64. The pinned recipe checks their exact targets
-   and rewrites only those links layer-relatively. Do not weaken Fortlet's
-   general rejection of absolute or escaping links.
-4. The first focused Linux Cargo build downloads public crates and populates
-   `/home/agent/.cargo/fortlet-target`; subsequent capsules reuse that explicit
-   persistent cache.
-5. Experiments 0017 through 0019 retain the honest baseline, capacity, and
-   absolute-link failures that led to accepted experiment 0020. Never rewrite
-   or resume those terminal units.
+The existing `EnvironmentStore::ensure` seam already prepares the exact base,
+selected harness, and optional project layers. It does not intrinsically need a
+provider credential or reusable project+harness capsule. This is the narrow
+opportunity; do not generalize it into tasks, background work, inventory, or a
+new runtime abstraction.
 
-## Publication state
+## Proposed contract
 
-The local stack starts at fetched public `main`
-`633ea638013ba675e82ea7b06b1d3a287d7aa003` and contains accepted FIP-0006,
-implementation, tests, documentation, four terminal experiment records, and
-the local-completion records. Before requesting the one publication approval:
+Draft FIP-0007 adds:
 
-1. Run the complete verification set after these final record changes.
-2. Inspect and shape `main..@` into reviewable semantic checkpoints; preserve
-   the honest rejected experiments and accepted experiment 0020.
-3. Review the exact diff, sign every outgoing revision, choose one descriptive
-   bookmark, and prepare the complete FIP-0005 packet: bookmark, origin target,
-   draft PR title/body, expected `Rust verification`, readiness criteria, known
-   warnings/failures, and named post-merge bookmark cleanup.
-4. STOP for one operator approval. That approval permits one bookmark push, one
-   draft PR, initial hosted-run observation, evidence-only body refresh,
-   readiness after success, and named bookmark cleanup after operator merge and
-   exact tree-equality verification. The operator merges manually.
+```text
+fortlet prepare <harness> [--project <path>] [--allow-broad-mount]
+```
 
-Do not add installation, services, private overlays, Nix activation, releases,
-packages, registry authentication, remote execution, or another product goal
-to this stack. Do not push, open a PR, retry a failed remote transaction, change
-repository settings, or merge without the exact authority FIP-0005 requires.
+The command uses launch-equivalent harness and project selection, validates the
+optional project environment, ensures immutable layers synchronously, and
+prints `<harness><TAB>ready`. It never reads provider credentials, creates a
+guest auth projection, prepares persistent harness state, constructs the
+managed reusable capsule, or attaches a terminal. Cache hits verify required
+markers and content without provisioning contact.
+
+## What to do next
+
+1. Review draft FIP-0007 with the operator. Resolve command shape, exact output,
+   cache-hit semantics, and the credential/runtime boundary before acceptance.
+2. After explicit acceptance, checkpoint the proposal transition and implement
+   only the GOAL. Keep conformance `unimplemented` until code plus tests
+   establish observable behavior.
+3. Rehearse and predeclare one bounded daily-session experiment only after the
+   complete deterministic and package gates pass. Any model prompt or
+   operator-run interactive observation needs the exact experiment budget
+   accepted before dispatch.
+4. Publish through one FIP-0005 packet; the operator merges manually.
+
+Do not start another experiment, execute a model prompt, remove the verified
+project layer, add global inventory/pruning, implement background work, or begin
+standalone distribution before FIP-0007 and the new GOAL establish authority.

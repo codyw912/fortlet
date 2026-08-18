@@ -179,6 +179,16 @@
         "experiments/0020-relative-debian-project-links.md"
       ],
       "gaps": []
+    },
+    {
+      "proposal": "0007",
+      "title": "Explicit environment preparation",
+      "status": "unimplemented",
+      "modules": [],
+      "tests": [],
+      "gaps": [
+        "The public credential-free prepare command and its daily-session evidence are not implemented."
+      ]
     }
   ]
 }

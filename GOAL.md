@@ -1,124 +1,127 @@
-# GOAL: Add opt-in project environments
+# GOAL: Harden the first daily Fortlet session
 
-Status: locally complete on 2026-08-17; FIP-0005 publication pending.
+Status: active. FIP-0007 is Draft on 2026-08-18; implementation requires
+operator acceptance.
 
-Make Fortlet useful for ordinary work in real repositories by adding the
-smallest safe project-tool environment: projects that opt in can supply a
-versioned immutable layer whose tools and declared environment reach both
-supported harnesses. A project without configuration must behave exactly as it
-does today.
+Turn the proven isolated runtime into a deliberate, understandable daily-use
+workflow. Add the smallest explicit preparation surface, then dogfood one
+ordinary interactive project session and fix only blockers established by that
+path. Do not expand into general lifecycle administration or distribution.
 
-Before implementation, read FIP-0001, FIP-0005, and FIP-0006 in full.
+Before implementation, read FIP-0001, FIP-0002, FIP-0005, FIP-0006, and
+FIP-0007 in full.
 
-## Deliverable 1 — Accept the project-environment contract
+## Deliverable 1 — Accept explicit preparation
 
-1. Compare an isolated project-layer recipe, a pinned OCI project image, and
-   Nix/devenv activation against daily-use friction, isolation, identity,
-   update safety, and FIP-0001's optional-Nix boundary.
-2. Select and accept only the smallest contract that can provide real project
-   tools without executing repository-controlled text on the host or exposing
-   provider credentials during provisioning.
-3. Keep conformance `unimplemented` until code and tests establish observable
-   requirements. STOP if the implementation is materially larger than
-   FIP-0006 describes.
+1. Compare preparation only as a side effect of `run`, a dedicated
+   harness-scoped command, mutation through `status`, and background
+   provisioning.
+2. Accept only a contract that stages the exact immutable inputs needed by one
+   harness without reading credentials, creating persistent harness state, or
+   creating a reusable project+harness capsule.
+3. Preserve current `run`, shim, native, project-resolution, status, stop,
+   reset, and unconfigured-project behavior.
+4. Keep FIP-0007 conformance `unimplemented` until code and tests establish the
+   public contract. STOP before implementation if the operator does not accept
+   the proposal.
 
-## Deliverable 2 — Build immutable project layers
+## Deliverable 2 — Implement credential-free prepare
 
-1. Discover only the opt-in manifest at the resolved project root; absence
-   preserves the current base-plus-harness environment.
-2. Read the fixed manifest and adjacent recipe into owned snapshots before
-   isolated provisioning, and derive environment identity from their exact
-   bytes plus the provisioning contract and target platform.
-3. Run repository-controlled provisioning only inside a dedicated capsule
-   that receives no project mount, harness state, provider credential, SSH
-   agent, publication authority, or host shell execution.
-4. Publish a successful output atomically as an immutable content-verified
-   layer. A failed or changed build must not overwrite or remove the last
-   working layer.
+1. Add `fortlet prepare <harness>` with the same explicit project-selection
+   options as `run`.
+2. Resolve and validate the harness, project, and optional project environment,
+   then ensure the base, harness, and project layers through the existing
+   immutable provisioning paths.
+3. Do not read provider credentials, create a guest auth projection, prepare a
+   persistent harness home, construct a managed runtime capsule, or attach a
+   terminal.
+4. Make repeated preparation a verified cache hit with no network, VM, or
+   first-use progress output. Print one stable ready result on success.
+5. Preserve every prior published layer on failure and report the failed stage
+   plus one actionable correction without exposing internal identities or
+   unsafe recipe output.
 
-## Deliverable 3 — Activate and reconcile the environment
+## Deliverable 3 — Prove one ordinary work session
 
-1. Mount the project layer read-only at one stable guest path and add only its
-   validated path entries and literal environment values to Codex and Tact.
-2. Reserve Fortlet, credential, terminal, home, and harness-owned variables so
-   project configuration cannot replace the isolation or credential boundary.
-3. Include project-environment identity in capsule configuration. A changed
-   environment must fail closed against an existing stale capsule and use the
-   established `stop` then `reset` recovery path.
-4. Keep explicit `fortlet run`, optional shims, native escape, project
-   resolution, management commands, and unconfigured projects compatible.
+1. Add deterministic evidence for parsing, project parity with launch,
+   credential absence, provisioning inputs, cache-hit idempotence, both
+   harnesses, unconfigured projects, failure cleanup, and absence of persistent
+   capsule or harness state.
+2. Predeclare one bounded daily-session experiment only after the deterministic
+   and package gates pass. Separate the explicit prepare observation from the
+   operator-run interactive work observation in its record.
+3. Exercise an ordinary Codex session from a nested Fortlet directory, use the
+   project-provided Cargo and Jujutsu tools for one real edit/test loop, and
+   verify a subsequent invocation reuses the capsule and persistent Cargo
+   cache.
+4. Close through public stop/reset and record user-visible friction honestly.
+   Fix only a blocker inside the accepted contract; a new public mechanism
+   requires a successor FIP and experiment rather than silent scope growth.
 
-## Deliverable 4 — Prove one useful repository path
+## Deliverable 4 — Document, conform, and publish
 
-1. Add deterministic evidence for discovery, parsing, path containment,
-   identity, snapshotting, isolation inputs, atomic publication, update
-   failure, activation, reserved variables, and capsule reconciliation.
-2. Add a repository-owned environment for Fortlet that exposes `cargo`,
-   `rustc`, and `jj` in the guest and successfully runs a focused project test.
-3. Predeclare and execute at most one bounded local acceptance experiment for
-   the immutable public path. Record honest success or failure and perform no
-   silent retry.
-4. Update user documentation and conformance only for established behavior;
-   run the complete standard verification set, rewrite the handoff, prepare
-   one FIP-0005 publication packet, then STOP for operator merge.
+1. Document explicit preparation, cache-hit behavior, credential independence,
+   and the boundary between layer readiness and capsule lifecycle.
+2. Mark FIP-0007 conformant only after deterministic evidence and the terminal
+   daily-session unit establish the contract.
+3. Run the complete standard verification set, rewrite the handoff, shape and
+   sign `main..@`, and prepare one exact FIP-0005 publication packet.
+4. STOP for operator approval and manual squash merge.
 
 ## Definition of Done
 
-1. Unconfigured repositories retain current Fortlet behavior.
-2. One checked-in manifest produces one isolated, immutable, content-verified
-   project layer without making provider or host credentials guest-readable.
-3. Both project-controlled provisioning files affect environment identity, and
-   a failed update preserves the prior published layer and capsule.
-4. Both harness configurations receive the same validated project tool paths
-   and variables without allowing protected-variable overrides.
-5. Fortlet's own configured capsule can execute `cargo`, `rustc`, `jj`, and a
-   focused repository test.
-6. FIP-0006 is conformant, its experiment is terminal, the complete runbook
-   verification set is green, and the outgoing stack is reviewable; then STOP.
+1. A user can prepare one registered harness and the selected project's
+   immutable tools before starting an interactive agent.
+2. Preparation succeeds without a provider credential and cannot create or
+   mutate a reusable project+harness capsule or persistent harness home.
+3. A cache hit is fast, idempotent, and performs no provisioning contact.
+4. The following interactive launch reuses the prepared layers; one real
+   edit/test loop and one subsequent attachment work through the ordinary
+   Fortlet surface.
+5. Existing launch and management behavior remains compatible, and public
+   stop/reset returns the test project to absence without removing durable
+   state or immutable layers.
+6. FIP-0007 is conformant, its experiment is terminal, the complete verification
+   set is green, and the stack is reviewable; then STOP.
 
 ## Excluded scope
 
-Do not add background services, workload leases, private overlays, general Nix
-or devenv activation, standalone installation, logs, restart, tool-update
-commands, extra harnesses, remote execution, releases, packages, registry
-authentication, or repository settings.
+Do not add global inventory or pruning, restart, logs, background provisioning,
+progress protocols, workload leases, private overlays, general Nix/devenv
+activation, standalone installation, releases, packages, registry login,
+remote execution, new harnesses, services, or repository settings.
 
 ## Binding rules
 
-1. Preserve the charter and every accepted FIP, especially FIP-0001's
-   credential, host-execution, optional-Nix, and fail-closed boundaries.
-2. Use the MicroSandbox SDK directly; do not add a generic runtime abstraction.
-3. The host may read, validate, hash, and snapshot the two fixed files but MUST
-   NOT execute repository-controlled shell text or hooks.
-4. Provisioning may receive only the recipe snapshot and an empty output mount.
-   It MUST NOT receive the live project, persistent state, host environment,
-   provider credentials, SSH material, or publication credentials.
-5. Keep conformance changes with the code and tests that establish them. Use
-   Jujutsu checkpoints and inspect `main..@` before handoff.
-6. Publication follows one exact FIP-0005 packet. The operator remains the sole
-   merge authority unless they explicitly authorize that specific merge.
+1. Preserve the charter and every accepted FIP, especially credential
+   delegation, host-execution, project-boundary, and fail-closed rules.
+2. Use the existing MicroSandbox SDK and environment store directly; do not add
+   a generic runtime, task, or provisioning abstraction.
+3. Preparation may run only the already-authorized immutable layer provisioning
+   mechanisms. It must not read credentials or call runtime capsule creation,
+   attachment, stop, or removal.
+4. Keep preparation harness-scoped. Do not implicitly download every registered
+   harness or make `status` mutating.
+5. Architecture-track changes require accepted FIP-0007 before code. Keep
+   conformance changes with the code and tests that establish them.
+6. Use Jujutsu checkpoints and inspect `main..@` before handoff. Publication
+   follows one exact FIP-0005 packet; the operator merges manually.
 
 ## Budget and escalation
 
-1. Engineering ceiling: three hours after FIP-0006 acceptance, excluding
-   operator review, hosted CI, and manual merge waits.
-2. External budget: zero money, zero paid quota, no registry login, no release,
-   and at most one predeclared local acceptance unit.
-3. Stop on any credential anomaly, host execution of project-controlled text,
-   input outside the project root, undeclared provisioning mount, inability to
-   preserve the prior layer, need to change an accepted FIP, repeated live
-   failure, or scope materially larger than FIP-0006.
+1. Proposed engineering ceiling: two hours after FIP-0007 acceptance,
+   excluding operator review, hosted CI, and manual merge waits.
+2. External budget before an accepted experiment: zero money, zero paid quota,
+   zero model prompts, zero remote mutation, and no live runtime dispatch.
+3. The later experiment may use at most one operator-authorized interactive
+   Codex session, one prepared harness, one owned capsule, and zero silent
+   retries; its exact budget requires separate pre-dispatch acceptance.
+4. Stop on credential access during prepare, persistent capsule or harness-state
+   creation, unowned state, need to change an accepted FIP, repeated live
+   failure, scope growth, or any undeclared external mutation.
 
 ## Verification
 
-Run focused project-environment tests during development and the complete
-standard verification set from `docs/RUNBOOK.md` before publication.
-
-## Local completion
-
-FIP-0006 is conformant. Experiment 0020 accepted the immutable public path:
-Fortlet provisioned and published its checked-in project layer, exposed pinned
-Rust 1.97.1 and Jujutsu 0.43.0 inside Codex, passed 10 focused Linux tests, and
-removed the owned capsule while preserving durable state and immutable layers.
-The locally knowable work is complete; only the bounded FIP-0005 publication,
-operator merge, and landing verification remain in this goal.
+Run focused prepare tests during development and the complete standard
+verification set from `docs/RUNBOOK.md` before experiment dispatch and again
+before publication.
