@@ -21,7 +21,7 @@ case "$FORTLET_TARGET" in
     ;;
 esac
 
-temporary="$(mktemp -d)"
+temporary="$(mktemp -d "$FORTLET_OUTPUT/.fortlet-work.XXXXXX")"
 trap 'rm -rf "$temporary"' EXIT
 
 (

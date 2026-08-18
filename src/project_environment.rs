@@ -642,6 +642,8 @@ mod tests {
             "rust_version=1.97.1",
             "jj_version=0.43.0",
             "libcap-ng-dev=0.8.3-1+b3",
+            "temporary=\"$(mktemp -d \"$FORTLET_OUTPUT/.fortlet-work.XXXXXX\")\"",
+            "trap 'rm -rf \"$temporary\"' EXIT",
             "9a7a2c336b4787f1b72f6bab7c35d5b7af2fd03cbd39b4fc721466a70d402a7d",
             "88f28fa9af20594179f85d6df67078dfd6fa93e2f6da5e1e9b0ac4997988ca4f",
             "289197b6bec60b4e57d47260624b617716f737eb02cdfd9155791b2576aa5862",
