@@ -1,6 +1,6 @@
 # FIP-0007: Explicit environment preparation
 
-Status: Draft
+Status: Accepted
 Recorded: 2026-08-18 from the operator-selected daily-use hardening direction
 Requires: FIP-0001, FIP-0002, FIP-0006
 

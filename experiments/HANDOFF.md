@@ -1,7 +1,7 @@
 # Session Handoff — First daily Fortlet session
 
 Audience: a fresh agent session. `GOAL.md` is normative and active. Read
-FIP-0001, FIP-0002, FIP-0005, FIP-0006, and draft FIP-0007 in full before
+FIP-0001, FIP-0002, FIP-0005, FIP-0006, and accepted FIP-0007 in full before
 implementation. Experiments 0001 through 0020 are terminally closed; no
 experiment is active.
 
@@ -48,9 +48,9 @@ provider credential or reusable project+harness capsule. This is the narrow
 opportunity; do not generalize it into tasks, background work, inventory, or a
 new runtime abstraction.
 
-## Proposed contract
+## Accepted contract
 
-Draft FIP-0007 adds:
+FIP-0007 adds:
 
 ```text
 fortlet prepare <harness> [--project <path>] [--allow-broad-mount]
@@ -65,16 +65,13 @@ markers and content without provisioning contact.
 
 ## What to do next
 
-1. Review draft FIP-0007 with the operator. Resolve command shape, exact output,
-   cache-hit semantics, and the credential/runtime boundary before acceptance.
-2. After explicit acceptance, checkpoint the proposal transition and implement
-   only the GOAL. Keep conformance `unimplemented` until code plus tests
-   establish observable behavior.
-3. Rehearse and predeclare one bounded daily-session experiment only after the
+1. Implement only the accepted FIP-0007 contract. Keep conformance
+   `unimplemented` until code plus tests establish observable behavior.
+2. Rehearse and predeclare one bounded daily-session experiment only after the
    complete deterministic and package gates pass. Any model prompt or
    operator-run interactive observation needs the exact experiment budget
    accepted before dispatch.
-4. Publish through one FIP-0005 packet; the operator merges manually.
+3. Publish through one FIP-0005 packet; the operator merges manually.
 
 Do not start another experiment, execute a model prompt, remove the verified
 project layer, add global inventory/pruning, implement background work, or begin
