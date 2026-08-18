@@ -1,6 +1,6 @@
 # Experiment 0021: First daily Fortlet session
 
-Status: declared — awaiting operator budget acceptance
+Status: in-flight — dispatch budget accepted by the operator on 2026-08-18
 Design: FIP-0001, FIP-0002, FIP-0006, and FIP-0007
 Charter scope: `local-foundation/v1`
 
