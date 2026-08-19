@@ -23,8 +23,12 @@ live project workspace and separate from the host's ordinary `target/debug`.
 The repository already ignores `/target/`. The fixture test, retained compiled
 shim test, formatting, and conformance are green.
 
-The immutable treatment revision and Nix store path will be frozen from this
-declaration checkpoint and recorded before dispatch.
+The immutable treatment is declaration revision
+`95fb7607e74dff0aaf4f7e69ee94d1d7661a146d`, packaged as
+`/nix/store/68vqsxikz7a12sqyrd1518hkz9w9mxq3-fortlet-0.1.0`. Before dispatch,
+the complete standard verification set passed: `cargo test`, formatting,
+strict Clippy, conformance, and `nix flake check` (with only the expected
+incompatible `x86_64-linux` omission warning).
 
 ## Hypothesis and Production Mechanism
 
@@ -152,7 +156,9 @@ No provider or live runtime process has run under this declaration.
 
 ## Results
 
-Pending. No live unit has been dispatched.
+The immutable treatment revision and package are recorded above, and the
+complete deterministic verification gate passed. No live unit has been
+dispatched yet.
 
 ## Terminal Closure
 
