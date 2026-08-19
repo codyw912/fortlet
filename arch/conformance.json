@@ -223,6 +223,27 @@
         "experiments/0023-codex-bearer-projection-confirmation.md"
       ],
       "gaps": []
+    },
+    {
+      "proposal": "0009",
+      "title": "Codex Apps capability handling",
+      "status": "partial",
+      "modules": [
+        "README.md",
+        "OVERVIEW.md",
+        "docs/RUNBOOK.md",
+        "src/harness/mod.rs",
+        "src/harness/codex.rs",
+        "src/runtime.rs"
+      ],
+      "tests": [
+        "src/harness/mod.rs",
+        "src/runtime.rs",
+        "tests/codex_compatibility.rs"
+      ],
+      "gaps": [
+        "Experiment 0024 has not yet observed the packaged Codex startup and ordinary model prompt without the known Apps warning."
+      ]
     }
   ]
 }

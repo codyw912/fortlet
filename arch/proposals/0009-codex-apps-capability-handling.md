@@ -1,6 +1,6 @@
 # FIP-0009: Codex Apps capability handling
 
-Status: Proposed
+Status: Accepted
 Recorded: 2026-08-19 from the daily-startup warning accepted in GOAL.md
 Requires: FIP-0001, FIP-0002, FIP-0008
 
@@ -170,6 +170,11 @@ Apps are unavailable inside Fortlet even if the user has a working native Apps
 session. This is preferable to presenting a known-broken client or guessing at
 an undisclosed credential. Supporting Apps later remains possible without
 undoing persistent state because this FIP writes none.
+
+The currently installed Spreadsheets plugin's live Microsoft Excel control and
+the Sites plugin's hosting workflow depend on Apps and are therefore unavailable
+inside Fortlet. Local spreadsheet-file work and local site development remain
+available, as do skill-only plugins and independently configured MCP servers.
 
 ## Alternatives Considered
 

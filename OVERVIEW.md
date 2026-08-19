@@ -18,6 +18,12 @@ Nix package exists for
 `aarch64-darwin` and is declared for `x86_64-linux`; native Linux verification
 remains outstanding.
 
+Managed Codex 0.147.0 sessions disable only its built-in Apps client. Ordinary
+model work, local plugin skills, and independently configured MCP servers remain
+available. Connector-backed live Excel control and Sites hosting require the
+explicit native Codex escape hatch until Fortlet has a supported Apps
+authorization boundary.
+
 Global inventory, cross-project removal, restart, logs, explicit workload
 leases, automated publication, service orchestration, automatic harness
 discovery, and remote execution remain designed directions rather than

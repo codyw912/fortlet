@@ -45,3 +45,4 @@ scannable failure/win history of the project:
 - `0021-first-daily-fortlet-session.md` — rejected; packaged prepare and shim attachment passed, but Codex required token refresh before the first prompt and no edit/test loop began.
 - `0022-renewable-codex-daily-session.md` — rejected; external-token mode avoided guest refresh, but a missing `last_refresh` field omitted the bearer header and both model transports returned 401 before a response or edit.
 - `0023-codex-bearer-projection-confirmation.md` — accepted; the repaired bearer projection authenticated one bounded model-backed edit/test loop, and public stop/reset restored absence while preserving durable layers and cache.
+- `0024-managed-codex-apps-disable.md` — active; deterministic evidence passes and the bounded packaged startup check awaits the complete local gate.

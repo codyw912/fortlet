@@ -15,17 +15,86 @@ const ACCESS_TOKEN_PLACEHOLDER: &str = "$MSB_FORTLET_CHATGPT_ACCESS_TOKEN";
 
 #[test]
 #[ignore = "requires FORTLET_CODEX_COMPAT_BINARY pointing to stock Codex 0.147.0"]
+fn stock_codex_disable_is_authoritative_and_preserves_configured_mcp() {
+    let binary = PathBuf::from(
+        std::env::var_os("FORTLET_CODEX_COMPAT_BINARY")
+            .expect("set FORTLET_CODEX_COMPAT_BINARY to stock Codex 0.147.0"),
+    );
+    assert_stock_version(&binary);
+
+    let temporary = tempfile::tempdir().unwrap();
+    let codex_home = temporary.path().join("codex-home");
+    fs::create_dir(&codex_home).unwrap();
+    fs::write(
+        codex_home.join("config.toml"),
+        r#"[features]
+apps = true
+
+[mcp_servers.sample]
+command = "/usr/bin/true"
+"#,
+    )
+    .unwrap();
+
+    let features = Command::new(&binary)
+        .args([
+            "--disable",
+            "apps",
+            "--enable",
+            "apps",
+            "-c",
+            "features.apps=true",
+            "features",
+            "list",
+        ])
+        .env_clear()
+        .env("HOME", temporary.path())
+        .env("CODEX_HOME", &codex_home)
+        .env("PATH", "/usr/bin:/bin")
+        .output()
+        .unwrap();
+    assert!(
+        features.status.success(),
+        "stock Codex feature query failed: {}",
+        String::from_utf8_lossy(&features.stderr)
+    );
+    let features = String::from_utf8(features.stdout).unwrap();
+    let apps = features
+        .lines()
+        .find(|line| line.starts_with("apps "))
+        .expect("stock Codex did not report the apps feature");
+    assert!(
+        apps.ends_with("false"),
+        "Apps disable was not authoritative: {apps}"
+    );
+
+    let servers = Command::new(&binary)
+        .args(["--disable", "apps", "mcp", "list", "--json"])
+        .env_clear()
+        .env("HOME", temporary.path())
+        .env("CODEX_HOME", &codex_home)
+        .env("PATH", "/usr/bin:/bin")
+        .output()
+        .unwrap();
+    assert!(
+        servers.status.success(),
+        "stock Codex MCP query failed: {}",
+        String::from_utf8_lossy(&servers.stderr)
+    );
+    let servers: serde_json::Value = serde_json::from_slice(&servers.stdout).unwrap();
+    assert_eq!(servers.as_array().unwrap().len(), 1);
+    assert_eq!(servers[0]["name"], "sample");
+    assert_eq!(servers[0]["enabled"], true);
+}
+
+#[test]
+#[ignore = "requires FORTLET_CODEX_COMPAT_BINARY pointing to stock Codex 0.147.0"]
 fn stock_codex_loads_external_tokens_without_oauth_refresh() {
     let binary = PathBuf::from(
         std::env::var_os("FORTLET_CODEX_COMPAT_BINARY")
             .expect("set FORTLET_CODEX_COMPAT_BINARY to stock Codex 0.147.0"),
     );
-    let version = Command::new(&binary).arg("--version").output().unwrap();
-    assert!(version.status.success());
-    assert_eq!(
-        String::from_utf8(version.stdout).unwrap().trim(),
-        "codex-cli 0.147.0"
-    );
+    assert_stock_version(&binary);
 
     let temporary = tempfile::tempdir().unwrap();
     let codex_home = temporary.path().join("codex-home");
@@ -118,6 +187,18 @@ stream_max_retries = 0
     assert!(
         !output.status.success(),
         "the fake backend deliberately returns an error"
+    );
+}
+
+fn assert_stock_version(binary: &Path) {
+    let version = Command::new(binary)
+        .args(["--disable", "apps", "--version"])
+        .output()
+        .unwrap();
+    assert!(version.status.success());
+    assert_eq!(
+        String::from_utf8(version.stdout).unwrap().trim(),
+        "codex-cli 0.147.0"
     );
 }
 
