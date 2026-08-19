@@ -25,8 +25,11 @@ Merged `main` is `be43d5909b6a65e9ca6984859b85b6d27c2601dc`, with tree equality
 to PR #11's reviewed signed tip established before bookmark cleanup. The clean
 merged baseline passed all tests, formatting, strict Clippy, conformance, and
 `nix flake check` on aarch64-darwin; Nix emitted only the expected incompatible
-`x86_64-linux` omission warning. The treatment revision and package will be
-frozen from this declaration checkpoint and recorded before runtime contact.
+`x86_64-linux` omission warning. The frozen declaration revision is
+`a1dade963584803e0affa6fd9dfdc874bf74efc5`, packaged as
+`/nix/store/is3sfw30rzr58w29q8rnsdcdidwxqgzn-fortlet-0.1.0`. The complete
+standard gate passed again on that exact declaration tree, with only the same
+expected Nix system-omission warning.
 
 ## Hypothesis and Production Mechanism
 
@@ -185,7 +188,9 @@ No preparation or provider process has run under this experiment identity.
 
 ## Results
 
-Pending. No runtime unit has been dispatched.
+The immutable declaration revision and package are recorded above, and the
+complete pre-dispatch deterministic gate passed. No runtime unit has been
+dispatched.
 
 ## Terminal Closure
 
