@@ -1,6 +1,6 @@
 # Experiment 0029: Packaged Codex explicit EOF regression
 
-Status: declared — 2026-08-19
+Status: accepted — terminal 2026-08-19
 Design: FIP-0001, FIP-0002, FIP-0008, FIP-0009, and FIP-0010
 Charter scope: `local-foundation/v1`
 
@@ -98,8 +98,33 @@ failure path emits an explicit MicroSandbox exit event.
 
 ## Results
 
-Pending.
+Immediately before dispatch, the working copy was empty, treatment revision
+and immutable package matched, packaged public status reported
+`codex<TAB>absent`, and the packaged MicroSandbox inventory was `[]`.
+
+The sole process returned host status 1 in about 8.7 seconds. Its first line
+was `Reading additional input from stdin...`; it then advanced immediately to
+two local `/models` failures, printed the full Codex 0.147.0 session header
+with provider `fortlet-eof`, echoed the inert prompt, and reported local
+`/responses` transport failures. Every displayed URL began
+`http://127.0.0.1:9/v1/`. It did not emit Fortlet's inactivity error, an Apps
+diagnostic, or a model response.
+
+Packaged public cleanup reported `codex<TAB>running`,
+`codex<TAB>stopped`, `codex<TAB>reset`, and `codex<TAB>absent`; the final
+MicroSandbox inventory was `[]`. The synthetic auth file and directory were
+then deleted.
 
 ## Terminal Closure
 
-Pending.
+Accepted. Explicitly closing the streaming stdin pipe delivered EOF to stock
+Codex, which advanced beyond the exact live failure point and returned an
+explicit nonzero exit after only guest-loopback transport attempts. Fortlet
+streamed every stage and preserved the exact status without reaching its
+inactivity ceiling.
+
+Actual cost was one credential-free local Codex process, one owned capsule,
+about 8.7 seconds, zero provider requests, zero paid quota, zero tools, and no
+retry. Public cleanup restored exact absence. The next action is final local
+verification and the single authorized goal PR; no second model-backed prompt
+is permitted.

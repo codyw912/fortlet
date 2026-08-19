@@ -50,4 +50,4 @@ scannable failure/win history of the project:
 - `0026-credential-free-noninteractive-attribution.md` — accepted; local-only controls proved Codex remained alive on an unanswered request while collected execution hid progress, whereas normal success and failure produced exact output and exit events.
 - `0027-packaged-noninteractive-streaming.md` — accepted; one credential-free immutable-package Tact launch streamed the pinned version output, returned exact status zero, and cleaned up publicly before any model-backed unit.
 - `0028-managed-noninteractive-codex-successor.md` — rejected; streaming exposed Codex blocked reading an unclosed SDK stdin, then Fortlet enforced the 600-second bound and cleaned up publicly without retry.
-- `0029-packaged-codex-explicit-eof.md` — declared; one credential-free packaged Codex process will prove explicit streaming EOF advances past stdin and returns a local transport exit.
+- `0029-packaged-codex-explicit-eof.md` — accepted; explicit streaming EOF advanced packaged Codex past its stdin read and returned exact status 1 after guest-loopback-only transport failures.

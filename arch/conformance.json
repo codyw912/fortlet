@@ -247,7 +247,7 @@
     {
       "proposal": "0010",
       "title": "Bounded streaming non-interactive execution",
-      "status": "partial",
+      "status": "conformant",
       "modules": [
         "Cargo.toml",
         "README.md",
@@ -262,11 +262,13 @@
         "src/harness/mod.rs",
         "src/runtime.rs",
         "src/session.rs",
-        "experiments/0026-credential-free-noninteractive-attribution.md"
+        "tests/codex_compatibility.rs",
+        "experiments/0026-credential-free-noninteractive-attribution.md",
+        "experiments/0027-packaged-noninteractive-streaming.md",
+        "experiments/0028-managed-noninteractive-codex-successor.md",
+        "experiments/0029-packaged-codex-explicit-eof.md"
       ],
-      "gaps": [
-        "The one model-backed successor experiment remains outstanding."
-      ]
+      "gaps": []
     }
   ]
 }

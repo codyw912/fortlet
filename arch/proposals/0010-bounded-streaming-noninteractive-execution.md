@@ -180,3 +180,17 @@ claim a total ordering between independently delivered stdout and stderr.
    sufficiently visible and bounded to remove Fortlet's adapter ceiling.
 3. Whether Tact or future harnesses should opt into the same ceiling after
    independent evidence.
+
+## Amendment — 2026-08-19 explicit EOF for MicroSandbox 0.6.8
+
+Experiment 0028 showed that the pinned SDK's streaming `StdinMode::Null` does
+not send the empty `ExecStdin` frame that closes guest stdin. Stock Codex
+therefore blocked in `read_to_end(stdin)` before making its model request.
+Experiment 0029 proved the correction against an immutable package and an
+in-guest loopback-only provider.
+
+For MicroSandbox 0.6.8, Specification “Streaming and completion” item 1's null
+stdin requirement is implemented as an explicit stdin pipe closed immediately
+after the streaming handle is acquired. No input bytes are sent. This amendment
+changes only that pinned-SDK mechanism; all mode, streaming, inactivity,
+cleanup, credential, and user-facing semantics remain unchanged.
