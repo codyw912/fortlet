@@ -242,7 +242,7 @@
         "tests/codex_compatibility.rs"
       ],
       "gaps": [
-        "Experiment 0024 has not yet observed the packaged Codex startup and ordinary model prompt without the known Apps warning."
+        "Experiment 0024 observed no known Apps warning, but its sole packaged non-interactive model attempt produced no response before the frozen timeout; a successor must verify the ordinary model path through the proven interactive attachment."
       ]
     }
   ]

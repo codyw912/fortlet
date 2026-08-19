@@ -1,6 +1,6 @@
 # Experiment 0024: Managed Codex Apps disable
 
-Status: active — declared 2026-08-19; dispatch awaits the complete local gate
+Status: rejected — terminal 2026-08-19
 Design: FIP-0001, FIP-0002, FIP-0008, and FIP-0009
 Charter scope: `local-foundation/v1`
 
@@ -12,10 +12,25 @@ was the built-in `codex_apps` client failing with HTTP 451
 `no_biscuit_no_service`. Native Codex remains the unmodified control and may
 continue to expose Apps according to its host configuration.
 
-The treatment is the final signed revision produced by this GOAL. It must use
-MicroSandbox 0.6.8 and Codex 0.147.0, with Codex's adapter prepending exactly
-`--disable apps` at runtime attachment. The exact revision and immutable Nix
-package path will be frozen after the complete local verification set passes.
+The frozen treatment revision is
+`a98288dff08db53e34127e51b27c817078cf20b5` (`Disable unsupported Codex
+Apps client`). Its immutable aarch64-darwin package is
+`/nix/store/d2qnnmsfvbchf4vz1j9j8iwngbiy97q8-fortlet-0.1.0`, with
+MicroSandbox 0.6.8 and Codex 0.147.0. Codex's adapter prepends exactly
+`--disable apps` at runtime attachment.
+
+The complete local gate passed 72 unit tests, 29 non-ignored integration tests,
+formatting, strict all-target/all-feature Clippy, conformance, and `nix flake
+check` on aarch64-darwin. Both ignored stock-Codex fixtures passed separately
+against the native 0.147.0 binary. Immediately before dispatch, the working
+copy was an empty successor of the exact treatment, the public CLI reported
+`codex<TAB>absent`, and the pinned MicroSandbox CLI reported no sandboxes. The
+project-input SHA-256 values remain:
+
+1. `.fortlet/environment.json`:
+   `3908a64857fb1a0b5cca6c580774a6e15125a86172d5123ecbd610af62f31f1d`.
+2. `.fortlet/environment.sh`:
+   `5857604b2ceb0dda2117ee4a54256d342300b3832305ebd9a777cf6ecfe703e0`.
 
 ## Hypothesis and Production Mechanism
 
@@ -100,12 +115,39 @@ The pinned stock-Codex fixture proves the fixed disable remains authoritative
 over both a user `--enable apps` and `features.apps=true`, retains a separate
 configured MCP server, accepts the fixed flag at version 0.147.0, preserves the
 external model-token headers, and makes no OAuth refresh request. The complete
-gate and immutable package result remain to be recorded before dispatch.
+gate, immutable package build, exact revision, project inputs, public absence,
+and empty runtime inventory are frozen above.
 
 ## Results
 
-Pending.
+The complete local gate and immutable package build passed, and the frozen
+baseline matched every declared revision, input, absence, and inventory check.
+The sole packaged non-interactive command then remained silent for the full
+ten-minute bound. It emitted no `codex_apps`, HTTP 451,
+`no_biscuit_no_service`, MCP-startup-incomplete, credential, or model response
+diagnostic, but it also did not return the required model response or exit.
+
+At the bound, the packaged public CLI reported `codex<TAB>running`. Public
+`stop` reported `codex<TAB>stopped`; the waiting launch then failed at the
+terminal stage because the runtime exec session ended without an exit event.
+Public `reset` reported `codex<TAB>reset`, final status reported
+`codex<TAB>absent`, and the pinned MicroSandbox CLI reported no sandboxes. No
+retry, replacement prompt, second session, credential-content read, App
+invocation, repository edit, or remote mutation occurred.
 
 ## Terminal Closure
 
-Pending.
+Rejected. The packaged treatment removed the previously visible Apps warning,
+but the required ordinary model response was not observed before the frozen
+timeout. The immediate failure mode was a non-interactive MicroSandbox exec
+session that remained open without output; after public stop it ended without
+an exit event. Whether the model request reached the provider is unknown, so
+this unit cannot establish preserved model behavior or attribute the hang to
+model authentication.
+
+Actual cost was one packaged non-interactive attempt, one owned capsule, no
+observable model response, ten elapsed minutes, and public stop/reset cleanup.
+Keep the deterministic implementation evidence and FIP-0009's conformance
+partial. Any further live check must be a newly declared experiment with a new
+prompt authorization and should use the already-proven interactive packaged
+path rather than repeat this non-interactive assumption.
