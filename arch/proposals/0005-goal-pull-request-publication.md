@@ -206,3 +206,48 @@ transaction, fail-closed behavior, protected `main`, required checks, and
 operator-owned merge. It grants no standing authority for an unknown diff,
 retry, additional push or pull request, settings change, unrelated resource,
 or failure recovery. This amendment governs its own publication.
+
+## Amendment — 2026-08-19 delegated goal branch lifecycle
+
+Operator-accepted after PR #5's first hosted run exposed an ordinary Linux
+test defect. Requiring a new exact packet before the repair push repeated the
+same ceremony that the prior amendment intended to remove, while protected
+`main`, required checks, and operator merge already contained the risk.
+
+This amendment supersedes the Decision's exact publication packet and
+Publication authority items 1 through 3. Accepting a GOAL grants standing
+authority for exactly one descriptive Jujutsu bookmark and one pull request
+targeting `main`. Within the accepted GOAL's scope, the agent MAY:
+
+1. create the bookmark and draft pull request;
+2. push and update the same goal branch as needed, including lease-checked
+   history replacement outside `main`;
+3. diagnose hosted failures, implement fixes, and trigger replacement checks
+   without a new approval or experiment;
+4. update the pull request's title and body to reflect the current exact scope,
+   reviewed tip, evidence, experiments, and limitations;
+5. mark the pull request ready after every locally knowable deliverable and
+   experiment is complete and all required local and hosted gates pass; and
+6. after operator merge, verify destination and exact tree equality and delete
+   only that goal's landed local and remote bookmarks.
+
+The final publishable branch tip MUST have a verified signature before
+readiness. Intermediate semantic checkpoints MAY remain unsigned because the
+signed tip fixes their identities transitively. The agent MUST report the final
+tip, diff, checks, and limitations for review, but that report is not another
+publication approval gate.
+
+A failed push or check MUST be diagnosed and reported, not bypassed or silently
+retried. In-scope correction and a replacement run are ordinary development;
+two failures sharing an unresolved assumption trigger the charter stop. A
+changed GOAL, additional pull request, different base or repository, direct or
+force push to `main`, merge, settings mutation, release, tag, package, secret,
+external spend, destructive remote action, or unrelated resource remains
+outside standing authority.
+
+The operator remains the sole merge authority. Every requirement concerning
+one PR per GOAL, squash history, protected `main`, hosted verification, local
+Nix verification, trusted host tooling, landing tree equality, and credential
+or provenance safety remains in force. Routine branch iteration and CI repair
+are governed rollout, not experiments. This amendment governs its own
+publication.

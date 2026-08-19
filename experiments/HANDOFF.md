@@ -1,156 +1,55 @@
-# Session Handoff — First daily Fortlet session
+# Session Handoff — Goal-scoped publication autonomy
 
 Audience: a fresh agent session. `GOAL.md` is normative and active. Read
-FIP-0001, FIP-0002, FIP-0005, FIP-0006, accepted FIP-0007, and accepted FIP-0008
-in full before implementation. Experiments 0001 through 0023 are terminally
-closed; there is no active experiment.
+FIP-0001 and FIP-0005 in full before implementation. Experiments 0001 through
+0023 are terminally closed; there is no active experiment.
 
 ## Verified landed baseline
 
-PR #4 landed opt-in project environments on protected `main` as squash commit
-`ad199140ac8acf20cc73b1b5ea5ad6b2f1ce2d05`. Its tree is byte-identical to
-reviewed signed tip `3bda446d7d51eeeddcbfde781fbdde62d7d11994`.
-Hosted Rust verification passed, the declared branch bookmarks were removed,
-and the working copy began this mission as an empty change directly on fetched
-`main`.
+PR #5 squash-merged the first daily-session GOAL to protected `main` as
+`bee396569bd7aa047905c435d219ce28f3d49b64`. Its tree is byte-identical to
+reviewed signed tip `51e531a9dd74c543895f85d477e62b3a9e11679e`.
+The hosted Rust gate passed after one diagnosed Linux repair, the goal branch
+was removed locally and remotely, and the working copy began this GOAL as an
+empty change directly on fetched `main`.
 
-The FIP-0008 implementation checkpoint `e7b1d5a26693` passed 69 unit tests, 28
-non-ignored integration tests, formatting, strict all-target/all-feature
-Clippy, conformance, `nix flake check`, and `nix build .#fortlet` on
-`aarch64-darwin`. The separate stock Codex 0.147.0 compatibility fixture also
-passed against local fake model and OAuth-refresh servers. Nix emitted only the
-known missing app-metadata warning and omitted incompatible `x86_64-linux`.
+Fortlet's daily product path is proven: explicit credential-free `prepare`,
+the optional Codex shim, host-owned renewable ChatGPT credentials, immutable
+project Cargo and Jujutsu tools, one real model-backed edit/test loop, and
+public stop/reset all succeeded. FIP-0007 and FIP-0008 are conformant. MCP
+biscuit authorization remains a separate future product concern.
 
-## Current product surface
+## Recorded workflow blocker
 
-Fortlet provides explicit `run`, optional transparent Codex and Tact shims,
-`native`, `doctor`, project-scoped `status`, bounded `stop`, terminal `reset`,
-explicit credential-free `prepare`, and opt-in immutable project-tool layers.
-Project recipes execute only in credential-free provisioning
-capsules, and successful layers are content-verified and mounted read-only.
-
-Experiment 0020 proved the real Fortlet repository path: Cargo and rustc 1.97.1
-plus Jujutsu 0.43.0 reached Codex from the project layer, 10 focused Linux tests
-passed, and public stop/reset preserved persistent state plus every immutable
-layer. FIP-0006 is conformant.
-
-## Resolved daily-use blocker
-
-Experiment 0021 proved the immutable packaged `prepare` cache hit in 2.46
-seconds with exact `codex<TAB>ready`, no credential read, no reusable capsule,
-and no provisioning capsule. A non-prompt Codex version launch then created one
-owned capsule, and the packaged shim attached to its interactive UI.
-
-The first prompt failed before model work because Codex 0.147.0 attempted to
-refresh its access token. Fortlet's persistent projection deliberately contains
-a fake refresh token and relies on static request-time broker substitution, so
-it cannot satisfy this lifecycle. The `codex_apps` MCP also returned HTTP 451
-`no_biscuit_no_service`; treat that as a separate missing credential class.
-Public stop/reset restored absence, all immutable layers and Cargo cache remain,
-the repository was unchanged, and the operator removed the possible guest auth
-residue without exposing it.
-
-The accepted FIP-0008 implementation now loads only file-backed ChatGPT auth,
-renews inside a one-hour safety window under a source-scoped lock, atomically
-updates the host file, projects Codex `chatgptAuthTokens` with an empty guest
-refresh field, and rotates both MicroSandbox broker secrets live. Tact keeps
-its prior managed projection. Token-derived persistent fingerprints were
-removed.
+FIP-0005's first amendment reduced publication approval to one exact packet,
+but any changed diff, additional push, or failed hosted run invalidated that
+authority. PR #5 consequently required a second full packet for a small,
+well-diagnosed Linux inode-reuse repair. The operator identified that ceremony
+as disproportionate for a greenfield repository with no users, protected
+`main`, required checks, and manual merge.
 
 ## Accepted contract
 
-FIP-0007 adds:
+The 2026-08-19 amendments to FIP-0001, FIP-0005, and the charter make GOAL
+acceptance the sole routine publication authorization. One goal branch and
+draft PR may iterate through in-scope pushes, diagnosed CI fixes, replacement
+runs, PR updates, readiness, landing verification, and exact bookmark cleanup
+without more approval. Only the final branch tip requires a verified
+signature. The operator remains the sole merge authority.
 
-```text
-fortlet prepare <harness> [--project <path>] [--allow-broad-mount]
-```
-
-The command uses launch-equivalent harness and project selection, validates the
-optional project environment, ensures immutable layers synchronously, and
-prints `<harness><TAB>ready`. It never reads provider credentials, creates a
-guest auth projection, prepares persistent harness state, constructs the
-managed reusable capsule, or attaches a terminal. Cache hits verify required
-markers and content without provisioning contact.
-
-FIP-0008 adds a Codex-specific, host-owned renewable credential lease. It
-keeps the refresh token outside the guest, uses Codex's external-token
-projection, and rotates only the access token and account identifier through
-MicroSandbox's existing live broker. Infisical Agent Proxy was reviewed before
-acceptance: it validates the broker pattern and renews supported dynamic-secret
-leases, but it cannot renew an existing Codex ChatGPT OAuth login and would
-make an Infisical control plane plus an Enterprise feature required.
-
-## Terminal renewable-credential experiment
-
-Experiment 0022 pinned checkpoint
-`e7b1d5a26693`, package
-`/nix/store/kym4by5g33jw1z3wdg9p70manajzmnx0-fortlet-0.1.0`, one non-prompt
-version launch, one shimmed interactive session, one exact prompt, at most one
-host refresh, one owned capsule, one focused test, zero remote mutation, no
-retry, and 15 elapsed minutes. The clean pre-dispatch baseline matched exactly.
-
-The sole prompt caused Codex to fall back from WebSockets after a 401; its
-HTTPS request also returned 401 with `Your ChatGPT login did not make it to
-this service.` No model response, repository work, or test occurred. Unlike
-Experiment 0021, Codex did not attempt guest-owned refresh, but the brokered
-authentication still was not accepted. Public stop/reset restored absence, the
-working copy stayed empty, the MicroSandbox inventory is empty, and immutable
-layers plus persistent Codex and Cargo state remain.
-
-Exact Codex 0.147.0 source inspection then attributed the failure. Its bearer
-accessor requires `last_refresh` as well as `tokens`; Fortlet's external-token
-projection omitted `last_refresh`, so Codex sent the projected account header
-but silently omitted `Authorization`. MicroSandbox supports the relevant
-HTTP/1 WebSocket-upgrade and HTTP/2 HTTPS header substitutions. The repair adds
-the current non-secret timestamp to Codex projections only, and the stock-Codex
-fixture now requires both placeholder headers without an OAuth refresh.
-
-The repair passes 69 unit tests, 28 non-ignored integration tests, formatting,
-strict all-target/all-feature Clippy, conformance, `nix flake check`, and the
-separate stock Codex 0.147.0 compatibility fixture. The immutable aarch64-darwin
-package is `/nix/store/yql3hf31rf5qgf8vccmw75b2lz5z6n23-fortlet-0.1.0`.
-
-Experiment 0023 then accepted the repaired live path. One packaged shim
-session authenticated its sole model prompt, reported Cargo 1.97.1 and
-Jujutsu 0.43.0, added only the requested missing-refresh-token integration
-test, and passed all 12 tests in that focused guest target. Public status,
-stop, reset, and final status reported running, stopped, reset, and absent.
-MicroSandbox inventory is empty; the project edit, immutable layers,
-persistent harness state, and Cargo target cache remain. One malformed
-inspection command attempted shell substitution of the literal `codex login`,
-but the sandbox denied it before execution, credential access, or mutation.
-FIP-0007 and FIP-0008 are now conformant.
-
-The final closure tree passes 69 unit tests and 29 non-ignored integration
-tests, formatting, strict all-target/all-feature Clippy, explicit conformance,
-and `nix flake check` on `aarch64-darwin`. Nix built the package and emitted
-only the known missing app-metadata warning plus the incompatible
-`x86_64-linux` omission. The separate stock Codex 0.147.0 compatibility
-fixture remains green from the production repair checkpoint; the closure adds
-only one integration test and durable evidence.
-
-Draft PR #5 was created from signed reviewed tip `978c4458467e`. Its sole
-initial hosted run stopped in `cargo test`: Linux reused the inode after
-`source_identity_change_blocks_atomic_replacement` removed and recreated its
-fixture, so the device-plus-inode guard accepted changed contents. No retry,
-second push, body update, or readiness transition occurred. The approved local
-repair extends the source identity with a digest from the existing bounded,
-symlink-safe read and changes the regression to mutate the same inode
-deliberately. The repaired tree passes 69 unit tests, 29 non-ignored
-integration tests, formatting, strict all-target/all-feature Clippy, explicit
-conformance, and `nix flake check` on `aarch64-darwin`. A replacement
-publication packet remains required.
+Standing authority does not cover a changed GOAL, another PR, a different base
+or repository, `main` mutation, settings, releases, tags, packages, secrets,
+external spend, destructive actions, or unrelated resources. Two failures
+sharing an unresolved cause still stop under the charter.
 
 ## What to do next
 
-1. Preserve the accepted FIP-0007/FIP-0008 implementation and the retained
-   test-only experiment edit.
-2. Checkpoint and sign the hosted Linux repair, then present a new exact
-   FIP-0005 packet before moving the existing bookmark or triggering a
-   replacement hosted run. The operator merges manually.
-3. Continue to treat MCP biscuit authorization separately from model
-   authentication; it is not part of this completed credential contract.
+1. Checkpoint the accepted amendments before changing operational rules.
+2. Replace packet language consistently in `AGENTS.md`, `WORKFLOW.md`, and the
+   runbook; update publication tests and conformance in the same checkpoint.
+3. Run the complete local gate, sign only the publishable tip, then exercise
+   the delegated workflow on one branch and draft PR. Mark it ready after the
+   hosted gate succeeds; the operator squash-merges manually.
 
-Do not resume Experiments 0021 through 0023, add a refresh token to the guest
-projection, inspect credential values, remove verified layers, add global
-inventory/pruning, or begin standalone distribution.
+Do not change product code, hosted CI, branch protection, merge settings,
+experiment mechanics, release policy, secrets, or the operator merge boundary.

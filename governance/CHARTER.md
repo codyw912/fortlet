@@ -87,3 +87,23 @@ credential broker, and reproducible macOS package are already proven. The
 remaining risk is day-to-day product integration—especially transparent shims,
 lifecycle behavior, and failure UX—not another backend bake-off or more
 packaging apparatus.
+
+## Amendment — 2026-08-19 goal-scoped publication autonomy
+
+Operator-accepted for this greenfield repository after the exact-packet model
+repeated approval ceremony around a contained hosted test failure.
+
+This amendment replaces Autonomy Grant 1's prohibition on public remote
+mutation and Escalation Trigger 1's blanket triggers for remote push and pull
+request creation. Acceptance of a GOAL grants the agent FIP-0005's standing
+authority over one goal-scoped bookmark and pull request, including ordinary
+pushes, diagnosed CI fixes and replacement runs, PR maintenance, readiness,
+landing verification, and exact bookmark cleanup. No separate publication
+approval is required.
+
+External money or paid quota, package publication, releases, tags, public user
+tests, repository settings, secrets, unrelated refs or repositories, direct or
+force pushes to `main`, destructive remote actions, and merge remain escalation
+triggers. The operator remains the sole merge authority. Two failures sharing
+an unresolved assumption and every existing hard-invariant anomaly remain
+escalation triggers. This amendment governs its own publication.

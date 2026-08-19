@@ -162,3 +162,25 @@ Standalone release artifacts require separate implementation and verification.
 2. The first management commands and lifecycle lease representation.
 3. Private project overlay discovery and declarative environment activation.
 4. Remote workspace authority and transport.
+
+## Amendment — 2026-08-19 goal-scoped publication delegation
+
+Operator-accepted after PR #5 demonstrated that pre-push exact-tree approval
+does not materially protect a greenfield repository whose `main` is protected,
+whose hosted checks are required, and whose operator performs the merge.
+
+This amendment replaces Credentials and publication item 5's requirement to
+present the exact outgoing tree before branch publication. Accepting a GOAL is
+the explicit host-side authorization for one goal-scoped bookmark and pull
+request targeting `main`. The agent MAY publish and iterate that branch through
+trusted host-side Jujutsu and GitHub interfaces without further approval. The
+pull request MUST expose the exact final revision, diff, destination, and
+metadata before the operator decides whether to merge.
+
+Only the final publishable branch tip MUST be signed; that signature fixes its
+complete parent history. Protected `main`, required checks, operator-owned
+merge, trusted host execution, credential isolation, and the prohibition on
+repository-controlled hooks, aliases, pagers, credential helpers, or generated
+shell text remain unchanged. This amendment grants no authority over `main`,
+unrelated refs or repositories, settings, releases, tags, packages, secrets,
+external spend, or public user tests.
