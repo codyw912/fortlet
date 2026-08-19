@@ -1,96 +1,79 @@
-# Session Handoff — Ordinary Codex work-loop correction complete
+# Session Handoff — Global capsule inventory proposed
 
-Audience: a fresh agent session. `GOAL.md` is normative and complete. Verify
-the publication and merged `main` state before relying on this summary, then
-choose the next GOAL with the operator. Do not send another provider prompt for
-Experiments 0030–0032.
+Audience: a fresh agent session. `GOAL.md` is normative and active. Verify
+the publication, merged `main`, complete gate, and conformance before relying
+on this summary. Read FIP-0001, FIP-0003, FIP-0004, FIP-0005, and FIP-0011 in
+full before implementation.
 
-## Current local state
+## Verified baseline
 
-PR #8 previously squash-merged FIP-0010 at
-`53378399bfa581d5a7b3db8538b234dc3733bb26`. The current stack above that main
-contains the completed daily-work-loop GOAL, Experiments 0030–0032, one useful
-test-only model edit, and the FIP-0006 login-shell correction. The single goal
-bookmark is `daily-codex-work-loop`; draft PR #9 targets `main`. Verify Jujutsu,
-the exact signed tip, and GitHub checks rather than inferring readiness from
-this handoff. The operator remains the sole merge authority.
+The operator squash-merged PR #9 as
+`a7829362fbe13e82dbe4b1cddfac6ecd5f726a6f`. Its tree exactly matched reviewed
+tip `c576b9c883ab643a316e76b982b137b73500be2e`; the
+`daily-codex-work-loop` bookmark was removed locally and remotely. The working
+copy then began clean directly above merged `main`.
 
-## What the live work proved
+On 2026-08-19 the complete `docs/RUNBOOK.md` gate passed again through
+`nix develop`: all 83 unit tests and every enabled integration test,
+formatting, strict all-target/all-feature Clippy, conformance, and
+`nix flake check` on aarch64-darwin. Nix emitted only the known incompatible
+`x86_64-linux` omission notice. Conformance remains honest: FIP-0001 and
+FIP-0002 are partial; FIP-0003 through FIP-0010 are conformant.
 
-Experiment 0030 first used synthetic auth only to create a disposable capsule.
-Its one credential-free probe resolved `chatgpt.com` and returned HTTP 200 from
-`https://chatgpt.com/robots.txt`; public stop/reset restored absence and empty
-inventory. The complete standard gate passed before model spend.
+## Product state and selected direction
 
-The sole real Codex prompt crossed the prior stdin failure, streamed its work,
-showed no Apps warning, changed only test code in `src/runtime.rs`, and exited
-host status zero. It renamed the stdin regression and made the fake execution
-session prove stdin closes before the first event read. Codex's exact focused
-Cargo command itself returned 127 because Cargo was unavailable to its
-`/usr/bin/bash -lc` child. The same test passed independently through host
-`nix develop`. No prompt edit, follow-up, retry, interactive fallback, or native
-fallback occurred.
+Fortlet now reaches an ordinary managed Codex edit loop, streams output,
+refreshes host-owned credentials, suppresses only unsupported Apps, supplies
+project tools, and preserves those tools through non-interactive Bash login
+shells. The last model-backed unit made the intended test edit but its guest
+test could not find Cargo; the subsequently merged FIP-0006 correction has
+deterministic and real composed-path evidence, but no second provider prompt
+was sent under that completed goal.
 
-Experiment 0031 used one credential-free Tact capsule to compare the composed
-shell path. Guest Cargo was mode 755 and worked directly and through `bash -c`.
-Plain `bash -lc` replaced Fortlet's PATH with Debian's login default and lost
-Cargo. A disposable `BASH_ENV` restored the exact managed PATH and Cargo 1.97.1.
-This accepted experiment is the causal attribution.
+The operator wants Codex feasible for real work before broad harness expansion,
+then expects OMP, Pi, and Claude Code to expose additional adapter classes.
+The agreed sequence is global capsule inventory, one Codex work-readiness
+closure, then the first new harness chosen from a concrete use case rather than
+a speculative generalized adapter abstraction.
 
-Experiment 0032 exercised the production correction from immutable package
-`/nix/store/fls59kf9mwxrs8n1g3whd1g7mgjfk0cv-fortlet-0.1.0`. Its login shell
-reported the package-owned hook, resolved
-`/opt/fortlet/project/bin/cargo`, and passed the exact focused test. The unit is
-still rejected for protocol variance: the Tact-specific Cargo cache was cold,
-so Cargo downloaded public crates beyond the experiment's declared network
-budget, and capsule configuration was not inspected before cleanup. Do not
-rerun it to manufacture acceptance. Cleanup reported running, stopped, reset,
-absent, and final inventory `[]`; the repo stayed clean.
+## Completed lifecycle slice
 
-## Product change
+FIP-0011 is Accepted and `GOAL.md` is operator-approved. The selected
+surface is only `fortlet list`: a read-only global inventory of fully validated
+Fortlet-owned capsules with project, harness, and lifecycle state. It paginates
+the typed SDK, reconstructs the project from FIP-0001's same-path bind, verifies
+the stored identity and name, safely renders paths, and ignores unrelated
+MicroSandbox capsules.
 
-Base environment `bookworm-2` installs the read-only fragment
-`/opt/fortlet/base/etc/fortlet/bash-env`. Capsules set reserved internal
-`FORTLET_MANAGED_PATH` and `BASH_ENV` values after project and harness
-environment values. The fragment restores the complete project/base/harness
-PATH after a Debian non-interactive login profile replaces it, preserving the
-pinned MicroSandbox script prefix when present.
-
-Project manifests may no longer set `BASH_ENV`; `FORTLET_*` names were already
-reserved. Fortlet writes no `.profile`, `.bashrc`, fish configuration, or other
-host/persistent startup file. Both harnesses use the common runtime mechanism;
-there is no Codex-specific command rewrite.
-
-## Deterministic evidence
-
-The implementation adds a base-script assertion, reserved-variable coverage,
-managed shell-environment assertions for both harnesses, and the strengthened
-stdin ordering regression. The complete final `docs/RUNBOOK.md` set passed
-through `nix develop`: all 83 unit tests and every enabled integration test,
-formatting, strict all-target/all-feature Clippy, conformance, and `nix flake
-check` on aarch64-darwin. Nix emitted only the known incompatible
-`x86_64-linux` omission notice.
-
-## Honest limitations
-
-- The sole model task did not run its guest test; the project-layer correction
-  was validated afterward without another model prompt.
-- Experiment 0032's mechanism succeeded but the experiment is rejected for its
-  undeclared Cargo downloads and omitted configuration observation.
-- Native x86_64-linux package verification remains outstanding.
-- The ten-minute Codex non-interactive inactivity ceiling and unresolved
-  automated interactive idle-exit parity remain unchanged.
-- Apps remain deliberately disabled inside managed Codex.
+Cleanup deliberately reuses existing explicit
+`status`/`stop`/`reset --project` commands. There is no global mutation, raw
+capsule selector, automatic expiry, or workload lease in this slice. A missing
+project root remains visible but not globally removable. That is the principal
+honest limitation retained for a successor.
 
 ## Next action
 
-Finish only PR #9's existing FIP-0005 publication lifecycle: sign and push the
-exact publishable tip, require hosted `Rust verification`, and mark the PR
-ready. Leave squash merge to the operator. After merge, fetch main, prove tree
-equality with the signed reviewed tip, remove only the landed goal bookmark,
-and then discuss a successor GOAL.
+The `capsule-inventory` bookmark and draft PR #10 exist. Deterministic
+implementation is complete at `866007214df6b45030a4bfae71e89a4083679ff8`.
 
-Do not repeat the provider unit; resume Experiments 0030–0032; weaken the
-credential/mount boundary; write shell startup files; hide the rejected unit;
-push or force-push main; merge; or start unrelated product work under this
-completed GOAL.
+Experiment 0033 is accepted. Immutable package
+`/nix/store/72qrzh32iaxcvhvi97p8bi1gsj41gmqr-fortlet-0.1.0` reported the sole
+owned running Tact capsule from `/private/tmp`; the listed project selected
+packaged public status/stop/reset through final absence, `no capsules`, and raw
+inventory `[]`. The synthetic auth document is deleted, the working copy was
+unchanged by the live unit, and FIP-0011 is conformant.
+
+The final complete local gate subsequently passed through `nix develop` on
+aarch64-darwin: all 88 unit tests and every enabled integration test,
+formatting, strict all-target/all-feature Clippy, conformance, and
+`nix flake check`. Nix emitted only the known incompatible `x86_64-linux`
+omission notice. The GOAL is complete and conditionally active only for PR #10
+hosted verification, operator merge, and read-only landing verification.
+
+Shape and sign the exact publishable tip, update and push only
+`capsule-inventory`, require hosted Rust verification, update PR #10 evidence,
+and mark it ready. Leave merge to the operator.
+
+Do not send a provider prompt; resume Experiments 0030–0032; add a harness;
+add bulk cleanup, leases, logs, restart, standalone installation, or Linux CI;
+expose internal capsule names; mutate an unowned capsule; push `main`; or merge.

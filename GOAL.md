@@ -1,144 +1,123 @@
-# GOAL: Prove one ordinary managed Codex work loop
+# GOAL: Make every owned capsule visible
 
-Status: complete — operator-accepted and closed 2026-08-19. PR #8 merged the FIP-0010
-non-interactive correction to `main` at
-`53378399bfa581d5a7b3db8538b234dc3733bb26`; its tree matched the reviewed
-signed tip, the goal bookmark was removed locally and remotely, and the working
-copy began clean directly above merged `main`.
+Status: complete — local deliverables and Experiment 0033 closed 2026-08-19;
+conditionally active only for PR #10 hosted verification, operator merge, and
+read-only landing verification.
+
+The deterministic implementation is complete and Experiment 0033 is accepted.
+An immutable package listed one real owned running Tact capsule from outside
+its project; the listed path then selected unchanged public status, stop, and
+reset through final absence and empty MicroSandbox inventory. The final
+complete `docs/RUNBOOK.md` gate passed through `nix develop` on aarch64-darwin:
+all 88 unit tests and every enabled integration test, formatting, strict
+all-target/all-feature Clippy, conformance, and `nix flake check`. Nix emitted
+only the known incompatible `x86_64-linux` omission notice. Only PR #10's
+hosted check, readiness, operator merge, and landing verification remain.
 
 ## Outcome
 
-The credential-free guest preflight resolved `chatgpt.com` and completed TLS
-with HTTP 200. The sole managed Codex unit then streamed normally, made only
-the intended test-only edit, and exited cleanly without an Apps warning, but
-its `bash -lc` child could not resolve project-layer Cargo. No second prompt was
-sent. Experiments 0030 and 0031 attributed the failure to Debian login-profile
-PATH replacement, not credentials, networking, stdin, or executable modes.
+Make Fortlet practical to operate across ordinary projects by adding one
+read-only global capsule inventory. From any directory, the operator can see
+each Fortlet-owned project+harness capsule, its project path, harness, and
+lifecycle state, then use the existing explicit project-scoped `status`,
+`stop`, and `reset` commands for cleanup.
 
-Fortlet now provides a read-only package-owned `BASH_ENV` hook from base layer
-`bookworm-2`, reserves the hook from project override, and restores its exact
-managed PATH without modifying host or persistent user startup files. A frozen
-package subsequently resolved project Cargo through `bash -lc` and passed the
-focused test. That live correction unit remains rejected as an experiment
-because a cold Tact Cargo cache made undeclared public crate downloads and the
-declared capsule-configuration inspection was omitted before cleanup. The
-positive mechanism observation is retained without retry; deterministic tests
-cover the correction. Every live phase ended with public absence and empty
-MicroSandbox inventory.
+This is the lifecycle slice immediately before one final Codex work-readiness
+goal and subsequent harness expansion. It deliberately gathers real lifecycle
+visibility before defining automatic expiry, background-workload leases, or a
+bulk removal operation.
 
-Prove that the corrected packaged Fortlet path is suitable for ordinary daily
-work: establish guest DNS/TLS readiness without provider credentials, then run
-one bounded non-interactive Codex task that makes one small real repository
-change, runs its declared check, streams visible progress, and exits cleanly.
-Separate host firewall readiness from Fortlet behavior and retain a failed unit
-honestly rather than iterating until it appears successful.
+Before implementation or experiment dispatch, read FIP-0001, FIP-0003,
+FIP-0004, FIP-0005, and FIP-0011 in full.
 
-Before implementation or experiment dispatch, read FIP-0001, FIP-0002,
-FIP-0005, FIP-0006, FIP-0007, FIP-0008, FIP-0009, and FIP-0010 in full.
+## Deliverable 0 — Freeze the verified baseline and contract
 
-## Deliverable 0 — Verify and freeze the daily-use unit
+1. Reverify merged `main`, the clean Jujutsu working copy, conformance, and the
+   complete standard verification set through `nix develop` before relying on
+   the prior handoff.
+2. Accept FIP-0011 before implementation. Do not change its public command,
+   ownership, path-presentation, pagination, or failure contract in code first.
+3. Use one descriptive bookmark and one draft pull request under FIP-0005.
+4. Do not alter project identity, capsule topology, credential policy,
+   persistent state, or existing project-scoped management semantics.
 
-1. Reverify the merged `main` baseline, conformance, clean working copy, public
-   Codex absence, and empty MicroSandbox inventory before relying on the prior
-   handoff.
-2. Select one useful, low-risk repository maintenance task with a narrow file
-   boundary and an existing or predeclared deterministic check. The task must
-   be representative of an edit/test loop, not a synthetic response-only
-   prompt or an architecture change.
-3. Freeze the exact immutable Fortlet package, project path, prompt, permitted
-   files, expected check, lifecycle cleanup, and acceptance criteria in one
-   experiment record before any external request.
-4. Do not create a new public command, configuration key, timeout, credential
-   policy, or workload-lease semantic. Any such need requires a new proposal
-   and operator acceptance before implementation.
+## Deliverable 1 — Add global owned-capsule inventory
 
-## Deliverable 1 — Establish credential-free network readiness
+1. Implement `fortlet list` as the read-only FIP-0011 inventory over every
+   page of MicroSandbox capsules carrying Fortlet's managed label.
+2. Validate complete ownership and recover the stored project path before
+   rendering any row. Ignore unrelated MicroSandbox capsules and fail the
+   complete inventory without partial output on malformed or ambiguous managed
+   state.
+3. Render deterministic, single-line-safe project, harness, and lifecycle
+   fields without exposing internal capsule names, project identity hashes,
+   credentials, configuration bodies, or host state paths.
+4. Keep inventory independent of the current project, provider credentials,
+   immutable-layer preparation, persistent harness-state creation, capsule
+   start, and terminal attachment.
 
-1. Before the model task, use one disposable synthetic-auth Codex capsule and
-   the packaged MicroSandbox runtime to test the same guest network path's DNS
-   resolution and TLS reachability without sending a bearer token, model
-   request, prompt, repository content, or paid traffic.
-2. Keep the probe bounded, record its exact destination and output, and clean
-   up through packaged public stop/reset. The final public status must be
-   absent and MicroSandbox inventory empty.
-3. Fortlet must not read or change macOS firewall configuration. The operator
-   may approve one ordinary OS firewall prompt manually while the already-
-   declared probe is running; record whether a prompt appeared and whether the
-   same process then completed.
-4. If DNS/TLS remains unavailable, terminate the experiment with one manual
-   host correction and do not spend the model unit. Do not add firewall
-   automation or general network diagnostics under this GOAL.
+## Deliverable 2 — Prove the cleanup path
 
-## Deliverable 2 — Run one real managed work loop
-
-1. Only after the credential-free preflight and complete standard gate pass,
-   launch the frozen immutable package once through
-   `fortlet run codex --project /Users/cody/dev/fortlet -- exec ...`.
-2. Send exactly one prompt for the predeclared repository task. Require Codex
-   to stay within the permitted files, use no unrelated tools or network
-   resources, run the declared deterministic check, report its result, and
-   terminate normally.
-3. Require streamed progress before completion, no Apps warning, exact host
-   status zero, the intended diff only, and an independently repeated host
-   check after Codex exits.
-4. Regardless of outcome, record the first result without retry. Verify the
-   reusable capsule remains publicly manageable, then stop/reset it and require
-   final absence and empty MicroSandbox inventory.
+1. Add deterministic evidence for complete pagination, ordering, ownership
+   acceptance and rejection, project-path recovery, every lifecycle state,
+   safe rendering, empty inventory, unrelated-capsule exclusion, and absence
+   of project, credential, layer, and mutation side effects.
+2. Predeclare one bounded credential-free local experiment against an immutable
+   package. Start at an empty MicroSandbox inventory, create at most one owned
+   capsule through a public non-model harness command, observe it globally,
+   and clean it up only through explicit packaged `stop` and `reset` commands
+   using the listed project path.
+3. Require final public absence, empty MicroSandbox inventory, and no repository
+   diff from the live unit. One failed unit is terminal and must not be retried
+   under the same experiment identity.
 
 ## Deliverable 3 — Close and publish once
 
-1. Attribute any failure to host network readiness, Fortlet, MicroSandbox, or
-   Codex using the preflight, streamed output, exit status, and pinned source;
-   do not infer from silence.
-2. Fix only a demonstrated Fortlet-owned defect already governed by accepted
-   FIPs. Do not issue a second model prompt to validate a correction.
-3. Update conformance, runbook, GOAL, experiment index, and handoff with the
-   exact supported surface and remaining limitation. Preserve rejected units.
-4. Run the complete standard verification set through `nix develop`, including
-   any pinned compatibility fixture whose boundary changed.
-5. Use one descriptive bookmark and one draft PR under FIP-0005. Sign the final
-   tip, require hosted `Rust verification`, mark the PR ready, and leave the
-   squash merge to the operator.
+1. Update conformance, README, overview, runbook, experiment index, GOAL, and
+   handoff with the exact implemented surface and honest limitations.
+2. Run the complete standard verification set through `nix develop` and record
+   the local Nix host and result.
+3. Sign the final publishable tip, require hosted `Rust verification`, mark the
+   single pull request ready, and leave squash merge to the operator.
+4. After operator merge, fetch `main`, prove exact reviewed-tree equality, and
+   remove only this goal's local and remote bookmark.
 
 ## Definition of Done
 
-1. A credential-free control proves guest DNS/TLS readiness without credential
-   or model traffic, or terminates with one verified manual host correction
-   before model spend.
-2. The sole model-backed unit either completes the declared repository
-   edit/test loop with visible progress and exact status zero, or fails within
-   the accepted FIP-0010 bound with attributable evidence and one correction.
-3. No unexpected repository file, credential content, host configuration,
-   Apps authorization, browser state, or external resource is read or changed.
-4. Public lifecycle cleanup restores Codex absence and an empty MicroSandbox
-   inventory while preserving intended durable Fortlet layers and cache.
-5. Experiment records are terminal, conformance is honest, local and hosted
-   gates pass, and the single PR is ready for operator merge.
+1. `fortlet list` reports every valid owned capsule across projects in stable
+   order and from outside any project, or reports an empty inventory exactly.
+2. Malformed, ambiguous, or spoofed managed records fail closed before any row
+   is printed; unrelated MicroSandbox capsules are ignored.
+3. Inventory reads no provider credential, resolves no current project,
+   prepares no layer, creates no state directory, and performs no lifecycle
+   mutation.
+4. One packaged runtime unit proves a listed capsule can be managed and removed
+   through the existing explicit project-scoped public commands, ending absent
+   with empty MicroSandbox inventory.
+5. FIP-0011 is conformant, all local and hosted gates pass, and one PR is ready
+   for operator squash merge.
 
 ## Excluded scope
 
-Do not add firewall automation, a general network diagnostic command, logs,
-restart, global inventory, cross-project cleanup, standalone installation, a
-Codex fork, an alternative runtime, remote execution, a proxy, a new secret
-class, hosted CI changes, repository settings, release, tag, package
-publication, or an unrelated product feature.
+Do not add global or bulk removal, automatic expiry, workload leases, grace
+periods, restart, logs, persistent-state purge, tool-layer cleanup, structured
+output, a daemon, another harness, standalone installation, native Linux CI,
+remote execution, provider traffic, model prompts, or unrelated product work.
+Projects whose stored root no longer exists remain visible but are not made
+globally removable by this slice.
 
 ## Budget and escalation
 
-Engineering ceiling: 90 minutes. External money and paid quota remain zero
-beyond one short operator-authorized model-backed Codex work unit after the
-credential-free preflight and complete gate pass. This GOAL, once accepted,
-authorizes one descriptive bookmark and one draft PR targeting `main` under
-FIP-0005.
+Engineering ceiling: two hours. External money and paid quota are zero. The
+accepted GOAL authorizes one descriptive bookmark and one draft pull request
+targeting `main` under FIP-0005.
 
-Stop for material scope expansion, a new architecture contract, a second model
-prompt, automated firewall mutation, destructive or unrelated mutation, merge,
-any credential or data-boundary anomaly, or two failures sharing an unresolved
-assumption.
+Stop for material scope expansion, a changed public contract, destructive or
+bulk cleanup, mutation of an unowned capsule, a credential or data-boundary
+anomaly, merge, or two failures sharing an unresolved assumption.
 
 ## Verification
 
-Run focused deterministic checks while selecting and rehearsing the unit.
-Before live dispatch and readiness, run the complete standard verification set
-from `docs/RUNBOOK.md` inside `nix develop`, plus any pinned compatibility
-command required by a touched boundary.
+Run focused deterministic tests while implementing. Before live dispatch and
+publication readiness, run the complete standard verification set from
+`docs/RUNBOOK.md` inside `nix develop`.

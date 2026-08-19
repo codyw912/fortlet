@@ -18,6 +18,7 @@ nix run . -- doctor
 nix run . -- prepare codex
 nix run . -- run codex --
 nix run . -- run tact --
+nix run . -- list
 nix run . -- status
 nix run . -- stop codex
 nix run . -- reset codex
@@ -113,11 +114,11 @@ tact
 ```
 
 The shims are optional; `fortlet run` remains fully usable without them.
-Fortlet provides one capsule per project and harness. Its repository uses an
-explicit host-side publication boundary; an automated publication command,
-private project overlays, explicit workload leases, and standalone distribution
-remain future work. Local execution comes first; remote execution requires its
-own architecture.
+Fortlet provides one capsule per project and harness and can list every owned
+capsule across projects. Its repository uses an explicit host-side publication
+boundary; an automated publication command, private project overlays, explicit
+workload leases, and standalone distribution remain future work. Local
+execution comes first; remote execution requires its own architecture.
 
 See [OVERVIEW.md](OVERVIEW.md) for durable product scope and
 [GOAL.md](GOAL.md) for the current mission.

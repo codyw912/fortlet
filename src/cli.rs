@@ -26,6 +26,7 @@ struct Cli {
 #[derive(Subcommand)]
 enum Command {
     Doctor,
+    List,
     Run {
         harness: String,
         #[arg(long)]
@@ -80,6 +81,12 @@ pub async fn run() -> Result<()> {
 async fn run_command(command: Command) -> Result<()> {
     match command {
         Command::Doctor => doctor(),
+        Command::List => {
+            for line in management::list().await? {
+                println!("{line}");
+            }
+            Ok(())
+        }
         Command::Run {
             harness,
             project,
@@ -292,6 +299,9 @@ mod tests {
 
     #[test]
     fn parses_project_scoped_management_commands() {
+        let list = Cli::try_parse_from(["fortlet", "list"]).unwrap();
+        assert!(matches!(list.command, Command::List));
+
         let status = Cli::try_parse_from([
             "fortlet",
             "status",

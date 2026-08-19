@@ -9,6 +9,7 @@ struct Fixture {
     home: PathBuf,
     state: PathBuf,
     data: PathBuf,
+    msb: PathBuf,
     project: PathBuf,
 }
 
@@ -18,6 +19,7 @@ impl Fixture {
         let home = temporary.path().join("home");
         let state = temporary.path().join("state");
         let data = temporary.path().join("data");
+        let msb = temporary.path().join("msb");
         let project = temporary.path().join("project");
         fs::create_dir_all(&home).unwrap();
         fs::create_dir_all(&project).unwrap();
@@ -26,8 +28,19 @@ impl Fixture {
             home,
             state,
             data,
+            msb,
             project,
         }
+    }
+
+    fn list_without_home(&self) -> Output {
+        Command::new(env!("CARGO_BIN_EXE_fortlet"))
+            .arg("list")
+            .env_clear()
+            .env("MSB_HOME", &self.msb)
+            .current_dir(self._temporary.path())
+            .output()
+            .unwrap()
     }
 
     fn command(&self, arguments: &[&str]) -> Output {
@@ -45,6 +58,22 @@ impl Fixture {
         assert!(!self.state.join("fortlet").exists());
         assert!(!self.data.join("fortlet").exists());
     }
+}
+
+#[test]
+fn list_is_empty_without_home_project_credentials_or_fortlet_state() {
+    let fixture = Fixture::new();
+
+    let output = fixture.list_without_home();
+
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert_eq!(output.stdout, b"no capsules\n");
+    assert!(output.stderr.is_empty());
+    fixture.assert_no_fortlet_state();
 }
 
 fn assert_failure(output: Output, stage: &str, action: &str, cause: &str) {
