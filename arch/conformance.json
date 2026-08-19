@@ -227,7 +227,7 @@
     {
       "proposal": "0009",
       "title": "Codex Apps capability handling",
-      "status": "partial",
+      "status": "conformant",
       "modules": [
         "README.md",
         "OVERVIEW.md",
@@ -239,11 +239,10 @@
       "tests": [
         "src/harness/mod.rs",
         "src/runtime.rs",
-        "tests/codex_compatibility.rs"
+        "tests/codex_compatibility.rs",
+        "experiments/0025-interactive-codex-apps-disable.md"
       ],
-      "gaps": [
-        "Experiment 0024 observed no known Apps warning, but its sole packaged non-interactive model attempt produced no response before the frozen timeout; a successor must verify the ordinary model path through the proven interactive attachment."
-      ]
+      "gaps": []
     }
   ]
 }

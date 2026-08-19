@@ -1,6 +1,6 @@
 # Experiment 0025: Interactive Codex Apps disable confirmation
 
-Status: active — declared and operator-authorized 2026-08-19
+Status: accepted — terminal 2026-08-19
 Design: FIP-0001, FIP-0002, FIP-0008, and FIP-0009
 Charter scope: `local-foundation/v1`
 
@@ -93,8 +93,36 @@ current Apps-disabled package with the interactive prompt.
 
 ## Results
 
-Pending.
+Immediately before dispatch, the working copy was empty, treatment revision
+`a98288dff08db53e34127e51b27c817078cf20b5` and the immutable package matched,
+both project-input hashes retained their declared values, the packaged public
+CLI reported `codex<TAB>absent`, and the pinned MicroSandbox CLI reported no
+sandboxes.
+
+The one interactive packaged launch opened Codex 0.147.0 in
+`/Users/cody/dev/fortlet` with no `codex_apps`, HTTP 451,
+`no_biscuit_no_service`, or MCP-startup-incomplete diagnostic. The frozen
+prompt was submitted once and returned exactly:
+
+```text
+fortlet-apps-disabled-ok
+```
+
+No tool was invoked and no repository file changed. One Ctrl-C at the idle
+composer shut Codex down normally. The packaged public CLI then reported
+`codex<TAB>running`, `codex<TAB>stopped`, `codex<TAB>reset`, and finally
+`codex<TAB>absent`; the pinned MicroSandbox CLI reported no sandboxes.
 
 ## Terminal Closure
 
-Pending.
+Accepted. The adapter-owned Apps disable removed the known startup warning
+while preserving the ordinary interactive ChatGPT model path. The rejected
+Experiment 0024 was an attachment-mode failure: changing only to the previously
+proven interactive path produced the exact model response and normal UI exit.
+
+Actual cost was one operator-authorized model prompt, one interactive session,
+one owned reusable capsule, no tools, no repository edit, no retry, and public
+stop/reset cleanup. The attempt completed within the declared ten-minute bound;
+exact elapsed time and whether a host refresh occurred were not separately
+observed. Mark FIP-0009 conformant and complete the GOAL's single-PR publication
+path.
