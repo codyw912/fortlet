@@ -149,33 +149,34 @@ completed GOAL into one public commit. A recorded bootstrap MAY use a second
 closure pull request for evidence that can exist only after the primary merge;
 this exception does not apply to later GOALs.
 
-After locally knowable work and verification are complete, present one reviewed
-publication packet: the signed revisions and diff, named bookmark and `origin`
-destination, complete draft-PR metadata, expected initial hosted check,
-readiness criteria, known failures, and any exact landed bookmarks proposed for
-cleanup. One approval authorizes only one push of that signed bookmark, creation
-of that draft PR, observation of its initial hosted run, declared evidence-only
-body updates, readiness after success, and named bookmark cleanup after the
-operator merge and exact tree equality. The operator merges unless they
-explicitly authorize the agent to merge one specific pull request.
+Accepting a GOAL grants standing authority for that branch and PR lifecycle.
+The agent may create the draft PR, push in-scope iterations, diagnose and fix
+hosted failures, trigger replacement runs, keep the PR description current,
+and mark it ready without further publication approval. Lease-checked history
+replacement is permitted only on the named goal branch. A diagnosed in-scope
+CI repair is governed development, not a new experiment; two failures sharing
+an unresolved assumption trigger the charter stop.
 
-Changed code or scope, another push or PR, a retry, substantive metadata change,
-repository settings, an unexpected remote change, or any failed transaction
-step is outside the packet and requires a new exact review and approval. Never
-infer authority over unrelated refs or resources.
+Before readiness, complete all locally knowable GOAL work, close every
+experiment, run the complete local verification set, record the local Nix host
+and result, and sign the final publishable branch tip. Intermediate semantic
+checkpoints may remain unsigned because the signed tip fixes their identities.
+The PR must identify the exact final revision, scope, experiments,
+verification, and limitations. Report those facts to the operator for review,
+but do not add another approval gate. Mark the PR ready only after every
+required hosted check passes. Never bypass a failed check or push directly or
+force-push to `main`.
 
-Before publication, complete all locally knowable GOAL work, close every
-experiment, inspect and sign the bookmark stack, run the complete local
-verification set, and record the local Nix host and result. The GOAL may remain
-conditionally active only for hosted verification, operator merge, and landing
-observation. Mark the PR ready only after its expected hosted check passes. A
-failure stops publication; do not bypass a check, silently retry, or force-push
-`main`.
+Standing authority ends at the accepted GOAL boundary. A changed GOAL,
+additional PR, different base or repository, merge, settings mutation, release,
+tag, package, secret, external spend, destructive remote action, or unrelated
+resource requires new authority. The operator merges unless they explicitly
+authorize the agent to merge one specific pull request.
 
 After an operator squash merge, fetch `main` and prove its tree equals the exact
-reviewed branch-tip tree. Commit identity is expected to change. If the
-publication packet named landed bookmarks for cleanup, remove only those after
-destination and tree equality are verified; cleanup may otherwise be deferred.
+reviewed branch-tip tree. Commit identity is expected to change. Remove only
+the landed goal's local and remote bookmarks after destination and tree
+equality are verified.
 
 Session end (or mission completion):
 

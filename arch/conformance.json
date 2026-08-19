@@ -139,6 +139,7 @@
         "AGENTS.md",
         "WORKFLOW.md",
         "docs/RUNBOOK.md",
+        "governance/CHARTER.md",
         "package.nix"
       ],
       "tests": [
