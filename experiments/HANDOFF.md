@@ -53,9 +53,15 @@ honest limitation to evaluate during FIP review.
 
 ## Next action
 
-Create one descriptive Jujutsu bookmark and draft PR under FIP-0005, implement
-the deterministic surface, predeclare one credential-free packaged runtime
-experiment, and close the goal once.
+The `capsule-inventory` bookmark and draft PR #10 exist. Deterministic
+implementation is complete at `866007214df6b45030a4bfae71e89a4083679ff8`;
+focused inventory, management-failure, conformance, formatting, and strict
+Clippy gates pass. Experiment 0033 is predeclared but has not dispatched.
+
+Run the complete standard gate against the frozen treatment, build and record
+its immutable package, verify the declared empty baseline, then execute
+Experiment 0033 exactly once. Close its record and conformance before the final
+goal gate and publication readiness.
 
 Do not send a provider prompt; resume Experiments 0030–0032; add a harness;
 add bulk cleanup, leases, logs, restart, standalone installation, or Linux CI;

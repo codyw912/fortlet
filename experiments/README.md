@@ -54,3 +54,4 @@ scannable failure/win history of the project:
 - `0030-first-post-eof-daily-work-loop.md` — rejected; DNS/TLS and streaming passed, but the sole Codex edit/test task could not resolve Cargo beneath its login-shell command path; cleanup completed without retry.
 - `0031-login-shell-project-path.md` — accepted; guest tools remained executable, Debian `bash -lc` alone dropped the managed PATH, and a disposable `BASH_ENV` restored the exact Cargo path without startup-file mutation.
 - `0032-packaged-login-shell-project-tools.md` — rejected for protocol variance; the packaged hook restored Cargo and passed the focused login-shell test, but a cold Tact Cargo cache made undeclared public crate downloads and configuration inspection was omitted before cleanup.
+- `0033-global-owned-capsule-inventory.md` — active; immutable packaged global inventory and existing project-scoped cleanup are predeclared for one credential-free owned capsule.
