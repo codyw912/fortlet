@@ -189,8 +189,22 @@ No preparation or provider process has run under this experiment identity.
 ## Results
 
 The immutable declaration revision and package are recorded above, and the
-complete pre-dispatch deterministic gate passed. No runtime unit has been
-dispatched.
+complete pre-dispatch deterministic gate passed. The clean preparation
+preflight reported packaged `codex<TAB>absent`, `no capsules`, and raw
+MicroSandbox inventory `[]`.
+
+With the operator present, the sole cold public preparation printed only the
+declared first-use progress line on stderr, then exact stdout
+`codex<TAB>ready` and exited zero. The identical immediate cache-hit command
+returned exact `codex<TAB>ready` in 2.6 seconds with no first-use progress,
+firewall, or network diagnostic. No provider request occurred.
+
+The post-prepare repository remained clean; packaged status remained
+`codex<TAB>absent`, packaged list remained `no capsules`, and raw inventory
+remained `[]`. The active agent shell reported `CODEX_THREAD_ID`,
+`CODEX_SANDBOX_NETWORK_DISABLED`, and `CODEX_CI` present, so it is not an
+eligible outer observation boundary and did not dispatch Codex. No model unit
+has been dispatched yet.
 
 ## Terminal Closure
 
