@@ -65,11 +65,11 @@ there is no Codex-specific command rewrite.
 
 The implementation adds a base-script assertion, reserved-variable coverage,
 managed shell-environment assertions for both harnesses, and the strengthened
-stdin ordering regression. Before the final publication pass, all 83 unit tests
-and all enabled integration tests passed through `nix develop`; formatting,
-strict all-target/all-feature Clippy, and conformance were green. Run the full
-`docs/RUNBOOK.md` set again on the final documentation tip before readiness,
-including `nix flake check` on aarch64-darwin.
+stdin ordering regression. The complete final `docs/RUNBOOK.md` set passed
+through `nix develop`: all 83 unit tests and every enabled integration test,
+formatting, strict all-target/all-feature Clippy, conformance, and `nix flake
+check` on aarch64-darwin. Nix emitted only the known incompatible
+`x86_64-linux` omission notice.
 
 ## Honest limitations
 
@@ -84,11 +84,11 @@ including `nix flake check` on aarch64-darwin.
 
 ## Next action
 
-Finish only PR #9's existing FIP-0005 publication lifecycle: run the complete
-final gate, sign and push the exact publishable tip, require hosted `Rust
-verification`, and mark the PR ready. Leave squash merge to the operator. After
-merge, fetch main, prove tree equality with the signed reviewed tip, remove only
-the landed goal bookmark, and then discuss a successor GOAL.
+Finish only PR #9's existing FIP-0005 publication lifecycle: sign and push the
+exact publishable tip, require hosted `Rust verification`, and mark the PR
+ready. Leave squash merge to the operator. After merge, fetch main, prove tree
+equality with the signed reviewed tip, remove only the landed goal bookmark,
+and then discuss a successor GOAL.
 
 Do not repeat the provider unit; resume Experiments 0030–0032; weaken the
 credential/mount boundary; write shell startup files; hide the rejected unit;
