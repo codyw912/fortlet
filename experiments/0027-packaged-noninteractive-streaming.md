@@ -1,6 +1,6 @@
 # Experiment 0027: Packaged non-interactive streaming rehearsal
 
-Status: declared — 2026-08-19
+Status: accepted — terminal 2026-08-19
 Design: FIP-0001, FIP-0002, FIP-0008, FIP-0009, and FIP-0010
 Charter scope: `local-foundation/v1`
 
@@ -102,8 +102,38 @@ against local fixtures.
 
 ## Results
 
-Pending.
+Immediately before dispatch, the working copy was empty, the package resolved
+to treatment revision `c520e57823214cd44e56e15a714c35d972ddba04`, packaged
+public status reported `tact<TAB>absent`, and the packaged MicroSandbox CLI
+reported `[]`.
+
+The sole packaged launch used the fixed synthetic auth document and returned
+host status 0 with this stdout:
+
+```text
+tact 0.3.7
+commit: f03a9e323b7a (unknown, clean)
+commit timestamp: 2026-08-07T09:05:20-04:00
+build timestamp: 2026-08-07T13:09:28+00:00
+target: aarch64-unknown-linux-gnu
+profile: release
+rustc: rustc 1.97.1 (8bab26f4f 2026-07-14)
+```
+
+It emitted no stderr, provider, credential, network, or preparation diagnostic
+and completed in about 3.5 seconds. Packaged public cleanup then reported
+`tact<TAB>running`, `tact<TAB>stopped`, `tact<TAB>reset`, and
+`tact<TAB>absent`; the final MicroSandbox inventory was `[]`. The synthetic
+auth document and its temporary directory were deleted after cleanup.
 
 ## Terminal Closure
 
-Pending.
+Accepted. The immutable production package exercised Fortlet's non-terminal
+streaming attachment, forwarded the pinned harness output, and returned the
+explicit guest exit status without a real credential or provider request.
+
+Actual cost was one local Tact version launch, one owned capsule, about 3.5
+seconds of treatment time, zero real credentials, zero provider requests, zero
+paid quota, and no retry. Public lifecycle cleanup restored exact absence. The
+next action is the complete standard gate followed by the separately declared
+single model-backed Codex successor.

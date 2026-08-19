@@ -48,4 +48,4 @@ scannable failure/win history of the project:
 - `0024-managed-codex-apps-disable.md` — rejected; the Apps warning was absent, but the sole packaged non-interactive model attempt produced no response before its ten-minute bound and public cleanup.
 - `0025-interactive-codex-apps-disable.md` — accepted; the Apps-disabled packaged interactive path returned the exact model response without the known warning, then exited and cleaned up publicly.
 - `0026-credential-free-noninteractive-attribution.md` — accepted; local-only controls proved Codex remained alive on an unanswered request while collected execution hid progress, whereas normal success and failure produced exact output and exit events.
-- `0027-packaged-noninteractive-streaming.md` — declared; one credential-free packaged Tact version launch will rehearse Fortlet's production streaming and exact-exit path before the model-backed Codex unit.
+- `0027-packaged-noninteractive-streaming.md` — accepted; one credential-free immutable-package Tact launch streamed the pinned version output, returned exact status zero, and cleaned up publicly before any model-backed unit.
