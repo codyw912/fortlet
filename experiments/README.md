@@ -47,3 +47,4 @@ scannable failure/win history of the project:
 - `0023-codex-bearer-projection-confirmation.md` — accepted; the repaired bearer projection authenticated one bounded model-backed edit/test loop, and public stop/reset restored absence while preserving durable layers and cache.
 - `0024-managed-codex-apps-disable.md` — rejected; the Apps warning was absent, but the sole packaged non-interactive model attempt produced no response before its ten-minute bound and public cleanup.
 - `0025-interactive-codex-apps-disable.md` — accepted; the Apps-disabled packaged interactive path returned the exact model response without the known warning, then exited and cleaned up publicly.
+- `0026-credential-free-noninteractive-attribution.md` — accepted; local-only controls proved Codex remained alive on an unanswered request while collected execution hid progress, whereas normal success and failure produced exact output and exit events.

@@ -243,6 +243,14 @@
         "experiments/0025-interactive-codex-apps-disable.md"
       ],
       "gaps": []
+    },
+    {
+      "proposal": "0010",
+      "title": "Bounded streaming non-interactive execution",
+      "status": "unimplemented",
+      "modules": [],
+      "tests": [],
+      "gaps": []
     }
   ]
 }
