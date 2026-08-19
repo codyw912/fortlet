@@ -1,10 +1,9 @@
 # GOAL: Resolve the Codex Apps startup warning
 
-Status: active — operator-accepted 2026-08-19. Fortlet's ordinary Codex model
-and edit/test path works, but stock Codex 0.147.0 still starts its built-in
-`codex_apps` MCP client without the separate biscuit authorization it expects.
-Every daily launch consequently reports an HTTP 451 warning for a capability
-Fortlet does not currently claim to support.
+Status: complete — 2026-08-19. Accepted FIP-0009 is conformant. Managed Codex
+0.147.0 launches disable only the unsupported built-in Apps client; ordinary
+model work, user-configured MCP servers, native Codex, and persistent host
+configuration remain unchanged.
 
 Make Codex startup capability-aware. Determine the actual pinned upstream
 contract, then either delegate the capability through a narrow safe boundary or
@@ -70,6 +69,28 @@ Before implementation, read FIP-0001, FIP-0005, and FIP-0008 in full.
    refresh token, or general-purpose MCP credential becomes guest-readable.
 5. The pinned compatibility behavior has automated evidence, the local and
    hosted gates pass, and the PR is ready for operator merge.
+
+## Completion Evidence
+
+1. The pinned source audit established `--disable apps` as the supported,
+   authoritative launch-local control and found no supported external Apps
+   authorization contract suitable for Fortlet.
+2. Adapter and runtime tests prove exact Codex argument insertion, requested
+   argument preservation, unchanged Tact behavior, and use at the shared
+   attachment boundary.
+3. Both stock-Codex 0.147.0 fixtures passed: the fixed disable wins over user
+   re-enables, preserves another configured MCP server, and leaves external
+   model-token behavior unchanged without OAuth refresh.
+4. Experiment 0024 rejected the first non-interactive live unit after a bounded
+   timeout and public cleanup. Experiment 0025 then accepted the previously
+   proven interactive path: no Apps warning appeared, the sole prompt returned
+   exactly `fortlet-apps-disabled-ok`, idle Ctrl-C exited normally, and public
+   stop/reset restored absence.
+5. The complete local verification set passed through `nix develop` on
+   aarch64-darwin: 72 unit tests, 29 non-ignored integration tests, formatting,
+   strict Clippy, conformance, and `nix flake check`. PR #7's initial hosted
+   Rust verification passed on reviewed revision `07e82b7d4108`; the final
+   documentation closure receives the same required check before readiness.
 
 ## Excluded scope
 

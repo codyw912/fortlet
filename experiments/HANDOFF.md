@@ -1,69 +1,67 @@
-# Session Handoff — Codex Apps capability handling
+# Session Handoff — Warning-free daily Codex baseline
 
-Audience: a fresh agent session. `GOAL.md` is normative and active. Read
-FIP-0001, FIP-0005, and FIP-0008 in full before design or implementation.
-Experiments 0001 through 0023 are terminally closed; there is no active
-experiment.
+Audience: a fresh agent session. The Codex Apps capability GOAL is complete;
+choose and obtain operator acceptance for a successor GOAL before product work.
+Experiments 0001 through 0025 are terminally closed, and no experiment is
+active.
 
-## Verified landed baseline
+## Verified product baseline
 
-PR #6 squash-merged the delegated-publication GOAL to protected `main` as
-`118671e0f744b4168de86bcc4c6f326c3d89a768`. Its tree is byte-identical to the
-reviewed signed tip `a7c0d0a63a9bed5e3802e70b7ed5eb0578b13d17`.
-Hosted Rust verification passed, the exact goal bookmark was removed locally
-and remotely, and the working copy began this GOAL as an empty change directly
-on fetched `main`.
+Fortlet's daily Codex path now includes optional explicit preparation,
+transparent shims, host-owned renewable ChatGPT credentials, immutable project
+tools, ordinary interactive model work, warning-free startup, and public
+status/stop/reset. FIP-0007, FIP-0008, and FIP-0009 are conformant.
 
-GOAL acceptance now grants standing authority for one branch and PR through
-ordinary pushes, diagnosed CI repairs, evidence updates, readiness, landing
-verification, and exact bookmark cleanup. Only the final publishable tip must
-be signed. The operator remains the sole merge authority.
+Managed Codex 0.147.0 prepends `--disable apps` through the harness adapter at
+the shared runtime attachment boundary. The fixed disable is authoritative over
+user attempts to re-enable Apps, targets only the upstream-reserved
+`codex_apps` registration, and preserves requested arguments and independently
+configured MCP servers. Tact and `fortlet native codex` are unchanged. Fortlet
+does not write or inspect host Codex configuration and introduces no Apps
+credential.
 
-## Product baseline
+The practical limitation is narrow and explicit: connector-backed live
+Microsoft Excel control and Sites hosting are unavailable inside managed
+sessions. Local spreadsheet-file work, local site development, skill-only
+plugins, and direct MCP servers remain available. The operator confirmed those
+connector workflows are not part of current daily use; native Codex remains the
+escape hatch if that changes.
 
-Fortlet's daily Codex path is proven: explicit credential-free `prepare`, the
-optional shim, host-owned renewable ChatGPT credentials, immutable project
-Cargo and Jujutsu tools, one real model-backed edit/test loop, and public
-stop/reset all succeeded. FIP-0007 and FIP-0008 are conformant.
+## Evidence and publication state
 
-The remaining visible startup defect is separate from model authentication.
-Codex 0.147.0 starts the built-in `codex_apps` MCP client, which returns HTTP
-451 `no_biscuit_no_service` because Fortlet supplies no Apps biscuit. The model
-request itself succeeds after the FIP-0008 bearer-projection repair. FIP-0008
-explicitly excludes cookies and MCP authorization and leaves the separate
-capability as an open question.
+The complete local gate passed through `nix develop` on aarch64-darwin: 72 unit
+tests, 29 non-ignored integration tests, formatting, strict all-target/all-
+feature Clippy, conformance, and `nix flake check`. Both ignored stock-Codex
+0.147.0 fixtures passed separately against the pinned native binary. Native
+x86_64-linux package verification remains outstanding.
 
-## Accepted direction
+Experiment 0024 is terminally rejected: its one non-interactive `codex exec`
+attempt emitted no Apps warning but produced no model response before the
+ten-minute bound. Public cleanup succeeded and it was not retried. Experiment
+0025 is terminally accepted: the packaged interactive session started without
+the Apps warning, returned exactly `fortlet-apps-disabled-ok` for its sole
+prompt, exited normally on one idle Ctrl-C, and completed public stop/reset
+cleanup. The non-interactive timeout's cause remains unresolved; interactive
+daily use is the proven product path.
 
-The new GOAL is source-first. Verify how pinned Codex registers, authorizes,
-and disables `codex_apps`; then draft FIP-0009. If no narrow supported external
-authorization surface exists, prefer disabling only the unavailable built-in
-Apps client. Preserve user-configured MCP servers and the existing model-token
-boundary. Do not project raw cookies, biscuits, host configuration, or a
-general MCP credential into the guest.
-
-The two-hour ceiling includes research, design, the smallest implementation,
-deterministic evidence, one bounded packaged startup check, and the normal
-single-PR publication lifecycle. FIP-0009 acceptance is the one required design
-stop before implementation.
+PR #7 is the sole authorized goal pull request on bookmark
+`codex-apps-capability`. Its initial hosted Rust verification passed on reviewed
+revision `07e82b7d410864ed3057ce4e00d3f8cf4c1fd23e`. Verify the final check and
+PR state rather than relying on this snapshot. The operator is the sole merge
+authority. After merge, fetch `main`, prove tree equality with the reviewed
+tip, and remove only this goal's local and remote bookmark.
 
 ## What to do next
 
-The source audit is complete and FIP-0009 is proposed. Codex feature `apps` is
-stable and default-on; `--disable apps` is a supported global CLI override.
-The effective MCP map removes only reserved server `codex_apps` when disabled.
-`CODEX_CONNECTORS_TOKEN` is explicitly a debug override, while normal Apps
-startup reuses the ChatGPT auth provider. The open client contains no external
-biscuit acquisition or renewal contract.
+If PR #7 has not merged, finish only its accepted FIP-0005 publication closure.
+If it has merged, verify and clean the exact bookmark, then discuss the next
+GOAL with the operator. Product-facing candidates already identified in prior
+planning include global inventory/safe cross-project cleanup, restart/logs,
+explicit workload leases, and eventually standalone distribution. Select one
+based on the operator's current daily-use friction rather than speculative
+architecture.
 
-The recommended implementation adds an adapter-owned launch-argument transform:
-Codex 0.147.0 prepends `--disable apps`, Tact and native execution remain
-unchanged, and runtime attachment consumes the transformed arguments without a
-harness-name branch. No persistent config or credential changes are proposed.
-
-Next: obtain operator acceptance of FIP-0009. Then implement its smallest slice,
-add deterministic evidence, declare Experiment 0024, and run the packaged check.
-
-Do not resume a closed experiment, inspect credential contents, change model
-authentication, disable all MCP servers, fork Codex, introduce a proxy, mutate
-repository settings, merge, or expand beyond the accepted GOAL.
+Do not resume Experiments 0024 or 0025, re-enable Apps inside Fortlet, infer a
+biscuit protocol, project cookies or host config, retry the non-interactive
+model unit silently, merge PR #7, mutate repository settings, or begin a new
+GOAL without operator acceptance.
