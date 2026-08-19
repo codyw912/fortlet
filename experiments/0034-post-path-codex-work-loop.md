@@ -30,8 +30,10 @@ test. Experiment 0032 was rejected for undeclared Cargo network traffic and an
 omitted read-only inspection, not mechanism failure. No provider-backed unit
 has exercised the corrected composition.
 
-The immutable treatment revision and Nix store path will be frozen from this
-declaration checkpoint and recorded here before dispatch.
+The immutable treatment revision is
+`5ed68deed08454b9201367f2e3c0ecb06ec5e82f`. Its aarch64-darwin Nix package is
+`/nix/store/y2543gbhzbhbsnc4lq1c3a49qbrqphas-fortlet-0.1.0`. No live unit was
+dispatched before both values were recorded.
 
 ## Hypothesis and Production Mechanism
 
