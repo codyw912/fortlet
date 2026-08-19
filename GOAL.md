@@ -1,149 +1,121 @@
-# GOAL: Close the Codex daily work loop
+# GOAL: Recover firewall-blocked Codex readiness evidence
 
-Status: complete — bounded terminal outcome; awaiting operator merge
+Status: active — operator accepted 2026-08-19
 
 ## Outcome
 
-Establish that the merged Fortlet surface is ready for ordinary Codex work by
-completing one useful repository edit-and-test task through an immutable
-package's transparent `codex` shim. The unit must compose the corrected
-non-interactive EOF path, host-owned renewable authentication, managed Apps
-disablement, project tools beneath Codex's login shell, streamed output, exact
-exit status, and public capsule management.
+Correct the attribution error in the prior daily-work closure by proving the
+same corrected Codex path after the operator is present to approve the local
+MicroSandbox firewall request. First warm the immutable project environment
+through packaged, credential-free `fortlet prepare codex`; only after that
+public command succeeds may one packaged Codex shim process perform one useful
+repository edit and focused guest test.
 
-This is an evidence-first goal. Passing without production changes is a valid
-outcome. A failure may justify only the smallest correction to a demonstrated
-Fortlet defect; it does not authorize speculative product expansion.
+This GOAL changes no product or architecture contract. The prior DNS failure is
+operator-environment evidence, not a Fortlet defect. Do not modify production
+code to accommodate it. Read FIP-0001 through FIP-0011 in full before dispatch.
 
-Before implementation or experiment dispatch, read FIP-0001 through FIP-0011
-in full.
+## Deliverable 0 — Freeze the merged recovery baseline
 
-## Deliverable 0 — Freeze the merged baseline
+1. Verify fetched `main`, PR #11 landing tree equality, bookmark cleanup, a
+   clean Jujutsu working copy, conformance, and the complete `docs/RUNBOOK.md`
+   gate through `nix develop`.
+2. Archive the completed prior GOAL and replace the handoff with this recovery
+   mission without rewriting Experiments 0034 or 0035.
+3. Use one `codex-firewall-recovery` bookmark and one draft pull request
+   targeting `main` under FIP-0005. The operator remains the sole merge
+   authority.
 
-1. Verify the fetched `main` destination, clean Jujutsu working copy,
-   conformance map, and complete `docs/RUNBOOK.md` verification set through
-   `nix develop` before relying on the handoff.
-2. Record the exact immutable treatment revision and aarch64-darwin Nix package
-   before live dispatch.
-3. Use one `codex-work-readiness` bookmark and one draft pull request under
-   FIP-0005. The operator remains the sole merge authority.
-4. Do not change a public command, configuration, credential, capsule,
-   persistence, or harness-adapter contract without an accepted successor FIP.
+## Deliverable 1 — Establish firewall-ready cold preparation
 
-## Deliverable 1 — Run one ordinary Codex work unit
+1. Predeclare one successor experiment that identifies Experiment 0035's DNS
+   result as invalid daily-readiness evidence because the operator was absent
+   for the host firewall approval.
+2. Freeze one immutable aarch64-darwin package from the declaration checkpoint
+   and record its exact revision and store path.
+3. Require a clean repository, packaged Codex status `absent`, packaged
+   `fortlet list` output `no capsules`, and raw packaged MicroSandbox inventory
+   `[]` before preparation.
+4. With the operator present, invoke that package's public
+   `fortlet prepare codex --project /Users/cody/dev/fortlet` exactly once. The
+   operator may approve the expected local MicroSandbox firewall prompt, but no
+   shell, network, manifest, recipe, or package substitution is allowed.
+5. Require exact stdout `codex<TAB>ready` and verify the resulting immutable
+   project layer through an immediate second public `prepare` cache hit that
+   performs no provisioning or network contact. The cache-hit check is
+   verification, not a failed-unit retry.
+6. If the first preparation fails after the firewall decision, stop the GOAL.
+   Do not retry, remove a layer manually, or spend a provider request.
 
-1. Predeclare one new experiment with a useful bounded test or maintenance task,
-   its exact prompt, exact permitted paths, exact guest verification command,
-   clean repository baseline, public Codex absence, and empty MicroSandbox
-   inventory.
-2. Invoke packaged Codex through the package-owned transparent shim in
-   non-interactive `exec` mode from the real Fortlet project. Do not require an
-   explicit `prepare`; verified cached layers or the normal automatic first-use
-   path are both valid product behavior.
-3. Send exactly one frozen model prompt. Require visible streamed progress, no
-   Apps startup failure, successful model authentication, only the permitted
-   host-visible edit, successful execution of the exact project-tool command
-   beneath Codex, and host exit status zero.
-4. Do not edit the prompt, follow up, retry, start another model process, use
-   native Codex, or repair the produced diff during that experiment. If the
-   current agent environment cannot provide a valid outer-shell observation,
-   give the operator one exact command to run after the established Codex marker
-   check rather than weakening the treatment.
+## Deliverable 2 — Run one corrected ordinary Codex unit
 
-## Deliverable 2 — Verify and clean up independently
+1. After preparation succeeds, record a fresh clean working copy, a marker-free
+   outer shell, public Codex absence, `no capsules`, and raw inventory `[]`.
+2. Invoke the immutable package-owned `codex` shim once in non-interactive
+   `exec --ephemeral --skip-git-repo-check` mode from the real Fortlet project.
+3. Send one frozen prompt requiring Codex to report exactly
+   `CARGO_TARGET_DIR=target/fortlet-guest`, add only the previously declared
+   invalid-project-environment shim regression test to
+   `tests/pre_runtime_failures.rs`, run its exact focused Cargo test without an
+   environment override, summarize, and exit.
+4. Require visible streaming, no Apps or authentication failure, only the
+   declared test edit, the exact guest Cargo test passing, and host exit status
+   zero. No follow-up, repair, retry, native fallback, second model process, or
+   alternate test command is authorized.
 
-1. Inspect the exact produced diff and reject the unit if it touches an
-   undeclared path, production code when the task is test-only, VCS state, or
-   unrelated content.
-2. Run the same focused test independently through `nix develop`, then run any
-   additional deterministic check needed to validate the retained change.
-3. Observe the owned capsule through `fortlet list` and project-scoped status,
-   then use only packaged public `stop` and `reset` for cleanup.
-4. Require final public absence, empty MicroSandbox inventory, preserved
-   immutable layers and persistent harness state, and no unexpected repository
-   diff.
+## Deliverable 3 — Verify, clean up, and publish
 
-## Deliverable 3 — Correct only demonstrated defects
-
-1. Close the initial experiment terminally on its first failure and diagnose
-   without another provider request.
-2. If the failure proves nonconformance with an accepted FIP, implement the
-   smallest correction with deterministic regression evidence and update
-   conformance in the same checkpoint. A changed public or architectural
-   contract stops for a successor FIP and operator acceptance.
-3. After a deterministic correction and a new experiment declaration, at most
-   one fresh successor model unit may validate the corrected path. It is not a
-   retry of the terminal experiment.
-4. Two failures sharing an unresolved assumption stop the goal. Honest closure
-   with a remaining blocker is preferable to repeated provider attempts.
-
-## Deliverable 4 — Close and publish once
-
-1. Update conformance, README, overview, runbook, experiment index, GOAL, and
-   handoff only where the final evidence changes their claims.
-2. Run the complete standard verification set through `nix develop` and record
-   the local Nix host and result.
-3. Sign the final publishable tip, require hosted `Rust verification`, keep the
-   pull request evidence current, and mark it ready. Leave squash merge to the
-   operator.
-4. After operator merge, fetch `main`, prove exact reviewed-tree equality, and
-   remove only this goal's local and remote bookmark.
+1. Preserve and inspect the exact model diff. Reject any production, VCS, or
+   undeclared path change.
+2. Run the same focused test independently through `nix develop`, plus any
+   deterministic check required to validate the retained test.
+3. Observe the owned capsule through packaged list and status, then use only
+   packaged public stop/reset. Require final status `absent`, `no capsules`, and
+   raw inventory `[]`; preserve immutable layers and persistent harness state.
+4. Update experiment index, GOAL, handoff, conformance, and public docs only
+   where the recovered evidence changes a claim. Run the complete standard
+   gate through `nix develop`.
+5. Sign and publish the final `codex-firewall-recovery` tip, require hosted
+   `Rust verification`, keep the single PR accurate, and mark it ready. Leave
+   squash merge to the operator. After merge, prove exact tree equality and
+   remove only this GOAL's bookmark.
 
 ## Definition of Done
 
-1. An immutable packaged shim completes one useful Codex repository edit/test
-   task with streamed output, the intended diff, a successful in-capsule
-   project-tool command, and exact zero exit status.
-2. Independent host verification accepts the retained change, and no Apps,
-   authentication, EOF, PATH, terminal, or capsule-reconciliation failure is
-   observed.
-3. Public inventory, status, stop, and reset close the owned capsule to final
-   absence and empty MicroSandbox inventory without losing durable inputs.
-4. Any demonstrated Fortlet defect is either corrected and proven once under a
-   successor experiment or reported as the bounded terminal outcome.
-5. Conformance remains honest, all local and hosted gates pass, and one pull
-   request is ready for operator squash merge.
-
-## Terminal outcome
-
-The initial immutable work unit authenticated, streamed, and produced a correct
-test, but its exact Cargo command found the configured persistent-home target
-read-only inside Codex's workspace sandbox. Experiment 0034 closed rejected.
-The smallest correction moved this repository's guest Cargo target to ignored,
-guest-distinct `target/fortlet-guest`; focused and complete deterministic gates
-pass, and the useful model-produced regression test was retained.
-
-The sole authorized successor, Experiment 0035, then stopped before Codex
-launch when automatic first-use project provisioning could not resolve
-`deb.debian.org`. It made no provider request or repository edit and left
-public status absent with empty Fortlet and raw MicroSandbox inventories. No
-third process is authorized. The GOAL therefore closes as the bounded blocker
-per Definition of Done item 4 rather than claiming the ordinary Codex work loop
-is ready.
+1. Packaged cold preparation succeeds with the operator-approved firewall path
+   and an immediate public cache hit verifies the published project layer.
+2. One immutable packaged shim completes the corrected useful Codex edit/test
+   unit with streaming output and exact zero exit status.
+3. Independent host verification accepts the exact retained test, and no Apps,
+   authentication, EOF, PATH, Cargo-target, terminal, or reconciliation failure
+   is observed.
+4. Public cleanup ends at absence and empty inventories without deleting
+   durable inputs.
+5. Conformance remains honest, local and hosted gates pass, and one PR is ready
+   for operator squash merge.
 
 ## Excluded scope
 
-Do not add another harness, Apps authorization, workload leases, automatic or
-bulk cleanup, global removal for missing projects, restart, logs, persistent
-state purge, standalone installation, native Linux CI, remote execution,
-services, private project inputs, tool-layer management, structured output, a
-daemon, release, or unrelated product work.
+No product code, FIP, public contract, additional harness, Apps authorization,
+credential mechanism, firewall configuration change, network workaround,
+layer purge, workload lease, standalone installation, release, or unrelated
+work is in scope.
 
 ## Budget and escalation
 
-Engineering ceiling: two hours. External money is zero. Provider activity is
-limited to one initial model process and, only after a demonstrated correction
-and new terminal experiment identity, one successor model process. No unit may
-be retried or silently replaced.
+Engineering ceiling: 45 minutes. External money is zero. Runtime activity is
+limited to one cold public prepare, one immediate cache-hit verification, one
+Codex model process and prompt, one owned capsule, and public cleanup. The
+operator may approve only the expected local MicroSandbox firewall request.
 
-The accepted GOAL authorizes the `codex-work-readiness` bookmark and one draft
-pull request targeting `main` under FIP-0005. Stop for material scope expansion,
-a changed public contract, an undeclared provider request, a credential or data
-boundary anomaly, mutation outside the declared repository task, destructive
-or unowned cleanup, merge, or two failures sharing an unresolved assumption.
+Acceptance of this GOAL authorizes the `codex-firewall-recovery` bookmark and
+one draft PR under FIP-0005. Stop for a preparation failure after the firewall
+decision, an unexpected firewall target, a provider/authentication anomaly,
+any undeclared mutation, destructive or unowned cleanup, a second model
+process, changed scope, external spend, or merge.
 
 ## Verification
 
-Run focused deterministic checks while working. Before live dispatch and
-publication readiness, run the complete standard verification set from
-`docs/RUNBOOK.md` inside `nix develop`.
+Run focused checks while working. Run the complete standard verification set
+from `docs/RUNBOOK.md` through `nix develop` before dispatch and publication
+readiness.
