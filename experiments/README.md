@@ -51,3 +51,4 @@ scannable failure/win history of the project:
 - `0027-packaged-noninteractive-streaming.md` — accepted; one credential-free immutable-package Tact launch streamed the pinned version output, returned exact status zero, and cleaned up publicly before any model-backed unit.
 - `0028-managed-noninteractive-codex-successor.md` — rejected; streaming exposed Codex blocked reading an unclosed SDK stdin, then Fortlet enforced the 600-second bound and cleaned up publicly without retry.
 - `0029-packaged-codex-explicit-eof.md` — accepted; explicit streaming EOF advanced packaged Codex past its stdin read and returned exact status 1 after guest-loopback-only transport failures.
+- `0030-first-post-eof-daily-work-loop.md` — declared; one synthetic-auth DNS/TLS preflight will gate one packaged non-interactive Codex Rust edit/test task without retry.
