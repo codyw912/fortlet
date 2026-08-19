@@ -57,3 +57,4 @@ scannable failure/win history of the project:
 - `0033-global-owned-capsule-inventory.md` — accepted; immutable packaged inventory reported one real owned capsule from outside its project, and existing public stop/reset restored absence and empty raw inventory.
 - `0034-post-path-codex-work-loop.md` — rejected; the shimmed model produced the correct test, but the exact guest Cargo command found its persistent target read-only inside Codex's workspace sandbox and the altered in-process retry never settled.
 - `0035-workspace-cargo-codex-loop.md` — rejected; the sole successor stopped before Codex launch when automatic first-use provisioning lost guest DNS, leaving the corrected workspace Cargo target without provider-backed proof.
+- `0036-firewall-approved-codex-work-loop.md` — declared; one operator-present cold prepare and cache-hit check gate one corrected packaged Codex edit/test unit.
