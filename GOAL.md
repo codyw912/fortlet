@@ -2,6 +2,12 @@
 
 Status: active — operator-accepted 2026-08-19.
 
+The deterministic implementation is complete and Experiment 0033 is accepted.
+An immutable package listed one real owned running Tact capsule from outside
+its project; the listed path then selected unchanged public status, stop, and
+reset through final absence and empty MicroSandbox inventory. Goal closure,
+the final complete gate, and PR #10 readiness remain.
+
 ## Outcome
 
 Make Fortlet practical to operate across ordinary projects by adding one

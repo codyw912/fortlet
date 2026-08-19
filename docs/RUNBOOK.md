@@ -203,6 +203,11 @@ cargo test --bin fortlet management::tests::inventory
 cargo test --test management_failures list_is_empty_without_home_project_credentials_or_fortlet_state
 ```
 
+Experiment 0033 records the bounded real-runtime screen: immutable packaged
+inventory reported one owned running Tact capsule from outside its project,
+and the listed path selected packaged public status/stop/reset until final
+absence, `no capsules`, and raw MicroSandbox inventory `[]`.
+
 ## Project capsule management
 
 `fortlet status [harness]` reports `codex` and `tact` in registry order, or one

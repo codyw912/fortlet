@@ -58,10 +58,17 @@ implementation is complete at `866007214df6b45030a4bfae71e89a4083679ff8`;
 focused inventory, management-failure, conformance, formatting, and strict
 Clippy gates pass. Experiment 0033 is predeclared but has not dispatched.
 
-Run the complete standard gate against the frozen treatment, build and record
-its immutable package, verify the declared empty baseline, then execute
-Experiment 0033 exactly once. Close its record and conformance before the final
-goal gate and publication readiness.
+Experiment 0033 is accepted. Immutable package
+`/nix/store/72qrzh32iaxcvhvi97p8bi1gsj41gmqr-fortlet-0.1.0` reported the sole
+owned running Tact capsule from `/private/tmp`; the listed project selected
+packaged public status/stop/reset through final absence, `no capsules`, and raw
+inventory `[]`. The synthetic auth document is deleted, the working copy was
+unchanged by the live unit, and FIP-0011 is conformant.
+
+Close the GOAL, run the final complete standard gate, shape and sign the exact
+publishable tip, update and push only `capsule-inventory`, require hosted Rust
+verification, update PR #10 evidence, and mark it ready. Leave merge to the
+operator.
 
 Do not send a provider prompt; resume Experiments 0030–0032; add a harness;
 add bulk cleanup, leases, logs, restart, standalone installation, or Linux CI;

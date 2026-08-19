@@ -1,6 +1,6 @@
 # Experiment 0033: Global owned-capsule inventory
 
-Status: active — predeclared 2026-08-19
+Status: accepted — terminal 2026-08-19
 Design: FIP-0001, FIP-0003, FIP-0004, and FIP-0011
 Charter scope: `local-foundation/v1`
 
@@ -117,8 +117,62 @@ No VM or provider has run under this declaration.
 
 ## Results
 
-Pending.
+The exact frozen package built successfully at
+`/nix/store/72qrzh32iaxcvhvi97p8bi1gsj41gmqr-fortlet-0.1.0`. Before dispatch,
+the complete standard gate passed as recorded above, the Jujutsu working copy
+was empty, packaged `fortlet list` printed exactly `no capsules`, and the
+packaged raw MicroSandbox inventory printed `[]`.
+
+The sole synthetic-auth packaged Tact command ran from `/private/tmp`, exited
+zero in about 7.3 seconds, and printed only its pinned local version evidence:
+
+```text
+tact 0.3.7
+commit: f03a9e323b7a (unknown, clean)
+commit timestamp: 2026-08-07T09:05:20-04:00
+build timestamp: 2026-08-07T13:09:28+00:00
+target: aarch64-unknown-linux-gnu
+profile: release
+rustc: rustc 1.97.1 (8bab26f4f 2026-07-14)
+```
+
+There was no stderr, preparation, network, credential, provider, or model
+diagnostic. The one declared packaged inventory observation, also run from
+`/private/tmp`, printed exactly:
+
+```text
+/Users/cody/dev/fortlet<TAB>tact<TAB>running
+```
+
+Using that listed project and harness, packaged public cleanup then reported:
+
+```text
+tact<TAB>running
+tact<TAB>stopped
+tact<TAB>reset
+tact<TAB>absent
+no capsules
+[]
+```
+
+The last two lines are packaged Fortlet inventory and packaged raw
+MicroSandbox inventory respectively. The fixed synthetic auth document was
+deleted after cleanup, and the Jujutsu working copy remained empty. No retry,
+second capsule, real credential read, provider request, model prompt, network
+diagnostic, guest repository edit, direct capsule mutation, unrelated cleanup,
+or live-unit repository mutation occurred.
 
 ## Terminal Closure
 
-Pending.
+Accepted. The immutable production package consumed the real pinned SDK list
+shape, reconstructed and validated the Fortlet-owned project+harness capsule,
+and rendered its canonical project path and running state from outside the
+project. That path selected the unchanged project-scoped public cleanup
+surface, which restored exact absence and empty raw inventory.
+
+Actual cost was one exact-revision package build, one synthetic auth document,
+one Tact version launch lasting about 7.3 seconds, one owned capsule, one global
+present-state observation, one public cleanup sequence, zero retries, zero real
+credentials, zero provider requests, zero paid quota, and zero money. FIP-0011
+may become conformant; the next action is goal closure, the final complete gate,
+and PR #10 readiness.
