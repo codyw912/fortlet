@@ -7,7 +7,7 @@ external-token path avoided guest refresh, but a missing non-secret
 `last_refresh` field caused Codex to omit the bearer header and both model
 transports returned 401 before a response or edit. The deterministic repair and
 complete local gate now pass; Experiment 0023 is declared for one fresh bounded
-live confirmation and awaits separate dispatch-budget acceptance.
+live confirmation and is in flight under its separately accepted budget.
 
 Turn the proven isolated runtime into a deliberate, understandable daily-use
 workflow. Add the smallest explicit preparation surface, then dogfood one

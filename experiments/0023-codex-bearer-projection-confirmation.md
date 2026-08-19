@@ -1,6 +1,6 @@
 # Experiment 0023: Codex bearer projection confirmation
 
-Status: declared
+Status: in flight — authorized 2026-08-18
 Design: FIP-0001, FIP-0002, FIP-0006, FIP-0007, and FIP-0008
 Charter scope: `local-foundation/v1`
 
@@ -133,8 +133,19 @@ remote mutation.
 
 ## Results
 
-Not dispatched.
+The operator accepted the exact declared budget on 2026-08-18. Immediately
+before dispatch, the agent froze this baseline at `2026-08-19T02:40:07Z`:
+
+1. `jj status` reported an empty working copy above declaration checkpoint
+   `8d7fcebf`.
+2. The treatment resolved exactly to
+   `adc9b0389ea8d30ad3ac012df58424c59b8284f3`.
+3. Both project-input hashes matched the declared values.
+4. The immutable public CLI reported `codex<TAB>absent`.
+5. The pinned MicroSandbox CLI reported `No sandboxes found.`
+
+The operator-run unit is authorized but has not yet produced an observation.
 
 ## Terminal Closure
 
-Pending.
+Pending the authorized operator-run unit.
