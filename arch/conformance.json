@@ -272,6 +272,14 @@
         "experiments/0029-packaged-codex-explicit-eof.md"
       ],
       "gaps": []
+    },
+    {
+      "proposal": "0011",
+      "title": "Global owned-capsule inventory",
+      "status": "unimplemented",
+      "modules": [],
+      "tests": [],
+      "gaps": []
     }
   ]
 }
