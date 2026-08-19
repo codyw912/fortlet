@@ -1,6 +1,6 @@
 # Experiment 0028: Managed non-interactive Codex successor
 
-Status: declared — 2026-08-19
+Status: rejected — terminal 2026-08-19
 Design: FIP-0001, FIP-0002, FIP-0005, FIP-0008, FIP-0009, and FIP-0010
 Charter scope: `local-foundation/v1`
 
@@ -100,8 +100,49 @@ stock-Codex compatibility fixtures then passed against local fake servers.
 
 ## Results
 
-Pending.
+Immediately before dispatch, the working copy was empty, packaged public status
+reported `codex<TAB>absent`, and the packaged MicroSandbox CLI reported `[]`.
+The frozen command was launched once. It immediately streamed this stderr:
+
+```text
+Reading additional input from stdin...
+```
+
+It then emitted no more output. During the wait, the operator reported a macOS
+firewall popup asking whether `msb` could reach the configured DNS server; the
+popup's final disposition was not independently observed. Exactly 600 seconds
+after the last output event, Fortlet killed the guest command and returned host
+status 1 with:
+
+```text
+fortlet: terminal stage failed; retry interactively from a supported terminal: non-interactive command exceeded its 600-second inactivity ceiling
+```
+
+There was no model response and no `codex_apps`, HTTP 451,
+`no_biscuit_no_service`, or MCP-startup-incomplete diagnostic. No second prompt
+or process was launched. Packaged public cleanup reported
+`codex<TAB>running`, `codex<TAB>stopped`, `codex<TAB>reset`, and finally
+`codex<TAB>absent`; the final MicroSandbox inventory was `[]`.
+
+Post-terminal source inspection found that Codex 0.147.0 emits the observed
+line immediately before blocking in `read_to_end(stdin)`. MicroSandbox 0.6.8's
+streaming dispatcher records `StdinMode::Null` in host-only options but neither
+places a stdin mode in `ExecRequest` nor sends the empty `ExecStdin` frame that
+means EOF. Its `StdinMode::Bytes` and `ExecSink::close` paths do send that
+frame. The Codex process therefore had not advanced to its model request; the
+firewall popup cannot explain this process-level wait.
 
 ## Terminal Closure
 
-Pending.
+Rejected. The exact response and zero-exit criteria failed because the first
+streaming implementation relied on MicroSandbox's documented null-stdin mode,
+which does not close guest stdin in the pinned streaming path. Fortlet's new
+visibility and failure bound worked: it exposed the wait immediately, killed
+only the command at 600 seconds, returned the one interactive correction with
+status 1, preserved the capsule, and cleaned up publicly.
+
+Actual cost was one launched prompt process, one owned capsule, 600 seconds of
+post-output inactivity, zero model responses, zero tool calls, no retry, and
+unknown provider quota because Codex never passed its stdin read. The next
+action is an in-scope explicit-EOF correction and credential-free regression;
+the accepted GOAL prohibits another model-backed attempt.
