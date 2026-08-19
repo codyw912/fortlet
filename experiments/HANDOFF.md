@@ -18,8 +18,9 @@ conformance, and `nix flake check`; Nix emitted only its expected incompatible
 The immutable successor treatment is declaration revision
 `95fb7607e74dff0aaf4f7e69ee94d1d7661a146d` and package
 `/nix/store/68vqsxikz7a12sqyrd1518hkz9w9mxq3-fortlet-0.1.0`. The final
-documentation tree passed the same complete gate. It still requires signing,
-bookmark advance, push, hosted `Rust verification`, and PR-ready transition.
+documentation tree passed the same complete gate. Its publishable tip is
+signed, the bookmark is published, hosted `Rust verification` passed, and PR
+#11 is ready. Only operator review and squash merge remain.
 
 ## Product and retained change
 
@@ -64,12 +65,9 @@ all deterministic evidence is green.
 
 ## Next action
 
-Run the final complete verification set through `nix develop`, checkpoint the
-terminal records, inspect `jj log -r 'main..@'`, sign the publishable tip,
-advance and push only `codex-work-readiness`, require hosted `Rust
-verification`, update PR #11 with the bounded outcome, and mark it ready for
-the operator. Do not dispatch Codex again, warm or replace the failed project
-layer to manufacture acceptance, mutate `main`, or merge.
+Review ready PR #11 and leave squash merge to the operator. Do not dispatch
+Codex again, warm or replace the failed project layer to manufacture
+acceptance, mutate `main`, or merge.
 
 After the operator squash-merges, fetch `main`, prove exact reviewed-tree
 equality, and remove only this goal's local and remote bookmark. A later GOAL
