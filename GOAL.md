@@ -1,9 +1,9 @@
 # GOAL: Harden the first daily Fortlet session
 
-Status: active. FIP-0007 was accepted and its deterministic implementation is
-complete. Experiment 0021 rejected the first daily session at credential
-refresh. FIP-0008 is accepted for a host-owned renewable credential lease and
-its implementation is authorized.
+Status: active. FIP-0007 and FIP-0008 are accepted and their deterministic
+implementations are complete. Experiment 0021 rejected the first daily session
+at credential refresh. Successor Experiment 0022 is declared for the renewable
+credential path and awaits separate dispatch-budget acceptance.
 
 Turn the proven isolated runtime into a deliberate, understandable daily-use
 workflow. Add the smallest explicit preparation surface, then dogfood one
@@ -21,9 +21,10 @@ and FIP-0008 in full.
 2. Accept only a contract that keeps access and refresh credentials
    guest-unreadable, preserves the native Codex terminal, renews an active
    session without silently restarting a shared capsule, and fails closed.
-3. FIP-0008 is accepted after review of Codex, MicroSandbox, iron-proxy, and
-   Infisical Agent Proxy. Keep its conformance `unimplemented` until code and
-   tests establish the public contract.
+3. FIP-0008 was accepted after review of Codex, MicroSandbox, iron-proxy, and
+   Infisical Agent Proxy. Its deterministic implementation and stock-Codex
+   compatibility fixture are complete; conformance remains partial until the
+   declared ordinary-session experiment runs.
 
 ## Deliverable 1 — Accept explicit preparation
 
@@ -61,9 +62,9 @@ and FIP-0008 in full.
    credential absence, provisioning inputs, cache-hit idempotence, both
    harnesses, unconfigured projects, failure cleanup, and absence of persistent
    capsule or harness state.
-2. Predeclare one bounded daily-session experiment only after the deterministic
-   and package gates pass. Separate the explicit prepare observation from the
-   operator-run interactive work observation in its record.
+2. Experiment 0022 is the predeclared bounded daily-session unit. Dispatch it
+   only after separate operator acceptance of its exact budget; do not resume
+   Experiment 0021.
 3. Exercise an ordinary Codex session from a nested Fortlet directory, use the
    project-provided Cargo and Jujutsu tools for one real edit/test loop, and
    verify a subsequent invocation reuses the capsule and persistent Cargo

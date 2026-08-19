@@ -14,11 +14,12 @@ Hosted Rust verification passed, the declared branch bookmarks were removed,
 and the working copy began this mission as an empty change directly on fetched
 `main`.
 
-The current FIP-0007 implementation gate passed 57 unit tests, 28 integration
-tests, formatting, strict all-target/all-feature Clippy, conformance,
-`nix flake check`, and `nix build .#fortlet` on `aarch64-darwin`. Nix emitted
-only the known missing app-metadata warning and omitted incompatible
-`x86_64-linux` on that host.
+The FIP-0008 implementation checkpoint `e7b1d5a26693` passed 69 unit tests, 28
+non-ignored integration tests, formatting, strict all-target/all-feature
+Clippy, conformance, `nix flake check`, and `nix build .#fortlet` on
+`aarch64-darwin`. The separate stock Codex 0.147.0 compatibility fixture also
+passed against local fake model and OAuth-refresh servers. Nix emitted only the
+known missing app-metadata warning and omitted incompatible `x86_64-linux`.
 
 ## Current product surface
 
@@ -49,6 +50,13 @@ Public stop/reset restored absence, all immutable layers and Cargo cache remain,
 the repository was unchanged, and the operator removed the possible guest auth
 residue without exposing it.
 
+The accepted FIP-0008 implementation now loads only file-backed ChatGPT auth,
+renews inside a one-hour safety window under a source-scoped lock, atomically
+updates the host file, projects Codex `chatgptAuthTokens` with an empty guest
+refresh field, and rotates both MicroSandbox broker secrets live. Tact keeps
+its prior managed projection. Token-derived persistent fingerprints were
+removed.
+
 ## Accepted contract
 
 FIP-0007 adds:
@@ -72,22 +80,30 @@ acceptance: it validates the broker pattern and renews supported dynamic-secret
 leases, but it cannot renew an existing Codex ChatGPT OAuth login and would
 make an Infisical control plane plus an Enterprise feature required.
 
+## Declared next experiment
+
+Experiment 0022 is declared but not dispatched. It pins checkpoint
+`e7b1d5a26693`, package
+`/nix/store/kym4by5g33jw1z3wdg9p70manajzmnx0-fortlet-0.1.0`, one non-prompt
+version launch, one shimmed interactive session, one exact prompt, at most one
+host refresh, one owned capsule, one focused test, zero remote mutation, no
+retry, and 15 elapsed minutes. The immutable CLI currently reports
+`codex<TAB>absent`. Dispatch requires separate operator budget acceptance.
+
 ## What to do next
 
-1. Implement accepted FIP-0008. It selects a Codex-specific host renewal lease
-   over MicroSandbox's existing live secret rotation and keeps Infisical Agent
-   Proxy and iron-proxy deferred.
+1. Obtain explicit acceptance of Experiment 0022's exact budget, then give the
+   operator its frozen fish-shell command sequence. Do not dispatch before that
+   acceptance.
 2. Preserve the accepted FIP-0007 implementation; its conformance remains
    partial only because the daily edit/test unit could not begin.
 3. Require that no refresh token or durable provider credential becomes guest
    readable and that login cannot silently persist a real guest credential.
    Treat MCP biscuit authorization separately.
-4. Implement deterministic source locking, atomic host refresh, external-token
-   projection compatibility, live broker rotation, and a process-bounded
-   renewal lease before any new live prompt.
-5. Predeclare a new experiment rather than retrying 0021. Publication remains
-   one later FIP-0005 packet after the daily work unit succeeds.
+4. Record the sole session, inspect the exact diff, and close Experiment 0022
+   terminally. Publication remains one later FIP-0005 packet after the daily
+   work unit succeeds.
 
-Do not retry the prompt, add a refresh token to the guest projection, start a
-new experiment, remove verified layers, add global inventory/pruning, or begin
-standalone distribution before FIP-0008 is implemented and verified.
+Do not resume Experiment 0021, add a refresh token to the guest projection,
+dispatch Experiment 0022 without budget acceptance, remove verified layers,
+add global inventory/pruning, or begin standalone distribution.
