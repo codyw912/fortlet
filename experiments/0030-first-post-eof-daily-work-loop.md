@@ -1,6 +1,6 @@
 # Experiment 0030: First post-EOF daily Codex work loop
 
-Status: declared — 2026-08-19
+Status: rejected — 2026-08-19
 Design: FIP-0001, FIP-0002, FIP-0005, FIP-0006, FIP-0007, FIP-0008,
 FIP-0009, and FIP-0010
 Charter scope: `local-foundation/v1`
@@ -206,8 +206,41 @@ Clippy passed, the conformance test passed, and `nix flake check` built the
 package successfully on `aarch64-darwin`. Nix emitted only its expected notice
 that the incompatible `x86_64-linux` system was omitted.
 
-The frozen repository work unit remains pending.
+### Frozen repository work unit
+
+The final pre-dispatch working copy was clean, public status was
+`codex<TAB>absent`, and packaged MicroSandbox inventory was `[]`. The frozen
+command ran exactly once. Codex 0.147.0 advanced through stdin immediately,
+showed the managed session, streamed visible inspection and edit progress, and
+showed no Apps warning. It changed only test code in `src/runtime.rs`: it
+renamed the declared test, added fake-session tracking for an event read before
+stdin closure, and asserted that the ordering violation did not occur.
+
+Codex invoked the exact focused Cargo command once, but its guest shell returned
+status 127 immediately with `cargo: command not found`. Codex reported that
+failure honestly and its own process exited with host status zero. No second
+prompt, tool-network request, follow-up, retry, interactive fallback, or native
+fallback occurred. The independent host rerun through `nix develop` passed the
+renamed test: 1 passed, 0 failed, with 81 filtered out.
+
+The sole work unit is rejected because the requested in-capsule test did not
+run. Read-only diagnosis found the expected published `cargo`, `rustc`, and
+`jj` files in the selected project layer, but all three had host mode 0600.
+That makes commands in the layer's declared `PATH` non-executable when the
+layer is later mounted read-only. This is a Fortlet-owned FIP-0006 conformance
+defect: the accepted contract requires executable permissions in the output
+digest and requires the fixture to execute a focused Fortlet test inside the
+guest boundary.
+
+After the model process, public cleanup reported `running`, `stopped`, `reset`,
+then `absent`; packaged MicroSandbox inventory was `[]`. The intended test-only
+diff is retained as evidence and passed its independent host check.
 
 ## Terminal Closure
 
-Pending.
+Rejected. Credential-free DNS/TLS readiness and FIP-0010 streaming/EOF behavior
+passed, but the ordinary edit/test loop stopped at the project tool layer:
+published executable modes did not survive into reusable capsule activation.
+The result is attributable, bounded, publicly cleaned up, and preserved without
+a model retry. A separate offline correction may repair the demonstrated
+FIP-0006 defect; it must not spend another provider unit under this experiment.

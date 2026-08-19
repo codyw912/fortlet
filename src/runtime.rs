@@ -627,7 +627,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn non_interactive_stream_closes_stdin_before_returning() {
+    async fn non_interactive_stream_closes_stdin_before_reading_events() {
         let mut session = FakeExecutionSession::new([ProcessEvent::Exited(0)]);
 
         forward_non_interactive(&mut session, &mut Vec::new(), &mut Vec::new(), None)
@@ -635,6 +635,7 @@ mod tests {
             .unwrap();
 
         assert!(session.stdin_closed);
+        assert!(!session.event_read_before_stdin_closed);
     }
 
     #[tokio::test]
@@ -740,6 +741,7 @@ mod tests {
     struct FakeExecutionSession {
         events: VecDeque<ProcessEvent>,
         stdin_closed: bool,
+        event_read_before_stdin_closed: bool,
         killed: Option<Arc<AtomicBool>>,
         exit_after_kill: Option<i32>,
         stall_after_kill: bool,
@@ -750,6 +752,7 @@ mod tests {
             Self {
                 events: events.into_iter().collect(),
                 stdin_closed: false,
+                event_read_before_stdin_closed: false,
                 killed: None,
                 exit_after_kill: None,
                 stall_after_kill: false,
@@ -760,6 +763,7 @@ mod tests {
             Self {
                 events: VecDeque::from([ProcessEvent::Started]),
                 stdin_closed: false,
+                event_read_before_stdin_closed: false,
                 killed: Some(killed),
                 exit_after_kill: Some(exit_after_kill),
                 stall_after_kill: false,
@@ -770,6 +774,7 @@ mod tests {
             Self {
                 events: VecDeque::from([ProcessEvent::Started]),
                 stdin_closed: false,
+                event_read_before_stdin_closed: false,
                 killed: Some(killed),
                 exit_after_kill: None,
                 stall_after_kill: true,
@@ -784,6 +789,7 @@ mod tests {
         }
 
         async fn next_event(&mut self) -> Result<Option<ProcessEvent>> {
+            self.event_read_before_stdin_closed |= !self.stdin_closed;
             if let Some(event) = self.events.pop_front() {
                 return Ok(Some(event));
             }
