@@ -3,7 +3,8 @@
 Audience: a fresh agent session. `GOAL.md` is normative and active. Read
 FIP-0001, FIP-0002, FIP-0005, FIP-0006, accepted FIP-0007, and accepted FIP-0008
 in full before implementation. Experiments 0001 through 0021 are terminally
-closed, Experiment 0022 is terminally rejected, and no experiment is active.
+closed, Experiment 0022 is terminally rejected, and Experiment 0023 is declared
+but not dispatched.
 
 ## Verified landed baseline
 
@@ -112,9 +113,8 @@ package is `/nix/store/yql3hf31rf5qgf8vccmw75b2lz5z6n23-fortlet-0.1.0`.
 
 ## What to do next
 
-1. Declare a fresh bounded live confirmation for the `last_refresh` repair.
-   Do not retry the terminal treatment, and obtain separate operator acceptance
-   before dispatch.
+1. Obtain separate operator acceptance of Experiment 0023's exact budget, then
+   dispatch its frozen fish-shell sequence. Do not retry Experiment 0022.
 2. Preserve the accepted FIP-0007 implementation; its conformance remains
    partial only because the daily edit/test unit could not begin.
 3. Require that no refresh token or durable provider credential becomes guest

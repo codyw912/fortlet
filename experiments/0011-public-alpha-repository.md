@@ -1,6 +1,6 @@
 # Experiment 0011: Public alpha repository
 
-Status: declared
+Status: accepted — terminal
 Design: existing accepted FIPs; no product mechanism changes
 Charter scope: `local-foundation/v1`
 

@@ -6,7 +6,8 @@ at credential refresh. Successor Experiment 0022 is terminally rejected: the
 external-token path avoided guest refresh, but a missing non-secret
 `last_refresh` field caused Codex to omit the bearer header and both model
 transports returned 401 before a response or edit. The deterministic repair and
-complete local gate now pass; a fresh bounded live confirmation remains.
+complete local gate now pass; Experiment 0023 is declared for one fresh bounded
+live confirmation and awaits separate dispatch-budget acceptance.
 
 Turn the proven isolated runtime into a deliberate, understandable daily-use
 workflow. Add the smallest explicit preparation surface, then dogfood one
