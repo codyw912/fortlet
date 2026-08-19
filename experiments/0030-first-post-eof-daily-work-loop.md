@@ -199,8 +199,14 @@ unsupported display flag `--output json`; it failed locally without mutation
 and was corrected to `--format json`. This did not repeat the declared network
 probe.
 
-The credential-free preflight is accepted. The complete pre-model gate and
-frozen repository work unit remain pending.
+The credential-free preflight is accepted. After its cleanup, the complete
+standard gate passed through `nix develop`: all 82 unit tests and all enabled
+integration tests passed, formatting was clean, strict all-target/all-feature
+Clippy passed, the conformance test passed, and `nix flake check` built the
+package successfully on `aarch64-darwin`. Nix emitted only its expected notice
+that the incompatible `x86_64-linux` system was omitted.
+
+The frozen repository work unit remains pending.
 
 ## Terminal Closure
 
