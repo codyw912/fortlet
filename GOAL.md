@@ -1,111 +1,124 @@
-# GOAL: Make managed non-interactive Codex execution reliable
+# GOAL: Prove one ordinary managed Codex work loop
 
-Status: complete — 2026-08-19, pending operator merge of PR #8. FIP-0010 is
-accepted and conformant. Managed non-interactive execution now streams output,
-closes stdin explicitly, preserves exact exit status, and gives Codex a fixed
-600-second output-inactivity ceiling with bounded command-only cleanup.
+Status: active — operator-accepted 2026-08-19. PR #8 merged the FIP-0010
+non-interactive correction to `main` at
+`53378399bfa581d5a7b3db8538b234dc3733bb26`; its tree matched the reviewed
+signed tip, the goal bookmark was removed locally and remotely, and the working
+copy began clean directly above merged `main`.
 
-Experiment 0028 consumed the one authorized model-backed successor and exposed
-that MicroSandbox 0.6.8 streaming null stdin does not send guest EOF. It
-terminally failed at the new supported bound and was not retried. The in-scope
-explicit-EOF correction then passed the immutable packaged, credential-free
-Codex regression in Experiment 0029. Post-correction model success remains
-deliberately unclaimed.
+Prove that the corrected packaged Fortlet path is suitable for ordinary daily
+work: establish guest DNS/TLS readiness without provider credentials, then run
+one bounded non-interactive Codex task that makes one small real repository
+change, runs its declared check, streams visible progress, and exits cleanly.
+Separate host firewall readiness from Fortlet behavior and retain a failed unit
+honestly rather than iterating until it appears successful.
 
-Determine whether the non-interactive failure belongs to Fortlet,
-MicroSandbox 0.6.8, or Codex 0.147.0. Make the existing managed non-interactive
-surface complete with correct output and exit status, or fail within an
-explicit supported bound with one actionable correction when Fortlet cannot
-make the upstream path reliable.
+Before implementation or experiment dispatch, read FIP-0001, FIP-0002,
+FIP-0005, FIP-0006, FIP-0007, FIP-0008, FIP-0009, and FIP-0010 in full.
 
-Before implementation, read FIP-0001, FIP-0002, FIP-0005, FIP-0008, and
-FIP-0009 in full.
+## Deliverable 0 — Verify and freeze the daily-use unit
 
-## Deliverable 0 — Reproduce and attribute the hang
+1. Reverify the merged `main` baseline, conformance, clean working copy, public
+   Codex absence, and empty MicroSandbox inventory before relying on the prior
+   handoff.
+2. Select one useful, low-risk repository maintenance task with a narrow file
+   boundary and an existing or predeclared deterministic check. The task must
+   be representative of an edit/test loop, not a synthetic response-only
+   prompt or an architecture change.
+3. Freeze the exact immutable Fortlet package, project path, prompt, permitted
+   files, expected check, lifecycle cleanup, and acceptance criteria in one
+   experiment record before any external request.
+4. Do not create a new public command, configuration key, timeout, credential
+   policy, or workload-lease semantic. Any such need requires a new proposal
+   and operator acceptance before implementation.
 
-1. Preserve Experiment 0024 as terminal evidence; do not retry it or infer a
-   cause from silence.
-2. Reproduce with credential-free local fixtures before any provider request.
-   Prefer the smallest faithful Fortlet, MicroSandbox, and stock-Codex controls
-   that separate command completion from model authentication.
-3. Inspect Fortlet's non-interactive attachment and renewal selection,
-   MicroSandbox 0.6.8 exec completion semantics, and Codex 0.147.0 `exec`
-   shutdown behavior from their pinned sources.
-4. Determine whether the harness process remains alive, exits without an SDK
-   event, or is kept open by Fortlet. Record observed facts separately from
-   inference and retain exact commands and outcomes.
+## Deliverable 1 — Establish credential-free network readiness
 
-## Deliverable 1 — Fix only the owned boundary
+1. Before the model task, use one disposable synthetic-auth Codex capsule and
+   the packaged MicroSandbox runtime to test the same guest network path's DNS
+   resolution and TLS reachability without sending a bearer token, model
+   request, prompt, repository content, or paid traffic.
+2. Keep the probe bounded, record its exact destination and output, and clean
+   up through packaged public stop/reset. The final public status must be
+   absent and MicroSandbox inventory empty.
+3. Fortlet must not read or change macOS firewall configuration. The operator
+   may approve one ordinary OS firewall prompt manually while the already-
+   declared probe is running; record whether a prompt appeared and whether the
+   same process then completed.
+4. If DNS/TLS remains unavailable, terminate the experiment with one manual
+   host correction and do not spend the model unit. Do not add firewall
+   automation or general network diagnostics under this GOAL.
 
-1. If the defect is inside Fortlet's accepted adapter, runtime attachment, or
-   credential-lease contracts, implement the smallest correction under the
-   existing FIPs.
-2. Preserve stdout, stderr, requested arguments, exit status, cancellation,
-   current directory, and credential renewal for both interactive and
-   non-interactive launches.
-3. If diagnosis instead requires a new public timeout/configuration contract or
-   changes workload-lease semantics, draft FIP-0010 and obtain operator
-   acceptance before production implementation.
-4. If the pinned upstream path cannot be made reliable within the accepted
-   boundary, fail closed within a justified bound and report one actionable
-   correction. Do not silently fall back to native Codex or hide output.
+## Deliverable 2 — Run one real managed work loop
 
-## Deliverable 2 — Establish deterministic evidence
+1. Only after the credential-free preflight and complete standard gate pass,
+   launch the frozen immutable package once through
+   `fortlet run codex --project /Users/cody/dev/fortlet -- exec ...`.
+2. Send exactly one prompt for the predeclared repository task. Require Codex
+   to stay within the permitted files, use no unrelated tools or network
+   resources, run the declared deterministic check, report its result, and
+   terminate normally.
+3. Require streamed progress before completion, no Apps warning, exact host
+   status zero, the intended diff only, and an independently repeated host
+   check after Codex exits.
+4. Regardless of outcome, record the first result without retry. Verify the
+   reusable capsule remains publicly manageable, then stop/reset it and require
+   final absence and empty MicroSandbox inventory.
 
-1. Add a credential-free regression fixture that would fail for the observed
-   hang and proves bounded completion, output forwarding, and exact exit status.
-2. Cover the credential-renewal task's relationship to command completion and
-   cancellation without reading, printing, or contacting provider credentials.
-3. Keep interactive Codex, Tact, Apps disablement, capsule lifecycle commands,
-   persistent state, and user-configured MCP behavior unchanged.
-4. Run the pinned stock-Codex compatibility fixtures when diagnosis or code
-   touches their boundary.
+## Deliverable 3 — Close and publish once
 
-## Deliverable 3 — Verify and publish once
-
-1. After deterministic evidence passes, declare one bounded successor
-   experiment for exactly one short model-backed non-interactive prompt.
-2. Require the prompt response, clean command termination, correct exit status,
-   no Apps warning, and public stop/reset cleanup. Do not retry a failed unit.
-3. Update conformance, runbook, GOAL, and handoff with the exact supported
-   surface and any remaining upstream limitation.
-4. Run the complete standard verification set through `nix develop`, then use
-   one goal bookmark and pull request under FIP-0005. The operator performs the
-   squash merge.
+1. Attribute any failure to host network readiness, Fortlet, MicroSandbox, or
+   Codex using the preflight, streamed output, exit status, and pinned source;
+   do not infer from silence.
+2. Fix only a demonstrated Fortlet-owned defect already governed by accepted
+   FIPs. Do not issue a second model prompt to validate a correction.
+3. Update conformance, runbook, GOAL, experiment index, and handoff with the
+   exact supported surface and remaining limitation. Preserve rejected units.
+4. Run the complete standard verification set through `nix develop`, including
+   any pinned compatibility fixture whose boundary changed.
+5. Use one descriptive bookmark and one draft PR under FIP-0005. Sign the final
+   tip, require hosted `Rust verification`, mark the PR ready, and leave the
+   squash merge to the operator.
 
 ## Definition of Done
 
-1. `fortlet run codex -- exec ...` no longer waits indefinitely after an
-   otherwise completed or failed non-interactive request.
-2. Successful output and the harness exit status reach the host exactly; a
-   supported failure is bounded and gives one actionable correction.
-3. Interactive Codex, Tact, Apps disablement, model authentication/renewal, and
-   public lifecycle behavior retain their existing evidence.
-4. No credential content, browser state, Apps authorization, host Codex config,
-   or new secret class becomes guest-readable or enters test output.
-5. Deterministic and packaged evidence passes, FIP conformance is honest, the
-   local and hosted gates pass, and the PR is ready for operator merge.
+1. A credential-free control proves guest DNS/TLS readiness without credential
+   or model traffic, or terminates with one verified manual host correction
+   before model spend.
+2. The sole model-backed unit either completes the declared repository
+   edit/test loop with visible progress and exact status zero, or fails within
+   the accepted FIP-0010 bound with attributable evidence and one correction.
+3. No unexpected repository file, credential content, host configuration,
+   Apps authorization, browser state, or external resource is read or changed.
+4. Public lifecycle cleanup restores Codex absence and an empty MicroSandbox
+   inventory while preserving intended durable Fortlet layers and cache.
+5. Experiment records are terminal, conformance is honest, local and hosted
+   gates pass, and the single PR is ready for operator merge.
 
 ## Excluded scope
 
-Do not add general logs, restart, global inventory, cross-project cleanup,
-standalone installation, a Codex fork, an alternative runtime, remote
-execution, a proxy, a new credential class, hosted CI changes, repository
-settings, release, tag, or package publication.
+Do not add firewall automation, a general network diagnostic command, logs,
+restart, global inventory, cross-project cleanup, standalone installation, a
+Codex fork, an alternative runtime, remote execution, a proxy, a new secret
+class, hosted CI changes, repository settings, release, tag, package
+publication, or an unrelated product feature.
 
 ## Budget and escalation
 
-Engineering ceiling: two hours. External money and paid quota remain zero
-beyond one short operator-authorized model-backed non-interactive prompt after
-deterministic evidence passes. This accepted GOAL authorizes one descriptive
-bookmark and one draft PR targeting `main` under FIP-0005. Stop for FIP-0010
-acceptance, material scope expansion, a second provider prompt, destructive or
-unrelated mutation, merge, any credential or data-boundary anomaly, or two
-failures sharing an unresolved assumption.
+Engineering ceiling: 90 minutes. External money and paid quota remain zero
+beyond one short operator-authorized model-backed Codex work unit after the
+credential-free preflight and complete gate pass. This GOAL, once accepted,
+authorizes one descriptive bookmark and one draft PR targeting `main` under
+FIP-0005.
+
+Stop for material scope expansion, a new architecture contract, a second model
+prompt, automated firewall mutation, destructive or unrelated mutation, merge,
+any credential or data-boundary anomaly, or two failures sharing an unresolved
+assumption.
 
 ## Verification
 
-Run focused source and regression controls during diagnosis. Before live
-dispatch and readiness, run the complete standard verification set from
-`docs/RUNBOOK.md` inside `nix develop` plus any pinned compatibility command
-declared by the accepted design.
+Run focused deterministic checks while selecting and rehearsing the unit.
+Before live dispatch and readiness, run the complete standard verification set
+from `docs/RUNBOOK.md` inside `nix develop`, plus any pinned compatibility
+command required by a touched boundary.
