@@ -12,10 +12,12 @@ progress from a still-running request. FIP-0010 changes Fortlet's generic
 non-terminal attachment from collected to streaming execution and assigns only
 Codex a ten-minute inactivity ceiling.
 
-The treatment is checkpoint `7d15cddefcff`, with focused streaming, deadline,
-renewal-cancellation, conformance, formatting, and strict Clippy checks already
-green. The exact immutable Nix package and full revision will be frozen and
-recorded before dispatch.
+The treatment is revision
+`c520e57823214cd44e56e15a714c35d972ddba04`, including implementation
+checkpoint `7d15cddefcff`. Its immutable aarch64-darwin package is
+`/nix/store/pll98kyfsy734z2g0r5kxvyb8drhriz0-fortlet-0.1.0`. Focused
+streaming, deadline, renewal-cancellation, conformance, formatting, and strict
+Clippy checks were green before the package build.
 
 ## Hypothesis and Production Mechanism
 
