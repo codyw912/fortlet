@@ -1,6 +1,6 @@
 # Experiment 0035: Workspace-backed Cargo Codex loop
 
-Status: declared — no live unit dispatched
+Status: rejected — automatic first-use provisioning lost DNS before Codex launch
 Design: FIP-0001, FIP-0002, FIP-0003, FIP-0004, FIP-0005, FIP-0006,
 FIP-0007, FIP-0008, FIP-0009, FIP-0010, and FIP-0011
 Charter scope: `local-foundation/v1`
@@ -163,8 +163,36 @@ project and reported `CODEX_THREAD_ID`, `CODEX_SANDBOX`,
 `CODEX_SANDBOX_NETWORK_DISABLED`, and `CODEX_CI` absent. Packaged status
 reported `codex<TAB>absent`, packaged `fortlet list` reported `no capsules`,
 and packaged raw MicroSandbox inventory was `[]`. No live unit has been
-dispatched yet.
+dispatched at that point.
+
+Herdr then dispatched the exact temporary fish launcher once from pane
+`wA:p9`. Foreground-process inspection showed only that launcher, the immutable
+package's Codex shim, and one automatically selected
+`fortlet-project-provision-*` MicroSandbox. The shim printed the expected
+first-use preparation notice, but the preparation recipe exited 100 after 3
+minutes 21 seconds. Apt reported temporary DNS failure resolving
+`deb.debian.org`, then could not locate `libcap-ng-dev` or download the pinned
+`libcap-ng0:arm64` package.
+
+The failure occurred before Codex launched, so there was no provider request,
+target report, streamed model output, repository edit, or guest Cargo command.
+The launcher returned `codex_exit=1` and the Herdr pane returned to its idle
+fish shell. The working copy remained clean. Read-only post-failure checks
+reported packaged status `codex<TAB>absent`, packaged `fortlet list` output
+`no capsules`, and raw packaged MicroSandbox inventory `[]`. The temporary
+prompt and launcher files were deleted; no direct capsule or layer mutation was
+performed. On the terminal documentation tree, the complete standard gate
+passed again: all tests, formatting, strict Clippy, conformance, and
+`nix flake check`, with only the expected incompatible `x86_64-linux` omission
+warning.
 
 ## Terminal Closure
 
-Pending.
+Rejected. The corrected workspace-backed Cargo target passed every deterministic
+gate, but the sole authorized successor could not reach Codex because normal
+automatic first-use provisioning lost guest DNS. This run therefore provides
+no provider-backed proof of the corrected work loop. Experiment 0034 already
+consumed the initial model process and this terminal successor consumed the
+only permitted post-correction dispatch, so the GOAL authorizes no third
+process. Preserve the failure as a bounded daily-readiness blocker rather than
+retrying or silently substituting an already-warm environment.

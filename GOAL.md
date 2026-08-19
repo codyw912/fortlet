@@ -1,6 +1,6 @@
 # GOAL: Close the Codex daily work loop
 
-Status: active — operator accepted 2026-08-19
+Status: active — bounded terminal outcome reached; publication pending
 
 ## Outcome
 
@@ -103,6 +103,23 @@ in full.
    successor experiment or reported as the bounded terminal outcome.
 5. Conformance remains honest, all local and hosted gates pass, and one pull
    request is ready for operator squash merge.
+
+## Terminal outcome
+
+The initial immutable work unit authenticated, streamed, and produced a correct
+test, but its exact Cargo command found the configured persistent-home target
+read-only inside Codex's workspace sandbox. Experiment 0034 closed rejected.
+The smallest correction moved this repository's guest Cargo target to ignored,
+guest-distinct `target/fortlet-guest`; focused and complete deterministic gates
+pass, and the useful model-produced regression test was retained.
+
+The sole authorized successor, Experiment 0035, then stopped before Codex
+launch when automatic first-use project provisioning could not resolve
+`deb.debian.org`. It made no provider request or repository edit and left
+public status absent with empty Fortlet and raw MicroSandbox inventories. No
+third process is authorized. The GOAL therefore closes as the bounded blocker
+per Definition of Done item 4 rather than claiming the ordinary Codex work loop
+is ready.
 
 ## Excluded scope
 
