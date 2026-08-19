@@ -2,15 +2,28 @@
 
 Status: active. FIP-0007 was accepted and its deterministic implementation is
 complete. Experiment 0021 rejected the first daily session at credential
-refresh; credential changes require a successor FIP before implementation.
+refresh. FIP-0008 is drafted for a host-owned renewable credential lease and
+must be accepted before implementation.
 
 Turn the proven isolated runtime into a deliberate, understandable daily-use
 workflow. Add the smallest explicit preparation surface, then dogfood one
 ordinary interactive project session and fix only blockers established by that
 path. Do not expand into general lifecycle administration or distribution.
 
-Before implementation, read FIP-0001, FIP-0002, FIP-0005, FIP-0006, and
-FIP-0007 in full.
+Before implementation, read FIP-0001, FIP-0002, FIP-0005, FIP-0006, FIP-0007,
+and FIP-0008 in full.
+
+## Deliverable 0 — Decide renewable credential ownership
+
+1. Compare a trusted host renewal lease over the existing MicroSandbox broker,
+   iron-proxy plus a response-retry handler, Codex external authentication, and
+   static guest projection.
+2. Accept only a contract that keeps access and refresh credentials
+   guest-unreadable, preserves the native Codex terminal, renews an active
+   session without silently restarting a shared capsule, and fails closed.
+3. Keep FIP-0008 conformance `unimplemented` until code and tests establish the
+   public contract. STOP before implementation if the operator does not accept
+   the proposal.
 
 ## Deliverable 1 — Accept explicit preparation
 

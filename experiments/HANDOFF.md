@@ -1,9 +1,9 @@
 # Session Handoff — First daily Fortlet session
 
 Audience: a fresh agent session. `GOAL.md` is normative and active. Read
-FIP-0001, FIP-0002, FIP-0005, FIP-0006, and accepted FIP-0007 in full before
-implementation. Experiments 0001 through 0021 are terminally closed; no
-experiment is active.
+FIP-0001, FIP-0002, FIP-0005, FIP-0006, accepted FIP-0007, and draft FIP-0008
+in full before implementation. Experiments 0001 through 0021 are terminally
+closed; no experiment is active.
 
 ## Verified landed baseline
 
@@ -66,19 +66,20 @@ markers and content without provisioning contact.
 
 ## What to do next
 
-1. Preserve the accepted FIP-0007 implementation; its conformance remains
+1. Review draft FIP-0008. It selects a Codex-specific host renewal lease over
+   MicroSandbox's existing live secret rotation and keeps iron-proxy deferred;
+   do not implement it before operator acceptance.
+2. Preserve the accepted FIP-0007 implementation; its conformance remains
    partial only because the daily edit/test unit could not begin.
-2. Draft a successor FIP for host-owned credential lifecycle behavior before
-   changing authentication. Compare iron-proxy plus a trusted token-refresh
-   handler with Codex's externally supplied authentication path and the current
-   MicroSandbox broker. Static token replacement is not an acceptable retry.
 3. Require that no refresh token or durable provider credential becomes guest
-   readable, that proxy routing fails closed, and that login cannot silently
-   persist a real guest credential. Treat MCP biscuit authorization separately.
-4. Predeclare a new experiment rather than retrying 0021. Publication remains
+   readable and that login cannot silently persist a real guest credential.
+   Treat MCP biscuit authorization separately.
+4. After acceptance, implement deterministic source locking, atomic host
+   refresh, external-token projection compatibility, live broker rotation, and
+   a process-bounded renewal lease before any new live prompt.
+5. Predeclare a new experiment rather than retrying 0021. Publication remains
    one later FIP-0005 packet after the daily work unit succeeds.
 
 Do not retry the prompt, add a refresh token to the guest projection, start a
 new experiment, remove verified layers, add global inventory/pruning, implement
-background work, or begin standalone distribution before a successor
-credential FIP is accepted.
+FIP-0008, or begin standalone distribution before FIP-0008 is accepted.

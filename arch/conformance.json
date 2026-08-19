@@ -201,6 +201,16 @@
       "gaps": [
         "Experiment 0021 proved packaged prepare, cache reuse, capsule absence, and later shim attachment, but the ordinary edit/test session was blocked before model work by the existing static credential projection's inability to refresh Codex authentication."
       ]
+    },
+    {
+      "proposal": "0008",
+      "title": "Host-owned renewable Codex credentials",
+      "status": "unimplemented",
+      "modules": [],
+      "tests": [],
+      "gaps": [
+        "FIP-0008 is a draft and has not been accepted or implemented."
+      ]
     }
   ]
 }
