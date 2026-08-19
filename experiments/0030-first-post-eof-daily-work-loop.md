@@ -10,8 +10,10 @@ Charter scope: `local-foundation/v1`
 PR #8 squash-merged the accepted and conformant FIP-0010 implementation to
 `main` at `53378399bfa581d5a7b3db8538b234dc3733bb26`. Its tree matched signed
 reviewed tip `82df49b7eee2d0d25f9f064518deae67c3cf544b`; the landed bookmark was
-removed locally and remotely. The new GOAL is checkpoint `92f5de37b496` above
-that clean main.
+removed locally and remotely. The immutable treatment revision is
+`02e9c148e7a9e6aceb92993586375e0ab763035d`, including GOAL checkpoint
+`92f5de37b496`, above that clean main. Its aarch64-darwin package is
+`/nix/store/1xkx1xk7fd97ba5f1nlddq9bjilfdvbj-fortlet-0.1.0`.
 
 Before declaration, `jj status` was clean, conformance selected FIP-0010 as
 conformant with no gaps, `cargo test --test conformance` passed through
