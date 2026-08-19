@@ -1,68 +1,60 @@
-# Session Handoff — Goal-scoped publication autonomy
+# Session Handoff — Codex Apps capability handling
 
-Audience: a fresh agent session. `GOAL.md` is normative; implementation is
-complete and publication is pending. Read FIP-0001 and FIP-0005 in full before
-changing the design. Experiments 0001 through 0023 are terminally closed;
-there is no active experiment.
+Audience: a fresh agent session. `GOAL.md` is normative and active. Read
+FIP-0001, FIP-0005, and FIP-0008 in full before design or implementation.
+Experiments 0001 through 0023 are terminally closed; there is no active
+experiment.
 
 ## Verified landed baseline
 
-PR #5 squash-merged the first daily-session GOAL to protected `main` as
-`bee396569bd7aa047905c435d219ce28f3d49b64`. Its tree is byte-identical to
-reviewed signed tip `51e531a9dd74c543895f85d477e62b3a9e11679e`.
-The hosted Rust gate passed after one diagnosed Linux repair, the goal branch
-was removed locally and remotely, and the working copy began this GOAL as an
-empty change directly on fetched `main`.
+PR #6 squash-merged the delegated-publication GOAL to protected `main` as
+`118671e0f744b4168de86bcc4c6f326c3d89a768`. Its tree is byte-identical to the
+reviewed signed tip `a7c0d0a63a9bed5e3802e70b7ed5eb0578b13d17`.
+Hosted Rust verification passed, the exact goal bookmark was removed locally
+and remotely, and the working copy began this GOAL as an empty change directly
+on fetched `main`.
 
-Fortlet's daily product path is proven: explicit credential-free `prepare`,
-the optional Codex shim, host-owned renewable ChatGPT credentials, immutable
-project Cargo and Jujutsu tools, one real model-backed edit/test loop, and
-public stop/reset all succeeded. FIP-0007 and FIP-0008 are conformant. MCP
-biscuit authorization remains a separate future product concern.
+GOAL acceptance now grants standing authority for one branch and PR through
+ordinary pushes, diagnosed CI repairs, evidence updates, readiness, landing
+verification, and exact bookmark cleanup. Only the final publishable tip must
+be signed. The operator remains the sole merge authority.
 
-## Recorded workflow blocker
+## Product baseline
 
-FIP-0005's first amendment reduced publication approval to one exact packet,
-but any changed diff, additional push, or failed hosted run invalidated that
-authority. PR #5 consequently required a second full packet for a small,
-well-diagnosed Linux inode-reuse repair. The operator identified that ceremony
-as disproportionate for a greenfield repository with no users, protected
-`main`, required checks, and manual merge.
+Fortlet's daily Codex path is proven: explicit credential-free `prepare`, the
+optional shim, host-owned renewable ChatGPT credentials, immutable project
+Cargo and Jujutsu tools, one real model-backed edit/test loop, and public
+stop/reset all succeeded. FIP-0007 and FIP-0008 are conformant.
 
-## Accepted contract
+The remaining visible startup defect is separate from model authentication.
+Codex 0.147.0 starts the built-in `codex_apps` MCP client, which returns HTTP
+451 `no_biscuit_no_service` because Fortlet supplies no Apps biscuit. The model
+request itself succeeds after the FIP-0008 bearer-projection repair. FIP-0008
+explicitly excludes cookies and MCP authorization and leaves the separate
+capability as an open question.
 
-The 2026-08-19 amendments to FIP-0001, FIP-0005, and the charter make GOAL
-acceptance the sole routine publication authorization. One goal branch and
-draft PR may iterate through in-scope pushes, diagnosed CI fixes, replacement
-runs, PR updates, readiness, landing verification, and exact bookmark cleanup
-without more approval. Only the final branch tip requires a verified
-signature. The operator remains the sole merge authority.
+## Accepted direction
 
-Standing authority does not cover a changed GOAL, another PR, a different base
-or repository, `main` mutation, settings, releases, tags, packages, secrets,
-external spend, destructive actions, or unrelated resources. Two failures
-sharing an unresolved cause still stop under the charter.
+The new GOAL is source-first. Verify how pinned Codex registers, authorizes,
+and disables `codex_apps`; then draft FIP-0009. If no narrow supported external
+authorization surface exists, prefer disabling only the unavailable built-in
+Apps client. Preserve user-configured MCP servers and the existing model-token
+boundary. Do not project raw cookies, biscuits, host configuration, or a
+general MCP credential into the guest.
 
-## Implemented state
-
-The accepted amendments are checkpointed separately from the operational
-adoption. `AGENTS.md`, `WORKFLOW.md`, `docs/RUNBOOK.md`, the active charter,
-and publication-workflow tests now express the same goal-scoped authority.
-FIP-0005 remains conformant. The test's charter input exposed a Nix source
-filter omission; `package.nix` now includes only `governance/CHARTER.md` in
-addition to its prior source set, and the repaired `nix flake check` passed.
-
-No product code, hosted CI, branch settings, merge policy, experiment
-mechanics, release resources, or secrets changed.
+The two-hour ceiling includes research, design, the smallest implementation,
+deterministic evidence, one bounded packaged startup check, and the normal
+single-PR publication lifecycle. FIP-0009 acceptance is the one required design
+stop before implementation.
 
 ## What to do next
 
-1. Run the complete local gate on the exact final tree.
-2. Sign only the publishable tip, create one descriptive bookmark, and open
-   the authorized draft PR against `main`.
-3. Maintain that PR through hosted verification and mark it ready when green.
-   The operator squash-merges manually; then verify the landing and clean up
-   the exact goal bookmark.
+1. Inspect Codex 0.147.0 primary source for Apps registration, biscuit
+   acquisition, configuration precedence, and targeted disable behavior.
+2. Record the evidence and draft FIP-0009 with one recommended implementation.
+3. Present that concrete FIP for operator acceptance before changing runtime
+   behavior.
 
-Do not change product code, hosted CI, branch protection, merge settings,
-experiment mechanics, release policy, secrets, or the operator merge boundary.
+Do not resume a closed experiment, inspect credential contents, change model
+authentication, disable all MCP servers, fork Codex, introduce a proxy, mutate
+repository settings, merge, or expand beyond the accepted GOAL.
