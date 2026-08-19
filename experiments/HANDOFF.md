@@ -3,7 +3,7 @@
 Audience: a fresh agent session. `GOAL.md` is normative and active. Read
 FIP-0001, FIP-0002, FIP-0005, FIP-0006, accepted FIP-0007, and accepted FIP-0008
 in full before implementation. Experiments 0001 through 0021 are terminally
-closed; Experiment 0022 is the sole active experiment.
+closed, Experiment 0022 is terminally rejected, and no experiment is active.
 
 ## Verified landed baseline
 
@@ -80,22 +80,30 @@ acceptance: it validates the broker pattern and renews supported dynamic-secret
 leases, but it cannot renew an existing Codex ChatGPT OAuth login and would
 make an Infisical control plane plus an Enterprise feature required.
 
-## Active experiment
+## Terminal renewable-credential experiment
 
-Experiment 0022 is authorized and in flight. It pins checkpoint
+Experiment 0022 pinned checkpoint
 `e7b1d5a26693`, package
 `/nix/store/kym4by5g33jw1z3wdg9p70manajzmnx0-fortlet-0.1.0`, one non-prompt
 version launch, one shimmed interactive session, one exact prompt, at most one
 host refresh, one owned capsule, one focused test, zero remote mutation, no
-retry, and 15 elapsed minutes. The operator accepted that exact budget on
-2026-08-18. The frozen pre-dispatch baseline has an empty working copy, exact
-revision and project hashes, public `codex<TAB>absent`, and no MicroSandbox
-sandboxes.
+retry, and 15 elapsed minutes. The clean pre-dispatch baseline matched exactly.
+
+The sole prompt caused Codex to fall back from WebSockets after a 401; its
+HTTPS request also returned 401 with `Your ChatGPT login did not make it to
+this service.` No model response, repository work, or test occurred. Unlike
+Experiment 0021, Codex did not attempt guest-owned refresh, but the brokered
+authentication still was not accepted. The observation does not yet separate
+MicroSandbox substitution from host-token provider validity or request/account
+shape. Public stop/reset restored absence, the working copy stayed empty, the
+MicroSandbox inventory is empty, and immutable layers plus persistent Codex
+and Cargo state remain.
 
 ## What to do next
 
-1. Give the operator Experiment 0022's frozen fish-shell command sequence and
-   record its sole authorized observation without retry.
+1. Do not retry the terminal treatment. Obtain deterministic evidence that
+   separates broker substitution on Codex's WebSocket and HTTPS requests from
+   host-token validity and request/account shape before proposing a fix.
 2. Preserve the accepted FIP-0007 implementation; its conformance remains
    partial only because the daily edit/test unit could not begin.
 3. Require that no refresh token or durable provider credential becomes guest
@@ -105,6 +113,6 @@ sandboxes.
    terminally. Publication remains one later FIP-0005 packet after the daily
    work unit succeeds.
 
-Do not resume Experiment 0021, add a refresh token to the guest projection,
-retry Experiment 0022, remove verified layers, add global inventory/pruning,
-or begin standalone distribution.
+Do not resume Experiments 0021 or 0022, add a refresh token to the guest
+projection, inspect credential values, remove verified layers, add global
+inventory/pruning, or begin standalone distribution.

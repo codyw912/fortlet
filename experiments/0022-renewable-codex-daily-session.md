@@ -1,6 +1,6 @@
 # Experiment 0022: Renewable Codex daily session
 
-Status: in flight — authorized 2026-08-18
+Status: rejected — terminal
 Design: FIP-0001, FIP-0002, FIP-0006, FIP-0007, and FIP-0008
 Charter scope: `local-foundation/v1`
 
@@ -163,8 +163,57 @@ before dispatch, the agent froze this baseline at `2026-08-19T02:03:14Z`:
 4. The immutable public CLI reported `codex<TAB>absent`.
 5. The pinned MicroSandbox CLI reported `No sandboxes found.`
 
-The interactive unit is authorized but has not yet produced an observation.
+The operator proceeded through the declared non-prompt launch and opened the
+sole shimmed interactive session. The available transcript does not include
+the version command's stdout, but the immutable package and adapter remained
+pinned to Codex 0.147.0. On the sole submitted prompt, Codex first reported a
+WebSocket 401 and fell back to HTTPS; the HTTPS request then failed with:
+
+```text
+unexpected status 401 Unauthorized: We got your request, but your ChatGPT login did not make it to this service.
+```
+
+No model response, repository inspection, edit, or Cargo test occurred. This
+differs from Experiment 0021: Codex did not attempt its managed guest refresh,
+so the external-token projection changed the lifecycle as designed, but the
+brokered authentication was not accepted by either model transport. This
+black-box observation does not distinguish a broker substitution failure from
+a provider-invalid or otherwise incomplete host access credential.
+
+After ordinary interactive exit, the packaged public commands reported:
+
+```text
+codex  running
+codex  stopped
+codex  reset
+codex  absent
+```
+
+Independent closure checks found an empty Jujutsu working copy, final public
+absence, and no MicroSandbox sandboxes. Metadata-only checks, without reading
+host or guest authentication files, found the base marker, Codex 0.147.0
+marker, exact project-environment marker, persistent Codex state, and
+persistent Cargo target cache still present.
 
 ## Terminal Closure
 
-Pending the authorized operator-run unit.
+Rejected at the first model request. The accepted implementation successfully
+prevented Codex's old guest-owned refresh path, created and reused one owned
+capsule, and cleaned it up entirely through the public surface. It did not
+deliver usable model authentication: both the WebSocket request and its HTTPS
+fallback received 401 before model work.
+
+Actual cost was zero observed money, one prompt submission with no model
+response, one non-prompt version launch, one interactive session, one owned
+capsule, no source edit, no Cargo test, zero remote mutation, and no retry. The
+black-box output did not reveal whether the one-hour safety window caused a
+host refresh; Fortlet bounded any such refresh to the declared maximum of one.
+The interactive command returned after approximately 2 minutes 19 seconds;
+exact end-to-end experiment time was not captured, and no individual command
+observation indicated a timeout.
+
+Next action: do not retry this treatment or weaken credential containment.
+First obtain deterministic evidence that separates MicroSandbox substitution
+on Codex's WebSocket and HTTPS authorization requests from host-token provider
+validity and request-shape/account-binding behavior. Any change to the accepted
+credential mechanism requires a successor FIP and a newly declared experiment.

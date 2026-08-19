@@ -199,7 +199,7 @@
         "tests/prepare.rs"
       ],
       "gaps": [
-        "Experiment 0021 proved packaged prepare, cache reuse, capsule absence, and later shim attachment, but the ordinary edit/test session was blocked before model work by the existing static credential projection's inability to refresh Codex authentication."
+        "Experiments 0021 and 0022 proved packaged prepare, cache reuse, capsule absence, and later shim attachment, but both ordinary edit/test attempts were blocked before model work: first by guest refresh, then by backend rejection of the brokered external-token authentication."
       ]
     },
     {
@@ -222,7 +222,7 @@
         "tests/pre_runtime_failures.rs"
       ],
       "gaps": [
-        "Deterministic implementation and the stock Codex 0.147.0 local compatibility fixture pass, but the predeclared ordinary prompt and edit/test experiment has not run and live MicroSandbox rotation has not yet been observed during a real active session."
+        "Deterministic implementation and the stock Codex 0.147.0 local compatibility fixture pass, and Experiment 0022 avoided guest-owned refresh, but both WebSocket and HTTPS model requests returned 401; broker substitution has not yet been separated from host-token validity and request/account shape."
       ]
     }
   ]

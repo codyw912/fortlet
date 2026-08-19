@@ -2,8 +2,9 @@
 
 Status: active. FIP-0007 and FIP-0008 are accepted and their deterministic
 implementations are complete. Experiment 0021 rejected the first daily session
-at credential refresh. Successor Experiment 0022 is in flight for the renewable
-credential path under its separately accepted dispatch budget.
+at credential refresh. Successor Experiment 0022 is terminally rejected: the
+external-token path avoided guest refresh, but both model transports returned
+401 before a model response or edit.
 
 Turn the proven isolated runtime into a deliberate, understandable daily-use
 workflow. Add the smallest explicit preparation surface, then dogfood one
@@ -62,9 +63,9 @@ and FIP-0008 in full.
    credential absence, provisioning inputs, cache-hit idempotence, both
    harnesses, unconfigured projects, failure cleanup, and absence of persistent
    capsule or harness state.
-2. Experiment 0022 is the predeclared bounded daily-session unit. Dispatch it
-   only after separate operator acceptance of its exact budget; do not resume
-   Experiment 0021.
+2. Experiment 0022 is the terminal bounded daily-session unit. Do not resume or
+   retry Experiments 0021 or 0022; a changed mechanism requires a successor FIP
+   and experiment.
 3. Exercise an ordinary Codex session from a nested Fortlet directory, use the
    project-provided Cargo and Jujutsu tools for one real edit/test loop, and
    verify a subsequent invocation reuses the capsule and persistent Cargo
