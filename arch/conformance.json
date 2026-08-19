@@ -177,7 +177,8 @@
         "src/project_environment.rs",
         "src/runtime.rs",
         "tests/pre_runtime_failures.rs",
-        "experiments/0020-relative-debian-project-links.md"
+        "experiments/0020-relative-debian-project-links.md",
+        "experiments/0031-login-shell-project-path.md"
       ],
       "gaps": []
     },

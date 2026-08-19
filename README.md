@@ -98,6 +98,9 @@ downloads can drift unless the recipe pins and verifies them.
 This repository's recipe pins Rust, Cargo, Jujutsu, and the Linux development
 library needed to build Fortlet. It serves as the first project-environment
 fixture; Nix remains the host development and package-reproduction system.
+Fortlet also restores the managed tool PATH for non-interactive Bash login
+shells through a package-owned process environment hook. It does not write a
+user `.profile`, `.bashrc`, fish configuration, or other startup file.
 
 ## Product direction
 

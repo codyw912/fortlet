@@ -133,7 +133,11 @@ Successful output is validated, content-digested, atomically published, and
 re-verified before every read-only mount at `/opt/fortlet/project`. Manifest
 paths precede the base and harness paths, while the harness executable remains
 an absolute Fortlet-owned path. `HOME`, `PATH`, terminal, credential, Fortlet,
-MicroSandbox, and harness-owned variables cannot be overridden.
+MicroSandbox, and harness-owned variables cannot be overridden. `BASH_ENV` is
+also reserved: a read-only package-owned hook restores Fortlet's managed PATH
+after Debian login profiles replace it, so agent commands launched through
+non-interactive `bash -lc` keep project tools. Fortlet does not edit host or
+persistent user startup files.
 
 Changing either file changes capsule configuration. Stop and reset each
 affected harness before launching the new identity:

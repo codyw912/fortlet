@@ -11,9 +11,10 @@ use crate::paths::AppPaths;
 use crate::project_environment::{guest_platform, ProjectEnvironment, PublishedProjectEnvironment};
 
 pub const BASE_IMAGE: &str = "node:24-bookworm";
-const BASE_TOOLS_VERSION: &str = "bookworm-1";
+const BASE_TOOLS_VERSION: &str = "bookworm-2";
 const BUBBLEWRAP_VERSION: &str = "0.8.0-2+deb12u1";
 const HOLD_SCRIPT: &str = "trap 'exit 0' TERM INT; while :; do sleep 3600 & wait $!; done";
+pub const MANAGED_BASH_ENV: &str = "/opt/fortlet/base/etc/fortlet/bash-env";
 
 pub struct EnvironmentStore<'a> {
     paths: &'a AppPaths,
@@ -35,20 +36,7 @@ impl<'a> EnvironmentStore<'a> {
         harness: &dyn Harness,
         project: Option<&ProjectEnvironment>,
     ) -> Result<EnvironmentLayers> {
-        let base_script = format!(
-            r#"set -eu
-temporary="$(mktemp -d)"
-trap 'rm -rf "$temporary"' EXIT
-chmod 777 "$temporary"
-cd "$temporary"
-apt-get update -qq
-apt-get download "bubblewrap={BUBBLEWRAP_VERSION}"
-set -- bubblewrap_*.deb
-test "$#" -eq 1
-dpkg-deb -x "$1" /out
-/out/usr/bin/bwrap --version
-"#
-        );
+        let base_script = base_provision_script();
         let base = self
             .ensure_layer(
                 "_base",
@@ -231,6 +219,32 @@ dpkg-deb -x "$1" /out
     }
 }
 
+fn base_provision_script() -> String {
+    format!(
+        r#"set -eu
+temporary="$(mktemp -d)"
+trap 'rm -rf "$temporary"' EXIT
+chmod 777 "$temporary"
+cd "$temporary"
+apt-get update -qq
+apt-get download "bubblewrap={BUBBLEWRAP_VERSION}"
+set -- bubblewrap_*.deb
+test "$#" -eq 1
+dpkg-deb -x "$1" /out
+/out/usr/bin/bwrap --version
+mkdir -p /out/etc/fortlet
+cat > /out/etc/fortlet/bash-env <<'FORTLET_BASH_ENV'
+case ":$PATH:" in
+  *:/.msb/scripts:*) PATH="/.msb/scripts:$FORTLET_MANAGED_PATH" ;;
+  *) PATH="$FORTLET_MANAGED_PATH" ;;
+esac
+export PATH
+FORTLET_BASH_ENV
+chmod 0444 /out/etc/fortlet/bash-env
+"#
+    )
+}
+
 fn layer_marker_matches(
     destination: &Path,
     marker: &str,
@@ -352,6 +366,21 @@ mod tests {
             ]
         );
         assert!(!plan.recipe.contains("/Users/"));
+    }
+
+    #[test]
+    fn base_layer_installs_the_managed_bash_environment() {
+        let script = base_provision_script();
+
+        assert_eq!(BASE_TOOLS_VERSION, "bookworm-2");
+        for required in [
+            "cat > /out/etc/fortlet/bash-env <<'FORTLET_BASH_ENV'",
+            "*:/.msb/scripts:*) PATH=\"/.msb/scripts:$FORTLET_MANAGED_PATH\" ;;",
+            "*) PATH=\"$FORTLET_MANAGED_PATH\" ;;",
+            "chmod 0444 /out/etc/fortlet/bash-env",
+        ] {
+            assert!(script.contains(required), "{required}");
+        }
     }
 
     #[test]
