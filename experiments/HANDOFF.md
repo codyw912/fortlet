@@ -10,10 +10,10 @@ Experiments 0030–0032.
 PR #8 previously squash-merged FIP-0010 at
 `53378399bfa581d5a7b3db8538b234dc3733bb26`. The current stack above that main
 contains the completed daily-work-loop GOAL, Experiments 0030–0032, one useful
-test-only model edit, and the FIP-0006 login-shell correction. The goal bookmark
-and pull request are not yet recorded in this handoff; verify Jujutsu and GitHub
-rather than inferring publication from local commits. The operator remains the
-sole merge authority.
+test-only model edit, and the FIP-0006 login-shell correction. The single goal
+bookmark is `daily-codex-work-loop`; draft PR #9 targets `main`. Verify Jujutsu,
+the exact signed tip, and GitHub checks rather than inferring readiness from
+this handoff. The operator remains the sole merge authority.
 
 ## What the live work proved
 
@@ -84,12 +84,11 @@ including `nix flake check` on aarch64-darwin.
 
 ## Next action
 
-Finish only this GOAL's one FIP-0005 publication lifecycle: create or update one
-descriptive bookmark and draft PR, run the complete final gate, sign and push
-the exact publishable tip, require hosted `Rust verification`, and mark the PR
-ready. Leave squash merge to the operator. After merge, fetch main, prove tree
-equality with the signed reviewed tip, remove only the landed goal bookmark,
-and then discuss a successor GOAL.
+Finish only PR #9's existing FIP-0005 publication lifecycle: run the complete
+final gate, sign and push the exact publishable tip, require hosted `Rust
+verification`, and mark the PR ready. Leave squash merge to the operator. After
+merge, fetch main, prove tree equality with the signed reviewed tip, remove only
+the landed goal bookmark, and then discuss a successor GOAL.
 
 Do not repeat the provider unit; resume Experiments 0030–0032; weaken the
 credential/mount boundary; write shell startup files; hide the rejected unit;
