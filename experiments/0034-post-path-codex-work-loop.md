@@ -1,6 +1,6 @@
 # Experiment 0034: Post-PATH Codex work loop
 
-Status: declared — no live unit dispatched
+Status: rejected — terminal 2026-08-19
 Design: FIP-0001, FIP-0002, FIP-0003, FIP-0004, FIP-0005, FIP-0006,
 FIP-0007, FIP-0008, FIP-0009, FIP-0010, and FIP-0011
 Charter scope: `local-foundation/v1`
@@ -177,16 +177,70 @@ and runs the selected Cargo. No live process has run under this declaration.
 ## Results
 
 The immutable package build exited zero and produced the recorded store path.
-The working copy was clean. Packaged public status reported
+The final outer-shell working copy was clean. The neighboring Herdr fish pane
+reported all four forbidden Codex markers absent. Packaged public status reported
 `codex<TAB>absent`, packaged `fortlet list` reported `no capsules`, and the raw
 packaged MicroSandbox inventory was `[]`.
 
-The active agent shell contained all four forbidden Codex markers:
-`CODEX_THREAD_ID`, `CODEX_SANDBOX`, `CODEX_SANDBOX_NETWORK_DISABLED`, and
-`CODEX_CI`. The agent therefore did not dispatch. The one declared unit awaits
-operator execution from a marker-free outer shell; no Codex process, provider
-request, prompt, capsule, or repository edit has occurred under this experiment.
+The active agent shell contained all four forbidden markers, so it did not
+dispatch directly. Using the operator-authorized Herdr boundary, the exact
+frozen script ran once in the verified marker-free neighboring pane. The sole
+packaged shim process started Codex 0.147.0 with the OpenAI provider and
+workspace-write sandbox, authenticated, streamed inspection and edit progress,
+and emitted no Apps startup or authentication failure.
+
+Codex added only the requested 27-line test in
+`tests/pre_runtime_failures.rs`. The test invokes the compiled binary through a
+temporary `codex` symlink with the declared cleared environment and working
+directory, asserts the existing missing-auth credentials error, and verifies
+that project state and tool roots remain absent. Independent review accepted
+the diff.
+
+The exact guest Cargo command then exited 101 in about 1.4 seconds:
+
+```text
+error: failed to open: /home/agent/.cargo/fortlet-target/debug/.cargo-build-lock
+
+Caused by:
+  Read-only file system (os error 30)
+```
+
+Instead of stopping after that failure, Codex inspected its environment and
+changed `CARGO_TARGET_DIR` to retry the test. It also attempted to remove its
+temporary target with `rm -rf`, which the Codex sandbox rejected, then used a
+bounded `find ... -delete` cleanup. The altered build did not return within the
+final observation window. After 17 minutes 34 seconds total, packaged public
+status still reported `running`; packaged public stop returned `stopped` and
+the waiting wrapper ended with `codex_exit=255`.
+
+The same exact focused test passed independently through `nix develop`: one
+passed, zero failed, with 12 filtered out. Packaged public reset then returned
+`reset`; final status was `absent`, `fortlet list` reported `no capsules`, and
+raw MicroSandbox inventory was `[]`. The temporary host dispatch script was
+deleted. Immutable layers and persistent harness state were preserved.
 
 ## Terminal Closure
 
-Pending.
+Rejected. The intended model edit and independent test passed, and the composed
+shim, authentication, Apps-disablement, EOF, and streaming paths all advanced.
+The frozen in-capsule test did not pass: Fortlet's project fixture exports
+`CARGO_TARGET_DIR=/home/agent/.cargo/fortlet-target`, but managed Codex runs tool
+commands in a workspace-write sandbox whose writable roots include the live
+project and `/tmp`, not that persistent harness-home cache. Cargo could read the
+tool environment but could not create its build lock there. Experiment 0032's
+direct Tact process did not exercise this inner Codex sandbox boundary.
+
+The unit also violated its exact-command protocol when Codex changed the target
+directory after the first failure. That altered attempt cannot rescue the
+acceptance result and was not treated as a successor. No follow-up prompt,
+second Codex process, native fallback, credential inspection, or unowned
+capsule mutation occurred.
+
+Actual cost was one immutable package, one model-backed Codex process, one
+prompt, one correct 27-line test diff, one failed exact guest test, altered
+in-process Cargo attempts, one successful independent host test, 17 minutes 34
+seconds of process time, zero retries, zero external money, and exact public
+cleanup. Retain the independently verified test. Next action: deterministically
+correct the Fortlet repository's guest Cargo target to a Codex-writable,
+host-build-distinct workspace path, then declare at most one successor
+experiment under the active GOAL.
