@@ -643,6 +643,10 @@ mod tests {
             environment.environment.get("CARGO_HOME").unwrap(),
             "/home/agent/.cargo"
         );
+        assert_eq!(
+            environment.environment.get("CARGO_TARGET_DIR").unwrap(),
+            "target/fortlet-guest"
+        );
         for pinned in [
             "rust_version=1.97.1",
             "jj_version=0.43.0",

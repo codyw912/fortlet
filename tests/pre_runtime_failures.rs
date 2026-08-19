@@ -199,6 +199,33 @@ fn missing_auth_fails_before_capsule_or_environment_artifacts() {
 }
 
 #[test]
+fn codex_shim_missing_auth_fails_before_capsule_or_environment_artifacts() {
+    let fixture = Fixture::new();
+    let shim = fixture._temporary.path().join("codex");
+    symlink(env!("CARGO_BIN_EXE_fortlet"), &shim).unwrap();
+
+    let output = Command::new(shim)
+        .arg("--version")
+        .current_dir(&fixture.project)
+        .env_clear()
+        .env("HOME", &fixture.home)
+        .env("XDG_STATE_HOME", &fixture.state)
+        .env("XDG_DATA_HOME", &fixture.data)
+        .env("FORTLET_AUTH_FILE", &fixture.auth)
+        .output()
+        .unwrap();
+
+    assert_failure(
+        output,
+        "credentials",
+        "run `codex login` on the host and retry",
+        "cannot read Codex ChatGPT auth",
+    );
+    assert!(!fixture.projects().exists());
+    assert!(!fixture.tools().exists());
+}
+
+#[test]
 fn missing_refresh_token_fails_before_capsule_or_environment_artifacts() {
     let fixture = Fixture::new();
     fixture.write_valid_auth();

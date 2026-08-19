@@ -79,6 +79,7 @@
         "src/native.rs",
         "src/session.rs",
         "tests/native.rs",
+        "tests/pre_runtime_failures.rs",
         "experiments/0002-preserved-runtime-shim-smoke.md",
         "examples/pty_observer.rs",
         "experiments/0003-interactive-packaged-sessions.md",
