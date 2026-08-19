@@ -1,8 +1,9 @@
+use std::collections::HashSet;
 use std::fs::File;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
-use anyhow::{Context, Result};
-use microsandbox::sandbox::{SandboxConfig, SandboxHandle, SandboxStatus};
+use anyhow::{bail, Context, Result};
+use microsandbox::sandbox::{SandboxConfig, SandboxHandle, SandboxStatus, VolumeMount};
 use microsandbox::{MicrosandboxError, Sandbox};
 
 use crate::harness::{self, Harness};
@@ -26,6 +27,31 @@ pub struct ResetRequest {
     pub harness: String,
     pub project: Option<PathBuf>,
     pub allow_broad_mount: bool,
+}
+
+const INVENTORY_PAGE_SIZE: u32 = 100;
+const MAX_INVENTORY_CAPSULES: usize = 10_000;
+
+struct InventorySnapshot {
+    name: String,
+    config: String,
+    status: SandboxStatus,
+}
+
+struct InventoryPage {
+    capsules: Vec<InventorySnapshot>,
+    next_cursor: Option<String>,
+}
+
+#[derive(Debug, PartialEq, Eq)]
+struct InventoryRecord {
+    project: PathBuf,
+    harness: String,
+    status: SandboxStatus,
+}
+
+trait InventoryBackend {
+    async fn page(&self, cursor: Option<&str>, label: (&str, &str)) -> Result<InventoryPage>;
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -63,6 +89,33 @@ trait ResetBackend {
 
 struct LocalCapsuleControl<'a> {
     paths: &'a AppPaths,
+}
+
+struct LocalInventoryBackend;
+
+impl InventoryBackend for LocalInventoryBackend {
+    async fn page(&self, cursor: Option<&str>, label: (&str, &str)) -> Result<InventoryPage> {
+        let page = Sandbox::list_with(|builder| {
+            let mut builder = builder.limit(INVENTORY_PAGE_SIZE).label(label.0, label.1);
+            if let Some(cursor) = cursor {
+                builder = builder.cursor(cursor);
+            }
+            builder
+        })
+        .await?;
+        Ok(InventoryPage {
+            capsules: page
+                .sandboxes
+                .into_iter()
+                .map(|handle| InventorySnapshot {
+                    name: handle.name().to_owned(),
+                    config: handle.config_json().to_owned(),
+                    status: handle.status_snapshot(),
+                })
+                .collect(),
+            next_cursor: page.next_cursor,
+        })
+    }
 }
 
 impl CapsuleControl for LocalCapsuleControl<'_> {
@@ -129,6 +182,10 @@ pub async fn status(request: StatusRequest) -> Result<Vec<String>> {
     status_with(&LocalCapsuleControl { paths: &paths }, &project, harnesses).await
 }
 
+pub async fn list() -> Result<Vec<String>> {
+    inventory_with(&LocalInventoryBackend).await
+}
+
 pub async fn stop(request: StopRequest) -> Result<String> {
     let harness = select_harness(&request.harness)?;
     let (paths, project) = resolve_project(request.project, request.allow_broad_mount)?;
@@ -157,6 +214,150 @@ async fn status_with<C: CapsuleControl>(
         ));
     }
     Ok(lines)
+}
+
+async fn inventory_with<B: InventoryBackend>(backend: &B) -> Result<Vec<String>> {
+    let records = capsule_stage(load_inventory(backend).await)?;
+    if records.is_empty() {
+        return Ok(vec!["no capsules".into()]);
+    }
+    Ok(records
+        .iter()
+        .map(|record| {
+            format!(
+                "{}\t{}\t{}",
+                display_path(&record.project),
+                record.harness,
+                status_name(record.status)
+            )
+        })
+        .collect())
+}
+
+async fn load_inventory<B: InventoryBackend>(backend: &B) -> Result<Vec<InventoryRecord>> {
+    let mut records = Vec::new();
+    let mut cursor = None;
+    let mut seen_cursors = HashSet::new();
+
+    loop {
+        let page = backend
+            .page(cursor.as_deref(), ("fortlet.managed", "true"))
+            .await?;
+        if records.len() + page.capsules.len() > MAX_INVENTORY_CAPSULES {
+            bail!("owned capsule inventory exceeds the supported bound");
+        }
+        for capsule in page.capsules {
+            records.push(inventory_record(
+                &capsule.name,
+                &capsule.config,
+                capsule.status,
+            )?);
+        }
+        let Some(next) = page.next_cursor else {
+            break;
+        };
+        if next.is_empty() || !seen_cursors.insert(next.clone()) {
+            bail!("MicroSandbox returned an invalid capsule inventory cursor");
+        }
+        cursor = Some(next);
+    }
+
+    records.sort_by(|left, right| {
+        left.project
+            .as_os_str()
+            .as_encoded_bytes()
+            .cmp(right.project.as_os_str().as_encoded_bytes())
+            .then_with(|| left.harness.cmp(&right.harness))
+    });
+    Ok(records)
+}
+
+fn inventory_record(
+    handle_name: &str,
+    stored: &str,
+    status: SandboxStatus,
+) -> Result<InventoryRecord> {
+    let config: SandboxConfig =
+        serde_json::from_str(stored).context("cannot read stored capsule configuration")?;
+    if handle_name != config.spec.name {
+        bail!("stored capsule handle and configuration names do not match");
+    }
+    let project = project_mount(&config)?;
+    let harness =
+        CapsuleDescriptor::validate_inventory(&config.spec.name, &config.spec.labels, &project)?;
+    Ok(InventoryRecord {
+        project,
+        harness,
+        status,
+    })
+}
+
+fn project_mount(config: &SandboxConfig) -> Result<PathBuf> {
+    let mut matches = config.spec.mounts.iter().filter_map(|mount| match mount {
+        VolumeMount::Bind {
+            host,
+            guest,
+            options,
+            ..
+        } if !options.readonly && host.is_absolute() && host == Path::new(guest) => {
+            Some(host.clone())
+        }
+        _ => None,
+    });
+    let project = matches
+        .next()
+        .context("stored capsule has no unambiguous project mount")?;
+    if matches.next().is_some() {
+        bail!("stored capsule has multiple possible project mounts");
+    }
+    Ok(project)
+}
+
+fn display_path(path: &Path) -> String {
+    let bytes = path.as_os_str().as_encoded_bytes();
+    match std::str::from_utf8(bytes) {
+        Ok(text) => {
+            let mut escaped = String::new();
+            for character in text.chars() {
+                push_escaped_character(&mut escaped, character);
+            }
+            escaped
+        }
+        Err(_) => {
+            let mut escaped = String::new();
+            for byte in bytes {
+                push_escaped_byte(&mut escaped, *byte);
+            }
+            escaped
+        }
+    }
+}
+
+fn push_escaped_character(escaped: &mut String, character: char) {
+    match character {
+        '\\' => escaped.push_str("\\\\"),
+        '\t' => escaped.push_str("\\t"),
+        '\r' => escaped.push_str("\\r"),
+        '\n' => escaped.push_str("\\n"),
+        character if character.is_control() => {
+            use std::fmt::Write;
+            let _ = write!(escaped, "\\u{{{:x}}}", u32::from(character));
+        }
+        character => escaped.push(character),
+    }
+}
+
+fn push_escaped_byte(escaped: &mut String, byte: u8) {
+    if byte.is_ascii_graphic() || byte == b' ' {
+        if byte == b'\\' {
+            escaped.push_str("\\\\");
+        } else {
+            escaped.push(char::from(byte));
+        }
+    } else {
+        use std::fmt::Write;
+        let _ = write!(escaped, "\\x{byte:02x}");
+    }
 }
 
 async fn stop_with<C: CapsuleControl>(
@@ -300,10 +501,14 @@ fn stage<T>(result: Result<T>, name: &str, action: &str) -> Result<T> {
 
 #[cfg(test)]
 mod tests {
+    use std::collections::BTreeMap;
     use std::collections::VecDeque;
+    use std::ffi::OsString;
+    use std::os::unix::ffi::OsStringExt;
     use std::sync::Mutex;
 
     use anyhow::anyhow;
+    use microsandbox::sandbox::{HostPermissions, MountOptions, StatVirtualization};
 
     use super::*;
     use crate::project::ProjectIdentity;
@@ -312,6 +517,27 @@ mod tests {
         status: Result<Option<SandboxStatus>, &'static str>,
         stop: Result<StopOutcome, &'static str>,
         reset: Result<ResetOutcome, &'static str>,
+    }
+
+    struct FakeInventoryBackend {
+        pages: Mutex<VecDeque<Result<InventoryPage, &'static str>>>,
+        requests: Mutex<Vec<(Option<String>, String, String)>>,
+    }
+
+    impl InventoryBackend for FakeInventoryBackend {
+        async fn page(&self, cursor: Option<&str>, label: (&str, &str)) -> Result<InventoryPage> {
+            self.requests.lock().unwrap().push((
+                cursor.map(str::to_owned),
+                label.0.to_owned(),
+                label.1.to_owned(),
+            ));
+            self.pages
+                .lock()
+                .unwrap()
+                .pop_front()
+                .expect("unexpected inventory page")
+                .map_err(|message| anyhow!(message))
+        }
     }
 
     impl CapsuleControl for FakeControl {
@@ -344,6 +570,217 @@ mod tests {
             stop: Ok(stop),
             reset: Ok(ResetOutcome::Absent),
         }
+    }
+
+    fn inventory_handle(root: &Path, harness: &str, status: SandboxStatus) -> InventorySnapshot {
+        let identity = ProjectIdentity::from_local_root(root);
+        let name = format!(
+            "fortlet-{}-{harness}-{}",
+            unsafe { libc::geteuid() },
+            identity.as_str()
+        );
+        let mut config = SandboxConfig::default();
+        config.spec.name.clone_from(&name);
+        config.spec.labels = BTreeMap::from([
+            ("fortlet.managed".into(), "true".into()),
+            ("fortlet.schema".into(), "1".into()),
+            ("fortlet.project".into(), identity.as_str().into()),
+            ("fortlet.tool".into(), harness.into()),
+            ("fortlet.version".into(), "older-release".into()),
+        ]);
+        config.spec.mounts = vec![bind_mount(root, root, false)];
+        InventorySnapshot {
+            name,
+            config: serde_json::to_string(&config).unwrap(),
+            status,
+        }
+    }
+
+    fn bind_mount(host: &Path, guest: &Path, readonly: bool) -> VolumeMount {
+        VolumeMount::Bind {
+            host: host.into(),
+            guest: guest.display().to_string(),
+            options: MountOptions {
+                readonly,
+                ..MountOptions::default()
+            },
+            stat_virtualization: StatVirtualization::Strict,
+            host_permissions: HostPermissions::Mirror,
+            follow_root_symlinks: false,
+            quota_mib: None,
+        }
+    }
+
+    fn inventory_backend(
+        pages: impl IntoIterator<Item = Result<InventoryPage, &'static str>>,
+    ) -> FakeInventoryBackend {
+        FakeInventoryBackend {
+            pages: Mutex::new(pages.into_iter().collect()),
+            requests: Mutex::new(Vec::new()),
+        }
+    }
+
+    #[tokio::test]
+    async fn inventory_reads_every_managed_page_and_sorts_stably() {
+        let backend = inventory_backend([
+            Ok(InventoryPage {
+                capsules: vec![inventory_handle(
+                    Path::new("/tmp/z-project"),
+                    "tact",
+                    SandboxStatus::Stopped,
+                )],
+                next_cursor: Some("next-page".into()),
+            }),
+            Ok(InventoryPage {
+                capsules: vec![
+                    inventory_handle(Path::new("/tmp/a-project"), "tact", SandboxStatus::Running),
+                    inventory_handle(Path::new("/tmp/a-project"), "codex", SandboxStatus::Crashed),
+                ],
+                next_cursor: None,
+            }),
+        ]);
+
+        assert_eq!(
+            inventory_with(&backend).await.unwrap(),
+            [
+                "/tmp/a-project\tcodex\tcrashed",
+                "/tmp/a-project\ttact\trunning",
+                "/tmp/z-project\ttact\tstopped",
+            ]
+        );
+        assert_eq!(
+            *backend.requests.lock().unwrap(),
+            [
+                (None, "fortlet.managed".into(), "true".into()),
+                (
+                    Some("next-page".into()),
+                    "fortlet.managed".into(),
+                    "true".into(),
+                ),
+            ]
+        );
+    }
+
+    #[tokio::test]
+    async fn inventory_renders_empty_and_every_lifecycle_state() {
+        let empty = inventory_backend([Ok(InventoryPage {
+            capsules: vec![],
+            next_cursor: None,
+        })]);
+        assert_eq!(inventory_with(&empty).await.unwrap(), ["no capsules"]);
+
+        let states = [
+            (SandboxStatus::Created, "created"),
+            (SandboxStatus::Starting, "starting"),
+            (SandboxStatus::Running, "running"),
+            (SandboxStatus::Draining, "draining"),
+            (SandboxStatus::Paused, "paused"),
+            (SandboxStatus::Stopped, "stopped"),
+            (SandboxStatus::Crashed, "crashed"),
+        ];
+        for (index, (status, expected)) in states.into_iter().enumerate() {
+            let root = PathBuf::from(format!("/tmp/state-{index}"));
+            let backend = inventory_backend([Ok(InventoryPage {
+                capsules: vec![inventory_handle(&root, "codex", status)],
+                next_cursor: None,
+            })]);
+            assert_eq!(
+                inventory_with(&backend).await.unwrap(),
+                [format!("{}\tcodex\t{expected}", root.display())]
+            );
+        }
+    }
+
+    #[tokio::test]
+    async fn inventory_rejects_page_failure_and_repeated_cursor_without_partial_results() {
+        let page_failure = inventory_backend([
+            Ok(InventoryPage {
+                capsules: vec![inventory_handle(
+                    Path::new("/tmp/valid"),
+                    "codex",
+                    SandboxStatus::Running,
+                )],
+                next_cursor: Some("next".into()),
+            }),
+            Err("list failed"),
+        ]);
+        assert!(inventory_with(&page_failure).await.is_err());
+
+        let repeated = inventory_backend([
+            Ok(InventoryPage {
+                capsules: vec![],
+                next_cursor: Some("same".into()),
+            }),
+            Ok(InventoryPage {
+                capsules: vec![],
+                next_cursor: Some("same".into()),
+            }),
+        ]);
+        let error = inventory_with(&repeated).await.unwrap_err();
+        assert!(format!("{error:#}").contains("invalid capsule inventory cursor"));
+    }
+
+    #[test]
+    fn inventory_validates_complete_ownership_and_project_mount() {
+        let valid = inventory_handle(
+            Path::new("/tmp/inventory"),
+            "future-harness",
+            SandboxStatus::Stopped,
+        );
+        assert_eq!(
+            inventory_record(&valid.name, &valid.config, valid.status).unwrap(),
+            InventoryRecord {
+                project: "/tmp/inventory".into(),
+                harness: "future-harness".into(),
+                status: SandboxStatus::Stopped,
+            }
+        );
+
+        let mut invalid = Vec::new();
+        invalid.push(("different-name".into(), valid.config.clone()));
+        invalid.push((valid.name.clone(), "not json".into()));
+
+        for mutation in [
+            |value: &mut serde_json::Value| value["labels"]["fortlet.managed"] = "false".into(),
+            |value: &mut serde_json::Value| value["labels"]["fortlet.schema"] = "2".into(),
+            |value: &mut serde_json::Value| value["labels"]["fortlet.project"] = "wrong".into(),
+            |value: &mut serde_json::Value| value["labels"]["fortlet.tool"] = "BAD\n".into(),
+        ] {
+            let mut value: serde_json::Value = serde_json::from_str(&valid.config).unwrap();
+            mutation(&mut value);
+            invalid.push((valid.name.clone(), value.to_string()));
+        }
+
+        let mut missing_mount: serde_json::Value = serde_json::from_str(&valid.config).unwrap();
+        missing_mount["mounts"] = serde_json::json!([]);
+        invalid.push((valid.name.clone(), missing_mount.to_string()));
+
+        let mut duplicate_mount: serde_json::Value = serde_json::from_str(&valid.config).unwrap();
+        let mount = duplicate_mount["mounts"][0].clone();
+        duplicate_mount["mounts"]
+            .as_array_mut()
+            .unwrap()
+            .push(mount);
+        invalid.push((valid.name.clone(), duplicate_mount.to_string()));
+
+        for (name, config) in invalid {
+            assert!(
+                inventory_record(&name, &config, SandboxStatus::Stopped).is_err(),
+                "accepted invalid inventory config: {config}"
+            );
+        }
+    }
+
+    #[test]
+    fn inventory_path_rendering_is_single_line_and_preserves_printable_utf8() {
+        assert_eq!(
+            display_path(Path::new("/tmp/naïve\\line\n\t\r\u{1b}")),
+            "/tmp/naïve\\\\line\\n\\t\\r\\u{1b}"
+        );
+        let invalid = PathBuf::from(OsString::from_vec(vec![
+            b'/', b't', b'm', b'p', b'/', 0xff, b'\n',
+        ]));
+        assert_eq!(display_path(&invalid), "/tmp/\\xff\\x0a");
     }
 
     #[tokio::test]

@@ -276,10 +276,23 @@
     {
       "proposal": "0011",
       "title": "Global owned-capsule inventory",
-      "status": "unimplemented",
-      "modules": [],
-      "tests": [],
-      "gaps": []
+      "status": "partial",
+      "modules": [
+        "README.md",
+        "OVERVIEW.md",
+        "docs/RUNBOOK.md",
+        "src/cli.rs",
+        "src/management.rs",
+        "src/runtime.rs"
+      ],
+      "tests": [
+        "src/cli.rs",
+        "src/management.rs",
+        "tests/management_failures.rs"
+      ],
+      "gaps": [
+        "The required immutable-package runtime experiment has not yet exercised global inventory and project-scoped cleanup against one real owned capsule."
+      ]
     }
   ]
 }

@@ -27,6 +27,7 @@ nix run . -- doctor
 nix run . -- prepare codex
 nix run . -- run codex --
 nix run . -- run tact --
+nix run . -- list
 nix run . -- status
 nix run . -- stop codex
 nix run . -- reset codex
@@ -38,6 +39,7 @@ For a development binary inside `nix develop`:
 cargo run -- doctor
 cargo run -- prepare codex
 cargo run -- run codex --
+cargo run -- list
 cargo run -- status codex
 cargo run -- stop codex
 cargo run -- reset codex
@@ -162,6 +164,43 @@ cargo test --bin fortlet project_environment
 cargo test --bin fortlet environment
 cargo test --test prepare
 cargo test --test pre_runtime_failures invalid_project_environment
+```
+
+## Global capsule inventory
+
+`fortlet list` reports every Fortlet-owned capsule across projects without
+resolving the current project. Each row contains the safely rendered project
+path, harness, and lowercase lifecycle state separated by tabs. Rows are sorted
+by project then harness; an empty inventory prints `no capsules`.
+
+Inventory consumes every MicroSandbox page and validates the stored Fortlet
+schema, same-path project mount, project identity, harness, effective-user
+capsule name, and handle/configuration agreement before printing any row.
+Malformed or ambiguous managed state fails the complete command. Unrelated
+MicroSandbox capsules are excluded by the managed label and never interpreted
+as Fortlet state.
+
+List is read-only: it does not require `HOME`, resolve or open a project, read
+provider credentials, prepare layers, create Fortlet state, or mutate a
+capsule. For a listed project that still exists, cleanup remains explicit:
+
+```bash
+fortlet status codex --project /path/to/project
+fortlet stop codex --project /path/to/project
+fortlet reset codex --project /path/to/project
+```
+
+The displayed path is escaped for one-line terminal safety and is not generated
+shell text. Pass the actual project path as an ordinary argument. A moved or
+deleted project remains visible but cannot yet be removed through a global
+Fortlet selector; bulk cleanup, automatic expiry, and workload leases are not
+part of this surface.
+
+The deterministic inventory gate does not start a VM:
+
+```bash
+cargo test --bin fortlet management::tests::inventory
+cargo test --test management_failures list_is_empty_without_home_project_credentials_or_fortlet_state
 ```
 
 ## Project capsule management

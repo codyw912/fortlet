@@ -54,12 +54,7 @@ impl CapsuleDescriptor {
         .into_iter()
         .collect();
         Self {
-            name: format!(
-                "fortlet-{}-{}-{}",
-                effective_uid(),
-                harness.name(),
-                project.identity.as_str()
-            ),
+            name: capsule_name(harness.name(), &project.identity),
             tool: harness.name().to_owned(),
             labels,
         }
@@ -108,6 +103,44 @@ impl CapsuleDescriptor {
         Ok(())
     }
 
+    pub fn validate_inventory(
+        stored_name: &str,
+        labels: &BTreeMap<String, String>,
+        project_root: &Path,
+    ) -> Result<String> {
+        let required = |suffix| {
+            labels
+                .get(&label(suffix))
+                .with_context(|| format!("stored capsule is missing fortlet.{suffix}"))
+        };
+        if required("managed")? != "true" {
+            bail!("stored capsule is not marked as Fortlet-managed");
+        }
+        if required("schema")? != SCHEMA_VERSION {
+            bail!("stored capsule uses an unsupported Fortlet schema");
+        }
+
+        let tool = required("tool")?;
+        if tool.is_empty()
+            || tool.len() > 64
+            || !tool
+                .bytes()
+                .all(|byte| byte.is_ascii_lowercase() || byte.is_ascii_digit() || byte == b'-')
+        {
+            bail!("stored capsule has an invalid harness name");
+        }
+
+        let identity = crate::project::ProjectIdentity::from_local_root(project_root);
+        if required("project")? != identity.as_str() {
+            bail!("stored capsule project path does not match its identity");
+        }
+        let expected_name = capsule_name(tool, &identity);
+        if stored_name != expected_name {
+            bail!("stored capsule name does not match its ownership labels");
+        }
+        Ok(tool.clone())
+    }
+
     fn validate_launch(&self, stored_name: &str, labels: &BTreeMap<String, String>) -> Result<()> {
         self.validate_management(stored_name, labels)?;
         let stored_environment = labels
@@ -130,6 +163,10 @@ impl CapsuleDescriptor {
         }
         Ok(())
     }
+}
+
+fn capsule_name(tool: &str, identity: &crate::project::ProjectIdentity) -> String {
+    format!("fortlet-{}-{tool}-{}", effective_uid(), identity.as_str())
 }
 
 pub struct MicroSandboxRuntime<'a> {

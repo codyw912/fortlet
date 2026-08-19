@@ -13,7 +13,8 @@ on the host during active commands, creates reusable project-and-harness
 capsules, preserves interactive terminal behavior, provides optional
 transparent Codex and Tact shims, and exposes project-scoped capsule status,
 stop, terminal reset, explicit environment preparation, and opt-in immutable
-project-tool layers. Non-interactive execution streams output as it arrives;
+project-tool layers plus read-only global owned-capsule inventory.
+Non-interactive execution streams output as it arrives;
 Codex commands fail closed after ten minutes without stdout or stderr while
 preserving their capsule. A reproducible Nix package exists for
 `aarch64-darwin` and is declared for `x86_64-linux`; native Linux verification
@@ -25,7 +26,7 @@ available. Connector-backed live Excel control and Sites hosting require the
 explicit native Codex escape hatch until Fortlet has a supported Apps
 authorization boundary.
 
-Global inventory, cross-project removal, restart, logs, explicit workload
+Cross-project removal for missing roots, restart, logs, explicit workload
 leases, automated publication, service orchestration, automatic harness
 discovery, and remote execution remain designed directions rather than
 implemented features.
@@ -105,8 +106,8 @@ of that contract.
 
 ## Open design questions
 
-1. What global inventory and safe capsule-removal contract should follow the
-   project-scoped management surface?
+1. What exact cleanup selector should remove an owned capsule whose listed
+   project root no longer exists?
 2. How should background-process leases be observed and expired?
 3. How should standalone installation expose optional shims without shell
    mutation?
