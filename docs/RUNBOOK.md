@@ -57,9 +57,11 @@ lease. A token with less than one hour of usable life is refreshed once with
 bounded timeouts; successful refresh atomically replaces the host `auth.json`
 at mode 0600 and live-rotates the existing MicroSandbox secrets without
 restarting the capsule. The guest projection uses `chatgptAuthTokens`, stable
-broker placeholders, and an empty refresh field. Run `codex login` on the host
-for missing, keyring-backed, account-changing, or permanently rejected login
-state. `prepare`, `doctor`, `native`, `status`, `stop`, and `reset` never renew.
+broker placeholders, an empty refresh field, and the current non-secret
+`last_refresh` metadata required by Codex to emit its bearer header. Run
+`codex login` on the host for missing, keyring-backed, account-changing, or
+permanently rejected login state. `prepare`, `doctor`, `native`, `status`,
+`stop`, and `reset` never renew.
 
 ## Project tool environments
 

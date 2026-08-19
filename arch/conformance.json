@@ -222,7 +222,7 @@
         "tests/pre_runtime_failures.rs"
       ],
       "gaps": [
-        "Deterministic implementation and the stock Codex 0.147.0 local compatibility fixture pass, and Experiment 0022 avoided guest-owned refresh, but both WebSocket and HTTPS model requests returned 401; broker substitution has not yet been separated from host-token validity and request/account shape."
+        "Experiment 0022 exposed a missing last_refresh field that made Codex omit Authorization. The repaired stock Codex 0.147.0 fixture proves both broker placeholders reach request headers without guest OAuth refresh, but a newly declared ordinary model-backed session has not yet confirmed the repair live."
       ]
     }
   ]

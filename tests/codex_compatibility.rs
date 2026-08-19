@@ -11,6 +11,7 @@ use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 const ACCOUNT_PLACEHOLDER: &str = "$MSB_FORTLET_CHATGPT_ACCOUNT_ID";
+const ACCESS_TOKEN_PLACEHOLDER: &str = "$MSB_FORTLET_CHATGPT_ACCESS_TOKEN";
 
 #[test]
 #[ignore = "requires FORTLET_CODEX_COMPAT_BINARY pointing to stock Codex 0.147.0"]
@@ -105,6 +106,10 @@ stream_max_retries = 0
     assert!(
         request.contains(&format!("chatgpt-account-id: {ACCOUNT_PLACEHOLDER}")),
         "stock Codex did not send the external account placeholder: {request}"
+    );
+    assert!(
+        request.contains(&format!("authorization: Bearer {ACCESS_TOKEN_PLACEHOLDER}")),
+        "stock Codex did not send the external access-token placeholder: {request}"
     );
     assert!(
         !refresh_seen.load(Ordering::SeqCst),

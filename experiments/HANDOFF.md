@@ -93,17 +93,28 @@ The sole prompt caused Codex to fall back from WebSockets after a 401; its
 HTTPS request also returned 401 with `Your ChatGPT login did not make it to
 this service.` No model response, repository work, or test occurred. Unlike
 Experiment 0021, Codex did not attempt guest-owned refresh, but the brokered
-authentication still was not accepted. The observation does not yet separate
-MicroSandbox substitution from host-token provider validity or request/account
-shape. Public stop/reset restored absence, the working copy stayed empty, the
-MicroSandbox inventory is empty, and immutable layers plus persistent Codex
-and Cargo state remain.
+authentication still was not accepted. Public stop/reset restored absence, the
+working copy stayed empty, the MicroSandbox inventory is empty, and immutable
+layers plus persistent Codex and Cargo state remain.
+
+Exact Codex 0.147.0 source inspection then attributed the failure. Its bearer
+accessor requires `last_refresh` as well as `tokens`; Fortlet's external-token
+projection omitted `last_refresh`, so Codex sent the projected account header
+but silently omitted `Authorization`. MicroSandbox supports the relevant
+HTTP/1 WebSocket-upgrade and HTTP/2 HTTPS header substitutions. The repair adds
+the current non-secret timestamp to Codex projections only, and the stock-Codex
+fixture now requires both placeholder headers without an OAuth refresh.
+
+The repair passes 69 unit tests, 28 non-ignored integration tests, formatting,
+strict all-target/all-feature Clippy, conformance, `nix flake check`, and the
+separate stock Codex 0.147.0 compatibility fixture. The immutable aarch64-darwin
+package is `/nix/store/yql3hf31rf5qgf8vccmw75b2lz5z6n23-fortlet-0.1.0`.
 
 ## What to do next
 
-1. Do not retry the terminal treatment. Obtain deterministic evidence that
-   separates broker substitution on Codex's WebSocket and HTTPS requests from
-   host-token validity and request/account shape before proposing a fix.
+1. Declare a fresh bounded live confirmation for the `last_refresh` repair.
+   Do not retry the terminal treatment, and obtain separate operator acceptance
+   before dispatch.
 2. Preserve the accepted FIP-0007 implementation; its conformance remains
    partial only because the daily edit/test unit could not begin.
 3. Require that no refresh token or durable provider credential becomes guest

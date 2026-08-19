@@ -225,14 +225,24 @@ pub fn require_source_outside_mounts(source: &Path, mounts: &[&Path]) -> Result<
 }
 
 pub fn write_codex_projection(path: &Path) -> Result<()> {
-    write_projection(path, "chatgptAuthTokens", "")
+    write_projection(
+        path,
+        "chatgptAuthTokens",
+        "",
+        Some(Utc::now().to_rfc3339_opts(SecondsFormat::Secs, true)),
+    )
 }
 
 pub fn write_tact_projection(path: &Path) -> Result<()> {
-    write_projection(path, "chatgpt", "not-a-real-refresh-token")
+    write_projection(path, "chatgpt", "not-a-real-refresh-token", None)
 }
 
-fn write_projection(path: &Path, auth_mode: &str, refresh_token: &str) -> Result<()> {
+fn write_projection(
+    path: &Path,
+    auth_mode: &str,
+    refresh_token: &str,
+    last_refresh: Option<String>,
+) -> Result<()> {
     let parent = path.parent().context("guest auth path has no parent")?;
     fs::create_dir_all(parent)
         .with_context(|| format!("cannot create guest auth directory {}", parent.display()))?;
@@ -251,7 +261,7 @@ fn write_projection(path: &Path, auth_mode: &str, refresh_token: &str) -> Result
             path.display()
         );
     }
-    let document = json!({
+    let mut document = json!({
         "OPENAI_API_KEY": Value::Null,
         "auth_mode": auth_mode,
         "tokens": {
@@ -261,6 +271,9 @@ fn write_projection(path: &Path, auth_mode: &str, refresh_token: &str) -> Result
             "account_id": format!("$MSB_{ACCOUNT_ID_ENV}"),
         }
     });
+    if let Some(last_refresh) = last_refresh {
+        document["last_refresh"] = Value::String(last_refresh);
+    }
     atomic_write(path, &serde_json::to_vec(&document)?)
 }
 
@@ -727,9 +740,12 @@ mod tests {
         let path = temporary.path().join("state/auth.json");
         write_codex_projection(&path).unwrap();
         let document: Value = serde_json::from_slice(&fs::read(path).unwrap()).unwrap();
-        let fixture: Value =
+        let mut fixture: Value =
             serde_json::from_str(include_str!("../tests/fixtures/codex-external-auth.json"))
                 .unwrap();
+        let last_refresh = document["last_refresh"].as_str().unwrap();
+        chrono::DateTime::parse_from_rfc3339(last_refresh).unwrap();
+        fixture["last_refresh"] = document["last_refresh"].clone();
         assert_eq!(document, fixture);
         assert_eq!(document["auth_mode"], "chatgptAuthTokens");
         assert_eq!(document["tokens"]["refresh_token"], "");

@@ -217,3 +217,19 @@ First obtain deterministic evidence that separates MicroSandbox substitution
 on Codex's WebSocket and HTTPS authorization requests from host-token provider
 validity and request-shape/account-binding behavior. Any change to the accepted
 credential mechanism requires a successor FIP and a newly declared experiment.
+
+Post-closure source attribution found the exact failure chain without another
+provider request. Codex 0.147.0's external-token constructor records
+`last_refresh`, and its bearer accessor refuses to return `tokens.access_token`
+unless that field is present. Fortlet's handwritten projection omitted it.
+Codex could therefore derive and send `ChatGPT-Account-ID` while its bearer
+provider silently omitted `Authorization`, matching the backend message that
+the ChatGPT login did not reach the service. MicroSandbox supports placeholder
+replacement in both the HTTP/1 WebSocket upgrade headers and HTTP/2 HTTPS
+headers, so substitution never had an access-token placeholder to replace.
+
+The repaired local-only stock-Codex fixture now requires both
+`Authorization: Bearer $MSB_FORTLET_CHATGPT_ACCESS_TOKEN` and
+`ChatGPT-Account-ID: $MSB_FORTLET_CHATGPT_ACCOUNT_ID`, plus absence of an OAuth
+refresh request. The treatment remains terminal; a live confirmation requires
+a newly declared experiment, not a resumed prompt.
