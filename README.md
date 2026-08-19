@@ -58,8 +58,9 @@ capsule. This does not disable user-configured MCP servers or local plugin
 skills. Connector-backed live Excel control and Sites hosting are unavailable
 through Fortlet; use native Codex explicitly if either capability is needed.
 
-When stdin or stdout is not a terminal, Fortlet streams harness stdout and
-stderr without allocating a PTY and returns the exact guest exit status.
+When stdin or stdout is not a terminal, Fortlet closes harness stdin, streams
+stdout and stderr without allocating a PTY, and returns the exact guest exit
+status.
 Managed Codex commands have a ten-minute inactivity ceiling that renews on
 output; expiry kills only that command and preserves the reusable capsule.
 Use interactive managed Codex for work that may legitimately remain silent

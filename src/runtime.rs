@@ -209,7 +209,10 @@ impl<'a> MicroSandboxRuntime<'a> {
                     options
                         .args(arguments.iter().cloned())
                         .cwd(capsule.project.cwd.display().to_string())
-                        .stdin_null()
+                        // MicroSandbox 0.6.8 streaming does not send EOF for
+                        // StdinMode::Null. Close an explicit pipe below so
+                        // non-terminal harnesses cannot block reading stdin.
+                        .stdin_pipe()
                 })
                 .await?;
             return forward_non_interactive(
@@ -242,11 +245,20 @@ enum ProcessEvent {
 }
 
 trait ExecutionSession {
+    async fn close_stdin(&mut self) -> Result<()>;
     async fn next_event(&mut self) -> Result<Option<ProcessEvent>>;
     async fn kill(&self) -> Result<()>;
 }
 
 impl ExecutionSession for ExecHandle {
+    async fn close_stdin(&mut self) -> Result<()> {
+        self.take_stdin()
+            .context("non-interactive exec has no stdin pipe")?
+            .close()
+            .await
+            .context("cannot close non-interactive command stdin")
+    }
+
     async fn next_event(&mut self) -> Result<Option<ProcessEvent>> {
         loop {
             let event = match self.recv().await {
@@ -275,6 +287,7 @@ async fn forward_non_interactive(
     stderr: &mut impl Write,
     idle_timeout: Option<Duration>,
 ) -> Result<i32> {
+    session.close_stdin().await?;
     loop {
         let event = match idle_timeout {
             Some(duration) => match tokio::time::timeout(duration, session.next_event()).await {
@@ -614,6 +627,17 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn non_interactive_stream_closes_stdin_before_returning() {
+        let mut session = FakeExecutionSession::new([ProcessEvent::Exited(0)]);
+
+        forward_non_interactive(&mut session, &mut Vec::new(), &mut Vec::new(), None)
+            .await
+            .unwrap();
+
+        assert!(session.stdin_closed);
+    }
+
+    #[tokio::test]
     async fn non_interactive_stream_rejects_a_missing_exit_event() {
         let mut session = FakeExecutionSession::new([]);
 
@@ -715,6 +739,7 @@ mod tests {
 
     struct FakeExecutionSession {
         events: VecDeque<ProcessEvent>,
+        stdin_closed: bool,
         killed: Option<Arc<AtomicBool>>,
         exit_after_kill: Option<i32>,
         stall_after_kill: bool,
@@ -724,6 +749,7 @@ mod tests {
         fn new(events: impl IntoIterator<Item = ProcessEvent>) -> Self {
             Self {
                 events: events.into_iter().collect(),
+                stdin_closed: false,
                 killed: None,
                 exit_after_kill: None,
                 stall_after_kill: false,
@@ -733,6 +759,7 @@ mod tests {
         fn stalled(killed: Arc<AtomicBool>, exit_after_kill: i32) -> Self {
             Self {
                 events: VecDeque::from([ProcessEvent::Started]),
+                stdin_closed: false,
                 killed: Some(killed),
                 exit_after_kill: Some(exit_after_kill),
                 stall_after_kill: false,
@@ -742,6 +769,7 @@ mod tests {
         fn never_exits(killed: Arc<AtomicBool>) -> Self {
             Self {
                 events: VecDeque::from([ProcessEvent::Started]),
+                stdin_closed: false,
                 killed: Some(killed),
                 exit_after_kill: None,
                 stall_after_kill: true,
@@ -750,6 +778,11 @@ mod tests {
     }
 
     impl ExecutionSession for FakeExecutionSession {
+        async fn close_stdin(&mut self) -> Result<()> {
+            self.stdin_closed = true;
+            Ok(())
+        }
+
         async fn next_event(&mut self) -> Result<Option<ProcessEvent>> {
             if let Some(event) = self.events.pop_front() {
                 return Ok(Some(event));
@@ -792,6 +825,10 @@ mod tests {
     }
 
     impl ExecutionSession for DelayedExecutionSession {
+        async fn close_stdin(&mut self) -> Result<()> {
+            Ok(())
+        }
+
         async fn next_event(&mut self) -> Result<Option<ProcessEvent>> {
             let Some((delay, event)) = self.events.pop_front() else {
                 return Ok(None);

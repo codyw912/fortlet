@@ -71,8 +71,10 @@ files, local site development, and skill-only plugins remain available. Use
 `fortlet native codex -- <arguments>` when Apps are deliberately required.
 
 When host stdin or stdout is not a terminal, Fortlet uses a non-PTY streaming
-exec session with null stdin. Stdout and stderr are forwarded and flushed as
-events arrive, and the guest exit code becomes the Fortlet exit code. Managed
+exec session and immediately closes an empty stdin pipe. This explicit EOF is
+the pinned MicroSandbox 0.6.8 workaround for its streaming null-stdin mode,
+which does not close guest stdin. Stdout and stderr are forwarded and flushed
+as events arrive, and the guest exit code becomes the Fortlet exit code. Managed
 Codex has a ten-minute inactivity ceiling renewed by each stdout or stderr
 event. On expiry Fortlet kills only the guest command, waits up to five seconds
 for its terminal event, cancels the credential-renewal task, and leaves the
