@@ -16,12 +16,13 @@ complete. Architecture-track changes require an accepted FIP before
 implementation, and conformance changes belong in the same checkpoint as the
 code and tests that establish them.
 
-For publication, follow FIP-0005 and the runbook. Use one goal bookmark and one
-draft pull request. After locally knowable work and verification are complete,
-present one exact publication packet and wait for approval. That approval
-covers only its named signed branch, draft PR, initial hosted run,
-evidence-only body update, readiness after success, and declared landed-branch
-cleanup. Any changed diff or scope, additional push or PR, retry, settings
-change, unexpected remote state, or failure requires new review and approval.
-The operator merges unless they explicitly authorize the agent to merge one
-specific pull request. Never push directly or force-push to `main`.
+For publication, follow FIP-0005 and the runbook. Once the operator accepts a
+GOAL, use its standing authority for exactly one descriptive bookmark and one
+draft pull request targeting `main`. Maintain that branch and PR through
+in-scope pushes, diagnosed CI fixes and replacement runs, body updates,
+readiness, landing verification, and exact bookmark cleanup without requesting
+another approval. Sign the final publishable tip; intermediate semantic
+checkpoints may remain unsigned. Report the final tip, scope, verification, and
+limitations for review. The operator merges unless they explicitly authorize
+the agent to merge one specific pull request. Never push directly or
+force-push to `main`, and stop on any boundary named by the GOAL or charter.

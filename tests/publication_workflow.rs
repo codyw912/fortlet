@@ -4,6 +4,8 @@ const PUBLICATION_FIP: &str =
     include_str!("../arch/proposals/0005-goal-pull-request-publication.md");
 const PROJECT_WORKFLOW: &str = include_str!("../WORKFLOW.md");
 const RUNBOOK: &str = include_str!("../docs/RUNBOOK.md");
+const AGENT_INSTRUCTIONS: &str = include_str!("../AGENTS.md");
+const CHARTER: &str = include_str!("../governance/CHARTER.md");
 
 #[test]
 fn hosted_verification_is_read_only_and_targets_main_pull_requests() {
@@ -86,32 +88,38 @@ fn pull_request_template_requests_the_publication_contract() {
 }
 
 #[test]
-fn publication_authority_is_one_bounded_packet() {
-    assert!(PUBLICATION_FIP
-        .contains("One explicit operator approval MAY authorize only this ordered transaction"));
-    assert!(PUBLICATION_FIP
-        .contains("Routine publication through an approved packet is governed rollout"));
-    assert!(PROJECT_WORKFLOW.contains("present one reviewed\npublication packet"));
-    assert!(RUNBOOK.contains("present one exact publication packet"));
-    assert!(RUNBOOK
-        .contains("Routine publication through an approved FIP-0005 packet is governed rollout"));
+fn publication_authority_is_goal_scoped() {
+    assert!(PUBLICATION_FIP.contains("Accepting a GOAL grants standing"));
+    assert!(PUBLICATION_FIP.contains("authority for exactly one descriptive Jujutsu bookmark"));
+    assert!(PUBLICATION_FIP.contains("Routine branch iteration and CI repair"));
+    assert!(PUBLICATION_FIP.contains("governed rollout, not experiments"));
+    assert!(PROJECT_WORKFLOW
+        .contains("Accepting a GOAL grants standing authority for that branch and PR lifecycle"));
+    assert!(RUNBOOK.contains("Accepting a GOAL grants standing authority for exactly that"));
+    assert!(AGENT_INSTRUCTIONS.contains("standing authority for exactly one"));
+    assert!(AGENT_INSTRUCTIONS.contains("descriptive bookmark and one"));
+    assert!(AGENT_INSTRUCTIONS.contains("draft pull request targeting `main`"));
+    assert!(CHARTER.contains("No separate publication\napproval is required"));
+    assert!(PUBLICATION_FIP.contains("final publishable branch tip MUST have a verified signature"));
+    assert!(PROJECT_WORKFLOW.contains("sign the final publishable branch tip"));
+    assert!(RUNBOOK.contains("sign the final publishable tip"));
+    assert!(PUBLICATION_FIP.contains("In-scope correction and a replacement run are ordinary"));
 
     for (name, document) in [
         ("FIP-0005", PUBLICATION_FIP),
         ("WORKFLOW.md", PROJECT_WORKFLOW),
         ("runbook", RUNBOOK),
+        ("agent instructions", AGENT_INSTRUCTIONS),
+        ("charter", CHARTER),
     ] {
-        for required in [
-            "initial hosted run",
-            "evidence-only",
-            "operator merge",
-            "new exact review",
-            "approval",
-        ] {
+        for required in ["GOAL", "operator", "merge", "main"] {
             assert!(document.contains(required), "{name} is missing {required}");
         }
     }
 
-    assert!(!PROJECT_WORKFLOW.contains("Every remote mutation is a separate"));
-    assert!(!RUNBOOK.contains("Approval does not carry forward to the next push"));
+    for document in [PROJECT_WORKFLOW, RUNBOOK, AGENT_INSTRUCTIONS] {
+        assert!(!document.contains("present one exact publication packet"));
+        assert!(!document.contains("new exact review and approval"));
+        assert!(!document.contains("one initial hosted run"));
+    }
 }

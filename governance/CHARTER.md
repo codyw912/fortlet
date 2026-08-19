@@ -33,8 +33,9 @@ documentation — is instrumental and justified only insofar as it unblocks this
 
 ## Autonomy Grants (no operator sign-off needed)
 
-1. Spend: up to 20 hours of declared engineering effort, with no external money,
-   paid quota, public remote mutation, or repository publication.
+1. Spend: up to 20 hours of declared engineering effort, with no external money
+   or paid quota. An accepted GOAL MAY grant FIP-0005's bounded authority for
+   one goal branch and pull request.
 2. Design discretion: full discretion over implementation details within
    accepted FIPs and the constraints below.
 3. Successor experiments: declare, implement, and run offline experiments with
@@ -67,8 +68,9 @@ documentation — is instrumental and justified only insofar as it unblocks this
 
 ## Escalation Triggers
 
-1. Any external spend, remote push, PR creation, package publication, or public
-   user test.
+1. Any external spend, package publication, public user test, remote mutation
+   outside an accepted GOAL's FIP-0005 lifecycle, merge, repository setting,
+   release, tag, secret, or destructive remote action.
 2. Two consecutive terminal failures that share an assumption.
 3. Any need to weaken a hard invariant or change an accepted FIP.
 4. Any anomaly suggesting credential exposure, data loss, unowned process
