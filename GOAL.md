@@ -1,12 +1,18 @@
 # GOAL: Make every owned capsule visible
 
-Status: active — operator-accepted 2026-08-19.
+Status: complete — local deliverables and Experiment 0033 closed 2026-08-19;
+conditionally active only for PR #10 hosted verification, operator merge, and
+read-only landing verification.
 
 The deterministic implementation is complete and Experiment 0033 is accepted.
 An immutable package listed one real owned running Tact capsule from outside
 its project; the listed path then selected unchanged public status, stop, and
-reset through final absence and empty MicroSandbox inventory. Goal closure,
-the final complete gate, and PR #10 readiness remain.
+reset through final absence and empty MicroSandbox inventory. The final
+complete `docs/RUNBOOK.md` gate passed through `nix develop` on aarch64-darwin:
+all 88 unit tests and every enabled integration test, formatting, strict
+all-target/all-feature Clippy, conformance, and `nix flake check`. Nix emitted
+only the known incompatible `x86_64-linux` omission notice. Only PR #10's
+hosted check, readiness, operator merge, and landing verification remain.
 
 ## Outcome
 

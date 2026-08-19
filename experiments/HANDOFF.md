@@ -36,7 +36,7 @@ The agreed sequence is global capsule inventory, one Codex work-readiness
 closure, then the first new harness chosen from a concrete use case rather than
 a speculative generalized adapter abstraction.
 
-## Proposed lifecycle slice
+## Completed lifecycle slice
 
 FIP-0011 is Accepted and `GOAL.md` is operator-approved. The selected
 surface is only `fortlet list`: a read-only global inventory of fully validated
@@ -49,14 +49,12 @@ Cleanup deliberately reuses existing explicit
 `status`/`stop`/`reset --project` commands. There is no global mutation, raw
 capsule selector, automatic expiry, or workload lease in this slice. A missing
 project root remains visible but not globally removable. That is the principal
-honest limitation to evaluate during FIP review.
+honest limitation retained for a successor.
 
 ## Next action
 
 The `capsule-inventory` bookmark and draft PR #10 exist. Deterministic
-implementation is complete at `866007214df6b45030a4bfae71e89a4083679ff8`;
-focused inventory, management-failure, conformance, formatting, and strict
-Clippy gates pass. Experiment 0033 is predeclared but has not dispatched.
+implementation is complete at `866007214df6b45030a4bfae71e89a4083679ff8`.
 
 Experiment 0033 is accepted. Immutable package
 `/nix/store/72qrzh32iaxcvhvi97p8bi1gsj41gmqr-fortlet-0.1.0` reported the sole
@@ -65,10 +63,16 @@ packaged public status/stop/reset through final absence, `no capsules`, and raw
 inventory `[]`. The synthetic auth document is deleted, the working copy was
 unchanged by the live unit, and FIP-0011 is conformant.
 
-Close the GOAL, run the final complete standard gate, shape and sign the exact
-publishable tip, update and push only `capsule-inventory`, require hosted Rust
-verification, update PR #10 evidence, and mark it ready. Leave merge to the
-operator.
+The final complete local gate subsequently passed through `nix develop` on
+aarch64-darwin: all 88 unit tests and every enabled integration test,
+formatting, strict all-target/all-feature Clippy, conformance, and
+`nix flake check`. Nix emitted only the known incompatible `x86_64-linux`
+omission notice. The GOAL is complete and conditionally active only for PR #10
+hosted verification, operator merge, and read-only landing verification.
+
+Shape and sign the exact publishable tip, update and push only
+`capsule-inventory`, require hosted Rust verification, update PR #10 evidence,
+and mark it ready. Leave merge to the operator.
 
 Do not send a provider prompt; resume Experiments 0030–0032; add a harness;
 add bulk cleanup, leases, logs, restart, standalone installation, or Linux CI;
