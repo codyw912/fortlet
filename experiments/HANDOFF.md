@@ -3,7 +3,7 @@
 Audience: a fresh agent session. `GOAL.md` is normative and active. Read
 FIP-0001, FIP-0002, FIP-0005, FIP-0006, accepted FIP-0007, and accepted FIP-0008
 in full before implementation. Experiments 0001 through 0021 are terminally
-closed; no experiment is active.
+closed; Experiment 0022 is the sole active experiment.
 
 ## Verified landed baseline
 
@@ -80,21 +80,22 @@ acceptance: it validates the broker pattern and renews supported dynamic-secret
 leases, but it cannot renew an existing Codex ChatGPT OAuth login and would
 make an Infisical control plane plus an Enterprise feature required.
 
-## Declared next experiment
+## Active experiment
 
-Experiment 0022 is declared but not dispatched. It pins checkpoint
+Experiment 0022 is authorized and in flight. It pins checkpoint
 `e7b1d5a26693`, package
 `/nix/store/kym4by5g33jw1z3wdg9p70manajzmnx0-fortlet-0.1.0`, one non-prompt
 version launch, one shimmed interactive session, one exact prompt, at most one
 host refresh, one owned capsule, one focused test, zero remote mutation, no
-retry, and 15 elapsed minutes. The immutable CLI currently reports
-`codex<TAB>absent`. Dispatch requires separate operator budget acceptance.
+retry, and 15 elapsed minutes. The operator accepted that exact budget on
+2026-08-18. The frozen pre-dispatch baseline has an empty working copy, exact
+revision and project hashes, public `codex<TAB>absent`, and no MicroSandbox
+sandboxes.
 
 ## What to do next
 
-1. Obtain explicit acceptance of Experiment 0022's exact budget, then give the
-   operator its frozen fish-shell command sequence. Do not dispatch before that
-   acceptance.
+1. Give the operator Experiment 0022's frozen fish-shell command sequence and
+   record its sole authorized observation without retry.
 2. Preserve the accepted FIP-0007 implementation; its conformance remains
    partial only because the daily edit/test unit could not begin.
 3. Require that no refresh token or durable provider credential becomes guest
@@ -105,5 +106,5 @@ retry, and 15 elapsed minutes. The immutable CLI currently reports
    work unit succeeds.
 
 Do not resume Experiment 0021, add a refresh token to the guest projection,
-dispatch Experiment 0022 without budget acceptance, remove verified layers,
-add global inventory/pruning, or begin standalone distribution.
+retry Experiment 0022, remove verified layers, add global inventory/pruning,
+or begin standalone distribution.

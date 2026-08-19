@@ -2,8 +2,8 @@
 
 Status: active. FIP-0007 and FIP-0008 are accepted and their deterministic
 implementations are complete. Experiment 0021 rejected the first daily session
-at credential refresh. Successor Experiment 0022 is declared for the renewable
-credential path and awaits separate dispatch-budget acceptance.
+at credential refresh. Successor Experiment 0022 is in flight for the renewable
+credential path under its separately accepted dispatch budget.
 
 Turn the proven isolated runtime into a deliberate, understandable daily-use
 workflow. Add the smallest explicit preparation surface, then dogfood one

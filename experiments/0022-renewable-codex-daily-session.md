@@ -1,6 +1,6 @@
 # Experiment 0022: Renewable Codex daily session
 
-Status: declared
+Status: in flight — authorized 2026-08-18
 Design: FIP-0001, FIP-0002, FIP-0006, FIP-0007, and FIP-0008
 Charter scope: `local-foundation/v1`
 
@@ -152,8 +152,19 @@ a VM, provider request, model prompt, or remote mutation.
 
 ## Results
 
-Not dispatched.
+The operator accepted the exact declared budget on 2026-08-18. Immediately
+before dispatch, the agent froze this baseline at `2026-08-19T02:03:14Z`:
+
+1. `jj status` reported no working-copy changes, with the empty working copy
+   at `0665141a` and the experiment declaration at parent `33d3c4a2`.
+2. Revision `e7b1d5a26693` resolved exactly to
+   `e7b1d5a2669300aa2e81f55971a6211db8a383df`.
+3. Both project-input hashes matched the declared values.
+4. The immutable public CLI reported `codex<TAB>absent`.
+5. The pinned MicroSandbox CLI reported `No sandboxes found.`
+
+The interactive unit is authorized but has not yet produced an observation.
 
 ## Terminal Closure
 
-Pending.
+Pending the authorized operator-run unit.
