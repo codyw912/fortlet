@@ -3,7 +3,7 @@
   "path": ["bin"],
   "environment": {
     "CARGO_HOME": "/home/agent/.cargo",
-    "CARGO_TARGET_DIR": "/home/agent/.cargo/fortlet-target",
+    "CARGO_TARGET_DIR": "target/fortlet-guest",
     "C_INCLUDE_PATH": "/opt/fortlet/project/usr/include",
     "LD_LIBRARY_PATH": "/opt/fortlet/project/lib",
     "LIBRARY_PATH": "/opt/fortlet/project/lib"
