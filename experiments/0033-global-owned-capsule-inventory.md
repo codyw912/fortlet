@@ -14,9 +14,11 @@ tests, all five management-failure integrations, conformance, formatting, and
 strict all-target/all-feature Clippy.
 
 The complete standard gate passed on merged `main` before goal selection and
-will run again against the frozen treatment before live dispatch. The package
-store path, clean working copy, public empty result, and raw empty MicroSandbox
-inventory must be recorded before the treatment unit begins.
+passed again against the frozen treatment before live dispatch: all 88 unit
+tests and every enabled integration test, formatting, strict Clippy,
+conformance, and `nix flake check` on aarch64-darwin. Nix emitted only the known
+incompatible `x86_64-linux` omission notice. The exact immutable package is
+`/nix/store/72qrzh32iaxcvhvi97p8bi1gsj41gmqr-fortlet-0.1.0`.
 
 ## Hypothesis and Production Mechanism
 
