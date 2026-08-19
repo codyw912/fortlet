@@ -225,12 +225,15 @@ renamed test: 1 passed, 0 failed, with 81 filtered out.
 
 The sole work unit is rejected because the requested in-capsule test did not
 run. Read-only diagnosis found the expected published `cargo`, `rustc`, and
-`jj` files in the selected project layer, but all three had host mode 0600.
-That makes commands in the layer's declared `PATH` non-executable when the
-layer is later mounted read-only. This is a Fortlet-owned FIP-0006 conformance
-defect: the accepted contract requires executable permissions in the output
-digest and requires the fixture to execute a focused Fortlet test inside the
-guest boundary.
+`jj` files in the selected project layer. Their host-side modes appeared as
+0600, but that observation is not by itself causal: Experiment 0020 previously
+executed the same mounted tools through direct `msb exec`. The model transcript
+shows Codex invoked the failed command through `/usr/bin/bash -lc`, making
+login-shell PATH replacement the competing explanation. The demonstrated
+Fortlet-owned defect is therefore narrower and certain: a FIP-0006 tool that
+worked in the direct acceptance probe was unavailable in the ordinary Codex
+child-command path. A zero-provider successor must distinguish mount permission
+translation from login-shell environment loss before implementation.
 
 After the model process, public cleanup reported `running`, `stopped`, `reset`,
 then `absent`; packaged MicroSandbox inventory was `[]`. The intended test-only
@@ -240,7 +243,8 @@ diff is retained as evidence and passed its independent host check.
 
 Rejected. Credential-free DNS/TLS readiness and FIP-0010 streaming/EOF behavior
 passed, but the ordinary edit/test loop stopped at the project tool layer:
-published executable modes did not survive into reusable capsule activation.
-The result is attributable, bounded, publicly cleaned up, and preserved without
-a model retry. A separate offline correction may repair the demonstrated
-FIP-0006 defect; it must not spend another provider unit under this experiment.
+the declared Cargo command was unavailable beneath Codex's login-shell command
+path. The result is bounded, publicly cleaned up, and preserved without a model
+retry. A separate offline diagnosis and correction may repair the demonstrated
+FIP-0006 integration defect; it must not spend another provider unit under this
+experiment.
