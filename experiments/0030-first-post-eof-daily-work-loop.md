@@ -175,7 +175,32 @@ restored absence and empty inventory. The current conformance gate is green.
 
 ## Results
 
-Pending.
+### Credential-free preflight
+
+The frozen package's final baseline was clean: public status reported
+`codex<TAB>absent` and the packaged MicroSandbox inventory was `[]`. The
+synthetic auth document was a mode-0600 regular file at the declared path.
+
+The one packaged version launch exited zero in about five seconds and printed
+`codex-cli 0.147.0`, creating the sole expected running capsule. The one direct
+guest probe then exited zero in about 4.6 seconds with empty stderr and printed:
+
+```text
+172.64.155.209  STREAM chatgpt.com
+tls_http=200
+```
+
+No firewall popup was reported during the probe. No Authorization header,
+cookie, prompt, repository content, or provider credential was sent. Public
+cleanup reported `running`, `stopped`, `reset`, then `absent`; the corrected
+packaged inventory query reported `[]`. The synthetic auth document and its
+directory were deleted. An initial post-cleanup inventory query used the
+unsupported display flag `--output json`; it failed locally without mutation
+and was corrected to `--format json`. This did not repeat the declared network
+probe.
+
+The credential-free preflight is accepted. The complete pre-model gate and
+frozen repository work unit remain pending.
 
 ## Terminal Closure
 
