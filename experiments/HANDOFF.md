@@ -49,11 +49,20 @@ stop before implementation.
 
 ## What to do next
 
-1. Inspect Codex 0.147.0 primary source for Apps registration, biscuit
-   acquisition, configuration precedence, and targeted disable behavior.
-2. Record the evidence and draft FIP-0009 with one recommended implementation.
-3. Present that concrete FIP for operator acceptance before changing runtime
-   behavior.
+The source audit is complete and FIP-0009 is proposed. Codex feature `apps` is
+stable and default-on; `--disable apps` is a supported global CLI override.
+The effective MCP map removes only reserved server `codex_apps` when disabled.
+`CODEX_CONNECTORS_TOKEN` is explicitly a debug override, while normal Apps
+startup reuses the ChatGPT auth provider. The open client contains no external
+biscuit acquisition or renewal contract.
+
+The recommended implementation adds an adapter-owned launch-argument transform:
+Codex 0.147.0 prepends `--disable apps`, Tact and native execution remain
+unchanged, and runtime attachment consumes the transformed arguments without a
+harness-name branch. No persistent config or credential changes are proposed.
+
+Next: obtain operator acceptance of FIP-0009. Then implement its smallest slice,
+add deterministic evidence, declare Experiment 0024, and run the packaged check.
 
 Do not resume a closed experiment, inspect credential contents, change model
 authentication, disable all MCP servers, fork Codex, introduce a proxy, mutate
