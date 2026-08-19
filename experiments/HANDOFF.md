@@ -1,8 +1,9 @@
 # Session Handoff — Goal-scoped publication autonomy
 
-Audience: a fresh agent session. `GOAL.md` is normative and active. Read
-FIP-0001 and FIP-0005 in full before implementation. Experiments 0001 through
-0023 are terminally closed; there is no active experiment.
+Audience: a fresh agent session. `GOAL.md` is normative; implementation is
+complete and publication is pending. Read FIP-0001 and FIP-0005 in full before
+changing the design. Experiments 0001 through 0023 are terminally closed;
+there is no active experiment.
 
 ## Verified landed baseline
 
@@ -42,14 +43,26 @@ or repository, `main` mutation, settings, releases, tags, packages, secrets,
 external spend, destructive actions, or unrelated resources. Two failures
 sharing an unresolved cause still stop under the charter.
 
+## Implemented state
+
+The accepted amendments are checkpointed separately from the operational
+adoption. `AGENTS.md`, `WORKFLOW.md`, `docs/RUNBOOK.md`, the active charter,
+and publication-workflow tests now express the same goal-scoped authority.
+FIP-0005 remains conformant. The test's charter input exposed a Nix source
+filter omission; `package.nix` now includes only `governance/CHARTER.md` in
+addition to its prior source set, and the repaired `nix flake check` passed.
+
+No product code, hosted CI, branch settings, merge policy, experiment
+mechanics, release resources, or secrets changed.
+
 ## What to do next
 
-1. Checkpoint the accepted amendments before changing operational rules.
-2. Replace packet language consistently in `AGENTS.md`, `WORKFLOW.md`, and the
-   runbook; update publication tests and conformance in the same checkpoint.
-3. Run the complete local gate, sign only the publishable tip, then exercise
-   the delegated workflow on one branch and draft PR. Mark it ready after the
-   hosted gate succeeds; the operator squash-merges manually.
+1. Run the complete local gate on the exact final tree.
+2. Sign only the publishable tip, create one descriptive bookmark, and open
+   the authorized draft PR against `main`.
+3. Maintain that PR through hosted verification and mark it ready when green.
+   The operator squash-merges manually; then verify the landing and clean up
+   the exact goal bookmark.
 
 Do not change product code, hosted CI, branch protection, merge settings,
 experiment mechanics, release policy, secrets, or the operator merge boundary.

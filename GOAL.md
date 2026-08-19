@@ -1,8 +1,10 @@
 # GOAL: Delegate goal-scoped publication iteration
 
-Status: active — operator-accepted 2026-08-19. PR #5 proved that exact
-per-push packets turn an ordinary hosted test failure into repeated approval
-ceremony without changing the protected `main` or operator merge boundary.
+Status: implementation complete; publication pending — operator-accepted
+2026-08-19. The accepted FIP and charter amendments, operational rules,
+conformance evidence, and publication-workflow tests are checkpointed. The
+remaining work is exact-tip verification, delegated PR publication, hosted
+verification, and operator merge.
 
 Replace that approval model with standing authority derived from an accepted
 GOAL. Keep one branch, one pull request, required checks, protected `main`, and
