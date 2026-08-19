@@ -129,13 +129,25 @@ only the known missing app-metadata warning plus the incompatible
 fixture remains green from the production repair checkpoint; the closure adds
 only one integration test and durable evidence.
 
+Draft PR #5 was created from signed reviewed tip `978c4458467e`. Its sole
+initial hosted run stopped in `cargo test`: Linux reused the inode after
+`source_identity_change_blocks_atomic_replacement` removed and recreated its
+fixture, so the device-plus-inode guard accepted changed contents. No retry,
+second push, body update, or readiness transition occurred. The approved local
+repair extends the source identity with a digest from the existing bounded,
+symlink-safe read and changes the regression to mutate the same inode
+deliberately. The repaired tree passes 69 unit tests, 29 non-ignored
+integration tests, formatting, strict all-target/all-feature Clippy, explicit
+conformance, and `nix flake check` on `aarch64-darwin`. A replacement
+publication packet remains required.
+
 ## What to do next
 
 1. Preserve the accepted FIP-0007/FIP-0008 implementation and the retained
    test-only experiment edit.
-2. Shape and sign `main..@`, then present one exact FIP-0005 packet for the
-   single goal bookmark, draft PR, initial hosted run, readiness transition,
-   and named post-merge cleanup. The operator merges manually.
+2. Checkpoint and sign the hosted Linux repair, then present a new exact
+   FIP-0005 packet before moving the existing bookmark or triggering a
+   replacement hosted run. The operator merges manually.
 3. Continue to treat MCP biscuit authorization separately from model
    authentication; it is not part of this completed credential contract.
 

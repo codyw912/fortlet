@@ -1,13 +1,14 @@
 # GOAL: Harden the first daily Fortlet session
 
-Status: conditionally active only for publication and landing verification.
-FIP-0007 and FIP-0008 are conformant. Experiment 0023 terminally accepted the
-first ordinary Fortlet work loop: the repaired external-token projection
-authenticated one bounded model prompt, Codex made the exact requested
-test-only edit through the project tool layer, the focused test passed, and
-public stop/reset restored absence while preserving durable layers and cache.
-The final tree passes the complete standard verification set on
-`aarch64-darwin`; locally knowable mission work is complete.
+Status: conditionally active for replacement publication and landing
+verification. FIP-0007 and FIP-0008 are conformant. Experiment 0023 terminally
+accepted the first ordinary Fortlet work loop. PR #5's sole initial hosted run
+then exposed that the atomic credential replacement guard compared only device
+and inode; Linux reused the inode after the test recreated the source, so the
+guard missed changed contents. The repair adds the bounded source digest to
+that identity and makes the test mutate the existing inode deliberately. Its
+complete local gate passes; locally knowable work is complete, and publication
+remains stopped for one new exact packet.
 
 Turn the proven isolated runtime into a deliberate, understandable daily-use
 workflow. Add the smallest explicit preparation surface, then dogfood one

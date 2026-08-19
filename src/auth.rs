@@ -283,28 +283,33 @@ struct SourceIdentity {
     device: u64,
     #[cfg(unix)]
     inode: u64,
+    digest: [u8; 32],
 }
 
 impl SourceIdentity {
-    fn from_metadata(metadata: &fs::Metadata) -> Self {
+    fn from_source(metadata: &fs::Metadata, bytes: &[u8]) -> Self {
         Self {
             #[cfg(unix)]
             device: metadata.dev(),
             #[cfg(unix)]
             inode: metadata.ino(),
+            digest: Sha256::digest(bytes).into(),
         }
     }
 
-    fn matches(self, metadata: &fs::Metadata) -> bool {
-        #[cfg(unix)]
-        {
-            self.device == metadata.dev() && self.inode == metadata.ino()
-        }
-        #[cfg(not(unix))]
-        {
-            let _ = metadata;
-            true
-        }
+    fn matches(self, metadata: &fs::Metadata, bytes: &[u8]) -> bool {
+        let metadata_matches = {
+            #[cfg(unix)]
+            {
+                self.device == metadata.dev() && self.inode == metadata.ino()
+            }
+            #[cfg(not(unix))]
+            {
+                let _ = metadata;
+                true
+            }
+        };
+        metadata_matches && self.digest == Sha256::digest(bytes).as_slice()
     }
 }
 
@@ -316,34 +321,7 @@ struct CredentialSnapshot {
 }
 
 fn read_snapshot(source: &Path, require_refresh: bool) -> Result<CredentialSnapshot> {
-    let metadata = fs::symlink_metadata(source)
-        .with_context(|| format!("cannot inspect Codex auth at {}", source.display()))?;
-    if metadata.file_type().is_symlink() {
-        bail!("Codex auth must not be a symlink: {}", source.display());
-    }
-    let mut options = OpenOptions::new();
-    options.read(true);
-    #[cfg(unix)]
-    options.custom_flags(libc::O_NOFOLLOW);
-    let mut file = options
-        .open(source)
-        .with_context(|| format!("cannot read Codex ChatGPT auth at {}", source.display()))?;
-    let metadata = file
-        .metadata()
-        .with_context(|| format!("cannot inspect Codex auth at {}", source.display()))?;
-    if !metadata.is_file() {
-        bail!("Codex auth is not a regular file: {}", source.display());
-    }
-    if metadata.len() > MAX_AUTH_SIZE {
-        bail!("Codex auth is unexpectedly large: {}", source.display());
-    }
-    let mut bytes = Vec::with_capacity(metadata.len() as usize);
-    (&mut file)
-        .take(MAX_AUTH_SIZE + 1)
-        .read_to_end(&mut bytes)?;
-    if bytes.len() as u64 > MAX_AUTH_SIZE {
-        bail!("Codex auth is unexpectedly large: {}", source.display());
-    }
+    let (metadata, bytes) = read_source(source)?;
     let document: Value = serde_json::from_slice(&bytes)
         .with_context(|| format!("Codex auth is invalid: {}", source.display()))?;
     let object = document
@@ -385,9 +363,41 @@ fn read_snapshot(source: &Path, require_refresh: bool) -> Result<CredentialSnaps
             source: source.to_owned(),
         },
         refresh_token: refresh_token.to_owned(),
+        identity: SourceIdentity::from_source(&metadata, &bytes),
         document,
-        identity: SourceIdentity::from_metadata(&metadata),
     })
+}
+
+fn read_source(source: &Path) -> Result<(fs::Metadata, Vec<u8>)> {
+    let metadata = fs::symlink_metadata(source)
+        .with_context(|| format!("cannot inspect Codex auth at {}", source.display()))?;
+    if metadata.file_type().is_symlink() {
+        bail!("Codex auth must not be a symlink: {}", source.display());
+    }
+    let mut options = OpenOptions::new();
+    options.read(true);
+    #[cfg(unix)]
+    options.custom_flags(libc::O_NOFOLLOW);
+    let mut file = options
+        .open(source)
+        .with_context(|| format!("cannot read Codex ChatGPT auth at {}", source.display()))?;
+    let metadata = file
+        .metadata()
+        .with_context(|| format!("cannot inspect Codex auth at {}", source.display()))?;
+    if !metadata.is_file() {
+        bail!("Codex auth is not a regular file: {}", source.display());
+    }
+    if metadata.len() > MAX_AUTH_SIZE {
+        bail!("Codex auth is unexpectedly large: {}", source.display());
+    }
+    let mut bytes = Vec::with_capacity(metadata.len() as usize);
+    (&mut file)
+        .take(MAX_AUTH_SIZE + 1)
+        .read_to_end(&mut bytes)?;
+    if bytes.len() as u64 > MAX_AUTH_SIZE {
+        bail!("Codex auth is unexpectedly large: {}", source.display());
+    }
+    Ok((metadata, bytes))
 }
 
 fn token_value<'a>(
@@ -498,9 +508,9 @@ fn atomic_replace_source(path: &Path, identity: SourceIdentity, bytes: &[u8]) ->
             bail!("temporary Codex auth has unsafe ownership or permissions");
         }
     }
-    let current = fs::symlink_metadata(path)
+    let (current, current_bytes) = read_source(path)
         .with_context(|| format!("cannot recheck Codex auth at {}", path.display()))?;
-    if current.file_type().is_symlink() || !identity.matches(&current) {
+    if !identity.matches(&current, &current_bytes) {
         bail!("Codex auth changed during refresh; retry");
     }
     temporary
@@ -901,12 +911,11 @@ mod tests {
     }
 
     #[test]
-    fn source_identity_change_blocks_atomic_replacement() {
+    fn source_content_change_blocks_atomic_replacement() {
         let temporary = tempfile::tempdir().unwrap();
         let path = temporary.path().join("auth.json");
         write_auth(&path, unix_time().unwrap() + 30, "old-refresh");
         let snapshot = read_snapshot(&path, true).unwrap();
-        fs::remove_file(&path).unwrap();
         write_auth(&path, unix_time().unwrap() + 7200, "external-refresh");
         let external = fs::read(&path).unwrap();
         let refreshed = CompleteRefresh {
