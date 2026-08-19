@@ -157,7 +157,12 @@ No provider or live runtime process has run under this declaration.
 ## Results
 
 The immutable treatment revision and package are recorded above, and the
-complete deterministic verification gate passed. No live unit has been
+complete deterministic verification gate passed. Immediately before dispatch,
+the working copy was clean; Herdr pane `wA:p9` was an idle fish shell in the
+project and reported `CODEX_THREAD_ID`, `CODEX_SANDBOX`,
+`CODEX_SANDBOX_NETWORK_DISABLED`, and `CODEX_CI` absent. Packaged status
+reported `codex<TAB>absent`, packaged `fortlet list` reported `no capsules`,
+and packaged raw MicroSandbox inventory was `[]`. No live unit has been
 dispatched yet.
 
 ## Terminal Closure
