@@ -1,6 +1,6 @@
 # Experiment 0023: Codex bearer projection confirmation
 
-Status: in flight — authorized 2026-08-18
+Status: accepted — terminal 2026-08-18
 Design: FIP-0001, FIP-0002, FIP-0006, FIP-0007, and FIP-0008
 Charter scope: `local-foundation/v1`
 
@@ -144,8 +144,55 @@ before dispatch, the agent froze this baseline at `2026-08-19T02:40:07Z`:
 4. The immutable public CLI reported `codex<TAB>absent`.
 5. The pinned MicroSandbox CLI reported `No sandboxes found.`
 
-The operator-run unit is authorized but has not yet produced an observation.
+The operator completed the frozen unit in 9 minutes 30 seconds. The immutable
+package created one owned Codex capsule, the packaged shim attached, and the
+sole prompt reached a model response without a refresh failure or backend 401.
+The model reported Cargo 1.97.1 and Jujutsu 0.43.0, made only the requested
+24-line addition to `tests/pre_runtime_failures.rs`, and ran the focused guest
+gate successfully: 12 passed, 0 failed.
+
+The retained test is named
+`missing_refresh_token_fails_before_capsule_or_environment_artifacts`. It
+removes only `tokens.refresh_token` from an otherwise valid isolated fixture,
+requires the credentials-stage `codex login` correction, and proves neither
+the project-state root nor tool-layer root was created. Independent
+post-session review found the diff correct, and the same focused gate plus
+formatting check passed locally.
+
+The compact returned transcript retained the tool versions but not the raw
+`command -v` output lines. Their project-layer placement is supported by the
+unchanged immutable environment and Experiment 0020's exact path evidence,
+rather than a raw Experiment 0023 path transcript. No startup or MCP warning
+was included in the returned transcript.
+
+One malformed inspection command caused the shell to interpret the literal
+text `codex login` as command substitution. The sandbox denied it before
+login, credential access, or state mutation. This is retained as a contained
+agent-command near-miss; it did not execute the prohibited operation or alter
+the treatment.
+
+After normal interactive exit, the public CLI reported `codex<TAB>running`,
+then `codex<TAB>stopped`, `codex<TAB>reset`, and finally
+`codex<TAB>absent`. Independent read-only review found no MicroSandbox
+sandboxes and confirmed preservation of the Codex harness layer, base layer,
+project layer, persistent harness state, and Cargo target cache.
 
 ## Terminal Closure
 
-Pending the authorized operator-run unit.
+Accepted. The repaired external-token projection authenticated the ordinary
+model request, and the packaged daily path completed one real repository
+edit/test loop through the project tool layer. The prior failures were caused
+by missing non-secret `last_refresh` metadata, not by an inherent limitation
+of host-owned renewable credentials or MicroSandbox substitution.
+
+Actual cost was one model-backed prompt, one non-prompt version launch, one
+interactive session, one owned reusable capsule, one focused guest Cargo test,
+and 9 minutes 30 seconds. No remote mutation, retry, second session, layer
+build, credential read, credential output, or observed paid action beyond the
+single prompt occurred; whether the launch needed a host refresh was not
+observable from the returned transcript. Public stop/reset completed and all
+declared durable inputs remained available.
+
+Retain the requested integration test, mark FIP-0007 and FIP-0008 conformant,
+run the complete publication gate, and prepare the single FIP-0005 review
+packet. Experiments 0021 through 0023 remain terminal and must not be resumed.

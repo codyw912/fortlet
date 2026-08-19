@@ -1,13 +1,13 @@
 # GOAL: Harden the first daily Fortlet session
 
-Status: active. FIP-0007 and FIP-0008 are accepted and their deterministic
-implementations are complete. Experiment 0021 rejected the first daily session
-at credential refresh. Successor Experiment 0022 is terminally rejected: the
-external-token path avoided guest refresh, but a missing non-secret
-`last_refresh` field caused Codex to omit the bearer header and both model
-transports returned 401 before a response or edit. The deterministic repair and
-complete local gate now pass; Experiment 0023 is declared for one fresh bounded
-live confirmation and is in flight under its separately accepted budget.
+Status: conditionally active only for publication and landing verification.
+FIP-0007 and FIP-0008 are conformant. Experiment 0023 terminally accepted the
+first ordinary Fortlet work loop: the repaired external-token projection
+authenticated one bounded model prompt, Codex made the exact requested
+test-only edit through the project tool layer, the focused test passed, and
+public stop/reset restored absence while preserving durable layers and cache.
+The final tree passes the complete standard verification set on
+`aarch64-darwin`; locally knowable mission work is complete.
 
 Turn the proven isolated runtime into a deliberate, understandable daily-use
 workflow. Add the smallest explicit preparation surface, then dogfood one
@@ -26,9 +26,8 @@ and FIP-0008 in full.
    guest-unreadable, preserves the native Codex terminal, renews an active
    session without silently restarting a shared capsule, and fails closed.
 3. FIP-0008 was accepted after review of Codex, MicroSandbox, iron-proxy, and
-   Infisical Agent Proxy. Its deterministic implementation and stock-Codex
-   compatibility fixture are complete; conformance remains partial until the
-   declared ordinary-session experiment runs.
+   Infisical Agent Proxy. Its deterministic implementation, stock-Codex
+   compatibility fixture, and ordinary-session experiment are complete.
 
 ## Deliverable 1 — Accept explicit preparation
 
@@ -66,9 +65,9 @@ and FIP-0008 in full.
    credential absence, provisioning inputs, cache-hit idempotence, both
    harnesses, unconfigured projects, failure cleanup, and absence of persistent
    capsule or harness state.
-2. Experiment 0022 is the terminal bounded daily-session unit. Do not resume or
-   retry Experiments 0021 or 0022; a changed mechanism requires a successor FIP
-   and experiment.
+2. Experiment 0023 is the accepted terminal bounded daily-session unit. Do not
+   resume or retry Experiments 0021 through 0023; a changed mechanism requires
+   a successor FIP and experiment.
 3. Exercise an ordinary Codex session from a nested Fortlet directory, use the
    project-provided Cargo and Jujutsu tools for one real edit/test loop, and
    verify a subsequent invocation reuses the capsule and persistent Cargo
@@ -100,8 +99,8 @@ and FIP-0008 in full.
 5. Existing launch and management behavior remains compatible, and public
    stop/reset returns the test project to absence without removing durable
    state or immutable layers.
-6. FIP-0007 is conformant, its experiment is terminal, the complete verification
-   set is green, and the stack is reviewable; then STOP.
+6. FIP-0007 and FIP-0008 are conformant, their experiment is terminal, the
+   complete verification set is green, and the stack is reviewable; then STOP.
 
 ## Excluded scope
 

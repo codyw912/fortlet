@@ -199,6 +199,30 @@ fn missing_auth_fails_before_capsule_or_environment_artifacts() {
 }
 
 #[test]
+fn missing_refresh_token_fails_before_capsule_or_environment_artifacts() {
+    let fixture = Fixture::new();
+    fixture.write_valid_auth();
+    let mut document: serde_json::Value =
+        serde_json::from_slice(&fs::read(&fixture.auth).unwrap()).unwrap();
+    document["tokens"]
+        .as_object_mut()
+        .unwrap()
+        .remove("refresh_token");
+    fs::write(&fixture.auth, serde_json::to_vec(&document).unwrap()).unwrap();
+
+    let output = fixture.run("codex", &fixture.project);
+
+    assert_failure(
+        output,
+        "credentials",
+        "run `codex login` on the host or retry the bounded refresh",
+        "Codex ChatGPT auth has no refresh token; run `codex login` and retry",
+    );
+    assert!(!fixture.projects().exists());
+    assert!(!fixture.tools().exists());
+}
+
+#[test]
 fn invalid_project_environment_fails_before_credentials_or_runtime_artifacts() {
     let fixture = Fixture::new();
     fs::create_dir(fixture.project.join(".fortlet")).unwrap();

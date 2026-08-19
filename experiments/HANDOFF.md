@@ -2,9 +2,8 @@
 
 Audience: a fresh agent session. `GOAL.md` is normative and active. Read
 FIP-0001, FIP-0002, FIP-0005, FIP-0006, accepted FIP-0007, and accepted FIP-0008
-in full before implementation. Experiments 0001 through 0021 are terminally
-closed, Experiment 0022 is terminally rejected, and Experiment 0023 is in
-flight as the sole active experiment.
+in full before implementation. Experiments 0001 through 0023 are terminally
+closed; there is no active experiment.
 
 ## Verified landed baseline
 
@@ -35,7 +34,7 @@ plus Jujutsu 0.43.0 reached Codex from the project layer, 10 focused Linux tests
 passed, and public stop/reset preserved persistent state plus every immutable
 layer. FIP-0006 is conformant.
 
-## Recorded daily-use blocker
+## Resolved daily-use blocker
 
 Experiment 0021 proved the immutable packaged `prepare` cache hit in 2.46
 seconds with exact `codex<TAB>ready`, no credential read, no reusable capsule,
@@ -111,19 +110,35 @@ strict all-target/all-feature Clippy, conformance, `nix flake check`, and the
 separate stock Codex 0.147.0 compatibility fixture. The immutable aarch64-darwin
 package is `/nix/store/yql3hf31rf5qgf8vccmw75b2lz5z6n23-fortlet-0.1.0`.
 
+Experiment 0023 then accepted the repaired live path. One packaged shim
+session authenticated its sole model prompt, reported Cargo 1.97.1 and
+Jujutsu 0.43.0, added only the requested missing-refresh-token integration
+test, and passed all 12 tests in that focused guest target. Public status,
+stop, reset, and final status reported running, stopped, reset, and absent.
+MicroSandbox inventory is empty; the project edit, immutable layers,
+persistent harness state, and Cargo target cache remain. One malformed
+inspection command attempted shell substitution of the literal `codex login`,
+but the sandbox denied it before execution, credential access, or mutation.
+FIP-0007 and FIP-0008 are now conformant.
+
+The final closure tree passes 69 unit tests and 29 non-ignored integration
+tests, formatting, strict all-target/all-feature Clippy, explicit conformance,
+and `nix flake check` on `aarch64-darwin`. Nix built the package and emitted
+only the known missing app-metadata warning plus the incompatible
+`x86_64-linux` omission. The separate stock Codex 0.147.0 compatibility
+fixture remains green from the production repair checkpoint; the closure adds
+only one integration test and durable evidence.
+
 ## What to do next
 
-1. Run Experiment 0023's frozen fish-shell sequence exactly once and record its
-   sole observation. Do not retry Experiment 0022 or 0023.
-2. Preserve the accepted FIP-0007 implementation; its conformance remains
-   partial only because the daily edit/test unit could not begin.
-3. Require that no refresh token or durable provider credential becomes guest
-   readable and that login cannot silently persist a real guest credential.
-   Treat MCP biscuit authorization separately.
-4. Record the sole session, inspect the exact diff, and close Experiment 0022
-   terminally. Publication remains one later FIP-0005 packet after the daily
-   work unit succeeds.
+1. Preserve the accepted FIP-0007/FIP-0008 implementation and the retained
+   test-only experiment edit.
+2. Shape and sign `main..@`, then present one exact FIP-0005 packet for the
+   single goal bookmark, draft PR, initial hosted run, readiness transition,
+   and named post-merge cleanup. The operator merges manually.
+3. Continue to treat MCP biscuit authorization separately from model
+   authentication; it is not part of this completed credential contract.
 
-Do not resume Experiments 0021 or 0022, add a refresh token to the guest
+Do not resume Experiments 0021 through 0023, add a refresh token to the guest
 projection, inspect credential values, remove verified layers, add global
 inventory/pruning, or begin standalone distribution.

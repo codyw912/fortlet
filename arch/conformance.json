@@ -183,7 +183,7 @@
     {
       "proposal": "0007",
       "title": "Explicit environment preparation",
-      "status": "partial",
+      "status": "conformant",
       "modules": [
         "README.md",
         "OVERVIEW.md",
@@ -196,16 +196,15 @@
         "src/cli.rs",
         "src/environment.rs",
         "src/preparation.rs",
-        "tests/prepare.rs"
+        "tests/prepare.rs",
+        "experiments/0023-codex-bearer-projection-confirmation.md"
       ],
-      "gaps": [
-        "Experiments 0021 and 0022 proved packaged prepare, cache reuse, capsule absence, and later shim attachment, but both ordinary edit/test attempts were blocked before model work: first by guest refresh, then by backend rejection of the brokered external-token authentication."
-      ]
+      "gaps": []
     },
     {
       "proposal": "0008",
       "title": "Host-owned renewable Codex credentials",
-      "status": "partial",
+      "status": "conformant",
       "modules": [
         "README.md",
         "OVERVIEW.md",
@@ -219,11 +218,10 @@
         "src/runtime.rs",
         "src/session.rs",
         "tests/codex_compatibility.rs",
-        "tests/pre_runtime_failures.rs"
+        "tests/pre_runtime_failures.rs",
+        "experiments/0023-codex-bearer-projection-confirmation.md"
       ],
-      "gaps": [
-        "Experiment 0022 exposed a missing last_refresh field that made Codex omit Authorization. The repaired stock Codex 0.147.0 fixture proves both broker placeholders reach request headers without guest OAuth refresh, but a newly declared ordinary model-backed session has not yet confirmed the repair live."
-      ]
+      "gaps": []
     }
   ]
 }
