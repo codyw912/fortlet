@@ -1,6 +1,8 @@
 # GOAL: Harden the first daily Fortlet session
 
-Status: active. FIP-0007 was accepted by the operator on 2026-08-18.
+Status: active. FIP-0007 was accepted and its deterministic implementation is
+complete. Experiment 0021 rejected the first daily session at credential
+refresh; credential changes require a successor FIP before implementation.
 
 Turn the proven isolated runtime into a deliberate, understandable daily-use
 workflow. Add the smallest explicit preparation surface, then dogfood one

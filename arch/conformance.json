@@ -199,7 +199,7 @@
         "tests/prepare.rs"
       ],
       "gaps": [
-        "The predeclared packaged prepare and ordinary interactive daily-session experiment has not yet run."
+        "Experiment 0021 proved packaged prepare, cache reuse, capsule absence, and later shim attachment, but the ordinary edit/test session was blocked before model work by the existing static credential projection's inability to refresh Codex authentication."
       ]
     }
   ]

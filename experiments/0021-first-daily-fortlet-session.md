@@ -1,6 +1,6 @@
 # Experiment 0021: First daily Fortlet session
 
-Status: in-flight — dispatch budget accepted by the operator on 2026-08-18
+Status: rejected — terminal
 Design: FIP-0001, FIP-0002, FIP-0006, and FIP-0007
 Charter scope: `local-foundation/v1`
 
@@ -146,8 +146,65 @@ passed without a VM, harness, model prompt, or remote mutation.
 
 ## Results
 
-Not dispatched.
+Rejected. The exact input hashes and immutable package matched the declaration.
+Initial public status was `codex<TAB>absent`, and MicroSandbox reported no
+sandboxes.
+
+The packaged preparation from `/Users/cody/dev/fortlet/src` exited zero in
+2.46 seconds with exactly:
+
+```text
+codex	ready
+```
+
+It emitted no first-use message. Public status remained absent and no
+provisioning or reusable sandbox existed afterward. The one non-prompt launch
+then exited zero in 4.20 seconds with `codex-cli 0.147.0` and created exactly
+one running capsule, `fortlet-501-codex-6652b8ca5f1b9273`.
+
+The packaged shim attached to that capsule and reached the interactive Codex
+UI. Startup warned that `codex_apps` returned HTTP 451
+`no_biscuit_no_service`. On the sole submitted prompt, before any model response
+or repository work, Codex reported:
+
+```text
+Your access token could not be refreshed. Please log out and sign in again.
+```
+
+An operator device-auth attempt did not correct the error. Because the shim
+directory remained active, that login may have run inside the capsule. The
+experiment stopped without another prompt or launch. `jj status` proved the
+working copy remained unchanged.
+
+Public status still reported the one capsule running. Public stop returned
+`codex<TAB>stopped`, reset returned `codex<TAB>reset`, final status returned
+`codex<TAB>absent`, and MicroSandbox reported no sandboxes. The base, Codex,
+and verified project markers plus the persistent Cargo target cache remained.
+The operator deleted the exact persistent guest `.codex/auth.json` that might
+have been modified by device login; a metadata-only check verified its absence
+without inspecting credential content. The host credential was not modified by
+Fortlet cleanup.
 
 ## Terminal Closure
 
-Pending dispatch and evidence.
+Rejected. Explicit environment preparation, capsule creation, and shim
+attachment behaved as designed, but the ordinary work unit could not begin.
+Fortlet presents Codex with a stored-auth projection containing a brokered
+access-token placeholder and a deliberately fake refresh token; Codex 0.147.0
+attempted token refresh on the first real request, so static request-time secret
+substitution was insufficient for the harness's authentication lifecycle.
+
+Actual cost was zero observed money, one prompt submission with no model
+response, one packaged prepare, one non-prompt version launch, one interactive
+session, one owned capsule, no source edit, no Cargo test, zero remote mutation,
+and no retry. Exact elapsed experiment time was not captured; each automated
+step stayed within its bound and the unit terminated at the first prompt
+failure.
+
+Next action: retain the accepted `prepare` implementation and design a successor
+FIP for host-owned credential lifecycle/gateway behavior. Evaluate a maintained
+egress proxy such as iron-proxy together with a trusted refresh-token broker,
+and Codex's externally supplied authentication path, before writing another
+credential mechanism. Static secret replacement alone does not settle refresh,
+MCP biscuit authorization, TLS/routing enforcement, or persistent guest-state
+cleanup.
