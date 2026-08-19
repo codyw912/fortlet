@@ -1,6 +1,6 @@
 # Experiment 0032: Packaged login-shell project tools
 
-Status: declared — 2026-08-19
+Status: rejected — 2026-08-19
 Design: FIP-0001, FIP-0006, and FIP-0007
 Charter scope: `local-foundation/v1`
 
@@ -116,8 +116,47 @@ gate is green. No live process has run under this declaration.
 
 ## Results
 
-Pending.
+The immutable package build exited zero and produced the recorded store path.
+The final baseline was clean: base layer `bookworm-2` was absent, Tact was
+absent, and packaged MicroSandbox inventory was `[]`.
+
+The sole public launch printed one first-use base preparation message, exited
+zero in about four seconds, and reported Tact 0.3.7 with Rust 1.97.1. The sole
+login-shell process then reported the intended production values:
+
+```text
+bash_env=/opt/fortlet/base/etc/fortlet/bash-env
+login_path=/.msb/scripts:/opt/fortlet/project/bin:/opt/fortlet/base/usr/bin:/opt/fortlet/tool/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+cargo_path=/opt/fortlet/project/bin/cargo
+cargo 1.97.1 (c980f4866 2026-06-30)
+```
+
+It compiled for about 3m49s, ran the exact focused test, and exited zero: 1
+passed, 0 failed, with 82 filtered out. This directly observes that the
+production hook repairs the login-shell PATH defect and makes the Experiment
+0030 command executable. The live unit added no repository diff.
+
+The process also updated the crates.io index and downloaded public crates
+because the Tact-specific persistent Cargo cache was cold. That traffic was not
+within the budget's stated maximum of one pinned Debian preparation request, so
+the experiment is rejected despite the positive mechanism observation. In
+addition, the operator sequence cleaned up before the declared read-only
+capsule-configuration inspection; that omitted observation cannot be backfilled.
+
+Public cleanup reported `running`, `stopped`, `reset`, then `absent`; final
+inventory was `[]`. The new base marker records `_base`, `bookworm-2`, and
+`node:24-bookworm`; its package-owned hook exists on the host. The working copy
+remained clean. No provider credential, prompt, model request, retry, second
+capsule, user startup-file write, or repository mutation occurred.
 
 ## Terminal Closure
 
-Pending.
+Rejected for protocol variance, not mechanism failure. The production
+`BASH_ENV` correction restored the exact managed PATH and the focused test
+passed, but the cold Cargo cache made undeclared public crate requests and the
+capsule-configuration inspection was omitted before cleanup. Actual cost was
+one immutable package, one base preparation, one Tact capsule, one guest test,
+public crate downloads, zero retries, zero provider units, and zero money. Do
+not repeat this live unit under the current GOAL; retain the successful
+observation, rely on deterministic coverage, and report the missing strict
+acceptance honestly.
