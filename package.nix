@@ -59,6 +59,7 @@ rustPlatform.buildRustPackage {
       ./docs/RUNBOOK.md
       ./examples
       ./experiments
+      ./governance/CHARTER.md
       ./package.nix
       ./src
       ./tests
