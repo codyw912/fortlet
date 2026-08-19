@@ -13,11 +13,12 @@ inspection attributed that exact state to MicroSandbox 0.6.8 streaming
 `StdinMode::Null`: the SDK does not transmit its protocol's empty `ExecStdin`
 EOF frame on that path.
 
-Checkpoint `71d1cfc0` instead requests a streaming stdin pipe and explicitly
-closes its `ExecSink` before processing events. A focused test was red before
-the call and green afterward; all non-interactive deadline/streaming tests,
-strict Clippy, and formatting pass. The exact full revision and immutable Nix
-package will be frozen before dispatch.
+Treatment revision `673f3206b51c9ce08a898d1852d3f12142f8b04e`, including
+checkpoint `71d1cfc0`, instead requests a streaming stdin pipe and explicitly
+closes its `ExecSink` before processing events. Its immutable aarch64-darwin
+package is `/nix/store/m6lrd4a8slw5r627k5xkday9l3nkdj7d-fortlet-0.1.0`.
+A focused test was red before the call and green afterward; all non-interactive
+deadline/streaming tests, strict Clippy, and formatting pass.
 
 ## Hypothesis and Production Mechanism
 
