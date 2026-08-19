@@ -176,7 +176,16 @@ and runs the selected Cargo. No live process has run under this declaration.
 
 ## Results
 
-Pending. No live unit has been dispatched.
+The immutable package build exited zero and produced the recorded store path.
+The working copy was clean. Packaged public status reported
+`codex<TAB>absent`, packaged `fortlet list` reported `no capsules`, and the raw
+packaged MicroSandbox inventory was `[]`.
+
+The active agent shell contained all four forbidden Codex markers:
+`CODEX_THREAD_ID`, `CODEX_SANDBOX`, `CODEX_SANDBOX_NETWORK_DISABLED`, and
+`CODEX_CI`. The agent therefore did not dispatch. The one declared unit awaits
+operator execution from a marker-free outer shell; no Codex process, provider
+request, prompt, capsule, or repository edit has occurred under this experiment.
 
 ## Terminal Closure
 
