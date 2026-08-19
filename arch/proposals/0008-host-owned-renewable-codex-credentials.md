@@ -1,6 +1,6 @@
 # FIP-0008: Host-owned renewable Codex credentials
 
-Status: Draft
+Status: Accepted
 Recorded: 2026-08-18 from the credential-refresh blocker in Experiment 0021
 Requires: FIP-0001, FIP-0002
 
@@ -40,7 +40,15 @@ and MicroSandbox 0.6.8 before this proposal was drafted:
 3. MicroSandbox already performs destination-bound TLS secret substitution and
    supports live rotation of an existing secret without changing its
    guest-visible placeholder.
-4. iron-proxy supplies a strong general egress boundary, rotating file-backed
+4. Infisical Agent Proxy supplies a mature credential-substitution proxy,
+   enforced local isolation on supported hosts, and automatic renewal for
+   credentials minted by its supported dynamic-secret providers. It does not
+   provide a dynamic-secret provider for an existing Codex ChatGPT OAuth
+   login, so a static Codex access token would still need an external refresh
+   owner. Making it a required Fortlet layer would also require an Infisical
+   secrets-management control plane; its dynamic-secret renewal is an
+   Enterprise feature.
+5. iron-proxy supplies a strong general egress boundary, rotating file-backed
    secret sources, and an externally authorized one-replay response handler.
    It does not own OAuth refresh. Using it here would add a second TLS proxy,
    CA distribution, enforced routing, process lifecycle, and another secret
@@ -51,6 +59,10 @@ Sources checked for this decision:
 - [Codex 0.147.0 authentication modes](https://github.com/openai/codex/blob/rust-v0.147.0/codex-rs/protocol/src/auth.rs)
 - [Codex 0.147.0 authentication manager](https://github.com/openai/codex/blob/rust-v0.147.0/codex-rs/login/src/auth/manager.rs)
 - [Codex 0.147.0 external-token protocol](https://github.com/openai/codex/blob/rust-v0.147.0/codex-rs/app-server-protocol/src/protocol/v2/account.rs)
+- [Infisical Agent Proxy](https://infisical.com/docs/documentation/platform/agent-proxy/overview)
+- [Infisical proxied services and dynamic-secret leases](https://infisical.com/docs/documentation/platform/agent-proxy/proxied-services)
+- [Infisical local Agent Proxy isolation](https://infisical.com/docs/documentation/platform/agent-proxy/local-agent-proxy)
+- [Infisical dynamic-secret availability](https://infisical.com/docs/documentation/platform/dynamic-secrets/overview)
 - [iron-proxy](https://github.com/paradigmxyz/iron-proxy)
 
 ## Decision
@@ -221,21 +233,29 @@ than reverting to a fake managed refresh token.
 2. Keep static MicroSandbox substitution and require periodic native login.
    Rejected because Experiment 0021 proved that it cannot support an ordinary
    prompt reliably and turns provider expiry into unexplained guest failure.
-3. Add iron-proxy plus a trusted response-retry handler now. Deferred because
+3. Add Infisical Agent Proxy. Deferred because its proxy can hide static
+   credentials and renew supported Infisical dynamic-secret leases, but it
+   cannot mint or renew the existing Codex ChatGPT OAuth login. Fortlet would
+   still need the host renewal owner selected here. Requiring an Infisical
+   secrets-management control plane and Enterprise dynamic-secret feature
+   would also violate the charter's local, no-required-control-plane boundary.
+   It remains a credible optional external secret backend under a successor
+   contract.
+4. Add iron-proxy plus a trusted response-retry handler now. Deferred because
    it still needs a host OAuth owner and would duplicate MicroSandbox's TLS
    substitution while adding CA, routing, configuration, and process lifecycle.
    Its exact one-replay boundary is preferable if proactive live rotation later
    proves insufficient.
-4. Drive Codex's external authentication through `codex app-server`. Rejected
+5. Drive Codex's external authentication through `codex app-server`. Rejected
    for the native CLI because it requires Fortlet to become an app-server
    client and terminal UI; the relevant 0.147.0 protocol is explicitly
    unstable and for internal use.
-5. Use Codex `headers` authentication. Rejected because the stock CLI refuses
+6. Use Codex `headers` authentication. Rejected because the stock CLI refuses
    to load that mode from `auth.json`.
-6. Use `CODEX_ACCESS_TOKEN`, a personal access token, agent identity, or an API
+7. Use `CODEX_ACCESS_TOKEN`, a personal access token, agent identity, or an API
    key. Rejected as the default because those are different credential and
    billing contracts and do not renew the user's existing ChatGPT OAuth login.
-7. Refresh only at launch and restart the capsule when the token changes.
+8. Refresh only at launch and restart the capsule when the token changes.
    Rejected because an interactive session can outlive an access token and a
    silent restart would disrupt concurrent attachments.
 

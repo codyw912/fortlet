@@ -2,8 +2,8 @@
 
 Status: active. FIP-0007 was accepted and its deterministic implementation is
 complete. Experiment 0021 rejected the first daily session at credential
-refresh. FIP-0008 is drafted for a host-owned renewable credential lease and
-must be accepted before implementation.
+refresh. FIP-0008 is accepted for a host-owned renewable credential lease and
+its implementation is authorized.
 
 Turn the proven isolated runtime into a deliberate, understandable daily-use
 workflow. Add the smallest explicit preparation surface, then dogfood one
@@ -21,9 +21,9 @@ and FIP-0008 in full.
 2. Accept only a contract that keeps access and refresh credentials
    guest-unreadable, preserves the native Codex terminal, renews an active
    session without silently restarting a shared capsule, and fails closed.
-3. Keep FIP-0008 conformance `unimplemented` until code and tests establish the
-   public contract. STOP before implementation if the operator does not accept
-   the proposal.
+3. FIP-0008 is accepted after review of Codex, MicroSandbox, iron-proxy, and
+   Infisical Agent Proxy. Keep its conformance `unimplemented` until code and
+   tests establish the public contract.
 
 ## Deliverable 1 — Accept explicit preparation
 

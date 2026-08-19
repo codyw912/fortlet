@@ -1,7 +1,7 @@
 # Session Handoff — First daily Fortlet session
 
 Audience: a fresh agent session. `GOAL.md` is normative and active. Read
-FIP-0001, FIP-0002, FIP-0005, FIP-0006, accepted FIP-0007, and draft FIP-0008
+FIP-0001, FIP-0002, FIP-0005, FIP-0006, accepted FIP-0007, and accepted FIP-0008
 in full before implementation. Experiments 0001 through 0021 are terminally
 closed; no experiment is active.
 
@@ -64,22 +64,30 @@ guest auth projection, prepares persistent harness state, constructs the
 managed reusable capsule, or attaches a terminal. Cache hits verify required
 markers and content without provisioning contact.
 
+FIP-0008 adds a Codex-specific, host-owned renewable credential lease. It
+keeps the refresh token outside the guest, uses Codex's external-token
+projection, and rotates only the access token and account identifier through
+MicroSandbox's existing live broker. Infisical Agent Proxy was reviewed before
+acceptance: it validates the broker pattern and renews supported dynamic-secret
+leases, but it cannot renew an existing Codex ChatGPT OAuth login and would
+make an Infisical control plane plus an Enterprise feature required.
+
 ## What to do next
 
-1. Review draft FIP-0008. It selects a Codex-specific host renewal lease over
-   MicroSandbox's existing live secret rotation and keeps iron-proxy deferred;
-   do not implement it before operator acceptance.
+1. Implement accepted FIP-0008. It selects a Codex-specific host renewal lease
+   over MicroSandbox's existing live secret rotation and keeps Infisical Agent
+   Proxy and iron-proxy deferred.
 2. Preserve the accepted FIP-0007 implementation; its conformance remains
    partial only because the daily edit/test unit could not begin.
 3. Require that no refresh token or durable provider credential becomes guest
    readable and that login cannot silently persist a real guest credential.
    Treat MCP biscuit authorization separately.
-4. After acceptance, implement deterministic source locking, atomic host
-   refresh, external-token projection compatibility, live broker rotation, and
-   a process-bounded renewal lease before any new live prompt.
+4. Implement deterministic source locking, atomic host refresh, external-token
+   projection compatibility, live broker rotation, and a process-bounded
+   renewal lease before any new live prompt.
 5. Predeclare a new experiment rather than retrying 0021. Publication remains
    one later FIP-0005 packet after the daily work unit succeeds.
 
 Do not retry the prompt, add a refresh token to the guest projection, start a
-new experiment, remove verified layers, add global inventory/pruning, implement
-FIP-0008, or begin standalone distribution before FIP-0008 is accepted.
+new experiment, remove verified layers, add global inventory/pruning, or begin
+standalone distribution before FIP-0008 is implemented and verified.
