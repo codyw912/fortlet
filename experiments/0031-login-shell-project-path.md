@@ -1,6 +1,6 @@
 # Experiment 0031: Login-shell project PATH preservation
 
-Status: declared — 2026-08-19
+Status: accepted — 2026-08-19
 Design: FIP-0001 and FIP-0006
 Charter scope: `local-foundation/v1`
 
@@ -110,8 +110,41 @@ has run under this declaration.
 
 ## Results
 
-Pending.
+The final baseline was clean: Tact was absent and packaged MicroSandbox
+inventory was `[]`. The sole public launch exited zero in about three seconds
+and printed Tact 0.3.7 with Rust 1.97.1. It created exactly one running owned
+Tact capsule.
+
+The one direct comparison process exited zero and reported:
+
+```text
+direct_path=/.msb/scripts:/opt/fortlet/project/bin:/opt/fortlet/base/usr/bin:/opt/fortlet/tool/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+direct_cargo=/opt/fortlet/project/bin/cargo
+direct_mode=755
+cargo 1.97.1 (c980f4866 2026-06-30)
+nonlogin_path=/.msb/scripts:/opt/fortlet/project/bin:/opt/fortlet/base/usr/bin:/opt/fortlet/tool/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+nonlogin_cargo=/opt/fortlet/project/bin/cargo
+cargo 1.97.1 (c980f4866 2026-06-30)
+login_path=/.msb/scripts:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
+login_cargo=absent
+restored_path=/.msb/scripts:/opt/fortlet/project/bin:/opt/fortlet/base/usr/bin:/opt/fortlet/tool/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+restored_cargo=/opt/fortlet/project/bin/cargo
+cargo 1.97.1 (c980f4866 2026-06-30)
+```
+
+This falsifies host permission loss: the guest sees mode 755. It confirms that
+Debian's login profile replaces the injected PATH and that a process-scoped
+`BASH_ENV` restores the exact value after profile processing. Public cleanup
+reported `running`, `stopped`, `reset`, then `absent`; final inventory was `[]`.
+No provider credential, prompt, model request, or network request was used.
 
 ## Terminal Closure
 
-Pending.
+Accepted. Root cause: `/usr/bin/bash -lc` replaces Fortlet's capsule PATH with
+the Debian login default, dropping the read-only project tool layer before
+Codex runs repository commands. The fixed `BASH_ENV` mechanism restored the
+managed PATH without persistent shell mutation. Actual cost matched the budget:
+one Tact capsule, one comparison process, zero retries, zero provider units,
+and zero money. Next action: implement the internal environment hook under
+FIP-0006, add deterministic coverage, and validate it without another model
+prompt.

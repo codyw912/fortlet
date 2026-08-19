@@ -52,4 +52,4 @@ scannable failure/win history of the project:
 - `0028-managed-noninteractive-codex-successor.md` — rejected; streaming exposed Codex blocked reading an unclosed SDK stdin, then Fortlet enforced the 600-second bound and cleaned up publicly without retry.
 - `0029-packaged-codex-explicit-eof.md` — accepted; explicit streaming EOF advanced packaged Codex past its stdin read and returned exact status 1 after guest-loopback-only transport failures.
 - `0030-first-post-eof-daily-work-loop.md` — rejected; DNS/TLS and streaming passed, but the sole Codex edit/test task could not resolve Cargo beneath its login-shell command path; cleanup completed without retry.
-- `0031-login-shell-project-path.md` — declared; one credential-free Tact capsule will distinguish guest executable-mode loss from login-shell PATH replacement and test a non-persistent `BASH_ENV` correction.
+- `0031-login-shell-project-path.md` — accepted; guest tools remained executable, Debian `bash -lc` alone dropped the managed PATH, and a disposable `BASH_ENV` restored the exact Cargo path without startup-file mutation.
