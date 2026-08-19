@@ -20,6 +20,10 @@ capsules reserve `BASH_ENV`, provide the exact managed PATH through
 all 83 unit tests and all enabled integration tests passed through `nix
 develop`; formatting, strict Clippy, and conformance were green.
 
+The immutable treatment revision is
+`2414bdee3fca3b9d72ded0693158b717216510f8`. Its aarch64-darwin package is
+`/nix/store/fls59kf9mwxrs8n1g3whd1g7mgjfk0cv-fortlet-0.1.0`.
+
 ## Hypothesis and Production Mechanism
 
 An immutable package from this declaration will provision or reuse base layer
