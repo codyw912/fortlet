@@ -223,6 +223,26 @@
         "experiments/0023-codex-bearer-projection-confirmation.md"
       ],
       "gaps": []
+    },
+    {
+      "proposal": "0009",
+      "title": "Codex Apps capability handling",
+      "status": "conformant",
+      "modules": [
+        "README.md",
+        "OVERVIEW.md",
+        "docs/RUNBOOK.md",
+        "src/harness/mod.rs",
+        "src/harness/codex.rs",
+        "src/runtime.rs"
+      ],
+      "tests": [
+        "src/harness/mod.rs",
+        "src/runtime.rs",
+        "tests/codex_compatibility.rs",
+        "experiments/0025-interactive-codex-apps-disable.md"
+      ],
+      "gaps": []
     }
   ]
 }

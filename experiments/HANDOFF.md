@@ -1,68 +1,67 @@
-# Session Handoff — Goal-scoped publication autonomy
+# Session Handoff — Warning-free daily Codex baseline
 
-Audience: a fresh agent session. `GOAL.md` is normative; implementation is
-complete and publication is pending. Read FIP-0001 and FIP-0005 in full before
-changing the design. Experiments 0001 through 0023 are terminally closed;
-there is no active experiment.
+Audience: a fresh agent session. The Codex Apps capability GOAL is complete;
+choose and obtain operator acceptance for a successor GOAL before product work.
+Experiments 0001 through 0025 are terminally closed, and no experiment is
+active.
 
-## Verified landed baseline
+## Verified product baseline
 
-PR #5 squash-merged the first daily-session GOAL to protected `main` as
-`bee396569bd7aa047905c435d219ce28f3d49b64`. Its tree is byte-identical to
-reviewed signed tip `51e531a9dd74c543895f85d477e62b3a9e11679e`.
-The hosted Rust gate passed after one diagnosed Linux repair, the goal branch
-was removed locally and remotely, and the working copy began this GOAL as an
-empty change directly on fetched `main`.
+Fortlet's daily Codex path now includes optional explicit preparation,
+transparent shims, host-owned renewable ChatGPT credentials, immutable project
+tools, ordinary interactive model work, warning-free startup, and public
+status/stop/reset. FIP-0007, FIP-0008, and FIP-0009 are conformant.
 
-Fortlet's daily product path is proven: explicit credential-free `prepare`,
-the optional Codex shim, host-owned renewable ChatGPT credentials, immutable
-project Cargo and Jujutsu tools, one real model-backed edit/test loop, and
-public stop/reset all succeeded. FIP-0007 and FIP-0008 are conformant. MCP
-biscuit authorization remains a separate future product concern.
+Managed Codex 0.147.0 prepends `--disable apps` through the harness adapter at
+the shared runtime attachment boundary. The fixed disable is authoritative over
+user attempts to re-enable Apps, targets only the upstream-reserved
+`codex_apps` registration, and preserves requested arguments and independently
+configured MCP servers. Tact and `fortlet native codex` are unchanged. Fortlet
+does not write or inspect host Codex configuration and introduces no Apps
+credential.
 
-## Recorded workflow blocker
+The practical limitation is narrow and explicit: connector-backed live
+Microsoft Excel control and Sites hosting are unavailable inside managed
+sessions. Local spreadsheet-file work, local site development, skill-only
+plugins, and direct MCP servers remain available. The operator confirmed those
+connector workflows are not part of current daily use; native Codex remains the
+escape hatch if that changes.
 
-FIP-0005's first amendment reduced publication approval to one exact packet,
-but any changed diff, additional push, or failed hosted run invalidated that
-authority. PR #5 consequently required a second full packet for a small,
-well-diagnosed Linux inode-reuse repair. The operator identified that ceremony
-as disproportionate for a greenfield repository with no users, protected
-`main`, required checks, and manual merge.
+## Evidence and publication state
 
-## Accepted contract
+The complete local gate passed through `nix develop` on aarch64-darwin: 72 unit
+tests, 29 non-ignored integration tests, formatting, strict all-target/all-
+feature Clippy, conformance, and `nix flake check`. Both ignored stock-Codex
+0.147.0 fixtures passed separately against the pinned native binary. Native
+x86_64-linux package verification remains outstanding.
 
-The 2026-08-19 amendments to FIP-0001, FIP-0005, and the charter make GOAL
-acceptance the sole routine publication authorization. One goal branch and
-draft PR may iterate through in-scope pushes, diagnosed CI fixes, replacement
-runs, PR updates, readiness, landing verification, and exact bookmark cleanup
-without more approval. Only the final branch tip requires a verified
-signature. The operator remains the sole merge authority.
+Experiment 0024 is terminally rejected: its one non-interactive `codex exec`
+attempt emitted no Apps warning but produced no model response before the
+ten-minute bound. Public cleanup succeeded and it was not retried. Experiment
+0025 is terminally accepted: the packaged interactive session started without
+the Apps warning, returned exactly `fortlet-apps-disabled-ok` for its sole
+prompt, exited normally on one idle Ctrl-C, and completed public stop/reset
+cleanup. The non-interactive timeout's cause remains unresolved; interactive
+daily use is the proven product path.
 
-Standing authority does not cover a changed GOAL, another PR, a different base
-or repository, `main` mutation, settings, releases, tags, packages, secrets,
-external spend, destructive actions, or unrelated resources. Two failures
-sharing an unresolved cause still stop under the charter.
-
-## Implemented state
-
-The accepted amendments are checkpointed separately from the operational
-adoption. `AGENTS.md`, `WORKFLOW.md`, `docs/RUNBOOK.md`, the active charter,
-and publication-workflow tests now express the same goal-scoped authority.
-FIP-0005 remains conformant. The test's charter input exposed a Nix source
-filter omission; `package.nix` now includes only `governance/CHARTER.md` in
-addition to its prior source set, and the repaired `nix flake check` passed.
-
-No product code, hosted CI, branch settings, merge policy, experiment
-mechanics, release resources, or secrets changed.
+PR #7 is the sole authorized goal pull request on bookmark
+`codex-apps-capability`. Its initial hosted Rust verification passed on reviewed
+revision `07e82b7d410864ed3057ce4e00d3f8cf4c1fd23e`. Verify the final check and
+PR state rather than relying on this snapshot. The operator is the sole merge
+authority. After merge, fetch `main`, prove tree equality with the reviewed
+tip, and remove only this goal's local and remote bookmark.
 
 ## What to do next
 
-1. Run the complete local gate on the exact final tree.
-2. Sign only the publishable tip, create one descriptive bookmark, and open
-   the authorized draft PR against `main`.
-3. Maintain that PR through hosted verification and mark it ready when green.
-   The operator squash-merges manually; then verify the landing and clean up
-   the exact goal bookmark.
+If PR #7 has not merged, finish only its accepted FIP-0005 publication closure.
+If it has merged, verify and clean the exact bookmark, then discuss the next
+GOAL with the operator. Product-facing candidates already identified in prior
+planning include global inventory/safe cross-project cleanup, restart/logs,
+explicit workload leases, and eventually standalone distribution. Select one
+based on the operator's current daily-use friction rather than speculative
+architecture.
 
-Do not change product code, hosted CI, branch protection, merge settings,
-experiment mechanics, release policy, secrets, or the operator merge boundary.
+Do not resume Experiments 0024 or 0025, re-enable Apps inside Fortlet, infer a
+biscuit protocol, project cookies or host config, retry the non-interactive
+model unit silently, merge PR #7, mutate repository settings, or begin a new
+GOAL without operator acceptance.

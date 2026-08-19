@@ -52,6 +52,12 @@ sees only stable placeholders and an empty refresh field. The credential file
 itself must remain outside all guest mounts; run `codex login` on the host when
 Fortlet reports a permanent refresh failure.
 
+Fortlet-managed Codex 0.147.0 launches disable the built-in Apps connector
+client because its separate authorization contract is not available inside the
+capsule. This does not disable user-configured MCP servers or local plugin
+skills. Connector-backed live Excel control and Sites hosting are unavailable
+through Fortlet; use native Codex explicitly if either capability is needed.
+
 `fortlet prepare <harness>` is an optional eager warm-up. It ensures the base,
 selected harness, and optional project-tool layers without reading provider
 credentials, creating a reusable project capsule or persistent harness home,

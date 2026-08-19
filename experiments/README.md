@@ -45,3 +45,5 @@ scannable failure/win history of the project:
 - `0021-first-daily-fortlet-session.md` — rejected; packaged prepare and shim attachment passed, but Codex required token refresh before the first prompt and no edit/test loop began.
 - `0022-renewable-codex-daily-session.md` — rejected; external-token mode avoided guest refresh, but a missing `last_refresh` field omitted the bearer header and both model transports returned 401 before a response or edit.
 - `0023-codex-bearer-projection-confirmation.md` — accepted; the repaired bearer projection authenticated one bounded model-backed edit/test loop, and public stop/reset restored absence while preserving durable layers and cache.
+- `0024-managed-codex-apps-disable.md` — rejected; the Apps warning was absent, but the sole packaged non-interactive model attempt produced no response before its ten-minute bound and public cleanup.
+- `0025-interactive-codex-apps-disable.md` — accepted; the Apps-disabled packaged interactive path returned the exact model response without the known warning, then exited and cleaned up publicly.

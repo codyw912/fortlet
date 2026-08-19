@@ -63,6 +63,13 @@ broker placeholders, an empty refresh field, and the current non-secret
 permanently rejected login state. `prepare`, `doctor`, `native`, `status`,
 `stop`, and `reset` never renew.
 
+Managed Codex 0.147.0 launches prepend `--disable apps`. This suppresses the
+unsupported reserved `codex_apps` client without rewriting `config.toml` or
+disabling user-configured MCP servers. It also makes connector-backed live
+Excel control and Sites hosting unavailable inside Fortlet; local spreadsheet
+files, local site development, and skill-only plugins remain available. Use
+`fortlet native codex -- <arguments>` when Apps are deliberately required.
+
 ## Project tool environments
 
 `fortlet prepare <harness> [--project <path>] [--allow-broad-mount]` is an
@@ -198,8 +205,11 @@ cargo test --bin fortlet session::tests::renewal_cancellation
 ```
 
 The pinned stock-Codex compatibility fixture is separate because it requires a
-native Codex 0.147.0 executable. It sends placeholder-only authentication only
-to local fake model and refresh servers; it makes no provider or paid request:
+native Codex 0.147.0 executable. It proves the fixed Apps disable wins over
+configuration and command-line re-enables, preserves another configured MCP
+server, and keeps the existing external-token behavior. It sends
+placeholder-only authentication only to local fake model and refresh servers;
+it makes no provider or paid request:
 
 ```bash
 FORTLET_CODEX_COMPAT_BINARY=/path/to/codex-0.147.0 \

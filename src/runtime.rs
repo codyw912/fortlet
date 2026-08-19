@@ -197,13 +197,14 @@ impl<'a> MicroSandboxRuntime<'a> {
         &self,
         capsule: &Capsule<'_>,
         sandbox: &Sandbox,
-        args: &[String],
+        requested_arguments: &[String],
     ) -> Result<i32> {
+        let arguments = effective_launch_arguments(capsule.harness, requested_arguments);
         if !std::io::stdin().is_terminal() || !std::io::stdout().is_terminal() {
             let output = sandbox
                 .exec_with(tool_executable(capsule), |options| {
                     options
-                        .args(args.iter().cloned())
+                        .args(arguments.iter().cloned())
                         .cwd(capsule.project.cwd.display().to_string())
                 })
                 .await?;
@@ -216,13 +217,20 @@ impl<'a> MicroSandboxRuntime<'a> {
         sandbox
             .attach_with(tool_executable(capsule), |options| {
                 options
-                    .args(args.iter().cloned())
+                    .args(arguments.iter().cloned())
                     .cwd(capsule.project.cwd.display().to_string())
                     .envs(terminal)
             })
             .await
             .map_err(Into::into)
     }
+}
+
+fn effective_launch_arguments(
+    harness: &dyn Harness,
+    requested_arguments: &[String],
+) -> Vec<String> {
+    harness.launch_arguments(requested_arguments)
 }
 
 pub async fn rotate_credentials(sandbox: &Sandbox, credentials: &Credentials) -> Result<()> {
@@ -431,6 +439,25 @@ mod tests {
             kind: "test",
             scratch: false,
         }
+    }
+
+    #[test]
+    fn attachment_arguments_pass_through_the_harness_adapter() {
+        let requested = vec!["exec".to_owned(), "hello".to_owned()];
+
+        assert_eq!(
+            effective_launch_arguments(harness::find("codex").unwrap(), &requested),
+            vec![
+                "--disable".to_owned(),
+                "apps".to_owned(),
+                "exec".to_owned(),
+                "hello".to_owned(),
+            ]
+        );
+        assert_eq!(
+            effective_launch_arguments(harness::find("tact").unwrap(), &requested),
+            requested
+        );
     }
 
     #[test]

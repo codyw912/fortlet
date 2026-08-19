@@ -28,4 +28,11 @@ impl Harness for Codex {
     fn environment(&self, _project: &Project) -> Vec<(String, String)> {
         vec![("CODEX_HOME".into(), "/home/agent/.codex".into())]
     }
+
+    fn launch_arguments(&self, requested: &[String]) -> Vec<String> {
+        ["--disable".to_owned(), "apps".to_owned()]
+            .into_iter()
+            .chain(requested.iter().cloned())
+            .collect()
+    }
 }
