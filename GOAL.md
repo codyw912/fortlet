@@ -1,11 +1,16 @@
 # GOAL: Make managed non-interactive Codex execution reliable
 
-Status: active — operator-accepted 2026-08-19. Experiment 0024 launched
-packaged Codex 0.147.0 non-interactively through Fortlet, but the command
-remained silent until its ten-minute experiment bound. Public status showed the
-owned capsule running; public stop ended the waiting command without a runtime
-exit event. Experiment 0025 changed only to the proven interactive attachment
-and received an ordinary model response without the Apps warning.
+Status: complete — 2026-08-19, pending operator merge of PR #8. FIP-0010 is
+accepted and conformant. Managed non-interactive execution now streams output,
+closes stdin explicitly, preserves exact exit status, and gives Codex a fixed
+600-second output-inactivity ceiling with bounded command-only cleanup.
+
+Experiment 0028 consumed the one authorized model-backed successor and exposed
+that MicroSandbox 0.6.8 streaming null stdin does not send guest EOF. It
+terminally failed at the new supported bound and was not retried. The in-scope
+explicit-EOF correction then passed the immutable packaged, credential-free
+Codex regression in Experiment 0029. Post-correction model success remains
+deliberately unclaimed.
 
 Determine whether the non-interactive failure belongs to Fortlet,
 MicroSandbox 0.6.8, or Codex 0.147.0. Make the existing managed non-interactive
