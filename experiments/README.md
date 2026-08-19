@@ -55,3 +55,4 @@ scannable failure/win history of the project:
 - `0031-login-shell-project-path.md` — accepted; guest tools remained executable, Debian `bash -lc` alone dropped the managed PATH, and a disposable `BASH_ENV` restored the exact Cargo path without startup-file mutation.
 - `0032-packaged-login-shell-project-tools.md` — rejected for protocol variance; the packaged hook restored Cargo and passed the focused login-shell test, but a cold Tact Cargo cache made undeclared public crate downloads and configuration inspection was omitted before cleanup.
 - `0033-global-owned-capsule-inventory.md` — accepted; immutable packaged inventory reported one real owned capsule from outside its project, and existing public stop/reset restored absence and empty raw inventory.
+- `0034-post-path-codex-work-loop.md` — declared; one immutable packaged shim unit will test the corrected provider-backed Codex edit/test composition without retry.
