@@ -1,5 +1,9 @@
+use std::time::Duration;
+
 use crate::harness::Harness;
 use crate::project::Project;
+
+const NON_INTERACTIVE_IDLE_TIMEOUT: Duration = Duration::from_secs(10 * 60);
 
 pub static CODEX: Codex = Codex;
 
@@ -34,5 +38,9 @@ impl Harness for Codex {
             .into_iter()
             .chain(requested.iter().cloned())
             .collect()
+    }
+
+    fn non_interactive_idle_timeout(&self) -> Option<Duration> {
+        Some(NON_INTERACTIVE_IDLE_TIMEOUT)
     }
 }

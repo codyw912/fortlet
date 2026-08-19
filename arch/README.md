@@ -52,3 +52,8 @@ cargo test --test conformance
 4. [FIP-0003: Project capsule status and stop](proposals/0003-project-capsule-status-and-stop.md)
 5. [FIP-0004: Project capsule reset](proposals/0004-project-capsule-reset.md)
 6. [FIP-0005: Goal-scoped pull request publication](proposals/0005-goal-pull-request-publication.md)
+7. [FIP-0006: Opt-in project environments](proposals/0006-opt-in-project-environments.md)
+8. [FIP-0007: Explicit environment preparation](proposals/0007-explicit-environment-preparation.md)
+9. [FIP-0008: Host-owned renewable Codex credentials](proposals/0008-host-owned-renewable-codex-credentials.md)
+10. [FIP-0009: Codex Apps capability handling](proposals/0009-codex-apps-capability-handling.md)
+11. [FIP-0010: Bounded streaming non-interactive execution](proposals/0010-bounded-streaming-noninteractive-execution.md)

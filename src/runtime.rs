@@ -3,12 +3,14 @@ use std::env;
 use std::fs::{self, File};
 use std::io::{IsTerminal, Write};
 use std::path::{Path, PathBuf};
+use std::time::Duration;
 
 use anyhow::{bail, Context, Result};
 use fs2::FileExt;
 use microsandbox::sandbox::SandboxStatus;
 use microsandbox::{
-    MicrosandboxError, ModificationDisposition, PlannedChange, Sandbox, SecretSource,
+    ExecEvent, ExecHandle, MicrosandboxError, ModificationDisposition, PlannedChange, Sandbox,
+    SecretSource,
 };
 
 use crate::auth::{Credentials, ACCESS_TOKEN_ENV, ACCOUNT_ID_ENV};
@@ -22,6 +24,7 @@ use crate::project_environment::{
 
 const SCHEMA_VERSION: &str = "1";
 const DEFAULT_IDLE_TIMEOUT_SECS: u64 = 4 * 60 * 60;
+const EXEC_KILL_CLEANUP_TIMEOUT: Duration = Duration::from_secs(5);
 const HOLD_SCRIPT: &str = "trap 'exit 0' TERM INT; while :; do sleep 3600 & wait $!; done";
 const SECRET_HOSTS: &[&str] = &["chatgpt.com", "*.chatgpt.com", "openai.com", "*.openai.com"];
 pub struct Capsule<'a> {
@@ -201,16 +204,24 @@ impl<'a> MicroSandboxRuntime<'a> {
     ) -> Result<i32> {
         let arguments = effective_launch_arguments(capsule.harness, requested_arguments);
         if !std::io::stdin().is_terminal() || !std::io::stdout().is_terminal() {
-            let output = sandbox
-                .exec_with(tool_executable(capsule), |options| {
+            let mut session = sandbox
+                .exec_stream_with(tool_executable(capsule), |options| {
                     options
                         .args(arguments.iter().cloned())
                         .cwd(capsule.project.cwd.display().to_string())
+                        // MicroSandbox 0.6.8 streaming does not send EOF for
+                        // StdinMode::Null. Close an explicit pipe below so
+                        // non-terminal harnesses cannot block reading stdin.
+                        .stdin_pipe()
                 })
                 .await?;
-            std::io::stdout().write_all(output.stdout_bytes())?;
-            std::io::stderr().write_all(output.stderr_bytes())?;
-            return Ok(output.status().code);
+            return forward_non_interactive(
+                &mut session,
+                &mut std::io::stdout(),
+                &mut std::io::stderr(),
+                capsule.harness.non_interactive_idle_timeout(),
+            )
+            .await;
         }
 
         let terminal = terminal_environment();
@@ -223,6 +234,124 @@ impl<'a> MicroSandboxRuntime<'a> {
             })
             .await
             .map_err(Into::into)
+    }
+}
+
+enum ProcessEvent {
+    Started,
+    Stdout(Vec<u8>),
+    Stderr(Vec<u8>),
+    Exited(i32),
+}
+
+trait ExecutionSession {
+    async fn close_stdin(&mut self) -> Result<()>;
+    async fn next_event(&mut self) -> Result<Option<ProcessEvent>>;
+    async fn kill(&self) -> Result<()>;
+}
+
+impl ExecutionSession for ExecHandle {
+    async fn close_stdin(&mut self) -> Result<()> {
+        self.take_stdin()
+            .context("non-interactive exec has no stdin pipe")?
+            .close()
+            .await
+            .context("cannot close non-interactive command stdin")
+    }
+
+    async fn next_event(&mut self) -> Result<Option<ProcessEvent>> {
+        loop {
+            let event = match self.recv().await {
+                Some(ExecEvent::Started { .. }) => ProcessEvent::Started,
+                Some(ExecEvent::Stdout(bytes)) => ProcessEvent::Stdout(bytes.to_vec()),
+                Some(ExecEvent::Stderr(bytes)) => ProcessEvent::Stderr(bytes.to_vec()),
+                Some(ExecEvent::Exited { code }) => ProcessEvent::Exited(code),
+                Some(ExecEvent::Failed(failure)) => {
+                    return Err(MicrosandboxError::ExecFailed(failure).into());
+                }
+                Some(ExecEvent::StdinError(_)) => continue,
+                None => return Ok(None),
+            };
+            return Ok(Some(event));
+        }
+    }
+
+    async fn kill(&self) -> Result<()> {
+        ExecHandle::kill(self).await.map_err(Into::into)
+    }
+}
+
+async fn forward_non_interactive(
+    session: &mut impl ExecutionSession,
+    stdout: &mut impl Write,
+    stderr: &mut impl Write,
+    idle_timeout: Option<Duration>,
+) -> Result<i32> {
+    session.close_stdin().await?;
+    loop {
+        let event = match idle_timeout {
+            Some(duration) => match tokio::time::timeout(duration, session.next_event()).await {
+                Ok(event) => event?,
+                Err(_) => {
+                    terminate_inactive_session(session, stdout, stderr).await?;
+                    bail!(
+                        "non-interactive command exceeded its {}-second inactivity ceiling",
+                        duration.as_secs_f64()
+                    );
+                }
+            },
+            None => session.next_event().await?,
+        };
+        let Some(event) = event else {
+            bail!("exec session ended without exit event");
+        };
+        if let Some(code) = forward_process_event(event, stdout, stderr)? {
+            return Ok(code);
+        }
+    }
+}
+
+async fn terminate_inactive_session(
+    session: &mut impl ExecutionSession,
+    stdout: &mut impl Write,
+    stderr: &mut impl Write,
+) -> Result<()> {
+    session
+        .kill()
+        .await
+        .context("cannot kill inactive command")?;
+    tokio::time::timeout(EXEC_KILL_CLEANUP_TIMEOUT, async {
+        loop {
+            let Some(event) = session.next_event().await? else {
+                bail!("exec session ended without exit event after kill");
+            };
+            if forward_process_event(event, stdout, stderr)?.is_some() {
+                return Ok(());
+            }
+        }
+    })
+    .await
+    .context("inactive command did not exit after kill")?
+}
+
+fn forward_process_event(
+    event: ProcessEvent,
+    stdout: &mut impl Write,
+    stderr: &mut impl Write,
+) -> Result<Option<i32>> {
+    match event {
+        ProcessEvent::Started => Ok(None),
+        ProcessEvent::Stdout(bytes) => {
+            stdout.write_all(&bytes)?;
+            stdout.flush()?;
+            Ok(None)
+        }
+        ProcessEvent::Stderr(bytes) => {
+            stderr.write_all(&bytes)?;
+            stderr.flush()?;
+            Ok(None)
+        }
+        ProcessEvent::Exited(code) => Ok(Some(code)),
     }
 }
 
@@ -425,6 +554,10 @@ fn effective_gid() -> u32 {
 
 #[cfg(test)]
 mod tests {
+    use std::collections::VecDeque;
+    use std::sync::atomic::{AtomicBool, Ordering};
+    use std::sync::Arc;
+
     use super::*;
     use crate::harness;
     use crate::project::ProjectIdentity;
@@ -458,6 +591,255 @@ mod tests {
             effective_launch_arguments(harness::find("tact").unwrap(), &requested),
             requested
         );
+    }
+
+    #[tokio::test]
+    async fn non_interactive_stream_forwards_output_and_exact_exit_status() {
+        let mut session = FakeExecutionSession::new([
+            ProcessEvent::Started,
+            ProcessEvent::Stdout(b"visible stdout".to_vec()),
+            ProcessEvent::Stderr(b"visible stderr".to_vec()),
+            ProcessEvent::Exited(7),
+        ]);
+        let mut stdout = RecordingWriter::default();
+        let mut stderr = RecordingWriter::default();
+
+        let code = forward_non_interactive(&mut session, &mut stdout, &mut stderr, None)
+            .await
+            .unwrap();
+
+        assert_eq!(stdout.bytes, b"visible stdout");
+        assert_eq!(stderr.bytes, b"visible stderr");
+        assert_eq!(stdout.flushes, 1);
+        assert_eq!(stderr.flushes, 1);
+        assert_eq!(code, 7);
+    }
+
+    #[tokio::test]
+    async fn non_interactive_stream_returns_zero_exit_status() {
+        let mut session = FakeExecutionSession::new([ProcessEvent::Exited(0)]);
+
+        let code = forward_non_interactive(&mut session, &mut Vec::new(), &mut Vec::new(), None)
+            .await
+            .unwrap();
+
+        assert_eq!(code, 0);
+    }
+
+    #[tokio::test]
+    async fn non_interactive_stream_closes_stdin_before_returning() {
+        let mut session = FakeExecutionSession::new([ProcessEvent::Exited(0)]);
+
+        forward_non_interactive(&mut session, &mut Vec::new(), &mut Vec::new(), None)
+            .await
+            .unwrap();
+
+        assert!(session.stdin_closed);
+    }
+
+    #[tokio::test]
+    async fn non_interactive_stream_rejects_a_missing_exit_event() {
+        let mut session = FakeExecutionSession::new([]);
+
+        let error = forward_non_interactive(&mut session, &mut Vec::new(), &mut Vec::new(), None)
+            .await
+            .unwrap_err();
+
+        assert_eq!(error.to_string(), "exec session ended without exit event");
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn output_activity_renews_the_non_interactive_deadline() {
+        let nine_minutes = std::time::Duration::from_secs(9 * 60);
+        let mut session = DelayedExecutionSession::new([
+            (nine_minutes, ProcessEvent::Stdout(b"still".to_vec())),
+            (nine_minutes, ProcessEvent::Stderr(b" working".to_vec())),
+            (nine_minutes, ProcessEvent::Exited(0)),
+        ]);
+        let mut stdout = Vec::new();
+        let mut stderr = Vec::new();
+
+        let code = forward_non_interactive(
+            &mut session,
+            &mut stdout,
+            &mut stderr,
+            Some(std::time::Duration::from_secs(10 * 60)),
+        )
+        .await
+        .unwrap();
+
+        assert_eq!(stdout, b"still");
+        assert_eq!(stderr, b" working");
+        assert_eq!(code, 0);
+    }
+
+    #[tokio::test]
+    async fn non_interactive_inactivity_kills_the_command_and_fails_boundedly() {
+        let killed = Arc::new(AtomicBool::new(false));
+        let mut session = FakeExecutionSession::stalled(killed.clone(), 137);
+        let mut stdout = Vec::new();
+        let mut stderr = Vec::new();
+
+        let result = tokio::time::timeout(
+            std::time::Duration::from_millis(100),
+            forward_non_interactive(
+                &mut session,
+                &mut stdout,
+                &mut stderr,
+                Some(std::time::Duration::from_millis(10)),
+            ),
+        )
+        .await
+        .expect("inactivity handling must be bounded");
+        let error = result.unwrap_err();
+
+        assert!(killed.load(Ordering::SeqCst));
+        assert!(error
+            .to_string()
+            .contains("exceeded its 0.01-second inactivity ceiling"));
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn non_interactive_kill_cleanup_has_a_short_bound() {
+        let killed = Arc::new(AtomicBool::new(false));
+        let mut session = FakeExecutionSession::never_exits(killed.clone());
+
+        let error = forward_non_interactive(
+            &mut session,
+            &mut Vec::new(),
+            &mut Vec::new(),
+            Some(std::time::Duration::from_secs(10 * 60)),
+        )
+        .await
+        .unwrap_err();
+
+        assert!(killed.load(Ordering::SeqCst));
+        assert!(error
+            .to_string()
+            .contains("inactive command did not exit after kill"));
+    }
+
+    #[derive(Default)]
+    struct RecordingWriter {
+        bytes: Vec<u8>,
+        flushes: usize,
+    }
+
+    impl Write for RecordingWriter {
+        fn write(&mut self, buffer: &[u8]) -> std::io::Result<usize> {
+            self.bytes.extend_from_slice(buffer);
+            Ok(buffer.len())
+        }
+
+        fn flush(&mut self) -> std::io::Result<()> {
+            self.flushes += 1;
+            Ok(())
+        }
+    }
+
+    struct FakeExecutionSession {
+        events: VecDeque<ProcessEvent>,
+        stdin_closed: bool,
+        killed: Option<Arc<AtomicBool>>,
+        exit_after_kill: Option<i32>,
+        stall_after_kill: bool,
+    }
+
+    impl FakeExecutionSession {
+        fn new(events: impl IntoIterator<Item = ProcessEvent>) -> Self {
+            Self {
+                events: events.into_iter().collect(),
+                stdin_closed: false,
+                killed: None,
+                exit_after_kill: None,
+                stall_after_kill: false,
+            }
+        }
+
+        fn stalled(killed: Arc<AtomicBool>, exit_after_kill: i32) -> Self {
+            Self {
+                events: VecDeque::from([ProcessEvent::Started]),
+                stdin_closed: false,
+                killed: Some(killed),
+                exit_after_kill: Some(exit_after_kill),
+                stall_after_kill: false,
+            }
+        }
+
+        fn never_exits(killed: Arc<AtomicBool>) -> Self {
+            Self {
+                events: VecDeque::from([ProcessEvent::Started]),
+                stdin_closed: false,
+                killed: Some(killed),
+                exit_after_kill: None,
+                stall_after_kill: true,
+            }
+        }
+    }
+
+    impl ExecutionSession for FakeExecutionSession {
+        async fn close_stdin(&mut self) -> Result<()> {
+            self.stdin_closed = true;
+            Ok(())
+        }
+
+        async fn next_event(&mut self) -> Result<Option<ProcessEvent>> {
+            if let Some(event) = self.events.pop_front() {
+                return Ok(Some(event));
+            }
+            if self
+                .killed
+                .as_ref()
+                .is_some_and(|killed| killed.load(Ordering::SeqCst))
+            {
+                if self.stall_after_kill {
+                    return std::future::pending().await;
+                }
+                return Ok(self.exit_after_kill.take().map(ProcessEvent::Exited));
+            }
+            if self.killed.is_some() {
+                std::future::pending().await
+            } else {
+                Ok(None)
+            }
+        }
+
+        async fn kill(&self) -> Result<()> {
+            if let Some(killed) = &self.killed {
+                killed.store(true, Ordering::SeqCst);
+            }
+            Ok(())
+        }
+    }
+
+    struct DelayedExecutionSession {
+        events: VecDeque<(Duration, ProcessEvent)>,
+    }
+
+    impl DelayedExecutionSession {
+        fn new(events: impl IntoIterator<Item = (Duration, ProcessEvent)>) -> Self {
+            Self {
+                events: events.into_iter().collect(),
+            }
+        }
+    }
+
+    impl ExecutionSession for DelayedExecutionSession {
+        async fn close_stdin(&mut self) -> Result<()> {
+            Ok(())
+        }
+
+        async fn next_event(&mut self) -> Result<Option<ProcessEvent>> {
+            let Some((delay, event)) = self.events.pop_front() else {
+                return Ok(None);
+            };
+            tokio::time::sleep(delay).await;
+            Ok(Some(event))
+        }
+
+        async fn kill(&self) -> Result<()> {
+            Ok(())
+        }
     }
 
     #[test]

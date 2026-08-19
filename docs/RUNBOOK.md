@@ -70,6 +70,26 @@ Excel control and Sites hosting unavailable inside Fortlet; local spreadsheet
 files, local site development, and skill-only plugins remain available. Use
 `fortlet native codex -- <arguments>` when Apps are deliberately required.
 
+When host stdin or stdout is not a terminal, Fortlet uses a non-PTY streaming
+exec session and immediately closes an empty stdin pipe. This explicit EOF is
+the pinned MicroSandbox 0.6.8 workaround for its streaming null-stdin mode,
+which does not close guest stdin. Stdout and stderr are forwarded and flushed
+as events arrive, and the guest exit code becomes the Fortlet exit code. Managed
+Codex has a ten-minute inactivity ceiling renewed by each stdout or stderr
+event. On expiry Fortlet kills only the guest command, waits up to five seconds
+for its terminal event, cancels the credential-renewal task, and leaves the
+capsule running. Retry interactively from a supported terminal when more than
+ten silent minutes are expected. Tact and native execution have no
+Fortlet-owned inactivity ceiling.
+
+The credential-free deterministic gate for this boundary is:
+
+```bash
+cargo test --bin fortlet runtime::tests::non_interactive
+cargo test --bin fortlet runtime::tests::output_activity
+cargo test --bin fortlet session::tests::attachment
+```
+
 ## Project tool environments
 
 `fortlet prepare <harness> [--project <path>] [--allow-broad-mount]` is an
@@ -202,6 +222,7 @@ lease cancellation:
 cargo test --bin fortlet auth::
 cargo test --bin fortlet runtime::tests::credential_rotation
 cargo test --bin fortlet session::tests::renewal_cancellation
+cargo test --bin fortlet session::tests::attachment
 ```
 
 The pinned stock-Codex compatibility fixture is separate because it requires a

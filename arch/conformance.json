@@ -243,6 +243,32 @@
         "experiments/0025-interactive-codex-apps-disable.md"
       ],
       "gaps": []
+    },
+    {
+      "proposal": "0010",
+      "title": "Bounded streaming non-interactive execution",
+      "status": "conformant",
+      "modules": [
+        "Cargo.toml",
+        "README.md",
+        "OVERVIEW.md",
+        "docs/RUNBOOK.md",
+        "src/harness/mod.rs",
+        "src/harness/codex.rs",
+        "src/runtime.rs",
+        "src/session.rs"
+      ],
+      "tests": [
+        "src/harness/mod.rs",
+        "src/runtime.rs",
+        "src/session.rs",
+        "tests/codex_compatibility.rs",
+        "experiments/0026-credential-free-noninteractive-attribution.md",
+        "experiments/0027-packaged-noninteractive-streaming.md",
+        "experiments/0028-managed-noninteractive-codex-successor.md",
+        "experiments/0029-packaged-codex-explicit-eof.md"
+      ],
+      "gaps": []
     }
   ]
 }

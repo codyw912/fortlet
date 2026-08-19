@@ -13,8 +13,9 @@ on the host during active commands, creates reusable project-and-harness
 capsules, preserves interactive terminal behavior, provides optional
 transparent Codex and Tact shims, and exposes project-scoped capsule status,
 stop, terminal reset, explicit environment preparation, and opt-in immutable
-project-tool layers. A reproducible
-Nix package exists for
+project-tool layers. Non-interactive execution streams output as it arrives;
+Codex commands fail closed after ten minutes without stdout or stderr while
+preserving their capsule. A reproducible Nix package exists for
 `aarch64-darwin` and is declared for `x86_64-linux`; native Linux verification
 remains outstanding.
 

@@ -1,117 +1,111 @@
-# GOAL: Resolve the Codex Apps startup warning
+# GOAL: Make managed non-interactive Codex execution reliable
 
-Status: complete — 2026-08-19. Accepted FIP-0009 is conformant. Managed Codex
-0.147.0 launches disable only the unsupported built-in Apps client; ordinary
-model work, user-configured MCP servers, native Codex, and persistent host
-configuration remain unchanged.
+Status: complete — 2026-08-19, pending operator merge of PR #8. FIP-0010 is
+accepted and conformant. Managed non-interactive execution now streams output,
+closes stdin explicitly, preserves exact exit status, and gives Codex a fixed
+600-second output-inactivity ceiling with bounded command-only cleanup.
 
-Make Codex startup capability-aware. Determine the actual pinned upstream
-contract, then either delegate the capability through a narrow safe boundary or
-disable only the unavailable built-in Apps client. Preserve ordinary model
-authentication and user-configured MCP servers.
+Experiment 0028 consumed the one authorized model-backed successor and exposed
+that MicroSandbox 0.6.8 streaming null stdin does not send guest EOF. It
+terminally failed at the new supported bound and was not retried. The in-scope
+explicit-EOF correction then passed the immutable packaged, credential-free
+Codex regression in Experiment 0029. Post-correction model success remains
+deliberately unclaimed.
 
-Before implementation, read FIP-0001, FIP-0005, and FIP-0008 in full.
+Determine whether the non-interactive failure belongs to Fortlet,
+MicroSandbox 0.6.8, or Codex 0.147.0. Make the existing managed non-interactive
+surface complete with correct output and exit status, or fail within an
+explicit supported bound with one actionable correction when Fortlet cannot
+make the upstream path reliable.
 
-## Deliverable 0 — Establish the upstream contract
+Before implementation, read FIP-0001, FIP-0002, FIP-0005, FIP-0008, and
+FIP-0009 in full.
 
-1. Inspect the Codex 0.147.0 source and configuration schema that register
-   `codex_apps`, acquire or attach its biscuit, and enable or disable the client.
-2. Separate observed facts from inference. Record exact primary-source paths,
-   configuration keys, authorization source and lifetime, and failure behavior.
-3. Determine whether a supported external capability exists that Fortlet can
-   delegate without exposing a durable browser cookie, ChatGPT session, host
-   configuration, or general MCP credential to the guest.
-4. Prefer a clean adapter-owned disable path when no narrow supported
-   delegation surface exists. Do not patch or fork Codex for this GOAL.
+## Deliverable 0 — Reproduce and attribute the hang
 
-## Deliverable 1 — Accept the capability boundary
+1. Preserve Experiment 0024 as terminal evidence; do not retry it or infer a
+   cause from silence.
+2. Reproduce with credential-free local fixtures before any provider request.
+   Prefer the smallest faithful Fortlet, MicroSandbox, and stock-Codex controls
+   that separate command completion from model authentication.
+3. Inspect Fortlet's non-interactive attachment and renewal selection,
+   MicroSandbox 0.6.8 exec completion semantics, and Codex 0.147.0 `exec`
+   shutdown behavior from their pinned sources.
+4. Determine whether the harness process remains alive, exits without an SDK
+   event, or is kept open by Fortlet. Record observed facts separately from
+   inference and retain exact commands and outcomes.
 
-1. Draft FIP-0009 for Codex Apps capability handling. Keep MCP authorization
-   independent from FIP-0008 model authentication.
-2. Specify ownership, persistence, configuration precedence, failure behavior,
-   and version-pinned compatibility evidence.
-3. Preserve user-configured MCP servers. A fallback MUST target only the
-   unavailable built-in `codex_apps` client.
-4. Obtain operator acceptance of the concrete FIP before implementation.
+## Deliverable 1 — Fix only the owned boundary
 
-## Deliverable 2 — Implement the smallest safe behavior
+1. If the defect is inside Fortlet's accepted adapter, runtime attachment, or
+   credential-lease contracts, implement the smallest correction under the
+   existing FIPs.
+2. Preserve stdout, stderr, requested arguments, exit status, cancellation,
+   current directory, and credential renewal for both interactive and
+   non-interactive launches.
+3. If diagnosis instead requires a new public timeout/configuration contract or
+   changes workload-lease semantics, draft FIP-0010 and obtain operator
+   acceptance before production implementation.
+4. If the pinned upstream path cannot be made reliable within the accepted
+   boundary, fail closed within a justified bound and report one actionable
+   correction. Do not silently fall back to native Codex or hide output.
 
-1. Put Codex-specific behavior in the harness adapter or its owned session
-   preparation boundary, not generic orchestration.
-2. Avoid overwriting persistent user configuration. Any generated or injected
-   setting MUST be minimal, deterministic, version-pinned, and reversible.
-3. Keep model credentials, refresh behavior, terminal behavior, lifecycle
-   commands, and non-Apps MCP configuration unchanged.
-4. Fail closed with one actionable correction if upstream provides neither a
-   safe delegation surface nor a targeted disable mechanism.
+## Deliverable 2 — Establish deterministic evidence
 
-## Deliverable 3 — Verify daily startup and publish once
+1. Add a credential-free regression fixture that would fail for the observed
+   hang and proves bounded completion, output forwarding, and exact exit status.
+2. Cover the credential-renewal task's relationship to command completion and
+   cancellation without reading, printing, or contacting provider credentials.
+3. Keep interactive Codex, Tact, Apps disablement, capsule lifecycle commands,
+   persistent state, and user-configured MCP behavior unchanged.
+4. Run the pinned stock-Codex compatibility fixtures when diagnosis or code
+   touches their boundary.
 
-1. Add deterministic coverage for configuration precedence, targeted Apps
-   handling, preservation of other MCP servers, and the unchanged credential
-   projection.
-2. Run a bounded packaged Codex startup check. It MUST show no misleading
-   `codex_apps` 451 warning and MUST preserve an ordinary model-backed prompt
-   when live authorization is available.
-3. Update conformance, README, runbook, GOAL, and handoff evidence with the
-   exact supported and unsupported capability surface.
+## Deliverable 3 — Verify and publish once
+
+1. After deterministic evidence passes, declare one bounded successor
+   experiment for exactly one short model-backed non-interactive prompt.
+2. Require the prompt response, clean command termination, correct exit status,
+   no Apps warning, and public stop/reset cleanup. Do not retry a failed unit.
+3. Update conformance, runbook, GOAL, and handoff with the exact supported
+   surface and any remaining upstream limitation.
 4. Run the complete standard verification set through `nix develop`, then use
-   one goal bookmark and pull request. The operator performs the squash merge.
+   one goal bookmark and pull request under FIP-0005. The operator performs the
+   squash merge.
 
 ## Definition of Done
 
-1. A normal packaged Codex launch does not emit the known `codex_apps` HTTP 451
-   warning merely because Fortlet lacks a separate Apps biscuit.
-2. Ordinary ChatGPT model authentication and renewal still work.
-3. User-configured MCP servers are not disabled, rewritten, or granted broader
-   credentials.
-4. No browser cookie, ChatGPT session cookie, raw biscuit, host Codex config,
-   refresh token, or general-purpose MCP credential becomes guest-readable.
-5. The pinned compatibility behavior has automated evidence, the local and
-   hosted gates pass, and the PR is ready for operator merge.
-
-## Completion Evidence
-
-1. The pinned source audit established `--disable apps` as the supported,
-   authoritative launch-local control and found no supported external Apps
-   authorization contract suitable for Fortlet.
-2. Adapter and runtime tests prove exact Codex argument insertion, requested
-   argument preservation, unchanged Tact behavior, and use at the shared
-   attachment boundary.
-3. Both stock-Codex 0.147.0 fixtures passed: the fixed disable wins over user
-   re-enables, preserves another configured MCP server, and leaves external
-   model-token behavior unchanged without OAuth refresh.
-4. Experiment 0024 rejected the first non-interactive live unit after a bounded
-   timeout and public cleanup. Experiment 0025 then accepted the previously
-   proven interactive path: no Apps warning appeared, the sole prompt returned
-   exactly `fortlet-apps-disabled-ok`, idle Ctrl-C exited normally, and public
-   stop/reset restored absence.
-5. The complete local verification set passed through `nix develop` on
-   aarch64-darwin: 72 unit tests, 29 non-ignored integration tests, formatting,
-   strict Clippy, conformance, and `nix flake check`. PR #7's initial hosted
-   Rust verification passed on reviewed revision `07e82b7d4108`; the final
-   documentation closure receives the same required check before readiness.
+1. `fortlet run codex -- exec ...` no longer waits indefinitely after an
+   otherwise completed or failed non-interactive request.
+2. Successful output and the harness exit status reach the host exactly; a
+   supported failure is bounded and gives one actionable correction.
+3. Interactive Codex, Tact, Apps disablement, model authentication/renewal, and
+   public lifecycle behavior retain their existing evidence.
+4. No credential content, browser state, Apps authorization, host Codex config,
+   or new secret class becomes guest-readable or enters test output.
+5. Deterministic and packaged evidence passes, FIP conformance is honest, the
+   local and hosted gates pass, and the PR is ready for operator merge.
 
 ## Excluded scope
 
-Do not add a general proxy, Codex fork, browser-session projection, broad MCP
-credential broker, MCP server manager, remote execution, standalone installer,
-hosted CI change, repository setting, release, tag, or package publication.
+Do not add general logs, restart, global inventory, cross-project cleanup,
+standalone installation, a Codex fork, an alternative runtime, remote
+execution, a proxy, a new credential class, hosted CI changes, repository
+settings, release, tag, or package publication.
 
 ## Budget and escalation
 
-Engineering ceiling: two hours. External money and paid quota remain zero.
-One bounded operator-observed model prompt MAY reuse the existing ChatGPT login
-after deterministic evidence passes; do not inspect or print credential
-content. This accepted GOAL authorizes one descriptive bookmark and one draft
-PR targeting `main` under FIP-0005. Stop for FIP-0009 acceptance, material
-scope expansion, any design requiring raw browser or biscuit material in the
-guest, a new secret class, destructive or unrelated mutation, merge, or two
-failures sharing an unresolved cause.
+Engineering ceiling: two hours. External money and paid quota remain zero
+beyond one short operator-authorized model-backed non-interactive prompt after
+deterministic evidence passes. This accepted GOAL authorizes one descriptive
+bookmark and one draft PR targeting `main` under FIP-0005. Stop for FIP-0010
+acceptance, material scope expansion, a second provider prompt, destructive or
+unrelated mutation, merge, any credential or data-boundary anomaly, or two
+failures sharing an unresolved assumption.
 
 ## Verification
 
-Run focused adapter and credential-projection tests while editing. Before
-readiness, run the complete standard verification set from `docs/RUNBOOK.md`
-inside `nix develop` and the bounded packaged startup check declared by the
-accepted FIP.
+Run focused source and regression controls during diagnosis. Before live
+dispatch and readiness, run the complete standard verification set from
+`docs/RUNBOOK.md` inside `nix develop` plus any pinned compatibility command
+declared by the accepted design.
