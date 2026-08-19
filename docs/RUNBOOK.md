@@ -24,6 +24,7 @@ builds offline. Native Linux verification is still outstanding.
 
 ```bash
 nix run . -- doctor
+nix run . -- prepare codex
 nix run . -- run codex --
 nix run . -- run tact --
 nix run . -- status
@@ -35,6 +36,7 @@ For a development binary inside `nix develop`:
 
 ```bash
 cargo run -- doctor
+cargo run -- prepare codex
 cargo run -- run codex --
 cargo run -- status codex
 cargo run -- stop codex
@@ -49,9 +51,32 @@ projects use Fortlet's persistent scratch workspace unless the user passes
 override.
 
 `doctor` reads authentication metadata but never prints token values. Real
-launches require a healthy MicroSandbox host and a valid ChatGPT credential.
+launches require a healthy MicroSandbox host and a valid file-backed ChatGPT
+credential. Codex launch and shim invocations acquire a source-scoped host
+lease. A token with less than one hour of usable life is refreshed once with
+bounded timeouts; successful refresh atomically replaces the host `auth.json`
+at mode 0600 and live-rotates the existing MicroSandbox secrets without
+restarting the capsule. The guest projection uses `chatgptAuthTokens`, stable
+broker placeholders, an empty refresh field, and the current non-secret
+`last_refresh` metadata required by Codex to emit its bearer header. Run
+`codex login` on the host for missing, keyring-backed, account-changing, or
+permanently rejected login state. `prepare`, `doctor`, `native`, `status`,
+`stop`, and `reset` never renew.
 
 ## Project tool environments
+
+`fortlet prepare <harness> [--project <path>] [--allow-broad-mount]` is an
+optional synchronous warm-up for the immutable base, selected harness, and
+optional project layers. It uses the same project selection as `run` and
+prints `<harness><TAB>ready` only after every selected layer verifies. It does
+not read provider credentials, create a reusable project capsule or persistent
+harness home, project guest authentication, or attach a terminal. A cache hit
+does not contact MicroSandbox or the network and does not rewrite a layer.
+
+Skipping `prepare` is supported: explicit `run` and the transparent shims
+perform the same layer preparation automatically on first launch. Preparation
+does not validate login, runtime health, or terminal readiness and does not
+change an existing capsule after project environment inputs change.
 
 Only `.fortlet/environment.json` at the resolved project root opts a repository
 into a project environment. It requires the fixed adjacent
@@ -104,6 +129,7 @@ the host:
 ```bash
 cargo test --bin fortlet project_environment
 cargo test --bin fortlet environment
+cargo test --test prepare
 cargo test --test pre_runtime_failures invalid_project_environment
 ```
 
@@ -123,8 +149,9 @@ same project rules as `run`. Repeat an explicit `--project <path>` on stop and
 reset so they select the same launch target. They do not read provider
 credentials, provision tool layers, launch a harness, or expose internal
 capsule names. Stop preserves the capsule record; reset preserves the project,
-persistent harness state, credential projection and fingerprint, and immutable
-tool layers for a later run.
+persistent harness state and placeholder-only credential projection, and every
+immutable tool layer for a later run. Fortlet does not persist a token
+fingerprint.
 
 The deterministic management gate uses fake lifecycle observations and
 isolated real-CLI failures without starting a VM:
@@ -158,6 +185,26 @@ boundaries, local capsule-state preparation, guest auth projection, and
 incomplete base or harness layers. The environment-layer fixtures are rejected
 before provisioning begins. This gate does not exercise live MicroSandbox
 reconciliation or terminal attachment; those failure paths remain outstanding.
+
+The credential unit gate covers source validation, expiry scheduling, bounded
+refresh, atomic replacement, account binding, concurrent lock convergence,
+single-request behavior, redacted failures, live-disposition enforcement, and
+lease cancellation:
+
+```bash
+cargo test --bin fortlet auth::
+cargo test --bin fortlet runtime::tests::credential_rotation
+cargo test --bin fortlet session::tests::renewal_cancellation
+```
+
+The pinned stock-Codex compatibility fixture is separate because it requires a
+native Codex 0.147.0 executable. It sends placeholder-only authentication only
+to local fake model and refresh servers; it makes no provider or paid request:
+
+```bash
+FORTLET_CODEX_COMPAT_BINARY=/path/to/codex-0.147.0 \
+  cargo test --test codex_compatibility -- --ignored
+```
 
 ## Optional transparent shims
 

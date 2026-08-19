@@ -42,3 +42,6 @@ scannable failure/win history of the project:
 - `0018-clean-baseline-project-environment.md` — rejected; the sole clean-baseline unit exhausted the provisioning root disk while unpacking the full Rust distribution, before layer publication or Codex launch.
 - `0019-output-backed-project-provisioning.md` — rejected; output-backed extraction cleared the capacity failure, but validation rejected an absolute Debian development link before publication.
 - `0020-relative-debian-project-links.md` — accepted; one public launch published the verified tool layer, exposed pinned Rust and Jujutsu, passed 10 focused Linux tests, and cleaned up the owned capsule.
+- `0021-first-daily-fortlet-session.md` — rejected; packaged prepare and shim attachment passed, but Codex required token refresh before the first prompt and no edit/test loop began.
+- `0022-renewable-codex-daily-session.md` — rejected; external-token mode avoided guest refresh, but a missing `last_refresh` field omitted the bearer header and both model transports returned 401 before a response or edit.
+- `0023-codex-bearer-projection-confirmation.md` — accepted; the repaired bearer projection authenticated one bounded model-backed edit/test loop, and public stop/reset restored absence while preserving durable layers and cache.

@@ -7,7 +7,9 @@ use std::path::{Path, PathBuf};
 use anyhow::{bail, Context, Result};
 use fs2::FileExt;
 use microsandbox::sandbox::SandboxStatus;
-use microsandbox::{MicrosandboxError, Sandbox, SecretSource};
+use microsandbox::{
+    MicrosandboxError, ModificationDisposition, PlannedChange, Sandbox, SecretSource,
+};
 
 use crate::auth::{Credentials, ACCESS_TOKEN_ENV, ACCOUNT_ID_ENV};
 use crate::environment::{EnvironmentLayers, BASE_IMAGE};
@@ -172,33 +174,21 @@ impl<'a> MicroSandboxRuntime<'a> {
                 capsule
                     .descriptor
                     .validate_launch(&config.spec.name, &config.spec.labels)?;
-                let fingerprint = credentials.fingerprint();
-                let fingerprint_changed =
-                    read_fingerprint(capsule).as_deref() != Some(fingerprint.as_str());
                 let running = matches!(
                     handle.status_snapshot(),
                     SandboxStatus::Running | SandboxStatus::Draining
                 );
-                let sandbox = if running && fingerprint_changed {
-                    handle.stop().await?;
-                    let sandbox = handle.start_detached().await?;
-                    write_fingerprint(capsule, credentials)?;
+                let sandbox = if running {
+                    let sandbox = handle.connect().await?;
+                    rotate_credentials(&sandbox, credentials).await?;
                     sandbox
-                } else if running {
-                    handle.connect().await?
                 } else {
-                    let sandbox = handle.start_detached().await?;
-                    write_fingerprint(capsule, credentials)?;
-                    sandbox
+                    handle.start_detached().await?
                 };
                 sandbox.touch().await?;
                 Ok(sandbox)
             }
-            Err(MicrosandboxError::SandboxNotFound(_)) => {
-                let sandbox = create_capsule(capsule, layers).await?;
-                write_fingerprint(capsule, credentials)?;
-                Ok(sandbox)
-            }
+            Err(MicrosandboxError::SandboxNotFound(_)) => create_capsule(capsule, layers).await,
             Err(error) => Err(error.into()),
         }
     }
@@ -233,6 +223,58 @@ impl<'a> MicroSandboxRuntime<'a> {
             .await
             .map_err(Into::into)
     }
+}
+
+pub async fn rotate_credentials(sandbox: &Sandbox, credentials: &Credentials) -> Result<()> {
+    credentials.expose_to_broker();
+    let plan = sandbox
+        .modify()
+        .secret(|secret| {
+            SECRET_HOSTS.iter().fold(
+                secret.env(ACCESS_TOKEN_ENV).source(SecretSource::Env {
+                    var: ACCESS_TOKEN_ENV.into(),
+                }),
+                |secret, host| secret.allow_host(*host),
+            )
+        })
+        .secret(|secret| {
+            SECRET_HOSTS.iter().fold(
+                secret.env(ACCOUNT_ID_ENV).source(SecretSource::Env {
+                    var: ACCOUNT_ID_ENV.into(),
+                }),
+                |secret, host| secret.allow_host(*host),
+            )
+        })
+        .apply()
+        .await?;
+    if !plan.applied {
+        bail!("credential rotation was planned but not applied");
+    }
+    validate_live_rotation(&plan.changes)?;
+    Ok(())
+}
+
+fn validate_live_rotation(changes: &[PlannedChange]) -> Result<()> {
+    let mut rotated = 0;
+    for change in changes {
+        let PlannedChange::Secret(secret) = change else {
+            continue;
+        };
+        if secret.name != ACCESS_TOKEN_ENV && secret.name != ACCOUNT_ID_ENV {
+            continue;
+        }
+        rotated += 1;
+        if secret.disposition != ModificationDisposition::Live {
+            bail!(
+                "credential rotation for {} was not applied live",
+                secret.name
+            );
+        }
+    }
+    if rotated != 2 {
+        bail!("credential rotation did not update both broker secrets live");
+    }
+    Ok(())
 }
 
 async fn create_capsule(capsule: &Capsule<'_>, layers: &EnvironmentLayers) -> Result<Sandbox> {
@@ -346,20 +388,6 @@ fn terminal_environment() -> Vec<(String, String)> {
         .collect()
 }
 
-fn read_fingerprint(capsule: &Capsule<'_>) -> Option<String> {
-    fs::read_to_string(capsule.state.join(".fortlet-credential-fingerprint"))
-        .ok()
-        .map(|value| value.trim().to_owned())
-}
-
-fn write_fingerprint(capsule: &Capsule<'_>, credentials: &Credentials) -> Result<()> {
-    let destination = capsule.state.join(".fortlet-credential-fingerprint");
-    let temporary = destination.with_extension(format!("tmp-{}", std::process::id()));
-    fs::write(&temporary, format!("{}\n", credentials.fingerprint()))?;
-    fs::rename(temporary, destination)?;
-    Ok(())
-}
-
 fn lock(path: &Path) -> Result<File> {
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent)?;
@@ -393,6 +421,7 @@ mod tests {
     use crate::harness;
     use crate::project::ProjectIdentity;
     use crate::project_environment::PublishedProjectEnvironment;
+    use microsandbox::{SecretChangeKind, SecretPlannedChange};
 
     fn project() -> Project {
         Project {
@@ -517,5 +546,41 @@ mod tests {
                 assert!(environment.iter().any(|(candidate, _)| candidate == &key));
             }
         }
+    }
+
+    fn secret_change(name: &str, disposition: ModificationDisposition) -> PlannedChange {
+        PlannedChange::Secret(SecretPlannedChange {
+            field: "secret".into(),
+            name: name.into(),
+            change: SecretChangeKind::Rotated,
+            before_ref: Some(format!("$MSB_{name}")),
+            after_ref: Some(format!("$MSB_{name}")),
+            disposition,
+            allow_hosts: SECRET_HOSTS.iter().map(|host| (*host).into()).collect(),
+            reason: None,
+        })
+    }
+
+    #[test]
+    fn credential_rotation_requires_both_changes_to_be_live() {
+        let live = vec![
+            secret_change(ACCESS_TOKEN_ENV, ModificationDisposition::Live),
+            secret_change(ACCOUNT_ID_ENV, ModificationDisposition::Live),
+        ];
+        validate_live_rotation(&live).unwrap();
+
+        let restart = vec![
+            secret_change(ACCESS_TOKEN_ENV, ModificationDisposition::RequiresRestart),
+            secret_change(ACCOUNT_ID_ENV, ModificationDisposition::Live),
+        ];
+        assert!(validate_live_rotation(&restart)
+            .unwrap_err()
+            .to_string()
+            .contains("was not applied live"));
+
+        assert!(validate_live_rotation(&live[..1])
+            .unwrap_err()
+            .to_string()
+            .contains("both broker secrets"));
     }
 }

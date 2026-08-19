@@ -1,14 +1,18 @@
 use std::path::PathBuf;
+use std::time::Duration;
 
-use anyhow::{Context, Result};
+use anyhow::{anyhow, bail, Context, Result};
 
-use crate::auth::{require_outside_mounts, write_public_projection, Credentials};
+use crate::auth::{
+    require_outside_mounts, require_source_outside_mounts, write_codex_projection,
+    write_tact_projection, CredentialStore, Credentials,
+};
 use crate::environment::EnvironmentStore;
 use crate::harness;
 use crate::paths::AppPaths;
 use crate::project;
 use crate::project_environment::ProjectEnvironment;
-use crate::runtime::MicroSandboxRuntime;
+use crate::runtime::{rotate_credentials, Capsule, MicroSandboxRuntime};
 
 pub struct LaunchRequest {
     pub harness: String,
@@ -54,11 +58,37 @@ pub async fn launch(request: LaunchRequest) -> Result<i32> {
         "project environment",
         "fix or remove .fortlet/environment.json and retry",
     )?;
-    let credentials = stage(
-        Credentials::read_default(),
-        "credentials",
-        "refresh the host Codex login and retry",
-    )?;
+    let credential_store = if harness.name() == "codex" {
+        let store = stage(
+            CredentialStore::from_environment(&paths),
+            "credentials",
+            "run `codex login` on the host and retry",
+        )?;
+        stage(
+            require_source_outside_mounts(
+                store.source(),
+                &[&project.root, &paths.data, &paths.state],
+            ),
+            "credentials",
+            "move the host credential file outside every guest mount and retry",
+        )?;
+        Some(store)
+    } else {
+        None
+    };
+    let credentials = if let Some(store) = &credential_store {
+        stage(
+            store.renew().await,
+            "credentials",
+            "run `codex login` on the host or retry the bounded refresh",
+        )?
+    } else {
+        stage(
+            Credentials::read_default(),
+            "credentials",
+            "refresh the host Codex login and retry",
+        )?
+    };
     stage(
         require_outside_mounts(&credentials, &[&project.root, &paths.data]),
         "credentials",
@@ -70,8 +100,14 @@ pub async fn launch(request: LaunchRequest) -> Result<i32> {
         "capsule",
         "check the reported Fortlet state path and retry",
     )?;
+    let projection = capsule.state.join(".codex/auth.json");
+    let projection_result = if harness.name() == "codex" {
+        write_codex_projection(&projection)
+    } else {
+        write_tact_projection(&projection)
+    };
     stage(
-        write_public_projection(&capsule.state.join(".codex/auth.json")),
+        projection_result,
         "credentials",
         "remove the reported invalid guest projection and retry",
     )?;
@@ -92,11 +128,69 @@ pub async fn launch(request: LaunchRequest) -> Result<i32> {
         "capsule",
         "run `fortlet doctor` and follow its reported correction",
     )?;
-    stage(
-        runtime.attach(&capsule, &sandbox, &request.arguments).await,
-        "terminal",
-        "retry from a supported terminal or use a non-interactive harness command",
-    )
+    if let Some(store) = credential_store {
+        attach_codex_with_lease(
+            &runtime,
+            &capsule,
+            &sandbox,
+            &request.arguments,
+            store,
+            credentials,
+        )
+        .await
+    } else {
+        stage(
+            runtime.attach(&capsule, &sandbox, &request.arguments).await,
+            "terminal",
+            "retry from a supported terminal or use a non-interactive harness command",
+        )
+    }
+}
+
+async fn attach_codex_with_lease(
+    runtime: &MicroSandboxRuntime<'_>,
+    capsule: &Capsule<'_>,
+    sandbox: &microsandbox::Sandbox,
+    arguments: &[String],
+    store: CredentialStore,
+    credentials: Credentials,
+) -> Result<i32> {
+    let renewal_sandbox = sandbox.clone();
+    let mut renewal = tokio::spawn(async move {
+        let mut current = credentials;
+        loop {
+            tokio::time::sleep(current.refresh_delay()?).await;
+            current = store.renew().await?;
+            rotate_credentials(&renewal_sandbox, &current).await?;
+        }
+        #[allow(unreachable_code)]
+        Ok::<(), anyhow::Error>(())
+    });
+    tokio::select! {
+        attached = runtime.attach(capsule, sandbox, arguments) => {
+            cancel_renewal(renewal).await;
+            stage(
+                attached,
+                "terminal",
+                "retry from a supported terminal or use a non-interactive harness command",
+            )
+        }
+        renewed = &mut renewal => {
+            let error = match renewed {
+                Ok(Err(error)) => error,
+                Ok(Ok(())) => anyhow!("Codex credential lease ended unexpectedly"),
+                Err(error) => anyhow!("Codex credential lease task failed: {error}"),
+            };
+            bail!(
+                "credentials stage failed; run `codex login` on the host or retry the bounded refresh: {error:#}"
+            )
+        }
+    }
+}
+
+async fn cancel_renewal(mut renewal: tokio::task::JoinHandle<Result<()>>) {
+    renewal.abort();
+    let _ = tokio::time::timeout(Duration::from_secs(1), &mut renewal).await;
 }
 
 fn stage<T>(result: Result<T>, name: &str, action: &str) -> Result<T> {
@@ -121,5 +215,18 @@ mod tests {
 
         assert!(message.starts_with("credentials stage failed; refresh the host login and retry"));
         assert!(message.ends_with("root cause"));
+    }
+
+    #[tokio::test]
+    async fn renewal_cancellation_is_bounded() {
+        let renewal = tokio::spawn(async {
+            tokio::time::sleep(Duration::from_secs(60)).await;
+            Ok(())
+        });
+        let started = std::time::Instant::now();
+
+        cancel_renewal(renewal).await;
+
+        assert!(started.elapsed() < Duration::from_secs(1));
     }
 }

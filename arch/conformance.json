@@ -179,6 +179,49 @@
         "experiments/0020-relative-debian-project-links.md"
       ],
       "gaps": []
+    },
+    {
+      "proposal": "0007",
+      "title": "Explicit environment preparation",
+      "status": "conformant",
+      "modules": [
+        "README.md",
+        "OVERVIEW.md",
+        "docs/RUNBOOK.md",
+        "src/cli.rs",
+        "src/environment.rs",
+        "src/preparation.rs"
+      ],
+      "tests": [
+        "src/cli.rs",
+        "src/environment.rs",
+        "src/preparation.rs",
+        "tests/prepare.rs",
+        "experiments/0023-codex-bearer-projection-confirmation.md"
+      ],
+      "gaps": []
+    },
+    {
+      "proposal": "0008",
+      "title": "Host-owned renewable Codex credentials",
+      "status": "conformant",
+      "modules": [
+        "README.md",
+        "OVERVIEW.md",
+        "docs/RUNBOOK.md",
+        "src/auth.rs",
+        "src/runtime.rs",
+        "src/session.rs"
+      ],
+      "tests": [
+        "src/auth.rs",
+        "src/runtime.rs",
+        "src/session.rs",
+        "tests/codex_compatibility.rs",
+        "tests/pre_runtime_failures.rs",
+        "experiments/0023-codex-bearer-projection-confirmation.md"
+      ],
+      "gaps": []
     }
   ]
 }

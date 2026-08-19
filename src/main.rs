@@ -5,6 +5,7 @@ mod harness;
 mod management;
 mod native;
 mod paths;
+mod preparation;
 mod project;
 mod project_environment;
 mod runtime;

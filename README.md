@@ -15,6 +15,7 @@ The reproducible Nix package includes the matching MicroSandbox host runtime:
 
 ```sh
 nix run . -- doctor
+nix run . -- prepare codex
 nix run . -- run codex --
 nix run . -- run tact --
 nix run . -- status
@@ -43,8 +44,21 @@ cargo run -- doctor
 ```
 
 MicroSandbox must be usable on the execution host. Codex authentication is
-read from the host and exposed through MicroSandbox's credential broker; the
-credential file itself must remain outside all guest mounts.
+read from a file-backed host ChatGPT login; keyring-backed login, API keys, and
+other authentication modes are not yet supported. Fortlet renews a near-expiry
+Codex token with the host refresh token, atomically updates the host login, and
+rotates the access token through MicroSandbox's credential broker. The guest
+sees only stable placeholders and an empty refresh field. The credential file
+itself must remain outside all guest mounts; run `codex login` on the host when
+Fortlet reports a permanent refresh failure.
+
+`fortlet prepare <harness>` is an optional eager warm-up. It ensures the base,
+selected harness, and optional project-tool layers without reading provider
+credentials, creating a reusable project capsule or persistent harness home,
+or attaching a terminal. If it is omitted, `fortlet run` and the optional
+shims perform the same preparation automatically on first launch. A successful
+preparation prints `<harness><TAB>ready`; a verified cache hit performs no
+provisioning or network contact.
 
 ## Project tool environments
 
