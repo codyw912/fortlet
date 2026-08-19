@@ -349,7 +349,7 @@ fn invalid_guest_projection_fails_before_environment_or_runtime_artifacts() {
 fn incomplete_base_layer_fails_before_provisioning_or_runtime_artifacts() {
     let fixture = Fixture::new();
     fixture.write_valid_auth();
-    let incomplete_base = fixture.tools().join("_base/bookworm-1");
+    let incomplete_base = fixture.tools().join("_base/bookworm-2");
     fs::create_dir_all(&incomplete_base).unwrap();
 
     let output = fixture.run("codex", &fixture.project);
@@ -373,12 +373,12 @@ fn incomplete_base_layer_fails_before_provisioning_or_runtime_artifacts() {
 fn incomplete_harness_layer_fails_before_provisioning_or_runtime_artifacts() {
     let fixture = Fixture::new();
     fixture.write_valid_auth();
-    let base = fixture.tools().join("_base/bookworm-1");
+    let base = fixture.tools().join("_base/bookworm-2");
     let incomplete_harness = fixture.tools().join("codex/0.147.0");
     fs::create_dir_all(&base).unwrap();
     fs::write(
         base.join(".fortlet-base.json"),
-        r#"{"name":"_base","version":"bookworm-1","image":"node:24-bookworm"}"#,
+        r#"{"name":"_base","version":"bookworm-2","image":"node:24-bookworm"}"#,
     )
     .unwrap();
     fs::create_dir_all(&incomplete_harness).unwrap();

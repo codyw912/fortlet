@@ -86,7 +86,7 @@ mod tests {
     fn seed_marker(root: &std::path::Path, marker: &str) {
         fs::create_dir_all(root).unwrap();
         let (name, version) = if marker == ".fortlet-base.json" {
-            ("_base", "bookworm-1")
+            ("_base", "bookworm-2")
         } else {
             let name = root
                 .parent()
@@ -161,7 +161,7 @@ mod tests {
         let marker_before = fs::read(published.join(".fortlet-project.json")).unwrap();
 
         seed_marker(
-            &paths.tools().join("_base/bookworm-1"),
+            &paths.tools().join("_base/bookworm-2"),
             ".fortlet-base.json",
         );
         for (name, version) in [("codex", "0.147.0"), ("tact", "0.3.7")] {

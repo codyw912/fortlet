@@ -14,7 +14,7 @@ use microsandbox::{
 };
 
 use crate::auth::{Credentials, ACCESS_TOKEN_ENV, ACCOUNT_ID_ENV};
-use crate::environment::{EnvironmentLayers, BASE_IMAGE};
+use crate::environment::{EnvironmentLayers, BASE_IMAGE, MANAGED_BASH_ENV};
 use crate::harness::Harness;
 use crate::paths::{AppPaths, PRODUCT};
 use crate::project::Project;
@@ -26,6 +26,7 @@ const SCHEMA_VERSION: &str = "1";
 const DEFAULT_IDLE_TIMEOUT_SECS: u64 = 4 * 60 * 60;
 const EXEC_KILL_CLEANUP_TIMEOUT: Duration = Duration::from_secs(5);
 const HOLD_SCRIPT: &str = "trap 'exit 0' TERM INT; while :; do sleep 3600 & wait $!; done";
+const MANAGED_PATH_ENV: &str = "FORTLET_MANAGED_PATH";
 const SECRET_HOSTS: &[&str] = &["chatgpt.com", "*.chatgpt.com", "openai.com", "*.openai.com"];
 pub struct Capsule<'a> {
     pub descriptor: CapsuleDescriptor,
@@ -435,7 +436,6 @@ async fn create_capsule(capsule: &Capsule<'_>, layers: &EnvironmentLayers) -> Re
             mount.bind(&layers.base).readonly()
         })
         .env("HOME", guest_home)
-        .env("PATH", guest_path(layers))
         .script("hold", HOLD_SCRIPT)
         .entrypoint(["hold"])
         .labels(capsule.descriptor.labels());
@@ -444,6 +444,9 @@ async fn create_capsule(capsule: &Capsule<'_>, layers: &EnvironmentLayers) -> Re
         builder = builder.volume(GUEST_ROOT, |mount| mount.bind(&project.root).readonly());
     }
     for (key, value) in capsule_environment(capsule, layers) {
+        builder = builder.env(key, value);
+    }
+    for (key, value) in managed_shell_environment(layers) {
         builder = builder.env(key, value);
     }
     builder = builder
@@ -483,6 +486,15 @@ fn capsule_environment(capsule: &Capsule<'_>, layers: &EnvironmentLayers) -> Vec
         .unwrap_or_default();
     environment.extend(capsule.harness.environment(capsule.project));
     environment
+}
+
+fn managed_shell_environment(layers: &EnvironmentLayers) -> [(String, String); 3] {
+    let path = guest_path(layers);
+    [
+        ("PATH".into(), path.clone()),
+        (MANAGED_PATH_ENV.into(), path),
+        ("BASH_ENV".into(), MANAGED_BASH_ENV.into()),
+    ]
 }
 
 fn guest_path(layers: &EnvironmentLayers) -> String {
@@ -627,7 +639,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn non_interactive_stream_closes_stdin_before_returning() {
+    async fn non_interactive_stream_closes_stdin_before_reading_events() {
         let mut session = FakeExecutionSession::new([ProcessEvent::Exited(0)]);
 
         forward_non_interactive(&mut session, &mut Vec::new(), &mut Vec::new(), None)
@@ -635,6 +647,7 @@ mod tests {
             .unwrap();
 
         assert!(session.stdin_closed);
+        assert!(!session.event_read_before_stdin_closed);
     }
 
     #[tokio::test]
@@ -740,6 +753,7 @@ mod tests {
     struct FakeExecutionSession {
         events: VecDeque<ProcessEvent>,
         stdin_closed: bool,
+        event_read_before_stdin_closed: bool,
         killed: Option<Arc<AtomicBool>>,
         exit_after_kill: Option<i32>,
         stall_after_kill: bool,
@@ -750,6 +764,7 @@ mod tests {
             Self {
                 events: events.into_iter().collect(),
                 stdin_closed: false,
+                event_read_before_stdin_closed: false,
                 killed: None,
                 exit_after_kill: None,
                 stall_after_kill: false,
@@ -760,6 +775,7 @@ mod tests {
             Self {
                 events: VecDeque::from([ProcessEvent::Started]),
                 stdin_closed: false,
+                event_read_before_stdin_closed: false,
                 killed: Some(killed),
                 exit_after_kill: Some(exit_after_kill),
                 stall_after_kill: false,
@@ -770,6 +786,7 @@ mod tests {
             Self {
                 events: VecDeque::from([ProcessEvent::Started]),
                 stdin_closed: false,
+                event_read_before_stdin_closed: false,
                 killed: Some(killed),
                 exit_after_kill: None,
                 stall_after_kill: true,
@@ -784,6 +801,7 @@ mod tests {
         }
 
         async fn next_event(&mut self) -> Result<Option<ProcessEvent>> {
+            self.event_read_before_stdin_closed |= !self.stdin_closed;
             if let Some(event) = self.events.pop_front() {
                 return Ok(Some(event));
             }
@@ -941,6 +959,17 @@ mod tests {
 
         assert!(guest_path(&layers)
             .starts_with("/opt/fortlet/project/cargo/bin:/opt/fortlet/project/jj/bin:"));
+        let managed_path = guest_path(&layers);
+        let managed_environment = BTreeMap::from(managed_shell_environment(&layers));
+        assert_eq!(managed_environment.get("PATH"), Some(&managed_path));
+        assert_eq!(
+            managed_environment.get(MANAGED_PATH_ENV),
+            Some(&managed_path)
+        );
+        assert_eq!(
+            managed_environment.get("BASH_ENV").map(String::as_str),
+            Some(MANAGED_BASH_ENV)
+        );
         for harness_name in ["codex", "tact"] {
             let harness = harness::find(harness_name).unwrap();
             let capsule = Capsule {

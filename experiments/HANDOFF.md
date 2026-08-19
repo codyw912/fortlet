@@ -1,98 +1,96 @@
-# Session Handoff — Bounded non-interactive Codex complete
+# Session Handoff — Ordinary Codex work-loop correction complete
 
-Audience: a fresh agent session. `GOAL.md` is normative and complete; do not
-start implementation under it. Verify PR #8 and `main` before relying on this
-briefing, then choose a new GOAL with the operator. FIP-0010 is the durable
-non-interactive contract.
+Audience: a fresh agent session. `GOAL.md` is normative and complete. Verify
+the publication and merged `main` state before relying on this summary, then
+choose the next GOAL with the operator. Do not send another provider prompt for
+Experiments 0030–0032.
 
-## Verified branch state
+## Current local state
 
-Protected `main` began this GOAL at
-`f05da5ec8274e5905d8baf81fe61c48c8e76ecd4`, the squash merge of PR #7. The
-single authorized bookmark is `noninteractive-codex-reliability`; PR #8 is the
-goal pull request. The operator remains the sole merge authority.
+PR #8 previously squash-merged FIP-0010 at
+`53378399bfa581d5a7b3db8538b234dc3733bb26`. The current stack above that main
+contains the completed daily-work-loop GOAL, Experiments 0030–0032, one useful
+test-only model edit, and the FIP-0006 login-shell correction. The single goal
+bookmark is `daily-codex-work-loop`; draft PR #9 targets `main`. Verify Jujutsu,
+the exact signed tip, and GitHub checks rather than inferring readiness from
+this handoff. The operator remains the sole merge authority.
 
-The branch contains accepted FIP-0010 and conformant implementation evidence.
-Before the final documentation tip, 81 unit tests, 29 ordinary integration
-tests, formatting, strict all-target/all-feature Clippy, conformance, and
-`nix flake check` passed through `nix develop` on aarch64-darwin. Both ignored
-stock-Codex 0.147.0 compatibility fixtures passed against local fake servers.
-The final publishable tip must retain a complete green local gate and hosted
-`Rust verification`; verify those exact PR facts rather than assuming them
-from this handoff.
+## What the live work proved
 
-## What changed
+Experiment 0030 first used synthetic auth only to create a disposable capsule.
+Its one credential-free probe resolved `chatgpt.com` and returned HTTP 200 from
+`https://chatgpt.com/robots.txt`; public stop/reset restored absence and empty
+inventory. The complete standard gate passed before model spend.
 
-When host stdin or stdout is not a terminal, Fortlet now:
+The sole real Codex prompt crossed the prior stdin failure, streamed its work,
+showed no Apps warning, changed only test code in `src/runtime.rs`, and exited
+host status zero. It renamed the stdin regression and made the fake execution
+session prove stdin closes before the first event read. Codex's exact focused
+Cargo command itself returned 127 because Cargo was unavailable to its
+`/usr/bin/bash -lc` child. The same test passed independently through host
+`nix develop`. No prompt edit, follow-up, retry, interactive fallback, or native
+fallback occurred.
 
-1. acquires a non-PTY MicroSandbox streaming exec handle;
-2. immediately closes an explicit empty stdin pipe;
-3. forwards and flushes stdout and stderr events without rewriting them;
-4. returns only the explicit guest exit code; and
-5. rejects stream closure without an exit event.
+Experiment 0031 used one credential-free Tact capsule to compare the composed
+shell path. Guest Cargo was mode 755 and worked directly and through `bash -c`.
+Plain `bash -lc` replaced Fortlet's PATH with Debian's login default and lost
+Cargo. A disposable `BASH_ENV` restored the exact managed PATH and Cargo 1.97.1.
+This accepted experiment is the causal attribution.
 
-The harness adapter owns an optional inactivity policy. Codex 0.147.0 selects
-600 seconds renewed by every stdout or stderr event. Tact selects none. On
-expiry Fortlet kills only the command, drains for at most five seconds,
-preserves the capsule, cancels the credential-renewal task, and reports one
-correction: retry interactively from a supported terminal. Interactive
-attachment and `fortlet native` are unchanged.
+Experiment 0032 exercised the production correction from immutable package
+`/nix/store/fls59kf9mwxrs8n1g3whd1g7mgjfk0cv-fortlet-0.1.0`. Its login shell
+reported the package-owned hook, resolved
+`/opt/fortlet/project/bin/cargo`, and passed the exact focused test. The unit is
+still rejected for protocol variance: the Tact-specific Cargo cache was cold,
+so Cargo downloaded public crates beyond the experiment's declared network
+budget, and capsule configuration was not inspected before cleanup. Do not
+rerun it to manufacture acceptance. Cleanup reported running, stopped, reset,
+absent, and final inventory `[]`; the repo stayed clean.
 
-## Paid-for diagnosis
+## Product change
 
-Experiment 0026 and pinned-source inspection established that Codex can remain
-alive in an upstream wait while the old collected attachment hides all output.
-Normal shell and stock-Codex local success/failure commands still produced
-explicit MicroSandbox exit events; Fortlet's renewal task did not keep the
-attachment open.
+Base environment `bookworm-2` installs the read-only fragment
+`/opt/fortlet/base/etc/fortlet/bash-env`. Capsules set reserved internal
+`FORTLET_MANAGED_PATH` and `BASH_ENV` values after project and harness
+environment values. The fragment restores the complete project/base/harness
+PATH after a Debian non-interactive login profile replaces it, preserving the
+pinned MicroSandbox script prefix when present.
 
-Experiment 0027 accepted the first immutable production streaming path with a
-credential-free packaged Tact 0.3.7 launch and exact zero exit. Experiment 0028
-then used the one permitted real prompt. It streamed
-`Reading additional input from stdin...`, remained there, and failed exactly at
-Fortlet's 600-second inactivity ceiling with status 1. Public stop/reset
-restored absence. No Apps warning appeared and no retry occurred.
+Project manifests may no longer set `BASH_ENV`; `FORTLET_*` names were already
+reserved. Fortlet writes no `.profile`, `.bashrc`, fish configuration, or other
+host/persistent startup file. Both harnesses use the common runtime mechanism;
+there is no Codex-specific command rewrite.
 
-That line is emitted immediately before Codex 0.147.0 calls
-`read_to_end(stdin)`. MicroSandbox 0.6.8's streaming `StdinMode::Null` is only a
-host-side option: it neither enters `ExecRequest` nor sends the empty
-`ExecStdin` EOF frame. The contemporaneous macOS firewall/DNS popup therefore
-did not cause this process-level block; Codex had not reached its model request.
+## Deterministic evidence
 
-The correction uses `StdinMode::Pipe` plus awaited `ExecSink::close`.
-Experiment 0029 accepted the resulting immutable package: packaged Codex
-advanced immediately beyond its stdin read, displayed its session, attempted
-only `http://127.0.0.1:9/v1`, and returned exact status 1 in about 8.7 seconds.
-Public cleanup restored Codex absence and an empty MicroSandbox inventory.
+The implementation adds a base-script assertion, reserved-variable coverage,
+managed shell-environment assertions for both harnesses, and the strengthened
+stdin ordering regression. The complete final `docs/RUNBOOK.md` set passed
+through `nix develop`: all 83 unit tests and every enabled integration test,
+formatting, strict all-target/all-feature Clippy, conformance, and `nix flake
+check` on aarch64-darwin. Nix emitted only the known incompatible
+`x86_64-linux` omission notice.
 
 ## Honest limitations
 
-- The sole authorized model-backed successor was consumed discovering the
-  pinned SDK's unclosed streaming stdin. No post-correction provider prompt was
-  permitted, so ordinary model success through the corrected non-interactive
-  path is not claimed. Interactive model success remains proven by Experiment
-  0025.
-- The 600-second Codex inactivity ceiling is fixed for this first slice. A
-  legitimately silent longer command must be run interactively.
+- The sole model task did not run its guest test; the project-layer correction
+  was validated afterward without another model prompt.
+- Experiment 0032's mechanism succeeded but the experiment is rejected for its
+  undeclared Cargo downloads and omitted configuration observation.
 - Native x86_64-linux package verification remains outstanding.
-- Automated interactive Codex exit parity remains unresolved; manual evidence
-  says one Ctrl-C exits an empty composer.
+- The ten-minute Codex non-interactive inactivity ceiling and unresolved
+  automated interactive idle-exit parity remain unchanged.
+- Apps remain deliberately disabled inside managed Codex.
 
-## What to do next
+## Next action
 
-If PR #8 is not merged, finish only its existing FIP-0005 lifecycle: verify the
-signed reviewed tip and hosted check, leave merge to the operator, then fetch
-`main`, prove tree equality, and remove only the landed goal bookmark. If it is
-merged, verify that closure before discussing a successor GOAL.
+Finish only PR #9's existing FIP-0005 publication lifecycle: sign and push the
+exact publishable tip, require hosted `Rust verification`, and mark the PR
+ready. Leave squash merge to the operator. After merge, fetch main, prove tree
+equality with the signed reviewed tip, remove only the landed goal bookmark,
+and then discuss a successor GOAL.
 
-A natural product-focused successor is one deliberately authorized
-post-correction daily-use Codex session that separates first-run macOS
-firewall/DNS readiness from Fortlet behavior and proves an ordinary prompt/edit
-loop. Predeclare any provider unit and rehearse its full cleanup path first.
-Standalone installation, general logs/restart/inventory, remote execution, and
-alternative runtimes remain outside the completed mission.
-
-Do not resume Experiments 0024, 0028, or 0029; silently retry a provider prompt;
-restore streaming `stdin_null`; weaken credential or mount boundaries; infer
-post-correction model success from the loopback regression; merge PR #8; or
-start a new implementation before the operator accepts a new GOAL.
+Do not repeat the provider unit; resume Experiments 0030–0032; weaken the
+credential/mount boundary; write shell startup files; hide the rejected unit;
+push or force-push main; merge; or start unrelated product work under this
+completed GOAL.

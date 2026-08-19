@@ -214,6 +214,7 @@ fn validate_manifest(manifest: &Manifest, project: &Project) -> Result<()> {
 fn protected_environment_name(name: &str, project: &Project) -> Result<bool> {
     if name == "HOME"
         || name == "PATH"
+        || name == "BASH_ENV"
         || name == ACCESS_TOKEN_ENV
         || name == ACCOUNT_ID_ENV
         || name.starts_with("FORTLET_")
@@ -487,6 +488,10 @@ mod tests {
             ),
             (
                 r#"{"schema":1,"path":[],"environment":{"HOME":"/tmp"}}"#,
+                "reserved",
+            ),
+            (
+                r#"{"schema":1,"path":[],"environment":{"BASH_ENV":"/tmp/hook"}}"#,
                 "reserved",
             ),
             (
