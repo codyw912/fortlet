@@ -1,6 +1,6 @@
 # FIP-0010: Bounded streaming non-interactive execution
 
-Status: Review
+Status: Accepted
 Recorded: 2026-08-19 from the Experiment 0024 non-interactive hang diagnosis
 Requires: FIP-0001, FIP-0002, FIP-0008, FIP-0009
 

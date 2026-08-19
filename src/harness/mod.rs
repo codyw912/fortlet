@@ -1,9 +1,11 @@
-mod codex;
-mod tact;
+use std::time::Duration;
 
 use anyhow::{bail, Result};
 
 use crate::project::Project;
+
+mod codex;
+mod tact;
 
 pub trait Harness: Sync {
     fn name(&self) -> &'static str;
@@ -14,6 +16,10 @@ pub trait Harness: Sync {
 
     fn launch_arguments(&self, requested: &[String]) -> Vec<String> {
         requested.to_vec()
+    }
+
+    fn non_interactive_idle_timeout(&self) -> Option<Duration> {
+        None
     }
 }
 
@@ -60,5 +66,14 @@ mod tests {
             find("tact").unwrap().launch_arguments(&requested),
             requested
         );
+    }
+
+    #[test]
+    fn only_codex_has_a_non_interactive_inactivity_ceiling() {
+        assert_eq!(
+            find("codex").unwrap().non_interactive_idle_timeout(),
+            Some(std::time::Duration::from_secs(10 * 60))
+        );
+        assert_eq!(find("tact").unwrap().non_interactive_idle_timeout(), None);
     }
 }

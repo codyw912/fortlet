@@ -247,10 +247,26 @@
     {
       "proposal": "0010",
       "title": "Bounded streaming non-interactive execution",
-      "status": "unimplemented",
-      "modules": [],
-      "tests": [],
-      "gaps": []
+      "status": "partial",
+      "modules": [
+        "Cargo.toml",
+        "README.md",
+        "OVERVIEW.md",
+        "docs/RUNBOOK.md",
+        "src/harness/mod.rs",
+        "src/harness/codex.rs",
+        "src/runtime.rs",
+        "src/session.rs"
+      ],
+      "tests": [
+        "src/harness/mod.rs",
+        "src/runtime.rs",
+        "src/session.rs",
+        "experiments/0026-credential-free-noninteractive-attribution.md"
+      ],
+      "gaps": [
+        "Packaged treatment rehearsal and the one model-backed successor experiment remain outstanding."
+      ]
     }
   ]
 }

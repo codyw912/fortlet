@@ -14,6 +14,8 @@ use crate::project;
 use crate::project_environment::ProjectEnvironment;
 use crate::runtime::{rotate_credentials, Capsule, MicroSandboxRuntime};
 
+const TERMINAL_CORRECTION: &str = "retry interactively from a supported terminal";
+
 pub struct LaunchRequest {
     pub harness: String,
     pub project: Option<PathBuf>,
@@ -142,7 +144,7 @@ pub async fn launch(request: LaunchRequest) -> Result<i32> {
         stage(
             runtime.attach(&capsule, &sandbox, &request.arguments).await,
             "terminal",
-            "retry from a supported terminal or use a non-interactive harness command",
+            TERMINAL_CORRECTION,
         )
     }
 }
@@ -156,7 +158,7 @@ async fn attach_codex_with_lease(
     credentials: Credentials,
 ) -> Result<i32> {
     let renewal_sandbox = sandbox.clone();
-    let mut renewal = tokio::spawn(async move {
+    let renewal = tokio::spawn(async move {
         let mut current = credentials;
         loop {
             tokio::time::sleep(current.refresh_delay()?).await;
@@ -166,14 +168,30 @@ async fn attach_codex_with_lease(
         #[allow(unreachable_code)]
         Ok::<(), anyhow::Error>(())
     });
-    tokio::select! {
-        attached = runtime.attach(capsule, sandbox, arguments) => {
-            cancel_renewal(renewal).await;
-            stage(
-                attached,
-                "terminal",
-                "retry from a supported terminal or use a non-interactive harness command",
+    match await_attachment_with_renewal(runtime.attach(capsule, sandbox, arguments), renewal).await
+    {
+        AttachmentOutcome::Attached(attached) => stage(attached, "terminal", TERMINAL_CORRECTION),
+        AttachmentOutcome::RenewalEnded(error) => {
+            bail!(
+                "credentials stage failed; run `codex login` on the host or retry the bounded refresh: {error:#}"
             )
+        }
+    }
+}
+
+enum AttachmentOutcome<T> {
+    Attached(Result<T>),
+    RenewalEnded(anyhow::Error),
+}
+
+async fn await_attachment_with_renewal<T>(
+    attachment: impl std::future::Future<Output = Result<T>>,
+    mut renewal: tokio::task::JoinHandle<Result<()>>,
+) -> AttachmentOutcome<T> {
+    tokio::select! {
+        attached = attachment => {
+            cancel_renewal(renewal).await;
+            AttachmentOutcome::Attached(attached)
         }
         renewed = &mut renewal => {
             let error = match renewed {
@@ -181,9 +199,7 @@ async fn attach_codex_with_lease(
                 Ok(Ok(())) => anyhow!("Codex credential lease ended unexpectedly"),
                 Err(error) => anyhow!("Codex credential lease task failed: {error}"),
             };
-            bail!(
-                "credentials stage failed; run `codex login` on the host or retry the bounded refresh: {error:#}"
-            )
+            AttachmentOutcome::RenewalEnded(error)
         }
     }
 }
@@ -199,9 +215,29 @@ fn stage<T>(result: Result<T>, name: &str, action: &str) -> Result<T> {
 
 #[cfg(test)]
 mod tests {
+    use std::sync::atomic::{AtomicBool, Ordering};
+    use std::sync::Arc;
+
     use anyhow::anyhow;
 
     use super::*;
+
+    struct CancellationFlag(Arc<AtomicBool>);
+
+    impl Drop for CancellationFlag {
+        fn drop(&mut self) {
+            self.0.store(true, Ordering::SeqCst);
+        }
+    }
+
+    fn pending_renewal(cancelled: Arc<AtomicBool>) -> tokio::task::JoinHandle<Result<()>> {
+        let guard = CancellationFlag(cancelled);
+        tokio::spawn(async move {
+            let _guard = guard;
+            std::future::pending::<()>().await;
+            Ok(())
+        })
+    }
 
     #[test]
     fn staged_errors_name_the_stage_and_one_action() {
@@ -228,5 +264,31 @@ mod tests {
         cancel_renewal(renewal).await;
 
         assert!(started.elapsed() < Duration::from_secs(1));
+    }
+
+    #[tokio::test]
+    async fn attachment_completion_cancels_the_renewal_task_before_returning() {
+        let cancelled = Arc::new(AtomicBool::new(false));
+        let renewal = pending_renewal(cancelled.clone());
+
+        let outcome = await_attachment_with_renewal(async { Ok(7) }, renewal).await;
+
+        assert!(matches!(outcome, AttachmentOutcome::Attached(Ok(7))));
+        assert!(cancelled.load(Ordering::SeqCst));
+    }
+
+    #[tokio::test]
+    async fn attachment_failure_cancels_the_renewal_task_before_returning() {
+        let cancelled = Arc::new(AtomicBool::new(false));
+        let renewal = pending_renewal(cancelled.clone());
+
+        let outcome = await_attachment_with_renewal(
+            async { Err::<i32, _>(anyhow!("inactivity timeout")) },
+            renewal,
+        )
+        .await;
+
+        assert!(matches!(outcome, AttachmentOutcome::Attached(Err(_))));
+        assert!(cancelled.load(Ordering::SeqCst));
     }
 }

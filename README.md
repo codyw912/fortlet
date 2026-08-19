@@ -58,6 +58,13 @@ capsule. This does not disable user-configured MCP servers or local plugin
 skills. Connector-backed live Excel control and Sites hosting are unavailable
 through Fortlet; use native Codex explicitly if either capability is needed.
 
+When stdin or stdout is not a terminal, Fortlet streams harness stdout and
+stderr without allocating a PTY and returns the exact guest exit status.
+Managed Codex commands have a ten-minute inactivity ceiling that renews on
+output; expiry kills only that command and preserves the reusable capsule.
+Use interactive managed Codex for work that may legitimately remain silent
+longer. Tact, interactive sessions, and `fortlet native` have no such ceiling.
+
 `fortlet prepare <harness>` is an optional eager warm-up. It ensures the base,
 selected harness, and optional project-tool layers without reading provider
 credentials, creating a reusable project capsule or persistent harness home,
