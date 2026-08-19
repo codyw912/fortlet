@@ -8,16 +8,18 @@ license = "MIT OR Apache-2.0"
 [dependencies]
 anyhow = "1.0"
 base64 = "0.22"
+chrono = "0.4"
 clap = { version = "4.5", features = ["derive"] }
 fs2 = "0.4"
 hex = "0.4"
 libc = "0.2"
 microsandbox = "=0.6.8"
+reqwest = { version = "0.13", default-features = false, features = ["json", "rustls"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 sha2 = "0.10"
 tempfile = "3.23"
-tokio = { version = "1.48", features = ["macros", "rt-multi-thread"] }
+tokio = { version = "1.48", features = ["macros", "rt-multi-thread", "time"] }
 
 [profile.release]
 strip = true

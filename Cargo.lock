@@ -1325,11 +1325,13 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "base64 0.22.1",
+ "chrono",
  "clap",
  "fs2",
  "hex",
  "libc",
  "microsandbox",
+ "reqwest",
  "serde",
  "serde_json",
  "sha2 0.10.9",

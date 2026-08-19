@@ -1,0 +1,10 @@
+{
+  "OPENAI_API_KEY": null,
+  "auth_mode": "chatgptAuthTokens",
+  "tokens": {
+    "access_token": "$MSB_FORTLET_CHATGPT_ACCESS_TOKEN",
+    "account_id": "$MSB_FORTLET_CHATGPT_ACCOUNT_ID",
+    "id_token": "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJleHAiOjQxMDI0NDQ4MDAsImh0dHBzOi8vYXBpLm9wZW5haS5jb20vYXV0aCI6eyJjaGF0Z3B0X2FjY291bnRfaWQiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDAiLCJjaGF0Z3B0X3BsYW5fdHlwZSI6InBsdXMifSwic3ViIjoiZm9ydGxldC1icm9rZXIifQ.signature",
+    "refresh_token": ""
+  }
+}

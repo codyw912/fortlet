@@ -205,11 +205,24 @@
     {
       "proposal": "0008",
       "title": "Host-owned renewable Codex credentials",
-      "status": "unimplemented",
-      "modules": [],
-      "tests": [],
+      "status": "partial",
+      "modules": [
+        "README.md",
+        "OVERVIEW.md",
+        "docs/RUNBOOK.md",
+        "src/auth.rs",
+        "src/runtime.rs",
+        "src/session.rs"
+      ],
+      "tests": [
+        "src/auth.rs",
+        "src/runtime.rs",
+        "src/session.rs",
+        "tests/codex_compatibility.rs",
+        "tests/pre_runtime_failures.rs"
+      ],
       "gaps": [
-        "FIP-0008 is accepted but has not been implemented."
+        "Deterministic implementation and the stock Codex 0.147.0 local compatibility fixture pass, but the predeclared ordinary prompt and edit/test experiment has not run and live MicroSandbox rotation has not yet been observed during a real active session."
       ]
     }
   ]

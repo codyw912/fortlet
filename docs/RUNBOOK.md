@@ -51,7 +51,15 @@ projects use Fortlet's persistent scratch workspace unless the user passes
 override.
 
 `doctor` reads authentication metadata but never prints token values. Real
-launches require a healthy MicroSandbox host and a valid ChatGPT credential.
+launches require a healthy MicroSandbox host and a valid file-backed ChatGPT
+credential. Codex launch and shim invocations acquire a source-scoped host
+lease. A token with less than one hour of usable life is refreshed once with
+bounded timeouts; successful refresh atomically replaces the host `auth.json`
+at mode 0600 and live-rotates the existing MicroSandbox secrets without
+restarting the capsule. The guest projection uses `chatgptAuthTokens`, stable
+broker placeholders, and an empty refresh field. Run `codex login` on the host
+for missing, keyring-backed, account-changing, or permanently rejected login
+state. `prepare`, `doctor`, `native`, `status`, `stop`, and `reset` never renew.
 
 ## Project tool environments
 
@@ -139,8 +147,9 @@ same project rules as `run`. Repeat an explicit `--project <path>` on stop and
 reset so they select the same launch target. They do not read provider
 credentials, provision tool layers, launch a harness, or expose internal
 capsule names. Stop preserves the capsule record; reset preserves the project,
-persistent harness state, credential projection and fingerprint, and immutable
-tool layers for a later run.
+persistent harness state and placeholder-only credential projection, and every
+immutable tool layer for a later run. Fortlet does not persist a token
+fingerprint.
 
 The deterministic management gate uses fake lifecycle observations and
 isolated real-CLI failures without starting a VM:
@@ -174,6 +183,26 @@ boundaries, local capsule-state preparation, guest auth projection, and
 incomplete base or harness layers. The environment-layer fixtures are rejected
 before provisioning begins. This gate does not exercise live MicroSandbox
 reconciliation or terminal attachment; those failure paths remain outstanding.
+
+The credential unit gate covers source validation, expiry scheduling, bounded
+refresh, atomic replacement, account binding, concurrent lock convergence,
+single-request behavior, redacted failures, live-disposition enforcement, and
+lease cancellation:
+
+```bash
+cargo test --bin fortlet auth::
+cargo test --bin fortlet runtime::tests::credential_rotation
+cargo test --bin fortlet session::tests::renewal_cancellation
+```
+
+The pinned stock-Codex compatibility fixture is separate because it requires a
+native Codex 0.147.0 executable. It sends placeholder-only authentication only
+to local fake model and refresh servers; it makes no provider or paid request:
+
+```bash
+FORTLET_CODEX_COMPAT_BINARY=/path/to/codex-0.147.0 \
+  cargo test --test codex_compatibility -- --ignored
+```
 
 ## Optional transparent shims
 
