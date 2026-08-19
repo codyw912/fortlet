@@ -1,10 +1,30 @@
 # GOAL: Prove one ordinary managed Codex work loop
 
-Status: active — operator-accepted 2026-08-19. PR #8 merged the FIP-0010
+Status: complete — operator-accepted and closed 2026-08-19. PR #8 merged the FIP-0010
 non-interactive correction to `main` at
 `53378399bfa581d5a7b3db8538b234dc3733bb26`; its tree matched the reviewed
 signed tip, the goal bookmark was removed locally and remotely, and the working
 copy began clean directly above merged `main`.
+
+## Outcome
+
+The credential-free guest preflight resolved `chatgpt.com` and completed TLS
+with HTTP 200. The sole managed Codex unit then streamed normally, made only
+the intended test-only edit, and exited cleanly without an Apps warning, but
+its `bash -lc` child could not resolve project-layer Cargo. No second prompt was
+sent. Experiments 0030 and 0031 attributed the failure to Debian login-profile
+PATH replacement, not credentials, networking, stdin, or executable modes.
+
+Fortlet now provides a read-only package-owned `BASH_ENV` hook from base layer
+`bookworm-2`, reserves the hook from project override, and restores its exact
+managed PATH without modifying host or persistent user startup files. A frozen
+package subsequently resolved project Cargo through `bash -lc` and passed the
+focused test. That live correction unit remains rejected as an experiment
+because a cold Tact Cargo cache made undeclared public crate downloads and the
+declared capsule-configuration inspection was omitted before cleanup. The
+positive mechanism observation is retained without retry; deterministic tests
+cover the correction. Every live phase ended with public absence and empty
+MicroSandbox inventory.
 
 Prove that the corrected packaged Fortlet path is suitable for ordinary daily
 work: establish guest DNS/TLS readiness without provider credentials, then run
