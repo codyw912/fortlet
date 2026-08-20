@@ -1,6 +1,6 @@
 # Experiment 0044: Managed startup phase attribution
 
-Status: declared
+Status: completed — terminal-failure
 Design: FIP-0001, FIP-0002
 
 ## Baseline / Control
@@ -92,8 +92,31 @@ same runtime state. No instrumented VM launch occurred during rehearsal.
 
 ## Results
 
-Pending.
+The first absent, running, and stopped commands returned Codex 0.147.0 with
+status zero and independent real durations of 0.83, 0.06, and 0.46 seconds,
+respectively. None emitted a startup-timing event. The sequence was terminated
+before its second running command or later cycles.
+
+Inspection of the dispatch assumption showed that `cargo test` had compiled
+the test harness containing the new code, while the selected
+`target/debug/fortlet` executable remained an older successfully built product
+binary. The preflight checked runtime compatibility and absent state but did
+not prove the opt-in event from the exact executable that would dispatch.
+
+Public stop and reset restored `absent`, and global inventory reported
+`no capsules`. No model request, credential output, AGD edit, ownership
+anomaly, or cleanup failure occurred.
 
 ## Terminal Closure
 
-Pending.
+1. Outcome: terminal-failure; the selected executable was stale and produced
+   no declared phase evidence.
+2. Root cause: the rehearsal proved the test binary but omitted an exact
+   product-binary opt-in probe; `cargo test` does not relink
+   `target/debug/fortlet`.
+3. Actual cost: 6 minutes, one absent capsule, three version commands, zero
+   model prompts, and zero external money versus the 30-minute ceiling.
+4. Next action: a successor must explicitly `cargo build --bin fortlet`, prove
+   the exact built executable emits the expected bounded events in a
+   credential-free failure fixture before VM dispatch, and only then repeat
+   phase attribution.
