@@ -1,4 +1,4 @@
-# Session Handoff — capsule launch latency locally complete
+# Session Handoff — capsule launch latency ready for operator merge
 
 Audience: a fresh agent session. `GOAL.md` is normative. Verify `main`, the
 Jujutsu stack, conformance, and the complete `docs/RUNBOOK.md` gate before
@@ -66,10 +66,12 @@ changes.
 
 ## Next action
 
-Shape the goal stack, sign its exact final tip, publish the authorized
-`capsule-launch-latency` bookmark and one draft PR targeting `main`, observe
-hosted Rust verification, and mark it ready on success. The operator remains
-the sole merge authority.
+PR #14 targets `main` from the authorized `capsule-launch-latency` bookmark.
+Its required hosted Rust verification passes. Verify its final signed tip and
+mark it ready, then wait for the operator to merge. After merge, fetch `main`,
+prove exact tree equality with the reviewed tip, and remove only the landed
+goal bookmark locally and remotely. The operator remains the sole merge
+authority.
 
 ## What not to do
 

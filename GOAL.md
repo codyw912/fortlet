@@ -1,6 +1,6 @@
 # GOAL: Make capsule launch latency suitable for daily use
 
-Status: active — locally complete; publication and hosted gate pending
+Status: active — ready; operator merge and landing verification pending
 
 ## Outcome
 
@@ -93,6 +93,8 @@ conformance, the curated package, and the shim-activation check. The two
 stock-Codex compatibility tests remain explicitly ignored because they require
 an external binary. Nix reports only the expected incompatible x86_64-linux
 omission warning.
+
+The required hosted Rust verification passes on the goal pull request.
 
 Experiments 0043 and 0045 establish running medians of 0.06 seconds through the
 landed package and 55 milliseconds under phase instrumentation. Instrumented
