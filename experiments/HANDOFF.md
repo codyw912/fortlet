@@ -1,75 +1,64 @@
-# Session Handoff — Codex daily work closure at terminal publication
+# Session Handoff — Workspace-backed Codex test execution complete
 
-Audience: a fresh agent session. `GOAL.md` is normative. Verify `main`, the
-Jujutsu stack, conformance, and the complete `docs/RUNBOOK.md` gate before
-relying on this summary. Read FIP-0001 through FIP-0011 in full before any
-implementation or experiment dispatch.
+Audience: a fresh agent session. `GOAL.md` is normative and complete pending
+operator merge. Verify `main`, the Jujutsu stack, conformance, and the complete
+`docs/RUNBOOK.md` gate before relying on this summary. Read every FIP named by
+a successor GOAL in full before implementation or experiment dispatch.
 
-## Verified baseline and publication
+## Baseline and publication
 
-Merged `main` is `bca9438b2bb97b8f79728627b687e8d1ccc943d3` (PR #10). Work is
-stacked above it on bookmark `codex-work-readiness` and draft PR #11. The
-operator remains the sole merge authority. The complete standard gate passed
-on aarch64-darwin before the successor dispatch: 88 unit tests and every
-enabled integration test, formatting, strict all-target/all-feature Clippy,
-conformance, and `nix flake check`; Nix emitted only its expected incompatible
-`x86_64-linux` omission warning.
+Merged `main` is `be43d5909b6a65e9ca6984859b85b6d27c2601dc` (PR #11), whose
+tree was proved byte-identical to reviewed signed tip
+`d8fa6c027d10f5622fd7e2eb6282b3a1bd8a424b`. This GOAL uses bookmark
+`codex-firewall-recovery` and PR #12; the historical bookmark name does not
+represent a current Fortlet limitation. The operator remains the sole merge
+authority.
 
-The immutable successor treatment is declaration revision
-`95fb7607e74dff0aaf4f7e69ee94d1d7661a146d` and package
-`/nix/store/68vqsxikz7a12sqyrd1518hkz9w9mxq3-fortlet-0.1.0`. The final
-documentation tree passed the same complete gate. Its publishable tip is
-signed, the bookmark is published, hosted `Rust verification` passed, and PR
-#11 is ready. Only operator review and squash merge remain.
+The complete standard gate passes on aarch64-darwin: all 88 unit tests and
+every enabled integration test, formatting, strict all-target/all-feature
+Clippy, conformance, and `nix flake check`. Nix emits only the expected
+incompatible `x86_64-linux` omission warning. Hosted Rust verification also
+passes. FIP-0001 and FIP-0002 remain partial with explicit gaps; FIP-0003
+through FIP-0011 remain conformant.
 
-## Product and retained change
+## Verified result
 
-Fortlet resolves safe project roots, supplies immutable project tools,
-optionally prepares layers, launches Codex and Tact explicitly or through
-package-owned shims, renews host-owned Codex credentials, suppresses only the
-unsupported Apps client, streams non-interactive output with explicit EOF and
-a bounded Codex inactivity ceiling, and exposes project lifecycle controls plus
-global owned-capsule inventory.
+The immutable treatment package is
+`/nix/store/is3sfw30rzr58w29q8rnsdcdidwxqgzn-fortlet-0.1.0`. Public cold
+`prepare codex` succeeded, and the immediate identical invocation verified the
+published project layer as a cache hit.
 
-Experiment 0034's sole model process authenticated, streamed, and added the
-correct retained regression test in `tests/pre_runtime_failures.rs`. Its exact
-guest Cargo command failed because this repository configured
-`CARGO_TARGET_DIR=/home/agent/.cargo/fortlet-target`, outside Codex's inner
-workspace-write roots. The smallest correction changes only the repository
-fixture to ignored, guest-distinct `target/fortlet-guest` and updates its
-deterministic assertion. The retained test and complete gate pass. FIP-0002's
-conformance evidence includes `tests/pre_runtime_failures.rs`.
+One packaged Codex 0.147.0 process ran from marker-free Herdr pane `wA:p9`. It
+authenticated, streamed without an Apps warning, reported
+`cargo_target=target/fortlet-guest`, and changed only
+`tests/pre_runtime_failures.rs`. The retained diff extracts two file-local
+fixture helpers and adds
+`codex_shim_invalid_project_environment_fails_before_credentials_or_runtime_artifacts`.
+The test exercises the compiled binary through a `codex` symlink, asserts the
+exact invalid normalized project-environment failure, and proves project,
+tool, and environment roots remain absent.
 
-## Terminal successor evidence
+Experiment 0037 independently created an ordinary owned Codex capsule with the
+same immutable package and no provider request. Inside that capsule, the exact
+focused Cargo command reported `target/fortlet-guest`, compiled the previously
+cold dependency set, passed 1/1, and exited zero. This controlled successor
+cleared the earlier environment-specific DNS observation. It is not an open
+product issue and should not direct successor work.
 
-Experiment 0035 froze the corrected package and passed a clean preflight in
-marker-free Herdr pane `wA:p9`: packaged Codex was absent, `fortlet list`
-reported `no capsules`, and raw MicroSandbox inventory was `[]`. Its exact sole
-launcher selected the normal new project-layer identity and printed the
-first-use preparation notice. After 3 minutes 21 seconds the provisioning
-recipe exited 100: apt could not resolve `deb.debian.org`, then could not obtain
-`libcap-ng-dev` or the pinned `libcap-ng0:arm64` package.
-
-Codex never launched. There was no provider request, target report, guest Cargo
-command, model output, or repository diff. The launcher returned status 1 and
-the pane returned to idle fish. Post-failure checks again proved a clean working
-copy, public Codex absence, `no capsules`, and raw inventory `[]`. Temporary
-launcher/prompt files were deleted; immutable layers and persistent harness
-state were not directly mutated.
-
-The GOAL allowed only the initial process and one successor after correction.
-Experiment 0035 is terminally rejected and no third process is authorized.
-Daily Codex readiness therefore remains unproven at automatic cold project
-provisioning, even though the demonstrated Cargo-target defect is corrected and
-all deterministic evidence is green.
+The exact host test and all 14 `pre_runtime_failures` tests pass. Public
+inventory identified exactly one owned capsule; packaged stop/reset returned
+`stopped` then `reset`, and final status was absent with `no capsules` and raw
+inventory `[]`. Immutable layers and persistent harness state remain.
 
 ## Next action
 
-Review ready PR #11 and leave squash merge to the operator. Do not dispatch
-Codex again, warm or replace the failed project layer to manufacture
-acceptance, mutate `main`, or merge.
+Update and sign the final branch tip, keep PR #12's framing focused on the
+workspace-backed guest test and retained regression coverage, require hosted
+Rust verification, and leave squash merge to the operator. Do not add product
+DNS/firewall work, retry a terminal experiment, dispatch another model process,
+mutate `main`, or merge.
 
-After the operator squash-merges, fetch `main`, prove exact reviewed-tree
-equality, and remove only this goal's local and remote bookmark. A later GOAL
-may investigate cold-provisioning network reliability or deliberately rerun
-daily-work evidence, but this GOAL cannot do either.
+After operator squash merge, fetch `main`, prove its tree equals the exact
+reviewed tip, and remove only this GOAL's local and remote bookmark. A successor
+GOAL can return to product-focused daily-use work rather than environment
+diagnosis.

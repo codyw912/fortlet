@@ -57,6 +57,22 @@ impl Fixture {
             .unwrap()
     }
 
+    fn run_codex_shim(&self) -> Output {
+        let shim = self._temporary.path().join("codex");
+        symlink(env!("CARGO_BIN_EXE_fortlet"), &shim).unwrap();
+
+        Command::new(shim)
+            .arg("--version")
+            .current_dir(&self.project)
+            .env_clear()
+            .env("HOME", &self.home)
+            .env("XDG_STATE_HOME", &self.state)
+            .env("XDG_DATA_HOME", &self.data)
+            .env("FORTLET_AUTH_FILE", &self.auth)
+            .output()
+            .unwrap()
+    }
+
     fn command(&self, harness: &str, project: &Path, auth: &Path) -> Command {
         let mut command = Command::new(env!("CARGO_BIN_EXE_fortlet"));
         command
@@ -82,6 +98,16 @@ impl Fixture {
 
     fn write_valid_auth(&self) {
         self.write_auth(VALID_FAKE_EXPIRATION);
+    }
+
+    fn write_invalid_project_environment(&self) {
+        fs::create_dir(self.project.join(".fortlet")).unwrap();
+        fs::write(
+            self.project.join(".fortlet/environment.json"),
+            r#"{"schema":1,"path":["../outside"],"environment":{}}"#,
+        )
+        .unwrap();
+        fs::write(self.project.join(".fortlet/environment.sh"), "exit 99\n").unwrap();
     }
 
     fn projects(&self) -> PathBuf {
@@ -201,19 +227,8 @@ fn missing_auth_fails_before_capsule_or_environment_artifacts() {
 #[test]
 fn codex_shim_missing_auth_fails_before_capsule_or_environment_artifacts() {
     let fixture = Fixture::new();
-    let shim = fixture._temporary.path().join("codex");
-    symlink(env!("CARGO_BIN_EXE_fortlet"), &shim).unwrap();
 
-    let output = Command::new(shim)
-        .arg("--version")
-        .current_dir(&fixture.project)
-        .env_clear()
-        .env("HOME", &fixture.home)
-        .env("XDG_STATE_HOME", &fixture.state)
-        .env("XDG_DATA_HOME", &fixture.data)
-        .env("FORTLET_AUTH_FILE", &fixture.auth)
-        .output()
-        .unwrap();
+    let output = fixture.run_codex_shim();
 
     assert_failure(
         output,
@@ -252,15 +267,27 @@ fn missing_refresh_token_fails_before_capsule_or_environment_artifacts() {
 #[test]
 fn invalid_project_environment_fails_before_credentials_or_runtime_artifacts() {
     let fixture = Fixture::new();
-    fs::create_dir(fixture.project.join(".fortlet")).unwrap();
-    fs::write(
-        fixture.project.join(".fortlet/environment.json"),
-        r#"{"schema":1,"path":["../outside"],"environment":{}}"#,
-    )
-    .unwrap();
-    fs::write(fixture.project.join(".fortlet/environment.sh"), "exit 99\n").unwrap();
+    fixture.write_invalid_project_environment();
 
     let output = fixture.run("codex", &fixture.project);
+
+    assert_failure(
+        output,
+        "project environment",
+        "fix or remove .fortlet/environment.json and retry",
+        "project environment PATH entry must be a normalized relative path",
+    );
+    assert!(!fixture.projects().exists());
+    assert!(!fixture.tools().exists());
+    assert!(!fixture.environments().exists());
+}
+
+#[test]
+fn codex_shim_invalid_project_environment_fails_before_credentials_or_runtime_artifacts() {
+    let fixture = Fixture::new();
+    fixture.write_invalid_project_environment();
+
+    let output = fixture.run_codex_shim();
 
     assert_failure(
         output,
