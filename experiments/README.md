@@ -65,3 +65,4 @@ scannable failure/win history of the project:
 - `0041-mise-direnv-prompt-composition.md` — rejected; a fresh fish with the exact generated mise and direnv hooks preserved every Nix path, falsifying a general prompt-order defect before any treatment or edit.
 - `0042-fresh-fish-agd-activation.md` — accepted; a fresh real fish preserved every Nix path, native and managed Codex returned 0.147.0, and public cleanup restored empty inventory; first managed startup took about nine seconds.
 - `0043-capsule-lifecycle-latency-screen.md` — rejected; absent and stopped launches overlapped around 0.4–0.5 seconds while all six running launches completed in 0.06 seconds, so the prior nine-second result did not reproduce and lifecycle state alone did not attribute it.
+- `0044-managed-startup-phase-attribution.md` — declared; uses opt-in bounded timings to attribute absent, stopped, and running launch cost before treatment.
