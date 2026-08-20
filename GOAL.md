@@ -1,85 +1,121 @@
-# GOAL: Validate workspace-backed Codex guest test execution
+# GOAL: Provide project-local Nix activation for Fortlet shims
 
-Status: complete — awaiting operator merge
+Status: active — locally complete; final revision publication and hosted gate
+pending
 
 ## Outcome
 
-Verify the corrected workspace-owned Cargo target in Fortlet's ordinary Codex
-capsule and retain one useful shim regression test produced through the
-packaged Codex path. Keep environmental transients out of the product surface
-unless they reproduce under a controlled successor check.
+Make Fortlet's optional `codex` and `tact` shims easy to activate for one
+development shell without changing global shell configuration. Provide a
+minimal named Nix shell for immediate use and a composable package output for
+projects that already use devenv or another Nix dev shell.
 
-This GOAL changes no product or architecture contract. FIP-0001 through
-FIP-0011 were read in full before dispatch. The work uses one
-`codex-firewall-recovery` bookmark and PR #12 under FIP-0005; the historical
-bookmark name does not describe a current product limitation.
+This is a packaging and activation refinement of accepted FIP-0001 and
+FIP-0002, published under FIP-0005. It does not change the capsule-session,
+credential, environment, harness, or lifecycle architecture and needs no new
+FIP.
 
 ## Deliverables
 
 1. Verify merged `main`, clean Jujutsu state, conformance, and the complete
-   `docs/RUNBOOK.md` gate through `nix develop`.
-2. Freeze and build one immutable aarch64-darwin package, prepare the project
-   environment through the public packaged command, and verify an immediate
-   immutable cache hit.
-3. Run one packaged Codex process from a marker-free outer shell. Require
-   authentication, visible streaming, exact
-   `CARGO_TARGET_DIR=target/fortlet-guest`, and only the declared integration
-   test edit.
-4. Independently accept the retained test through `nix develop` and verify the
-   exact focused Cargo command in an ordinary owned Codex capsule without a
-   model or provider request.
-5. Clean up only through packaged public stop/reset, require final absence and
-   empty inventories, run the complete local and hosted gates, and leave the
-   PR ready for the operator's squash merge.
+   `docs/RUNBOOK.md` gate through `nix develop` before implementation.
+2. Export an explicit shim-activation package whose `bin` entry resolves to
+   Fortlet's existing immutable package-owned shim directory.
+3. Add a minimal `devShells.agents` containing Fortlet and that activation
+   output. Keep `devShells.default` unchanged and avoid startup-file writes,
+   aliases, functions, `eval`, generated activation text, or reliance on an
+   interactive shell initializer.
+4. Prove deterministic discovery for both shims and recursion-safe
+   `fortlet native` resolution, including arguments and a native executable
+   later on `PATH`.
+5. Document bounded direct execution, explicit CLI use without shims, and
+   cached composition into an existing devenv project. Do not present repeated
+   local-path flake evaluation or a child interactive shell as the daily loop.
+   Predeclare bounded local smoke experiments before invoking a packaged shim.
+6. Run the complete local and hosted gates, publish one goal-scoped draft PR,
+   and leave merge authority with the operator.
+7. In a separately scoped, uncommitted AGD change, pin the exact published
+   Fortlet revision and add `fortlet` plus `shim-activation` to AGD's devenv.
+   Prove one cold activation and one cached re-entry before another live shim
+   unit.
 
 ## Definition of Done
 
-1. The immutable project layer prepares and verifies as a cache hit.
-2. Packaged Codex authenticates, streams, reports the corrected workspace
-   target, and changes only `tests/pre_runtime_failures.rs` as declared.
-3. The retained exact test passes independently on the host and inside the
-   ordinary Fortlet-owned capsule with exit zero.
-4. Public cleanup ends at Codex absence, `no capsules`, and raw inventory `[]`.
-5. Conformance remains honest, local and hosted verification pass, the final
-   tip is signed, and PR #12 is accurate and ready for operator merge.
-
-## Terminal outcome
-
-All deliverables passed. The frozen package prepared the immutable project
-environment and verified its cache hit. Packaged Codex 0.147.0 authenticated,
-streamed without an Apps warning, reported exact
-`CARGO_TARGET_DIR=target/fortlet-guest`, and produced only the intended valid
-test diff.
-
-Experiment 0037 then created the ordinary owned Codex capsule through the
-packaged `--version` path without provider traffic. The exact focused Cargo
-command reported the same target, compiled its dependencies, passed the test
-1/1, and exited zero. This controlled successor cleared the earlier
-environmental observation; it is not a current Fortlet product limitation.
-
-The exact host test, all 14 tests in its integration file, the complete local
-gate, and hosted Rust verification pass. Packaged public stop/reset restored
-absence, `no capsules`, and raw inventory `[]` while preserving immutable
-layers and persistent harness state.
+1. The named shell and its prebuilt outputs resolve `fortlet`, `codex`, and
+   `tact` without mutating user configuration or depending on fish startup
+   behavior.
+2. Plain `nix develop` does not include the activation output, and explicit
+   `fortlet run` remains fully usable without either shim.
+3. `fortlet native codex -- <arguments>` skips the activated shim path and
+   selects the first later native executable without recursion.
+4. A devenv project can opt in by adding the two Fortlet package outputs; no
+   Fortlet-specific shell hook is required.
+5. A terminal successor smoke begins and ends with no owned capsule, changes
+   no AGD product file, avoids repeated Nix evaluation, and records the exact
+   command resolution and native escape result from the operator's fish.
+6. Conformance and the complete `docs/RUNBOOK.md` verification set pass.
+7. AGD's direnv-owned environment resolves its project toolchain, `fortlet`,
+   `codex`, and `tact` without a per-command flake wrapper or prompt-time PATH
+   loss; unsupported Fortlet host systems retain AGD's existing environment.
 
 ## Excluded scope
 
-No product code, FIP, public contract, additional harness, Apps authorization,
-credential mechanism, network or firewall workaround, layer purge, workload
-lease, standalone installation, release, or unrelated work is in scope.
+No global Home Manager or shell configuration, AGD Rust product code, new
+harness, project guest environment, credential mechanism, runtime behavior,
+standalone installer, release, repository setting, AGD publication, or merge is
+in scope.
+
+## Experiment stop
+
+Experiments 0038 and 0039 both stopped before any native or managed harness
+launch. The first rejected repeated local-path Nix evaluation and contained a
+missing native separator. The second proved that AGD's direnv hook restores its
+owned environment at the next fish prompt and therefore removes a manual PATH
+prepend. Do not dispatch a third activation workaround under this scope.
+
+The operator then explicitly authorized the durable mechanism as a separate
+uncommitted AGD development-environment change. Experiment 0040 governs that
+work and must prove cached re-entry before another shim smoke.
+
+Experiment 0040's non-interactive agent phase passed: its cold activation took
+406.93 seconds, cached activation took 0.51 seconds, and native Codex returned
+0.147.0. The operator's exact interactive fish unit then failed without retry.
+After direnv successfully renewed and entered devenv, the next prompt selected
+host Cargo, omitted `fortlet`, and retained older shim paths; the native command
+therefore could not start. No managed shim or capsule ran. Experiment 0041 then
+used the exact Home Manager configuration in a new fish process and preserved
+all expected Nix paths across two prompt events without treatment. This
+falsifies a general hook-order defect and attributes the operator failure to
+stale long-lived shell state after the earlier manual PATH experiment. Do not
+add a compatibility mechanism; Experiment 0042 must test a genuinely fresh
+operator terminal once.
+
+Experiment 0042 passed. Two successive prompts preserved AGD's Nix Cargo,
+Fortlet, Codex, and Tact paths; native and managed Codex returned 0.147.0; and
+the one owned capsule moved from absent to running and back to absent through
+public status, list, stop, and reset. AGD retained exactly its three authorized
+environment-file changes. The absent-to-running managed version command took
+approximately nine seconds; running-capsule reattachment latency was not
+measured.
 
 ## Budget and authority
 
-The completed work used one immutable package, one cold prepare and cache-hit
-verification, one Codex model process and prompt, one credential-free Codex
-version process, one exact diagnostic Cargo command, one owned capsule at a
-time, zero retries, and zero external money.
-
-Acceptance authorized the `codex-firewall-recovery` bookmark and PR #12 only.
-The operator remains the sole merge authority. After merge, prove exact tree
-equality and remove only this GOAL's local and remote bookmark.
+The engineering ceiling is 90 minutes. The smoke may use one immutable package,
+one credential-free shim `--version` invocation, one owned capsule at a time,
+zero model prompts, zero retries, and zero external money. Acceptance
+authorizes one `project-local-shim-activation` bookmark and one PR targeting
+`main` under FIP-0005. It also authorizes local edits to AGD's `flake.nix`,
+`flake.lock`, and `devenv.nix` for Experiment 0040, but no AGD commit, branch,
+push, PR, or product-code change. The operator remains the sole merge authority.
 
 ## Verification
 
 Run the complete standard verification set from `docs/RUNBOOK.md` through
 `nix develop` before publication readiness.
+
+The final aarch64-darwin local gate passes: 88 unit tests and every enabled
+integration test, formatting, strict all-target/all-feature Clippy,
+conformance, the curated package, and the shim-activation Nix check. The two
+stock-Codex compatibility tests remain explicitly ignored because they require
+an external binary. Nix reports only the expected incompatible x86_64-linux
+omission warning.
