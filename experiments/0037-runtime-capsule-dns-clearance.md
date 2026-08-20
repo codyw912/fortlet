@@ -1,6 +1,6 @@
 # Experiment 0037: Runtime capsule DNS clearance
 
-Status: declared
+Status: accepted — exact guest test passed in the ordinary owned capsule
 Design: FIP-0001, FIP-0002, FIP-0003, FIP-0004, FIP-0005, FIP-0006,
 FIP-0007, FIP-0008, FIP-0009, FIP-0010, and FIP-0011
 Charter scope: `local-foundation/v1`
@@ -98,3 +98,45 @@ inspect, clean up publicly, and close terminally in that order.
 The exact focused test and the complete local and hosted gates already pass on
 the retained diff. The packaged project environment is an immutable verified
 cache hit. This declaration adds no product code and spends no provider call.
+
+## Results
+
+The complete pre-dispatch gate passed through `nix develop`: all 88 unit tests
+and every enabled integration test, formatting, strict all-target/all-feature
+Clippy, conformance, and `nix flake check`. Nix emitted only the expected
+incompatible `x86_64-linux` omission warning.
+
+Marker-free Herdr pane `wA:p9` reported all four forbidden markers absent.
+Packaged status was `codex<TAB>absent`, packaged inventory was `no capsules`,
+and raw MicroSandbox inventory was `[]`.
+
+The sole immutable packaged shim invocation returned exact
+`codex-cli 0.147.0` in three seconds without a model or provider request. It
+created exactly one owned running Codex capsule,
+`fortlet-501-codex-6652b8ca5f1b9273`, using image `node:24-bookworm`.
+
+The sole raw diagnostic ran the predeclared command inside that capsule. It
+printed exact `cargo_target=target/fortlet-guest`, successfully compiled the
+cold dependency set including `microsandbox-filesystem` 0.6.8, ran the focused
+test, reported one passed and zero failed, and exited zero after 68 seconds.
+There was no DNS, dependency-fetch, target, mount, or sandbox failure and no
+command retry or substitution.
+
+The repository remained clean. Packaged public stop returned `stopped`, reset
+returned `reset`, final status was `absent`, packaged inventory was
+`no capsules`, and raw inventory was `[]`. Immutable layers and persistent
+harness state were preserved. Temporary diagnostic scripts were deleted.
+
+## Terminal Closure
+
+Accepted. The exact retained test passes under the corrected Cargo target in
+the ordinary Fortlet-owned runtime capsule. The earlier DNS observation did
+not reproduce after the host firewall decision was settled and is classified
+as a cleared operator-environment transient, not a current product limitation.
+
+Actual cost stayed within the declared ceiling: one credential-free version
+process, one exact in-capsule Cargo command, one owned capsule, zero retries,
+zero model prompts, zero provider requests, and public cleanup. Keep the
+historical failed experiments intact, remove the transient from the PR's
+current product framing, and proceed with ordinary product-focused work after
+operator merge.

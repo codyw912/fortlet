@@ -263,3 +263,10 @@ test command, two successful host test commands, one owned capsule, and public
 cleanup. No retry or successor process is authorized. Retain the valid test,
 publish the terminal evidence, and stop this GOAL. A later mission may diagnose
 runtime DNS deterministically before spending another model request.
+
+Experiment 0037 subsequently ran the exact focused Cargo command successfully
+inside an ordinary owned Codex capsule using the same immutable package and
+target. That controlled successor classifies this DNS result as a cleared
+operator-environment transient rather than a current Fortlet product
+limitation. This experiment remains rejected under its declared single-unit
+criteria and is retained as historical evidence.
