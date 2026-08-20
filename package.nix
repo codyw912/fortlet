@@ -52,6 +52,7 @@ rustPlatform.buildRustPackage {
       ./AGENTS.md
       ./Cargo.lock
       ./Cargo.toml
+      ./flake.nix
       ./OVERVIEW.md
       ./README.md
       ./WORKFLOW.md

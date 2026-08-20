@@ -296,10 +296,46 @@ env PATH="$PWD/result/libexec/fortlet/shims:$PATH" codex --version
 env PATH="$PWD/result/libexec/fortlet/shims:$PATH" tact --version
 ```
 
+For a bounded command-local activation without writing shell configuration,
+execute the harness through the minimal named development shell:
+
+```bash
+nix develop .#agents -c codex
+nix develop .#agents -c tact
+nix develop .#agents -c fortlet native codex -- --version
+```
+
+The native separator is required because subsequent arguments belong to the
+host harness. Plain `nix develop` in Fortlet does not activate shims. Do not
+use repeated `nix develop path:/path/to/fortlet#agents -c ...` invocations as a
+daily loop: a local path flake is copied into the Nix store during each fresh
+evaluation. A project using devenv should instead add
+`packages.<system>.fortlet` and `packages.<system>.shim-activation` from a
+pinned Fortlet flake input to its `packages` list. The activation output's
+`bin` is a directory link to the existing package-owned shim directory, so
+native escape canonicalizes and skips the same shim identity. Direnv then
+applies the cached project environment to the existing fish after startup. If
+that shell previously underwent manual PATH experiments, validate in a fresh
+terminal rather than treating `direnv reload` as a reset for other shell
+managers' internal path state.
+
+Starting the first managed command from an absent capsule can take several
+seconds. Experiment 0042 observed approximately nine seconds for shimmed
+`codex --version` from absence on Apple silicon, then verified one running
+capsule and public cleanup. It did not measure attachment to that running
+capsule, so the observation is not a steady-state latency claim.
+
 Declarative users may prepend the same package path through Nix or Home
 Manager. Fortlet does not edit shell startup files, and omitting the shim path
 leaves the explicit CLI fully usable. `fortlet native <harness> -- <arguments>`
 is the deliberate host escape hatch; isolated launch failures never select it.
+
+The deterministic Nix check validates both shim discoveries and a
+recursion-safe native Codex selected later on `PATH`:
+
+```bash
+nix build .#checks.$(nix eval --impure --raw --expr builtins.currentSystem).shim-activation
+```
 
 Package install checks compare the bundled MicroSandbox runtime byte-for-byte
 with its fixed-output release archive. This preserves the macOS Hypervisor

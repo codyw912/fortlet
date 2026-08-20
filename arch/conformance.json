@@ -17,8 +17,10 @@
         ".github/pull_request_template.md",
         ".github/workflows/verify.yml",
         "AGENTS.md",
+        "README.md",
         "WORKFLOW.md",
         "docs/RUNBOOK.md",
+        "flake.nix",
         "package.nix",
         "src/auth.rs",
         "src/cli.rs",
@@ -33,6 +35,7 @@
       ],
       "tests": [
         ".github/workflows/verify.yml",
+        "flake.nix",
         "package.nix",
         "src/auth.rs",
         "src/cli.rs",
@@ -68,12 +71,16 @@
       "title": "Optional transparent harness shims",
       "status": "partial",
       "modules": [
+        "README.md",
+        "docs/RUNBOOK.md",
+        "flake.nix",
         "package.nix",
         "src/cli.rs",
         "src/native.rs",
         "src/session.rs"
       ],
       "tests": [
+        "flake.nix",
         "package.nix",
         "src/cli.rs",
         "src/native.rs",
@@ -81,6 +88,7 @@
         "tests/native.rs",
         "tests/pre_runtime_failures.rs",
         "experiments/0002-preserved-runtime-shim-smoke.md",
+        "experiments/0042-fresh-fish-agd-activation.md",
         "examples/pty_observer.rs",
         "experiments/0003-interactive-packaged-sessions.md",
         "experiments/0004-native-ui-signal-control.md",

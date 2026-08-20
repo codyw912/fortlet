@@ -44,6 +44,25 @@ cargo clippy --all-targets --all-features -- -D warnings
 cargo run -- doctor
 ```
 
+For a bounded opt-in command where `codex` or `tact` uses Fortlet, execute it
+through the named shell explicitly:
+
+```sh
+nix develop .#agents -c codex
+nix develop .#agents -c tact
+```
+
+The shell is minimal: it adds `fortlet` and the package-owned shim directory,
+but no project toolchain. Plain `nix develop` remains Fortlet's Rust development
+shell and does not activate the shims.
+
+Do not wrap every daily command in `nix develop path:/path/to/fortlet#agents`.
+An unlocked local path input is snapshotted into the Nix store on each fresh
+evaluation and is too slow for that loop. For daily project use, compose the
+two outputs into devenv as shown below so direnv evaluates once and reuses its
+cached environment. Explicit `fortlet run codex --` and
+`fortlet run tact --` remain available without shim activation.
+
 MicroSandbox must be usable on the execution host. Codex authentication is
 read from a file-backed host ChatGPT login; keyring-backed login, API keys, and
 other authentication modes are not yet supported. Fortlet renews a near-expiry
@@ -119,6 +138,37 @@ capsule across projects. Its repository uses an explicit host-side publication
 boundary; an automated publication command, private project overlays, explicit
 workload leases, and standalone distribution remain future work. Local
 execution comes first; remote execution requires its own architecture.
+
+Projects that already use devenv can opt in without a Fortlet shell hook. Add
+Fortlet as a pinned flake input (following the project's `nixpkgs` when
+appropriate), then include both outputs in `devenv.nix`:
+
+```nix
+# flake.nix
+fortlet = {
+  url = "github:codyw912/fortlet";
+  inputs.nixpkgs.follows = "nixpkgs";
+};
+
+# devenv.nix
+packages = [
+  inputs.fortlet.packages.${pkgs.system}.fortlet
+  inputs.fortlet.packages.${pkgs.system}.shim-activation
+];
+```
+
+The separate activation output contains no second launcher implementation: its
+`bin` resolves to the immutable shim directory in the Fortlet package. Remove
+that one output from the project environment to return `codex` and `tact` to
+their prior resolution. On a normal fresh project entry, direnv applies the
+cached environment after fish startup; manual PATH mutation in a long-lived
+shell can desynchronize shell-manager state and should be cleared with a fresh
+terminal before evaluating activation behavior.
+
+The first managed command for an absent project capsule must start that capsule
+and can take several seconds. Experiment 0042 observed approximately nine
+seconds for `codex --version` from absence on Apple silicon. That experiment did
+not measure attachment to an already-running capsule.
 
 See [OVERVIEW.md](OVERVIEW.md) for durable product scope and
 [GOAL.md](GOAL.md) for the current mission.
