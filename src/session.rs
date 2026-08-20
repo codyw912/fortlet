@@ -1,5 +1,7 @@
+use std::ffi::OsStr;
+use std::fmt;
 use std::path::PathBuf;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use anyhow::{anyhow, bail, Context, Result};
 
@@ -15,6 +17,7 @@ use crate::project_environment::ProjectEnvironment;
 use crate::runtime::{rotate_credentials, Capsule, MicroSandboxRuntime};
 
 const TERMINAL_CORRECTION: &str = "retry interactively from a supported terminal";
+const STARTUP_TIMINGS_ENV: &str = "FORTLET_STARTUP_TIMINGS";
 
 pub struct LaunchRequest {
     pub harness: String,
@@ -24,6 +27,7 @@ pub struct LaunchRequest {
 }
 
 pub async fn launch(request: LaunchRequest) -> Result<i32> {
+    let mut timings = StartupTimings::from_environment();
     let paths = stage(
         AppPaths::from_environment(),
         "project",
@@ -60,6 +64,7 @@ pub async fn launch(request: LaunchRequest) -> Result<i32> {
         "project environment",
         "fix or remove .fortlet/environment.json and retry",
     )?;
+    timings.record(StartupPhase::Resolve);
     let credential_store = if harness.name() == "codex" {
         let store = stage(
             CredentialStore::from_environment(&paths),
@@ -96,6 +101,7 @@ pub async fn launch(request: LaunchRequest) -> Result<i32> {
         "credentials",
         "move the host credential file outside every guest mount and retry",
     )?;
+    timings.record(StartupPhase::Credentials);
     let runtime = MicroSandboxRuntime::new(&paths);
     let capsule = stage(
         runtime.capsule(&project, harness, project_environment.as_ref()),
@@ -118,6 +124,7 @@ pub async fn launch(request: LaunchRequest) -> Result<i32> {
         "credentials",
         "move the host credential file outside every guest mount and retry",
     )?;
+    timings.record(StartupPhase::CapsuleState);
     let layers = stage(
         EnvironmentStore::new(&paths)
             .ensure(harness, project_environment.as_ref())
@@ -125,12 +132,14 @@ pub async fn launch(request: LaunchRequest) -> Result<i32> {
         "environment",
         "check network access or remove the reported incomplete layer and retry",
     )?;
+    timings.record(StartupPhase::Environment);
     let sandbox = stage(
         runtime.ensure(&capsule, &layers, &credentials).await,
         "capsule",
         "run `fortlet doctor` and follow its reported correction",
     )?;
-    if let Some(store) = credential_store {
+    timings.record(StartupPhase::Runtime);
+    let result = if let Some(store) = credential_store {
         attach_codex_with_lease(
             &runtime,
             &capsule,
@@ -145,6 +154,89 @@ pub async fn launch(request: LaunchRequest) -> Result<i32> {
             runtime.attach(&capsule, &sandbox, &request.arguments).await,
             "terminal",
             TERMINAL_CORRECTION,
+        )
+    };
+    timings.record(StartupPhase::Command);
+    result
+}
+
+#[derive(Clone, Copy)]
+enum StartupPhase {
+    Resolve,
+    Credentials,
+    CapsuleState,
+    Environment,
+    Runtime,
+    Command,
+}
+
+impl StartupPhase {
+    const fn as_str(self) -> &'static str {
+        match self {
+            Self::Resolve => "resolve",
+            Self::Credentials => "credentials",
+            Self::CapsuleState => "capsule-state",
+            Self::Environment => "environment",
+            Self::Runtime => "runtime",
+            Self::Command => "command",
+        }
+    }
+}
+
+struct StartupTimings {
+    enabled: bool,
+    started: Instant,
+    previous: Instant,
+}
+
+impl StartupTimings {
+    fn from_environment() -> Self {
+        let started = Instant::now();
+        Self {
+            enabled: startup_timings_enabled(std::env::var_os(STARTUP_TIMINGS_ENV).as_deref()),
+            started,
+            previous: started,
+        }
+    }
+
+    fn record(&mut self, phase: StartupPhase) {
+        if let Some(event) = self.record_at(phase, Instant::now()) {
+            eprintln!("{event}");
+        }
+    }
+
+    fn record_at(&mut self, phase: StartupPhase, now: Instant) -> Option<StartupTimingEvent> {
+        if !self.enabled {
+            return None;
+        }
+        let event = StartupTimingEvent {
+            phase,
+            delta: now.saturating_duration_since(self.previous),
+            total: now.saturating_duration_since(self.started),
+        };
+        self.previous = now;
+        Some(event)
+    }
+}
+
+fn startup_timings_enabled(value: Option<&OsStr>) -> bool {
+    value == Some(OsStr::new("1"))
+}
+
+struct StartupTimingEvent {
+    phase: StartupPhase,
+    delta: Duration,
+    total: Duration,
+}
+
+impl fmt::Display for StartupTimingEvent {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            formatter,
+            "fortlet: startup-timing phase={} delta_ms={} total_ms={}",
+            self.phase.as_str(),
+            self.delta.as_millis(),
+            self.total.as_millis()
         )
     }
 }
@@ -251,6 +343,54 @@ mod tests {
 
         assert!(message.starts_with("credentials stage failed; refresh the host login and retry"));
         assert!(message.ends_with("root cause"));
+    }
+
+    #[test]
+    fn startup_timings_require_an_exact_opt_in() {
+        assert!(startup_timings_enabled(Some(OsStr::new("1"))));
+        assert!(!startup_timings_enabled(None));
+        assert!(!startup_timings_enabled(Some(OsStr::new("true"))));
+        assert!(!startup_timings_enabled(Some(OsStr::new("0"))));
+    }
+
+    #[test]
+    fn startup_timing_output_contains_only_bounded_phase_and_durations() {
+        let started = Instant::now();
+        let mut timings = StartupTimings {
+            enabled: true,
+            started,
+            previous: started,
+        };
+
+        let first = timings
+            .record_at(StartupPhase::Resolve, started + Duration::from_millis(17))
+            .unwrap();
+        let second = timings
+            .record_at(StartupPhase::Runtime, started + Duration::from_millis(41))
+            .unwrap();
+
+        assert_eq!(
+            first.to_string(),
+            "fortlet: startup-timing phase=resolve delta_ms=17 total_ms=17"
+        );
+        assert_eq!(
+            second.to_string(),
+            "fortlet: startup-timing phase=runtime delta_ms=24 total_ms=41"
+        );
+    }
+
+    #[test]
+    fn disabled_startup_timings_emit_no_event() {
+        let started = Instant::now();
+        let mut timings = StartupTimings {
+            enabled: false,
+            started,
+            previous: started,
+        };
+
+        assert!(timings
+            .record_at(StartupPhase::Resolve, started + Duration::from_secs(1))
+            .is_none());
     }
 
     #[tokio::test]
