@@ -59,3 +59,4 @@ scannable failure/win history of the project:
 - `0035-workspace-cargo-codex-loop.md` — rejected; the sole successor stopped before Codex launch when automatic first-use provisioning lost guest DNS, leaving the corrected workspace Cargo target without provider-backed proof.
 - `0036-firewall-approved-codex-work-loop.md` — rejected; firewall-approved cold preparation and the corrected target passed, but the exact guest test could not resolve GitHub for MicroSandbox's build dependency.
 - `0037-runtime-capsule-dns-clearance.md` — accepted; the exact focused test passed under the corrected target in an ordinary owned capsule, clearing the earlier environment-specific DNS observation.
+- `0038-project-local-shim-activation.md` — planned; prove a child fish can activate immutable Fortlet shims inside AGD's existing devenv while preserving native escape and clean lifecycle state.

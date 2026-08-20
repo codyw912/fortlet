@@ -1,85 +1,69 @@
-# GOAL: Validate workspace-backed Codex guest test execution
+# GOAL: Provide project-local Nix activation for Fortlet shims
 
-Status: complete — awaiting operator merge
+Status: active
 
 ## Outcome
 
-Verify the corrected workspace-owned Cargo target in Fortlet's ordinary Codex
-capsule and retain one useful shim regression test produced through the
-packaged Codex path. Keep environmental transients out of the product surface
-unless they reproduce under a controlled successor check.
+Make Fortlet's optional `codex` and `tact` shims easy to activate for one
+development shell without changing global shell configuration. Provide a
+minimal named Nix shell for immediate use and a composable package output for
+projects that already use devenv or another Nix dev shell.
 
-This GOAL changes no product or architecture contract. FIP-0001 through
-FIP-0011 were read in full before dispatch. The work uses one
-`codex-firewall-recovery` bookmark and PR #12 under FIP-0005; the historical
-bookmark name does not describe a current product limitation.
+This is a packaging and activation refinement of accepted FIP-0001 and
+FIP-0002, published under FIP-0005. It does not change the capsule-session,
+credential, environment, harness, or lifecycle architecture and needs no new
+FIP.
 
 ## Deliverables
 
 1. Verify merged `main`, clean Jujutsu state, conformance, and the complete
-   `docs/RUNBOOK.md` gate through `nix develop`.
-2. Freeze and build one immutable aarch64-darwin package, prepare the project
-   environment through the public packaged command, and verify an immediate
-   immutable cache hit.
-3. Run one packaged Codex process from a marker-free outer shell. Require
-   authentication, visible streaming, exact
-   `CARGO_TARGET_DIR=target/fortlet-guest`, and only the declared integration
-   test edit.
-4. Independently accept the retained test through `nix develop` and verify the
-   exact focused Cargo command in an ordinary owned Codex capsule without a
-   model or provider request.
-5. Clean up only through packaged public stop/reset, require final absence and
-   empty inventories, run the complete local and hosted gates, and leave the
-   PR ready for the operator's squash merge.
+   `docs/RUNBOOK.md` gate through `nix develop` before implementation.
+2. Export an explicit shim-activation package whose `bin` entry resolves to
+   Fortlet's existing immutable package-owned shim directory.
+3. Add a minimal `devShells.agents` containing Fortlet and that activation
+   output. Keep `devShells.default` unchanged and avoid startup-file writes,
+   aliases, functions, `eval`, generated activation text, or reliance on an
+   interactive shell initializer.
+4. Prove deterministic discovery for both shims and recursion-safe
+   `fortlet native` resolution, including arguments and a native executable
+   later on `PATH`.
+5. Document fish entry, explicit CLI use without shims, exit behavior, and
+   composition into an existing devenv project. Predeclare one bounded local
+   smoke experiment for the AGD pilot before invoking a packaged shim.
+6. Run the complete local and hosted gates, publish one goal-scoped draft PR,
+   and leave merge authority with the operator.
 
 ## Definition of Done
 
-1. The immutable project layer prepares and verifies as a cache hit.
-2. Packaged Codex authenticates, streams, reports the corrected workspace
-   target, and changes only `tests/pre_runtime_failures.rs` as declared.
-3. The retained exact test passes independently on the host and inside the
-   ordinary Fortlet-owned capsule with exit zero.
-4. Public cleanup ends at Codex absence, `no capsules`, and raw inventory `[]`.
-5. Conformance remains honest, local and hosted verification pass, the final
-   tip is signed, and PR #12 is accurate and ready for operator merge.
-
-## Terminal outcome
-
-All deliverables passed. The frozen package prepared the immutable project
-environment and verified its cache hit. Packaged Codex 0.147.0 authenticated,
-streamed without an Apps warning, reported exact
-`CARGO_TARGET_DIR=target/fortlet-guest`, and produced only the intended valid
-test diff.
-
-Experiment 0037 then created the ordinary owned Codex capsule through the
-packaged `--version` path without provider traffic. The exact focused Cargo
-command reported the same target, compiled its dependencies, passed the test
-1/1, and exited zero. This controlled successor cleared the earlier
-environmental observation; it is not a current Fortlet product limitation.
-
-The exact host test, all 14 tests in its integration file, the complete local
-gate, and hosted Rust verification pass. Packaged public stop/reset restored
-absence, `no capsules`, and raw inventory `[]` while preserving immutable
-layers and persistent harness state.
+1. `nix develop .#agents -c fish` resolves `fortlet`, `codex`, and `tact` from
+   immutable Fortlet outputs without mutating user configuration.
+2. Plain `nix develop` does not include the activation output, and explicit
+   `fortlet run` remains fully usable without either shim.
+3. `fortlet native codex -- <arguments>` skips the activated shim path and
+   selects the first later native executable without recursion.
+4. A devenv project can opt in by adding the two Fortlet package outputs; no
+   Fortlet-specific shell hook is required.
+5. The bounded smoke begins and ends with no owned capsule, changes no AGD
+   product file, and records the exact fish-visible resolution and native
+   escape result.
+6. Conformance and the complete `docs/RUNBOOK.md` verification set pass.
 
 ## Excluded scope
 
-No product code, FIP, public contract, additional harness, Apps authorization,
-credential mechanism, network or firewall workaround, layer purge, workload
-lease, standalone installation, release, or unrelated work is in scope.
+No global Home Manager or shell configuration, AGD product change, new
+harness, project guest environment, credential mechanism, runtime behavior,
+standalone installer, release, repository setting, or merge is in scope.
 
 ## Budget and authority
 
-The completed work used one immutable package, one cold prepare and cache-hit
-verification, one Codex model process and prompt, one credential-free Codex
-version process, one exact diagnostic Cargo command, one owned capsule at a
-time, zero retries, and zero external money.
-
-Acceptance authorized the `codex-firewall-recovery` bookmark and PR #12 only.
-The operator remains the sole merge authority. After merge, prove exact tree
-equality and remove only this GOAL's local and remote bookmark.
+The engineering ceiling is 90 minutes. The smoke may use one immutable package,
+one credential-free shim `--version` invocation, one owned capsule at a time,
+zero model prompts, zero retries, and zero external money. Acceptance
+authorizes one `project-local-shim-activation` bookmark and one PR targeting
+`main` under FIP-0005. The operator remains the sole merge authority.
 
 ## Verification
 
 Run the complete standard verification set from `docs/RUNBOOK.md` through
 `nix develop` before publication readiness.
+
