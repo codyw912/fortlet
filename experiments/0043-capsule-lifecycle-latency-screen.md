@@ -1,6 +1,6 @@
 # Experiment 0043: Capsule lifecycle latency screen
 
-Status: declared
+Status: completed — rejected
 Design: FIP-0001, FIP-0002
 
 ## Baseline / Control
@@ -99,8 +99,36 @@ read-only invocations. No capsule or model request was created during rehearsal.
 
 ## Results
 
-Pending.
+All twelve packaged shim invocations returned `codex-cli 0.147.0` with status
+zero. `/usr/bin/time -p` recorded these end-to-end real durations in seconds:
+
+| Cycle | Absent | Running 1 | Stopped | Running 2 |
+| --- | ---: | ---: | ---: | ---: |
+| 1 | 0.71 | 0.06 | 0.48 | 0.06 |
+| 2 | 0.46 | 0.06 | 0.41 | 0.06 |
+| 3 | 0.44 | 0.06 | 0.40 | 0.06 |
+
+Absent ranged from 0.44 to 0.71 seconds with median 0.46. Stopped ranged
+from 0.40 to 0.48 seconds with median 0.41. All six running samples were 0.06
+seconds. The strict materialization rule failed because the fastest absent
+sample, 0.44 seconds, was faster than the slowest stopped sample, 0.48
+seconds. The running-capsule daily-use ceiling passed with substantial margin.
+
+Every cycle began and ended absent. Final public status reported `absent`,
+global inventory reported `no capsules`, and AGD retained exactly its three
+pre-existing modified environment files. No model request, prompt, credential
+output, file edit, unexpected output, or failed unit occurred.
 
 ## Terminal Closure
 
-Pending.
+1. Outcome: rejected; absent materialization did not dominate stopped restart,
+   while running attachment passed the daily-use screen at 0.06 seconds.
+2. Root cause: the prior approximately nine-second aggregate did not reproduce;
+   current absent and stopped costs overlap around 0.4–0.5 seconds, so lifecycle
+   state alone cannot attribute either the ordinary restart cost or the earlier
+   outlier.
+3. Actual cost: 11 minutes, three absent capsules, twelve version commands,
+   zero model prompts, and zero external money versus the 30-minute ceiling.
+4. Next action: add opt-in secret-safe phase timing before any performance
+   treatment, then run a separately declared successor against the same three
+   lifecycle states.
