@@ -319,11 +319,30 @@ that shell previously underwent manual PATH experiments, validate in a fresh
 terminal rather than treating `direnv reload` as a reset for other shell
 managers' internal path state.
 
-Starting the first managed command from an absent capsule can take several
-seconds. Experiment 0042 observed approximately nine seconds for shimmed
+Experiment 0042 observed approximately nine seconds for one shimmed
 `codex --version` from absence on Apple silicon, then verified one running
 capsule and public cleanup. It did not measure attachment to that running
-capsule, so the observation is not a steady-state latency claim.
+capsule, so the observation was not a steady-state latency claim. Experiments
+0043 and 0045 could not reproduce that duration: their six running launches
+had a 55-millisecond median, while instrumented absent and stopped medians were
+610 and 410 milliseconds.
+
+Set `FORTLET_STARTUP_TIMINGS=1` on one managed launch to diagnose an outlier
+without changing normal startup output:
+
+```bash
+env FORTLET_STARTUP_TIMINGS=1 codex --version
+env FORTLET_STARTUP_TIMINGS=1 fortlet run codex -- --version
+```
+
+The opt-in emits fixed `resolve`, `credentials`, `capsule-state`,
+`environment`, `runtime`, and `command` events to standard error. Each event
+contains only its phase, milliseconds since the previous phase, and total
+milliseconds since Fortlet launch; it never includes paths, environment
+values, credentials, user configuration, or harness output. `runtime` covers
+MicroSandbox lookup plus create, restart, or running reconciliation. `command`
+covers attachment through harness exit. These are Fortlet end-to-end phase
+boundaries, not MicroSandbox's narrower guest-kernel boot metric.
 
 Declarative users may prepend the same package path through Nix or Home
 Manager. Fortlet does not edit shell startup files, and omitting the shim path

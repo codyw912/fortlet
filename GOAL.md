@@ -1,6 +1,6 @@
 # GOAL: Make capsule launch latency suitable for daily use
 
-Status: active
+Status: active — locally complete; publication and hosted gate pending
 
 ## Outcome
 
@@ -86,5 +86,19 @@ authority.
 
 Run the complete standard verification set from `docs/RUNBOOK.md` through
 `nix develop` before publication readiness.
+
+The final aarch64-darwin local gate passes: 91 unit tests and every enabled
+integration test, formatting, strict all-target/all-feature Clippy,
+conformance, the curated package, and the shim-activation check. The two
+stock-Codex compatibility tests remain explicitly ignored because they require
+an external binary. Nix reports only the expected incompatible x86_64-linux
+omission warning.
+
+Experiments 0043 and 0045 establish running medians of 0.06 seconds through the
+landed package and 55 milliseconds under phase instrumentation. Instrumented
+absent and stopped medians are 610 and 410 milliseconds. Runtime
+reconciliation accounts for 76–87 percent of every absent and stopped total;
+the earlier approximately nine-second observation did not reproduce. No
+speculative performance treatment is justified.
 
 Then STOP. New harnesses and other product work belong to a successor GOAL.

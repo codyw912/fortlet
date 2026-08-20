@@ -1,4 +1,4 @@
-# Session Handoff — capsule launch latency active
+# Session Handoff — capsule launch latency locally complete
 
 Audience: a fresh agent session. `GOAL.md` is normative. Verify `main`, the
 Jujutsu stack, conformance, and the complete `docs/RUNBOOK.md` gate before
@@ -37,23 +37,45 @@ project provisioning are not credible explanations for most of nine seconds.
 
 ## Current mission
 
-Run Experiment 0043 exactly as declared. Its lifecycle comparison comes before
-instrumentation: absent, stopped, and running results can identify whether the
-cost belongs to one-time materialization, VM restart, or every attachment. Do
-not make a performance correction until this screen is terminal and attributed.
+The locally knowable mission is complete. Experiment 0043 rejected the strict
+materialization hypothesis but established packaged medians of 0.46 seconds
+absent, 0.41 seconds stopped, and 0.06 seconds running. Experiment 0044 stopped
+honestly when its selected development executable was stale. Experiment 0045
+accepted after exact-binary rehearsal: instrumented medians were 610
+milliseconds absent, 410 milliseconds stopped, and 55 milliseconds running.
 
-The absent path currently creates a managed 8 GiB ext4 writable upper, records
-MicroSandbox state, starts a detached VM and relay, mounts the project,
-persistent home, harness layer, and base layer, installs network-broker policy,
-then attaches Codex. A stopped capsule reuses its writable upper. A running
-capsule skips VM creation and restart but still performs credential rotation,
-touch, and attachment. These lifecycle differences are the first attribution
-instrument.
+Runtime reconciliation accounted for 76–87 percent of every absent and
+stopped total. Running reconciliation took 7–8 milliseconds, and attachment
+through Codex exit took 35–40 milliseconds. The approximately nine-second
+Experiment 0042 aggregate did not reproduce in 24 valid successor launches and
+is not a persistent daily-use result.
+
+Fortlet now exposes exact opt-in `FORTLET_STARTUP_TIMINGS=1` events for
+`resolve`, `credentials`, `capsule-state`, `environment`, `runtime`, and
+`command`. Normal startup remains silent. The event format is fixed and emits
+only delta and total milliseconds, never paths, environment values,
+credentials, configuration, or harness output. Do not enable unrestricted SDK
+tracing in its place.
+
+The final aarch64-darwin gate passes through `nix develop`: 91 unit tests and
+every enabled integration, formatting, strict Clippy, conformance, the curated
+package, and shim-activation check. Nix reports only the expected incompatible
+x86_64-linux omission. Every experiment ended with AGD Codex absent, global
+inventory empty, and AGD retaining exactly its three prior environment-file
+changes.
+
+## Next action
+
+Shape the goal stack, sign its exact final tip, publish the authorized
+`capsule-launch-latency` bookmark and one draft PR targeting `main`, observe
+hosted Rust verification, and mark it ready on success. The operator remains
+the sole merge authority.
 
 ## What not to do
 
-Do not treat the nine-second aggregate as guest boot time. Do not compare an
-Alpine provider benchmark directly with Fortlet's Node image and mounted,
-brokered capsule. Do not enable unrestricted SDK tracing around credentials,
-change root-disk persistence, switch runtimes, or reduce isolation before the
-dominant phase is measured. Do not send a model prompt during latency work.
+Do not treat the nine-second aggregate as guest boot time or as current product
+behavior. Do not optimize the measured sub-second lifecycle speculatively. Do
+not compare an Alpine provider benchmark directly with Fortlet's Node image and
+mounted, brokered capsule. Do not change root-disk persistence, switch
+runtimes, or reduce isolation without a successor proposal. Do not send a model
+prompt during latency work.
