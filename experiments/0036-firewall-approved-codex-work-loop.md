@@ -1,6 +1,6 @@
 # Experiment 0036: Firewall-approved Codex work loop
 
-Status: declared — no preparation or provider process dispatched
+Status: rejected — corrected target reached, but guest Cargo lost GitHub DNS
 Design: FIP-0001, FIP-0002, FIP-0003, FIP-0004, FIP-0005, FIP-0006,
 FIP-0007, FIP-0008, FIP-0009, FIP-0010, and FIP-0011
 Charter scope: `local-foundation/v1`
@@ -205,8 +205,61 @@ remained `[]`. The active agent shell reported `CODEX_THREAD_ID`,
 `CODEX_SANDBOX_NETWORK_DISABLED`, and `CODEX_CI` present, so it is not an
 eligible outer observation boundary and did not dispatch Codex. Operator-
 approved Herdr pane `wA:p9` was an idle fish shell at the project and reported
-all four forbidden markers absent. No model unit has been dispatched yet.
+all four forbidden markers absent before dispatch.
+
+Herdr dispatched the exact temporary fish launcher once from `wA:p9`. The sole
+packaged Codex 0.147.0 process used the OpenAI provider and workspace-write
+sandbox, authenticated, streamed inspection and edit progress, and emitted no
+Apps startup or authentication failure. Its terminal summary confirmed exact
+`cargo_target=target/fortlet-guest`.
+
+Codex changed only `tests/pre_runtime_failures.rs`: 46 insertions and 19
+deletions. It extracted file-local helpers for the temporary `codex` symlink
+and existing invalid environment fixture, preserved both existing tests, and
+added the exact requested shim regression with absence assertions for project,
+tool, and environment roots. Independent review accepted the unchanged diff.
+
+The exact guest Cargo command exited 101 before the test executed. The
+`microsandbox-filesystem` 0.6.8 build script attempted:
+
+```text
+https://github.com/superradcompany/microsandbox/releases/download/v0.6.8/agentd-aarch64
+```
+
+and failed with `failed to lookup address information: Temporary failure in
+name resolution`. Codex did not alter the target, retry, or run an alternate
+command. It summarized the failure and exited normally, so the packaged host
+process returned `codex_exit=0`; that normal model-process exit does not satisfy
+the declared requirement that the exact guest test pass.
+
+On the host, the exact focused test passed through `nix develop`: one passed,
+zero failed, 13 filtered. The complete affected integration file then passed
+all 14 tests, and formatting passed. These checks accept the retained test but
+do not replace the failed in-capsule command.
+
+On the terminal closure tree, the complete standard gate passed: all tests,
+formatting, strict Clippy, conformance, and `nix flake check`, with only the
+expected incompatible `x86_64-linux` omission warning.
+
+Packaged inventory and status identified exactly one owned running Codex
+capsule. Packaged public stop returned `stopped`, reset returned `reset`, and
+final status was `absent`; packaged list reported `no capsules` and raw
+MicroSandbox inventory was `[]`. The temporary prompt and launcher files were
+deleted. Immutable layers and persistent harness state were preserved.
 
 ## Terminal Closure
 
-Pending.
+Rejected. Firewall-approved cold preparation and immutable cache reuse passed,
+and the corrected workspace Cargo target reached Codex exactly as intended.
+The sole model unit nevertheless failed its required guest test because the
+runtime capsule temporarily could not resolve GitHub for a build dependency.
+The same prepared recipe had successfully downloaded Jujutsu from GitHub, so
+the observation does not establish a general package or firewall denial; it is
+a narrower runtime DNS failure whose attribution remains unresolved.
+
+Actual cost stayed within the declared 45-minute ceiling: one package, one cold
+prepare, one cache-hit prepare, one model process and prompt, one failed guest
+test command, two successful host test commands, one owned capsule, and public
+cleanup. No retry or successor process is authorized. Retain the valid test,
+publish the terminal evidence, and stop this GOAL. A later mission may diagnose
+runtime DNS deterministically before spending another model request.

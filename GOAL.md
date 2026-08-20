@@ -1,6 +1,6 @@
 # GOAL: Recover firewall-blocked Codex readiness evidence
 
-Status: active — operator accepted 2026-08-19
+Status: complete — terminal rejection; awaiting operator merge
 
 ## Outcome
 
@@ -93,6 +93,27 @@ code to accommodate it. Read FIP-0001 through FIP-0011 in full before dispatch.
    durable inputs.
 5. Conformance remains honest, local and hosted gates pass, and one PR is ready
    for operator squash merge.
+
+## Terminal outcome
+
+Firewall-approved cold preparation succeeded and an immediate public cache hit
+verified the immutable project layer. The sole packaged Codex process then
+authenticated, streamed, confirmed exact
+`CARGO_TARGET_DIR=target/fortlet-guest`, and produced only the intended valid
+test diff.
+
+The exact guest Cargo command still exited 101 before running the test because
+the runtime capsule could not resolve GitHub while
+`microsandbox-filesystem` downloaded its pinned `agentd-aarch64` build input.
+Codex made no retry or substitution. The exact focused host test and all 14
+tests in the affected integration file pass, but host evidence does not replace
+the failed required guest command. Public cleanup restored absence and empty
+inventories.
+
+No second model process is authorized. This GOAL therefore closes rejected:
+the prior firewall attribution is corrected and the workspace Cargo target is
+proven, while ordinary Codex readiness remains blocked by an unresolved
+runtime-capsule DNS failure.
 
 ## Excluded scope
 
