@@ -58,3 +58,4 @@ scannable failure/win history of the project:
 - `0034-post-path-codex-work-loop.md` — rejected; the shimmed model produced the correct test, but the exact guest Cargo command found its persistent target read-only inside Codex's workspace sandbox and the altered in-process retry never settled.
 - `0035-workspace-cargo-codex-loop.md` — rejected; the sole successor stopped before Codex launch when automatic first-use provisioning lost guest DNS, leaving the corrected workspace Cargo target without provider-backed proof.
 - `0036-firewall-approved-codex-work-loop.md` — rejected; firewall-approved cold preparation and the corrected target passed, but the exact guest test could not resolve GitHub for MicroSandbox's build dependency.
+- `0037-runtime-capsule-dns-clearance.md` — declared; recheck the exact focused test in an ordinary owned runtime capsule without a model or provider request.

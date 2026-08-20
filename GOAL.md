@@ -1,6 +1,6 @@
 # GOAL: Recover firewall-blocked Codex readiness evidence
 
-Status: complete — terminal rejection; awaiting operator merge
+Status: in progress — operator-authorized environmental attribution follow-up
 
 ## Outcome
 
@@ -115,6 +115,24 @@ the prior firewall attribution is corrected and the workspace Cargo target is
 proven, while ordinary Codex readiness remains blocked by an unresolved
 runtime-capsule DNS failure.
 
+## Operator-authorized attribution follow-up
+
+Before merge, the operator requested one bounded rerun to determine whether
+the runtime DNS observation was only a personal firewall/setup transient. This
+authorization supersedes the terminal stop only for Experiment 0037: one
+credential-free packaged Codex `--version` launch may create the ordinary
+owned capsule, and one raw diagnostic command may run the exact focused Cargo
+test inside that capsule. No model prompt or provider request is authorized.
+
+If the exact guest test passes, treat the DNS failure as a cleared host
+transient rather than an open Fortlet product limitation. Preserve Experiments
+0035 and 0036 as honest terminal records, but remove firewall recovery and
+unresolved DNS from the PR's current product framing. If DNS fails again, keep
+it as relevant project evidence and stop without retry. In either case, clean
+up through packaged public stop/reset, run the complete verification gate,
+update the terminal records and PR accurately, and return the PR to ready for
+operator merge.
+
 ## Excluded scope
 
 No product code, FIP, public contract, additional harness, Apps authorization,
@@ -128,6 +146,11 @@ Engineering ceiling: 45 minutes. External money is zero. Runtime activity is
 limited to one cold public prepare, one immediate cache-hit verification, one
 Codex model process and prompt, one owned capsule, and public cleanup. The
 operator may approve only the expected local MicroSandbox firewall request.
+
+The operator-authorized follow-up adds at most 20 minutes, one credential-free
+Codex `--version` process, one exact in-capsule focused Cargo command, and one
+owned capsule. It adds no provider request, model prompt, firewall mutation,
+network workaround, or retry.
 
 Acceptance of this GOAL authorizes the `codex-firewall-recovery` bookmark and
 one draft PR under FIP-0005. Stop for a preparation failure after the firewall
