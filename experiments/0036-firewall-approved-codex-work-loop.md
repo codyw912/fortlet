@@ -203,8 +203,9 @@ The post-prepare repository remained clean; packaged status remained
 `codex<TAB>absent`, packaged list remained `no capsules`, and raw inventory
 remained `[]`. The active agent shell reported `CODEX_THREAD_ID`,
 `CODEX_SANDBOX_NETWORK_DISABLED`, and `CODEX_CI` present, so it is not an
-eligible outer observation boundary and did not dispatch Codex. No model unit
-has been dispatched yet.
+eligible outer observation boundary and did not dispatch Codex. Operator-
+approved Herdr pane `wA:p9` was an idle fish shell at the project and reported
+all four forbidden markers absent. No model unit has been dispatched yet.
 
 ## Terminal Closure
 
