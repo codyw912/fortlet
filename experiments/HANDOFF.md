@@ -14,16 +14,18 @@ The complete `aarch64-darwin` runbook gate passed after implementation: 101
 unit tests and every enabled integration test, formatting, strict Clippy,
 conformance, Nix packaging, and shim activation were green.
 
-Do not start another provider rehearsal without operator direction. Experiment
-0046 failed before VM creation because a long isolated HOME exceeded the host
-Unix-socket limit. Experiment 0047 then failed before Fortlet dispatch because
-a relative clone destination landed outside its declared short root. The
-operator authorized one absolute-root successor, Experiment 0048. Its setup and
-plan passed, but an empty isolated `MSB_HOME` hid MicroSandbox's separately
-installed runtime binary before any guest or Nix command. Its one stopped
-provisioning capsule and exact root were removed; global inventory was
-unchanged. All three records are terminal, ran no model or remote mutation, and
-authorize no retry. A successor would need an exact trusted `MSB_PATH` control.
+Do not start another provider rehearsal without operator direction. Experiments
+0046 and 0047 stopped on a long MicroSandbox socket path and an escaped relative
+clone respectively. Experiment 0048's absolute setup and plan passed, but its
+isolated state hid the installed runtime. Experiment 0049 selected byte-pinned
+runtime and firmware, reached the guest, and exposed Fortlet's incorrect Debian
+tar validation path before Nix. That path was corrected at `95a87bec`, its
+focused test and the complete runbook gate passed, and the operator authorized
+the GOAL's one fresh successor. Experiment 0050's exact preflight passed, but
+its sole preparation attempt lost Docker Hub DNS while fetching the common base
+image. It created no capsule and never ran the corrected script or Nix. Every
+root was exactly removed, global inventory was unchanged, and the successor
+budget is now exhausted. All records are terminal and authorize no retry.
 
 ## Verified repository state
 
@@ -241,13 +243,14 @@ plane for the first experiment.
 
 1. Follow the repository startup order and confirm the verified baseline,
    implementation checkpoint, goal bookmark, and parked Claude bookmark.
-2. Obtain the operator's decision on whether to authorize a successor to
-   Experiment 0048 with one absolute short root and an exact trusted
-   `MSB_PATH`. Do not reuse any terminal checkout or unit.
-3. Diagnose any real provider failure without resuming or editing a terminal
-   experiment. Keep schema 1 conformant and the accepted FIP boundary fixed.
-4. Only after provider rehearsal and a repeated complete gate, predeclare the
-   exact Codex and Tact public work units before either model process.
+2. Report that the accepted GOAL cannot complete under its exhausted live-unit
+   budget: the provider has deterministic green evidence but no successful
+   live proof, and neither public model unit may now be dispatched.
+3. Do not retry or declare another provider/model unit unless the operator
+   explicitly replaces or amends the GOAL's authority. Keep schema 1 conformant
+   and the accepted FIP boundary fixed.
+4. If new authority is granted, predeclare a fresh exact unit and ensure network
+   access is available before dispatch; never reuse a terminal checkout.
 
 ## What not to do
 

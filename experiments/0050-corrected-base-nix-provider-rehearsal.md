@@ -1,6 +1,6 @@
 # Experiment 0050: corrected-base public Nix-provider rehearsal
 
-Status: declared
+Status: completed — rejected before provider preparation
 Design: FIP-0012
 
 ## Baseline / Control
@@ -89,8 +89,35 @@ controls through the exact failing instruction.
 
 ## Results
 
-Pending.
+Both runtime hashes, the absolute checkout, exact public parent, and three-file
+diff matched their declarations. Initial plan was redacted and unprepared
+without creating Fortlet state, data, or MicroSandbox roots.
+
+The sole first prepare stopped while MicroSandbox tried to fetch the common
+`node:24-bookworm` base image. DNS lookup for `index.docker.io` failed, so no
+base provisioning script, harness provisioning, or schema-2 Nix command ran.
+The corrected `/out/bin/tar` validation path was therefore not exercised by
+this live unit; its evidence remains the focused test and complete green
+runbook gate.
+
+Fortlet did not create a capsule: isolated raw inventory was `[]`. Inspection
+found only the failed-pull cache/database roots and empty Fortlet lock/tool
+parents. The exact temporary root was removed and proved absent. Global
+inventory retained only the unrelated pre-existing stopped Codex capsule. No
+model, credential read, managed project capsule, project-source edit,
+checkpoint, or remote mutation occurred.
 
 ## Terminal Closure
 
-Pending.
+1. Outcome: rejected because first-use base image resolution lost DNS before
+   any provider operation.
+2. Root cause: the execution environment could not resolve Docker Hub during
+   the one permitted preparation attempt. This neither confirms nor falsifies
+   the corrected common-base path or FIP-0012 provider implementation.
+3. Actual cost: zero capsules, zero Nix commands, zero model calls, and $0.
+   Elapsed engineering time was not instrumented, within the 45-minute cap.
+4. Cleanup: isolated inventory was empty, the exact temporary root was removed,
+   and global inventory was unchanged.
+5. Next action: none under this GOAL. Its demonstrated-defect successor budget
+   is exhausted; do not resume, retry, or declare another provider/model unit
+   without new operator direction.
