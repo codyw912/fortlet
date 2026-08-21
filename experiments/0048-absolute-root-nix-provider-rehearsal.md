@@ -1,6 +1,6 @@
 # Experiment 0048: absolute-root public Nix-provider rehearsal
 
-Status: declared
+Status: completed — rejected
 Design: FIP-0012
 
 ## Baseline / Control
@@ -90,8 +90,38 @@ relative checkout placement and long-root choreography.
 
 ## Results
 
-Pending.
+Absolute setup passed: the checkout landed at `/private/tmp/f48/r`, its parent
+was exactly `83f63799117108248750298720ed34dd55d5201a`, and its diff contained
+only the three declared setup files. Initial plan reported explicit project,
+target `aarch64-linux`, provider `nix-dev-shell`, selection `default`, and
+`unprepared` without creating state, data, or MicroSandbox roots.
+
+The first prepare emitted the common-base first-use message, populated the
+isolated MicroSandbox image cache, and created one stopped provisioning-capsule
+record. Capsule creation then failed because the SDK could not find its
+separately installed `msb` runtime binary beneath the empty isolated
+`MSB_HOME`; its correction was to rebuild or set `MSB_PATH`. The declaration
+did not include `MSB_PATH`, so the unit stopped without alteration or retry.
+No guest command or Nix provider operation ran.
+
+Inspection found exactly the stopped generated provisioning capsule in the
+isolated inventory and the unrelated pre-existing stopped Codex capsule only
+in global inventory. The generated provisioning capsule was removed by exact
+name; isolated inventory became `[]`; `/private/tmp/f48` was then removed and
+proved absent. Global inventory was unchanged. No model, credential read,
+managed project capsule, project-source edit, checkpoint, or remote mutation
+occurred.
 
 ## Terminal Closure
 
-Pending.
+1. Outcome: rejected; absolute setup and plan passed, but the sole prepare
+   stopped before a guest command or Nix provider operation.
+2. Root cause: isolating `MSB_HOME` also isolated MicroSandbox's installed
+   runtime-binary discovery. The provider needs a predeclared trusted
+   `MSB_PATH` when an empty isolated MicroSandbox home is used.
+3. Actual cost: one stopped common-base provisioning-capsule record and image
+   cache, both exactly cleaned up; zero Nix commands, zero model calls, and $0.
+   Elapsed engineering time was not instrumented, within the 45-minute cap.
+4. Next action: stop. This record authorized no retry or successor; any further
+   provider rehearsal requires new operator direction with an exact trusted
+   `MSB_PATH` control.

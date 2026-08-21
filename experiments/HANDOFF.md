@@ -17,11 +17,13 @@ conformance, Nix packaging, and shim activation were green.
 Do not start another provider rehearsal without operator direction. Experiment
 0046 failed before VM creation because a long isolated HOME exceeded the host
 Unix-socket limit. Experiment 0047 then failed before Fortlet dispatch because
-a relative clone destination landed outside its declared short root. Both were
-closed and exactly cleaned up; neither ran Nix, a model, or a remote mutation.
-The self-correction rule treats them as two failures in manual experiment-root
-choreography and requires an explicit decision before one mechanically verified
-absolute-root successor.
+a relative clone destination landed outside its declared short root. The
+operator authorized one absolute-root successor, Experiment 0048. Its setup and
+plan passed, but an empty isolated `MSB_HOME` hid MicroSandbox's separately
+installed runtime binary before any guest or Nix command. Its one stopped
+provisioning capsule and exact root were removed; global inventory was
+unchanged. All three records are terminal, ran no model or remote mutation, and
+authorize no retry. A successor would need an exact trusted `MSB_PATH` control.
 
 ## Verified repository state
 
@@ -239,9 +241,9 @@ plane for the first experiment.
 
 1. Follow the repository startup order and confirm the verified baseline,
    implementation checkpoint, goal bookmark, and parked Claude bookmark.
-2. Obtain the operator's decision on one successor to Experiments 0046 and
-   0047. If authorized, use one absolute short root and mechanically verify the
-   clone destination before declaring provider dispatch successful.
+2. Obtain the operator's decision on whether to authorize a successor to
+   Experiment 0048 with one absolute short root and an exact trusted
+   `MSB_PATH`. Do not reuse any terminal checkout or unit.
 3. Diagnose any real provider failure without resuming or editing a terminal
    experiment. Keep schema 1 conformant and the accepted FIP boundary fixed.
 4. Only after provider rehearsal and a repeated complete gate, predeclare the

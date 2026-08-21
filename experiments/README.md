@@ -69,4 +69,4 @@ scannable failure/win history of the project:
 - `0045-built-startup-phase-attribution.md` — accepted; runtime reconciliation dominated absent and stopped totals, while six running launches had a 55-millisecond median and the earlier nine-second observation did not reproduce.
 - `0046-public-nix-provider-rehearsal.md` — rejected; a long isolated HOME exceeded MicroSandbox's Unix-socket path limit before any Nix provider operation or VM creation.
 - `0047-short-root-nix-provider-rehearsal.md` — rejected before dispatch; a relative clone destination escaped the declared short root, so exact cleanup occurred before any Fortlet, VM, Nix, or model command.
-- `0048-absolute-root-nix-provider-rehearsal.md` — declared; the operator authorized one successor using only canonical absolute short paths and the unchanged public provider inputs.
+- `0048-absolute-root-nix-provider-rehearsal.md` — rejected; absolute setup and plan passed, but isolated MSB_HOME hid the installed runtime binary before any guest or Nix command; exact capsule and root cleanup completed.
