@@ -1,6 +1,6 @@
 # Experiment 0049: pinned-runtime public Nix-provider rehearsal
 
-Status: declared
+Status: completed — rejected with Fortlet defect
 Design: FIP-0012
 
 ## Baseline / Control
@@ -91,8 +91,32 @@ two byte-identified runtime selectors authorized by the operator.
 
 ## Results
 
-Pending.
+Both trusted runtime hashes, the absolute checkout, exact public parent, and
+three-file diff matched their declarations. Initial plan was redacted and
+unprepared without creating state, data, or MicroSandbox roots.
+
+The first prepare successfully found the copied runtime and firmware, created
+the common-base provisioning capsule, and executed its Fortlet-owned script.
+That script exited 127 while validating `/out/usr/bin/tar`: Debian's extracted
+`tar` package provides `/bin/tar`, so the newly added common-tool validation
+used the wrong layer-relative path. Schema-2 Nix preparation never began.
+
+Fortlet's bounded cleanup removed the provisioning capsule; isolated raw
+inventory was already `[]`. Inspection found only empty Fortlet tools and lock
+parents. The exact root was removed and proved absent; global inventory retained
+only the unrelated pre-existing stopped Codex capsule. No model, credential
+read, managed project capsule, project-source edit, checkpoint, or remote
+mutation occurred.
 
 ## Terminal Closure
 
-Pending.
+1. Outcome: rejected with a demonstrated Fortlet common-base defect before Nix
+   provider preparation.
+2. Root cause: `base_provision_script` validated Debian tar at
+   `/out/usr/bin/tar`, but the extracted package installs `/out/bin/tar`.
+3. Actual cost: one credential-free base provisioning capsule, automatically
+   removed; zero Nix commands, zero model calls, and $0. Elapsed engineering
+   time was not instrumented, within the 45-minute cap.
+4. Next action: correct the deterministic base path and test, rerun the complete
+   gate, then declare at most one fresh successor under the active GOAL's
+   demonstrated-defect allowance. Do not resume this unit or checkout.

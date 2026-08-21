@@ -70,4 +70,4 @@ scannable failure/win history of the project:
 - `0046-public-nix-provider-rehearsal.md` — rejected; a long isolated HOME exceeded MicroSandbox's Unix-socket path limit before any Nix provider operation or VM creation.
 - `0047-short-root-nix-provider-rehearsal.md` — rejected before dispatch; a relative clone destination escaped the declared short root, so exact cleanup occurred before any Fortlet, VM, Nix, or model command.
 - `0048-absolute-root-nix-provider-rehearsal.md` — rejected; absolute setup and plan passed, but isolated MSB_HOME hid the installed runtime binary before any guest or Nix command; exact capsule and root cleanup completed.
-- `0049-pinned-runtime-nix-provider-rehearsal.md` — declared; the authorized successor adds byte-verified runtime and firmware selectors to the proven absolute isolated-root controls.
+- `0049-pinned-runtime-nix-provider-rehearsal.md` — rejected with a Fortlet defect; the pinned runtime reached guest provisioning, where common-base validation used `/usr/bin/tar` instead of Debian's `/bin/tar`; cleanup completed before Nix.
