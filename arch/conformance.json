@@ -305,10 +305,37 @@
     {
       "proposal": "0012",
       "title": "Resolved provider-backed project environments",
-      "status": "unimplemented",
-      "modules": [],
-      "tests": [],
-      "gaps": []
+      "status": "partial",
+      "modules": [
+        "src/cli.rs",
+        "src/environment.rs",
+        "src/identity.rs",
+        "src/nix_provider.rs",
+        "src/paths.rs",
+        "src/preparation.rs",
+        "src/project_capability.rs",
+        "src/project_environment.rs",
+        "src/runtime.rs",
+        "src/session.rs"
+      ],
+      "tests": [
+        "src/cli.rs",
+        "src/environment.rs",
+        "src/identity.rs",
+        "src/nix_provider.rs",
+        "src/project_capability.rs",
+        "src/project_environment.rs",
+        "src/runtime.rs",
+        "src/session.rs",
+        "tests/plan.rs",
+        "tests/prepare.rs",
+        "tests/pre_runtime_failures.rs"
+      ],
+      "gaps": [
+        "A successful isolated live Nix-provider preparation and verified cache hit have not yet been recorded.",
+        "The required public Codex and Tact work units, unsigned checkpoints, exact diff inspection, and stop/start reuse evidence remain outstanding.",
+        "Native x86_64-linux provider and package verification is outstanding."
+      ]
     }
   ]
 }

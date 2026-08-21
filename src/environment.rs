@@ -13,10 +13,25 @@ use crate::project::Project;
 use crate::project_environment::{guest_platform, ProjectEnvironment, PublishedProjectEnvironment};
 
 pub const BASE_IMAGE: &str = "node:24-bookworm";
-const BASE_TOOLS_VERSION: &str = "bookworm-3";
+const BASE_TOOLS_VERSION: &str = "bookworm-4";
 const BUBBLEWRAP_VERSION: &str = "0.8.0-2+deb12u1";
 const HOLD_SCRIPT: &str = "trap 'exit 0' TERM INT; while :; do sleep 3600 & wait $!; done";
 pub const MANAGED_BASH_ENV: &str = "/opt/fortlet/base/etc/fortlet/bash-env";
+const CERTIFICATE_BUNDLE_FUNCTION: &str = r#"build_certificate_bundle() {
+  root="$1"
+  mkdir -p "$root/etc/ssl/certs"
+  bundle="$root/etc/ssl/certs/ca-certificates.crt"
+  : > "$bundle"
+  while IFS= read -r certificate || [ -n "$certificate" ]; do
+    case "$certificate" in
+      ''|'#'*|'!'*) continue ;;
+      /*|..|../*|*/../*|*/..) printf 'invalid CA certificate path: %s\n' "$certificate" >&2; return 1 ;;
+    esac
+    cat "$root/usr/share/ca-certificates/$certificate" >> "$bundle"
+    printf '\n' >> "$bundle"
+  done < "$root/etc/ca-certificates.conf"
+  test -s "$bundle"
+}"#;
 
 pub struct EnvironmentStore<'a> {
     paths: &'a AppPaths,
@@ -197,9 +212,12 @@ impl<'a> EnvironmentStore<'a> {
         cleanup_provisioning_capsule(&sandbox, &sandbox_name).await;
         let output = provision?;
         if !output.status().success {
-            let stderr = output.stderr().unwrap_or_default();
+            let diagnostic = sanitize_diagnostic(&output.stderr().unwrap_or_default());
+            if diagnostic.is_empty() {
+                bail!("environment provisioning exited {}", output.status().code);
+            }
             bail!(
-                "environment provisioning exited {}: {stderr}",
+                "environment provisioning exited {}: {diagnostic}",
                 output.status().code
             );
         }
@@ -230,21 +248,42 @@ impl<'a> EnvironmentStore<'a> {
 fn base_provision_script() -> String {
     format!(
         r#"set -eu
+{CERTIFICATE_BUNDLE_FUNCTION}
+step=temporary-directory
 temporary="$(mktemp -d)"
-trap 'rm -rf "$temporary"' EXIT
+cleanup() {{
+  status=$?
+  trap - EXIT
+  rm -rf "$temporary"
+  if [ "$status" -ne 0 ]; then
+    printf 'fortlet: base provisioning step failed: %s\n' "$step" >&2
+  fi
+  exit "$status"
+}}
+trap cleanup EXIT
 chmod 777 "$temporary"
 cd "$temporary"
+step=package-index
 apt-get update -qq
+step=package-download
 apt-get download "bubblewrap={BUBBLEWRAP_VERSION}" git ca-certificates curl tar xz-utils
+step=package-extraction
 for package in ./*.deb; do
   dpkg-deb -x "$package" /out
 done
+step=bubblewrap-validation
 /out/usr/bin/bwrap --version
+step=git-validation
 /out/usr/bin/git --version
+step=curl-validation
 /out/usr/bin/curl --version
+step=tar-validation
 /out/bin/tar --version
+step=xz-validation
 /out/usr/bin/xz --version
-test -f /out/etc/ssl/certs/ca-certificates.crt
+step=certificate-bundle
+build_certificate_bundle /out
+step=managed-shell-activation
 mkdir -p /out/etc/fortlet
 cat > /out/etc/fortlet/bash-env <<'FORTLET_BASH_ENV'
 case ":$PATH:" in
@@ -345,6 +384,7 @@ fn lock(path: &Path) -> Result<File> {
 mod tests {
     use super::*;
     use crate::project::{Project, ProjectIdentity};
+    use std::process::Command;
     use std::sync::mpsc;
     use std::time::Duration;
 
@@ -388,8 +428,11 @@ mod tests {
     fn base_layer_installs_the_managed_bash_environment() {
         let script = base_provision_script();
 
-        assert_eq!(BASE_TOOLS_VERSION, "bookworm-3");
+        assert_eq!(BASE_TOOLS_VERSION, "bookworm-4");
         for required in [
+            "printf 'fortlet: base provisioning step failed: %s\\n' \"$step\" >&2",
+            "step=certificate-bundle",
+            "build_certificate_bundle /out",
             "cat > /out/etc/fortlet/bash-env <<'FORTLET_BASH_ENV'",
             "*:/.msb/scripts:*) PATH=\"/.msb/scripts:$FORTLET_MANAGED_PATH\" ;;",
             "*) PATH=\"$FORTLET_MANAGED_PATH\" ;;",
@@ -398,6 +441,48 @@ mod tests {
         ] {
             assert!(script.contains(required), "{required}");
         }
+        assert!(!script.contains("test -f /out/etc/ssl/certs/ca-certificates.crt"));
+    }
+
+    #[test]
+    fn certificate_bundle_uses_enabled_entries_and_rejects_traversal() {
+        let root = tempfile::tempdir().unwrap();
+        let certificates = root.path().join("usr/share/ca-certificates/mozilla");
+        fs::create_dir_all(&certificates).unwrap();
+        fs::create_dir_all(root.path().join("etc")).unwrap();
+        fs::write(certificates.join("alpha.crt"), "alpha").unwrap();
+        fs::write(certificates.join("disabled.crt"), "disabled").unwrap();
+        fs::write(certificates.join("omega.crt"), "omega").unwrap();
+        fs::write(
+            root.path().join("etc/ca-certificates.conf"),
+            "# trusted certificates\nmozilla/alpha.crt\n!mozilla/disabled.crt\nmozilla/omega.crt\n",
+        )
+        .unwrap();
+
+        let script = format!("{CERTIFICATE_BUNDLE_FUNCTION}\nbuild_certificate_bundle \"$1\"\n");
+        let output = Command::new("/bin/sh")
+            .args(["-eu", "-c", &script, "fortlet-test"])
+            .arg(root.path())
+            .output()
+            .unwrap();
+        assert!(output.status.success(), "{:?}", output.stderr);
+        assert_eq!(
+            fs::read(root.path().join("etc/ssl/certs/ca-certificates.crt")).unwrap(),
+            b"alpha\nomega\n"
+        );
+
+        fs::write(
+            root.path().join("etc/ca-certificates.conf"),
+            "../outside.crt\n",
+        )
+        .unwrap();
+        let output = Command::new("/bin/sh")
+            .args(["-eu", "-c", &script, "fortlet-test"])
+            .arg(root.path())
+            .output()
+            .unwrap();
+        assert!(!output.status.success());
+        assert!(String::from_utf8_lossy(&output.stderr).contains("invalid CA certificate path"));
     }
 
     #[test]
