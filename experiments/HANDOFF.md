@@ -36,8 +36,14 @@ fresh provider-validation successor. Checkpoint `dd72b652` constructs the
 bundle from enabled trusted entries, rejects traversal, surfaces the failing
 base step, bumps the immutable layer identity, and updates FIP-0012 conformance
 to honest partial status. The complete 102-test runbook gate, strict Clippy,
-conformance, Nix package, and shim checks passed. Only separately declared
-Experiment 0052 may now run.
+conformance, Nix package, and shim checks passed. The separately declared
+Experiment 0052 then proved the diagnostic but rejected the CA fix:
+`certificate-bundle` failed because raw package extraction does not create
+`/etc/ca-certificates.conf`. Its synthetic fixture had supplied that file and
+therefore repeated the production assumption rather than falsifying it. The
+capsule and exact root were removed, global inventory was unchanged, and no
+Tact, Nix, or model command ran. The GOAL is blocked and all authorized
+provider successors are terminal.
 
 ## Verified repository state
 
@@ -255,12 +261,14 @@ plane for the first experiment.
 
 1. Follow the repository startup order and confirm the verified baseline,
    implementation checkpoint, goal bookmark, and parked Claude bookmark.
-2. Run only declared Experiment 0052 with new isolated state and network
-   approval from the outset. Never reuse a terminal checkout or state root.
-3. If 0052 fails, close it and stop; no correction or retry is authorized. Keep
-   schema 1 conformant and the accepted FIP boundary fixed.
-4. Only after 0052 succeeds may the exact Codex and Tact public work units be
-   predeclared under the GOAL's existing model-process authority.
+2. Stop. Experiment 0052 is terminal, the GOAL is blocked, and no further
+   correction, provider rehearsal, or model dispatch is authorized.
+3. Under new operator direction, replace the shared assumption that raw Debian
+   package extraction supplies maintainer-generated state. Rehearse the whole
+   base layer rather than another individual path. Keep schema 1 conformant and
+   the accepted FIP boundary fixed.
+4. A fresh provider unit must succeed before the exact Codex and Tact public
+   work units can be predeclared under separately amended authority.
 
 ## What not to do
 

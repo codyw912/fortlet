@@ -1,7 +1,8 @@
 # GOAL: Prove portable local project capability
 
-Status: active — accepted by the operator on 2026-08-21; FIP-0012 is Accepted
-and deterministic implementation is in progress
+Status: blocked — accepted by the operator on 2026-08-21; FIP-0012 is Accepted,
+but live validation exposed an unresolved common-base CA construction defect
+and the authorized correction/successor budget is exhausted
 
 ## Outcome
 
