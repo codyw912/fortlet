@@ -68,3 +68,4 @@ scannable failure/win history of the project:
 - `0044-managed-startup-phase-attribution.md` — terminal failure; the selected development executable was stale because the rehearsal built only its test harness, so three lifecycle commands produced no timing events before public cleanup.
 - `0045-built-startup-phase-attribution.md` — accepted; runtime reconciliation dominated absent and stopped totals, while six running launches had a 55-millisecond median and the earlier nine-second observation did not reproduce.
 - `0046-public-nix-provider-rehearsal.md` — rejected; a long isolated HOME exceeded MicroSandbox's Unix-socket path limit before any Nix provider operation or VM creation.
+- `0047-short-root-nix-provider-rehearsal.md` — declared; one fresh zero-model provider unit will use exact short isolated roots to clear Experiment 0046's pre-VM control failure.
