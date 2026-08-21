@@ -94,8 +94,12 @@ change the accepted provider contract.
 Deterministic schema parsing, activation filtering, redacted plan rendering,
 side-effect-free broad-root handling, provider identity, narrow identity
 configuration, stale-capsule detection, schema-1 compatibility, and strict
-Clippy passed at revision `062a68c69026`. The complete runbook gate is the final
-zero-cost rehearsal and will be recorded before dispatch.
+Clippy passed at revision `062a68c69026`. On 2026-08-21 the complete runbook
+gate passed on `aarch64-darwin`: 101 unit tests and every enabled integration
+test, formatting, strict all-target/all-feature Clippy, conformance, the Nix
+package, and shim activation were green. The two stock-Codex compatibility
+tests remained explicitly ignored because they require an external binary;
+Nix emitted only the expected incompatible x86_64-linux omission.
 
 ## Results
 
