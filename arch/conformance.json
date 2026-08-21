@@ -341,10 +341,36 @@
     {
       "proposal": "0013",
       "title": "Nix-built project runtime substrate",
-      "status": "unimplemented",
-      "modules": [],
-      "tests": [],
-      "gaps": []
+      "status": "partial",
+      "modules": [
+        ".fortlet/environment.json",
+        ".fortlet/environment.sh",
+        "README.md",
+        "docs/RUNBOOK.md",
+        "flake.nix",
+        "nix/runtime-artifacts.nix",
+        "package.nix",
+        "src/environment.rs",
+        "src/nix_provider.rs",
+        "src/paths.rs",
+        "src/preparation.rs",
+        "src/project_environment.rs",
+        "src/runtime.rs",
+        "src/runtime_artifacts.rs",
+        "src/session.rs"
+      ],
+      "tests": [
+        "src/project_environment.rs",
+        "src/runtime.rs",
+        "src/runtime_artifacts.rs",
+        "tests/prepare.rs",
+        "tests/pre_runtime_failures.rs"
+      ],
+      "gaps": [
+        "The declared credential-free control-and-candidate substrate campaign has not yet closed terminally.",
+        "A successful isolated live schema-2 preparation remains outstanding under a later authorization.",
+        "Native x86_64-linux artifact, package, and runtime verification remains outstanding."
+      ]
     }
   ]
 }

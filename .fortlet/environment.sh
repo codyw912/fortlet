@@ -1,6 +1,7 @@
 rust_version=1.97.1
 rust_date=2026-07-16
 jj_version=0.43.0
+zig_version=0.15.2
 
 case "$FORTLET_TARGET" in
   linux/aarch64)
@@ -9,6 +10,11 @@ case "$FORTLET_TARGET" in
     jj_target=aarch64-unknown-linux-musl
     jj_sha256=289197b6bec60b4e57d47260624b617716f737eb02cdfd9155791b2576aa5862
     debian_triplet=aarch64-linux-gnu
+    debian_arch=arm64
+    libcap_runtime_sha256=24e74ad29a37d2a3940b8977d11298a7afc77379ef414b561d79c64147d740e0
+    libcap_development_sha256=92ac2d723583ac9a34340f00c61adbf6a3ae613ec395541bc32d428f6c16c092
+    zig_target=aarch64-linux
+    zig_sha256=958ed7d1e00d0ea76590d27666efbf7a932281b3d7ba0c6b01b0ff26498f667f
     ;;
   linux/x86_64)
     rust_target=x86_64-unknown-linux-gnu
@@ -16,6 +22,11 @@ case "$FORTLET_TARGET" in
     jj_target=x86_64-unknown-linux-musl
     jj_sha256=59e5588583ac82b623239929368c65b90735931c0f26b5a16c1f04d5bb97643d
     debian_triplet=x86_64-linux-gnu
+    debian_arch=amd64
+    libcap_runtime_sha256=b4b54769c77e4a71c8b33aee4d600ba28a9994a1c6f60d55d4ebe7fc44882e07
+    libcap_development_sha256=50674ccc126009f8d640a9230db4600d6fe552b68077193f234ea892784db5d5
+    zig_target=x86_64-linux
+    zig_sha256=02aa270f183da276e5b5920b1dac44a63f1a49e55050ebde3aecc9eb82f93239
     ;;
   *)
     echo "unsupported Fortlet target: $FORTLET_TARGET" >&2
@@ -26,14 +37,34 @@ esac
 temporary="$(mktemp -d "$FORTLET_OUTPUT/.fortlet-work.XXXXXX")"
 trap 'rm -rf "$temporary"' EXIT
 
-(
-  cd "$temporary"
-  apt-get update -qq
-  apt-get download "libcap-ng0=0.8.3-1+b3" "libcap-ng-dev=0.8.3-1+b3"
-  for package in ./*.deb; do
-    dpkg-deb -x "$package" "$FORTLET_OUTPUT"
-  done
-)
+extract_debian_artifact() {
+  package=$1
+  sha256=$2
+  url="https://deb.debian.org/debian/pool/main/libc/libcap-ng/${package}_0.8.3-1+b3_${debian_arch}.deb"
+  archive="$temporary/$package.deb"
+  curl --proto '=https' --tlsv1.2 -LsSf -o "$archive" "$url"
+  printf '%s  %s\n' "$sha256" "$archive" | sha256sum -c -
+  bsdtar -xOf "$archive" data.tar.xz | tar -xJf - -C "$FORTLET_OUTPUT"
+}
+extract_debian_artifact libcap-ng0 "$libcap_runtime_sha256"
+extract_debian_artifact libcap-ng-dev "$libcap_development_sha256"
+
+zig_archive="zig-$zig_target-$zig_version.tar.xz"
+zig_url="https://ziglang.org/download/$zig_version/$zig_archive"
+curl --proto '=https' --tlsv1.2 -LsSf -o "$temporary/$zig_archive" "$zig_url"
+printf '%s  %s\n' "$zig_sha256" "$temporary/$zig_archive" | sha256sum -c -
+mkdir -p "$FORTLET_OUTPUT/zig"
+tar -xJf "$temporary/$zig_archive" -C "$FORTLET_OUTPUT/zig" --strip-components=1
+mkdir -p "$FORTLET_OUTPUT/bin"
+cat > "$FORTLET_OUTPUT/bin/cc" <<'EOF'
+#!/bin/sh
+exec /opt/fortlet/project/zig/zig cc "$@"
+EOF
+cat > "$FORTLET_OUTPUT/bin/c++" <<'EOF'
+#!/bin/sh
+exec /opt/fortlet/project/zig/zig c++ "$@"
+EOF
+chmod 755 "$FORTLET_OUTPUT/bin/cc" "$FORTLET_OUTPUT/bin/c++"
 
 make_layer_relative() {
   link=$1

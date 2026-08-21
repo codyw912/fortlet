@@ -1,6 +1,7 @@
 { lib
 , fetchurl
 , makeWrapper
+, runtimeArtifacts
 , rustPlatform
 , stdenv
 ,
@@ -61,6 +62,7 @@ rustPlatform.buildRustPackage {
       ./examples
       ./experiments
       ./governance/CHARTER.md
+      ./nix
       ./package.nix
       ./src
       ./tests
@@ -82,10 +84,13 @@ rustPlatform.buildRustPackage {
 
   postInstall = ''
     runtime="$out/libexec/fortlet/microsandbox"
+    artifacts="$out/libexec/fortlet/runtime-artifacts"
     shims="$out/libexec/fortlet/shims"
     mkdir -p "$runtime"
+    mkdir -p "$artifacts"
     mkdir -p "$shims"
     tar -xzf ${runtimeBundle} -C "$runtime"
+    cp -R ${runtimeArtifacts.bundle}/. "$artifacts/"
 
     for harness in codex tact; do
       ln -s "$out/bin/fortlet" "$shims/$harness"
@@ -94,6 +99,7 @@ rustPlatform.buildRustPackage {
     wrapProgram "$out/bin/fortlet" \
       --set MSB_PATH "$runtime/msb" \
       --set MSB_LIBKRUNFW_PATH "$runtime/${platform.libkrunfwFilename}" \
+      --set FORTLET_RUNTIME_ARTIFACTS "$artifacts" \
       --set FORTLET_SHIM_DIR "$shims"
   '';
 
@@ -101,6 +107,7 @@ rustPlatform.buildRustPackage {
   installCheckPhase = ''
     shims="$out/libexec/fortlet/shims"
     runtime="$out/libexec/fortlet/microsandbox"
+    artifacts="$out/libexec/fortlet/runtime-artifacts"
     test_home="$(mktemp -d)"
     runtime_check="$(mktemp -d)"
     trap 'rm -rf "$test_home" "$runtime_check"' EXIT
@@ -110,6 +117,11 @@ rustPlatform.buildRustPackage {
     cmp \
       "$runtime_check/${platform.libkrunfwFilename}" \
       "$runtime/${platform.libkrunfwFilename}"
+    test -s "$artifacts/runtime/image.oci.tar"
+    test -s "$artifacts/runtime/runtime.nar.gz"
+    test -s "$artifacts/runtime/manifest.json"
+    test -s "$artifacts/harnesses/codex/closure.nar.gz"
+    test -s "$artifacts/harnesses/tact/closure.nar.gz"
 
     env -i HOME="$test_home" PATH="$out/bin" \
       "$out/bin/fortlet" --help >/dev/null

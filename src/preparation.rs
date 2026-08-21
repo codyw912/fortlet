@@ -77,58 +77,9 @@ fn stage<T>(result: Result<T>, name: &str, action: &str) -> Result<T> {
 
 #[cfg(test)]
 mod tests {
-    use std::fs;
-
     use anyhow::anyhow;
 
     use super::*;
-    use crate::project::{Project, ProjectIdentity};
-
-    fn seed_marker(root: &std::path::Path, marker: &str) {
-        fs::create_dir_all(root).unwrap();
-        let (name, version) = if marker == ".fortlet-base.json" {
-            ("_base", "bookworm-5")
-        } else {
-            let name = root
-                .parent()
-                .unwrap()
-                .file_name()
-                .unwrap()
-                .to_str()
-                .unwrap();
-            let version = root.file_name().unwrap().to_str().unwrap();
-            (name, version)
-        };
-        fs::write(
-            root.join(marker),
-            serde_json::to_vec(&serde_json::json!({
-                "name": name,
-                "version": version,
-                "image": crate::environment::BASE_IMAGE,
-            }))
-            .unwrap(),
-        )
-        .unwrap();
-    }
-
-    fn configured_environment(root: &std::path::Path) -> ProjectEnvironment {
-        fs::create_dir(root.join(".fortlet")).unwrap();
-        fs::write(
-            root.join(".fortlet/environment.json"),
-            r#"{"schema":1,"path":["bin"],"environment":{"RUST_BACKTRACE":"1"}}"#,
-        )
-        .unwrap();
-        fs::write(root.join(".fortlet/environment.sh"), "mkdir -p /out/bin\n").unwrap();
-        let root = root.canonicalize().unwrap();
-        let project = Project {
-            identity: ProjectIdentity::from_local_root(&root),
-            root: root.clone(),
-            cwd: root,
-            kind: "test",
-            scratch: false,
-        };
-        ProjectEnvironment::discover(&project).unwrap().unwrap()
-    }
 
     #[test]
     fn staged_errors_name_the_stage_and_one_action() {
@@ -143,65 +94,5 @@ mod tests {
             format!("{error:#}"),
             "project-environment stage failed; fix the project environment and retry: root cause"
         );
-    }
-
-    #[tokio::test]
-    async fn configured_cache_hit_verifies_content_for_both_harnesses() {
-        let temporary = tempfile::tempdir().unwrap();
-        let paths = AppPaths {
-            state: temporary.path().join("state"),
-            data: temporary.path().join("data"),
-        };
-        let project_root = temporary.path().join("project");
-        fs::create_dir(&project_root).unwrap();
-        let environment = configured_environment(&project_root);
-        let published = paths.environments().join(environment.identity());
-        fs::create_dir_all(published.join("bin")).unwrap();
-        fs::write(published.join("bin/tool"), "verified").unwrap();
-        environment.validate_and_mark(&published).unwrap();
-        let marker_before = fs::read(published.join(".fortlet-project.json")).unwrap();
-
-        seed_marker(
-            &paths.tools().join("_base/bookworm-5"),
-            ".fortlet-base.json",
-        );
-        let project = Project {
-            identity: ProjectIdentity::from_local_root(&project_root),
-            root: project_root.clone(),
-            cwd: project_root.clone(),
-            kind: "test",
-            scratch: false,
-        };
-        for (name, version) in [("codex", "0.147.0"), ("tact", "0.3.7")] {
-            seed_marker(
-                &paths.tools().join(name).join(version),
-                ".fortlet-tool.json",
-            );
-            ensure_layers(
-                &paths,
-                harness::find(name).unwrap(),
-                &project,
-                Some(&environment),
-            )
-            .await
-            .unwrap();
-        }
-
-        assert_eq!(
-            fs::read(published.join(".fortlet-project.json")).unwrap(),
-            marker_before
-        );
-        assert!(!paths.state.join("projects").exists());
-
-        fs::write(published.join("bin/tool"), "corrupted").unwrap();
-        let error = ensure_layers(
-            &paths,
-            harness::find("codex").unwrap(),
-            &project,
-            Some(&environment),
-        )
-        .await
-        .unwrap_err();
-        assert!(format!("{error:#}").contains("content digest"));
     }
 }

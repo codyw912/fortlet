@@ -7,14 +7,14 @@ use std::time::Duration;
 
 use anyhow::{bail, Context, Result};
 use fs2::FileExt;
-use microsandbox::sandbox::SandboxStatus;
+use microsandbox::sandbox::{PullPolicy, SandboxStatus};
 use microsandbox::{
     ExecEvent, ExecHandle, MicrosandboxError, ModificationDisposition, PlannedChange, Sandbox,
     SecretSource,
 };
 
 use crate::auth::{Credentials, ACCESS_TOKEN_ENV, ACCOUNT_ID_ENV};
-use crate::environment::{EnvironmentLayers, BASE_IMAGE, MANAGED_BASH_ENV};
+use crate::environment::EnvironmentLayers;
 use crate::harness::Harness;
 use crate::identity::{
     IdentityProjection, GIT_CONFIG_GLOBAL, GIT_CONFIG_NOSYSTEM, GUEST_IDENTITY_ROOT, JJ_CONFIG,
@@ -28,7 +28,6 @@ use crate::project_environment::{
 const SCHEMA_VERSION: &str = "1";
 const DEFAULT_IDLE_TIMEOUT_SECS: u64 = 4 * 60 * 60;
 const EXEC_KILL_CLEANUP_TIMEOUT: Duration = Duration::from_secs(5);
-const HOLD_SCRIPT: &str = "trap 'exit 0' TERM INT; while :; do sleep 3600 & wait $!; done";
 const MANAGED_PATH_ENV: &str = "FORTLET_MANAGED_PATH";
 const SECRET_HOSTS: &[&str] = &["chatgpt.com", "*.chatgpt.com", "openai.com", "*.openai.com"];
 pub struct Capsule<'a> {
@@ -69,6 +68,7 @@ impl CapsuleDescriptor {
         harness: &dyn Harness,
         environment: Option<&PublishedProjectEnvironment>,
         identity: Option<&IdentityProjection>,
+        runtime: Option<&crate::runtime_artifacts::PreparedRuntime>,
     ) -> Self {
         let mut descriptor = Self::new(project, harness);
         descriptor.labels.insert(
@@ -83,6 +83,20 @@ impl CapsuleDescriptor {
             identity
                 .map(|projection| projection.identity.as_str())
                 .unwrap_or("none")
+                .to_owned(),
+        );
+        descriptor.labels.insert(
+            label("runtime"),
+            runtime
+                .map(|runtime| runtime.runtime_identity.as_str())
+                .unwrap_or("legacy")
+                .to_owned(),
+        );
+        descriptor.labels.insert(
+            label("harness-closure"),
+            runtime
+                .map(|runtime| runtime.harness_identity.as_str())
+                .unwrap_or("legacy")
                 .to_owned(),
         );
         descriptor
@@ -173,9 +187,29 @@ impl CapsuleDescriptor {
             .get(&label("identity"))
             .map(String::as_str)
             .unwrap_or("none");
+        let stored_runtime = labels
+            .get(&label("runtime"))
+            .map(String::as_str)
+            .unwrap_or("legacy");
+        let expected_runtime = self
+            .labels
+            .get(&label("runtime"))
+            .map(String::as_str)
+            .unwrap_or("legacy");
+        let stored_harness_closure = labels
+            .get(&label("harness-closure"))
+            .map(String::as_str)
+            .unwrap_or("legacy");
+        let expected_harness_closure = self
+            .labels
+            .get(&label("harness-closure"))
+            .map(String::as_str)
+            .unwrap_or("legacy");
         if labels.get(&label("version")) != self.labels.get(&label("version"))
             || stored_environment != expected_environment
             || stored_identity != expected_identity
+            || stored_runtime != expected_runtime
+            || stored_harness_closure != expected_harness_closure
         {
             bail!(
                 "capsule has stale configuration; run `fortlet stop {}` followed by `fortlet reset {}` and retry",
@@ -206,6 +240,7 @@ impl<'a> MicroSandboxRuntime<'a> {
         harness: &'b dyn Harness,
         environment: Option<&PublishedProjectEnvironment>,
         identity: Option<&'b IdentityProjection>,
+        layers: &EnvironmentLayers,
     ) -> Result<Capsule<'b>> {
         let state = self
             .paths
@@ -217,7 +252,13 @@ impl<'a> MicroSandboxRuntime<'a> {
             .with_context(|| format!("cannot create harness state {}", state.display()))?;
         let state = state.canonicalize()?;
         Ok(Capsule {
-            descriptor: CapsuleDescriptor::for_launch(project, harness, environment, identity),
+            descriptor: CapsuleDescriptor::for_launch(
+                project,
+                harness,
+                environment,
+                identity,
+                Some(&layers.runtime),
+            ),
             state,
             project,
             harness,
@@ -262,12 +303,13 @@ impl<'a> MicroSandboxRuntime<'a> {
         &self,
         capsule: &Capsule<'_>,
         sandbox: &Sandbox,
+        layers: &EnvironmentLayers,
         requested_arguments: &[String],
     ) -> Result<i32> {
         let arguments = effective_launch_arguments(capsule.harness, requested_arguments);
         if !std::io::stdin().is_terminal() || !std::io::stdout().is_terminal() {
             let mut session = sandbox
-                .exec_stream_with(tool_executable(capsule), |options| {
+                .exec_stream_with(tool_executable(layers), |options| {
                     options
                         .args(arguments.iter().cloned())
                         .cwd(capsule.project.cwd.display().to_string())
@@ -288,7 +330,7 @@ impl<'a> MicroSandboxRuntime<'a> {
 
         let terminal = terminal_environment();
         sandbox
-            .attach_with(tool_executable(capsule), |options| {
+            .attach_with(tool_executable(layers), |options| {
                 options
                     .args(arguments.iter().cloned())
                     .cwd(capsule.project.cwd.display().to_string())
@@ -479,8 +521,10 @@ fn validate_live_rotation(changes: &[PlannedChange]) -> Result<()> {
 async fn create_capsule(capsule: &Capsule<'_>, layers: &EnvironmentLayers) -> Result<Sandbox> {
     let guest_home = "/home/agent";
     let project_path = capsule.project.root.display().to_string();
+    let (passwd, group) = guest_accounts(capsule, layers)?;
     let mut builder = Sandbox::builder(&capsule.descriptor.name)
-        .image(BASE_IMAGE)
+        .image(layers.runtime.image_reference.clone())
+        .pull_policy(PullPolicy::Never)
         .cpus(4)
         .memory(8192)
         .root_disk(8192)
@@ -490,21 +534,21 @@ async fn create_capsule(capsule: &Capsule<'_>, layers: &EnvironmentLayers) -> Re
         .workdir(capsule.project.cwd.display().to_string())
         .volume(&project_path, |mount| mount.bind(&capsule.project.root))
         .volume(guest_home, |mount| mount.bind(&capsule.state))
-        .volume(format!("/opt/{PRODUCT}/tool"), |mount| {
-            mount.bind(&layers.harness).readonly()
-        })
-        .volume(format!("/opt/{PRODUCT}/base"), |mount| {
-            mount.bind(&layers.base).readonly()
+        .volume("/etc/passwd", |mount| mount.bind(&passwd).readonly())
+        .volume("/etc/group", |mount| mount.bind(&group).readonly())
+        .volume("/nix", |mount| {
+            mount.named(layers.runtime.store_volume.clone()).readonly()
         })
         .env("HOME", guest_home)
-        .script("hold", HOLD_SCRIPT)
-        .entrypoint(["hold"])
+        .entrypoint([layers.runtime.hold.clone()])
         .labels(capsule.descriptor.labels());
 
     if let Some(project) = &layers.project {
-        builder = builder.volume(&project.guest_root, |mount| {
-            mount.bind(&project.root).readonly()
-        });
+        if project.guest_root != "/nix" {
+            builder = builder.volume(&project.guest_root, |mount| {
+                mount.bind(&project.root).readonly()
+            });
+        }
     }
     if let Some(identity) = capsule.identity {
         builder = builder.volume(GUEST_IDENTITY_ROOT, |mount| {
@@ -540,6 +584,52 @@ async fn create_capsule(capsule: &Capsule<'_>, layers: &EnvironmentLayers) -> Re
         .with_context(|| format!("cannot create capsule {}", capsule.descriptor.name))
 }
 
+fn guest_accounts(capsule: &Capsule<'_>, layers: &EnvironmentLayers) -> Result<(PathBuf, PathBuf)> {
+    let parent = capsule
+        .state
+        .parent()
+        .context("capsule state has no parent")?;
+    let root = parent.join(format!(".{}-accounts", capsule.harness.name()));
+    match fs::symlink_metadata(&root) {
+        Ok(metadata) if metadata.is_dir() && !metadata.file_type().is_symlink() => {}
+        Ok(_) => bail!("capsule account projection is not a real directory"),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => fs::create_dir(&root)?,
+        Err(error) => return Err(error.into()),
+    }
+    let uid = effective_uid();
+    let gid = effective_gid();
+    let passwd = root.join("passwd");
+    let group = root.join("group");
+    write_account_file(
+        &passwd,
+        format!(
+            "root:x:0:0:root:/root:/bin/sh\nfortlet-agent:x:{uid}:{gid}:Fortlet agent:/home/agent:{}\n",
+            layers.runtime.shell
+        )
+        .as_bytes(),
+    )?;
+    write_account_file(
+        &group,
+        format!("root:x:0:\nfortlet-agent:x:{gid}:\n").as_bytes(),
+    )?;
+    Ok((passwd, group))
+}
+
+fn write_account_file(path: &Path, contents: &[u8]) -> Result<()> {
+    match fs::symlink_metadata(path) {
+        Ok(metadata) if metadata.is_file() && !metadata.file_type().is_symlink() => {}
+        Ok(_) => bail!("capsule account projection is not a regular file"),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+        Err(error) => return Err(error.into()),
+    }
+    let parent = path.parent().context("account projection has no parent")?;
+    let mut temporary = tempfile::NamedTempFile::new_in(parent)?;
+    temporary.as_file_mut().write_all(contents)?;
+    temporary.as_file_mut().sync_all()?;
+    temporary.persist(path)?;
+    Ok(())
+}
+
 fn capsule_environment(capsule: &Capsule<'_>, layers: &EnvironmentLayers) -> Vec<(String, String)> {
     let mut environment = layers
         .project
@@ -570,6 +660,19 @@ fn capsule_environment(capsule: &Capsule<'_>, layers: &EnvironmentLayers) -> Vec
         ),
     ]);
     environment.extend(capsule.harness.environment(capsule.project));
+    match environment
+        .iter_mut()
+        .find(|(key, _)| key == "LD_LIBRARY_PATH")
+    {
+        Some((_, value)) => {
+            value.push(':');
+            value.push_str(&layers.runtime.runtime_library_path);
+        }
+        None => environment.push((
+            "LD_LIBRARY_PATH".into(),
+            layers.runtime.runtime_library_path.clone(),
+        )),
+    }
     environment
 }
 
@@ -578,7 +681,7 @@ fn managed_shell_environment(layers: &EnvironmentLayers) -> [(String, String); 3
     [
         ("PATH".into(), path.clone()),
         (MANAGED_PATH_ENV.into(), path),
-        ("BASH_ENV".into(), MANAGED_BASH_ENV.into()),
+        ("BASH_ENV".into(), layers.runtime.managed_bash_env.clone()),
     ]
 }
 
@@ -589,8 +692,12 @@ fn guest_path(layers: &EnvironmentLayers) -> String {
         .map(|project| project.path.clone())
         .unwrap_or_default();
     entries.extend([
-        format!("/opt/{PRODUCT}/base/usr/bin"),
-        format!("/opt/{PRODUCT}/tool/bin"),
+        Path::new(&layers.runtime.harness_executable)
+            .parent()
+            .expect("validated harness executable has a parent")
+            .display()
+            .to_string(),
+        format!("{}/bin", layers.runtime.runtime_root),
         "/usr/local/sbin".into(),
         "/usr/local/bin".into(),
         "/usr/sbin".into(),
@@ -605,8 +712,8 @@ fn label(suffix: &str) -> String {
     format!("{PRODUCT}.{suffix}")
 }
 
-fn tool_executable(capsule: &Capsule<'_>) -> String {
-    format!("/opt/{PRODUCT}/tool/bin/{}", capsule.harness.executable())
+fn tool_executable(layers: &EnvironmentLayers) -> String {
+    layers.runtime.harness_executable.clone()
 }
 
 fn terminal_environment() -> Vec<(String, String)> {
@@ -1008,7 +1115,7 @@ mod tests {
             .insert(label("environment"), "configured".into());
         let legacy_labels = CapsuleDescriptor::new(&project, harness).labels();
 
-        CapsuleDescriptor::for_launch(&project, harness, None, None)
+        CapsuleDescriptor::for_launch(&project, harness, None, None, None)
             .validate_launch(&configured.name, &legacy_labels)
             .unwrap();
         configured
@@ -1035,8 +1142,20 @@ mod tests {
             environment: BTreeMap::from([("RUST_BACKTRACE".into(), "1".into())]),
         };
         let layers = EnvironmentLayers {
-            harness: "/harness-layer".into(),
-            base: "/base-layer".into(),
+            runtime: crate::runtime_artifacts::PreparedRuntime {
+                store_volume: "fortlet-store-501-fip0013-1-project".into(),
+                image_reference: "fortlet-runtime:fip0013-1-aarch64-linux".into(),
+                runtime_root: "/nix/store/runtime".into(),
+                nix_version: "2.34.8".into(),
+                nix: "/nix/store/runtime/bin/nix".into(),
+                shell: "/nix/store/runtime/bin/bash".into(),
+                hold: "/nix/store/runtime/bin/fortlet-hold".into(),
+                managed_bash_env: "/nix/store/runtime/etc/managed-bash-env".into(),
+                runtime_library_path: "/nix/store/glibc/lib:/nix/store/zlib/lib".into(),
+                harness_executable: "/nix/store/codex/bin/codex".into(),
+                runtime_identity: "sha256:runtime:seed".into(),
+                harness_identity: "harness-closure".into(),
+            },
             project: Some(published),
         };
 
@@ -1051,7 +1170,7 @@ mod tests {
         );
         assert_eq!(
             managed_environment.get("BASH_ENV").map(String::as_str),
-            Some(MANAGED_BASH_ENV)
+            Some("/nix/store/runtime/etc/managed-bash-env")
         );
         for harness_name in ["codex", "tact"] {
             let harness = harness::find(harness_name).unwrap();

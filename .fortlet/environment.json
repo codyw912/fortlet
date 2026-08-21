@@ -1,9 +1,11 @@
 {
   "schema": 1,
-  "path": ["bin"],
+  "path": ["bin", "zig"],
   "environment": {
     "CARGO_HOME": "/home/agent/.cargo",
     "CARGO_TARGET_DIR": "target/fortlet-guest",
+    "CC": "/opt/fortlet/project/bin/cc",
+    "CXX": "/opt/fortlet/project/bin/c++",
     "C_INCLUDE_PATH": "/opt/fortlet/project/usr/include",
     "LD_LIBRARY_PATH": "/opt/fortlet/project/lib",
     "LIBRARY_PATH": "/opt/fortlet/project/lib"

@@ -4,6 +4,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use anyhow::{bail, Context, Result};
 use fs2::FileExt;
+use microsandbox::sandbox::PullPolicy;
 use microsandbox::Sandbox;
 
 use crate::harness::Harness;
@@ -11,20 +12,14 @@ use crate::nix_provider;
 use crate::paths::AppPaths;
 use crate::project::Project;
 use crate::project_environment::{guest_platform, ProjectEnvironment, PublishedProjectEnvironment};
-
-pub const BASE_IMAGE: &str = "node:24-bookworm";
-const BASE_TOOLS_VERSION: &str = "bookworm-5";
-const BUBBLEWRAP_VERSION: &str = "0.8.0-2+deb12u1";
-const HOLD_SCRIPT: &str = "trap 'exit 0' TERM INT; while :; do sleep 3600 & wait $!; done";
-pub const MANAGED_BASH_ENV: &str = "/opt/fortlet/base/etc/fortlet/bash-env";
+use crate::runtime_artifacts::{PreparedRuntime, RuntimeArtifacts};
 
 pub struct EnvironmentStore<'a> {
     paths: &'a AppPaths,
 }
 
 pub struct EnvironmentLayers {
-    pub harness: PathBuf,
-    pub base: PathBuf,
+    pub runtime: PreparedRuntime,
     pub project: Option<PublishedProjectEnvironment>,
 }
 
@@ -39,45 +34,24 @@ impl<'a> EnvironmentStore<'a> {
         project: &Project,
         project_environment: Option<&ProjectEnvironment>,
     ) -> Result<EnvironmentLayers> {
-        let base_script = base_provision_script();
-        let base = self
-            .ensure_layer(
-                "_base",
-                BASE_TOOLS_VERSION,
-                ".fortlet-base.json",
-                &base_script,
-                "base environment",
-            )
-            .await?;
-        let harness_label = format!("{} environment", harness.name());
-        let harness_path = self
-            .ensure_layer(
-                harness.name(),
-                harness.version(),
-                ".fortlet-tool.json",
-                &harness.provision_script(),
-                &harness_label,
-            )
-            .await?;
+        let artifacts = RuntimeArtifacts::from_environment()?;
+        let runtime = artifacts.ensure(self.paths, project, harness).await?;
         let project = match project_environment {
             Some(environment) if environment.is_recipe() => {
-                Some(self.ensure_project(environment).await?)
+                Some(self.ensure_project(environment, &runtime).await?)
             }
             Some(environment) => {
-                Some(nix_provider::ensure(self.paths, project, environment).await?)
+                Some(nix_provider::ensure(self.paths, project, environment, &runtime).await?)
             }
             None => None,
         };
-        Ok(EnvironmentLayers {
-            harness: harness_path,
-            base,
-            project,
-        })
+        Ok(EnvironmentLayers { runtime, project })
     }
 
     async fn ensure_project(
         &self,
         environment: &ProjectEnvironment,
+        runtime: &PreparedRuntime,
     ) -> Result<PublishedProjectEnvironment> {
         let destination = self.paths.environments().join(environment.identity());
         if destination.exists() {
@@ -110,18 +84,18 @@ impl<'a> EnvironmentStore<'a> {
         );
         eprintln!("fortlet: preparing project environment (first use)");
         let sandbox = Sandbox::builder(&sandbox_name)
-            .image(BASE_IMAGE)
+            .image(runtime.image_reference.clone())
+            .pull_policy(PullPolicy::Never)
             .cpus(4)
             .memory(8192)
             .root_disk(8192)
             .volume("/out", |mount| mount.bind(&plan.output))
-            .script("hold", HOLD_SCRIPT)
-            .entrypoint(["hold"])
+            .entrypoint([runtime.hold.clone()])
             .create()
             .await
             .context("cannot create project environment provisioning capsule")?;
         let provision = sandbox
-            .exec_with("/bin/sh", |options| {
+            .exec_with(&runtime.shell, |options| {
                 options
                     .args(["-eu", "-c", plan.recipe.as_str()])
                     .envs(plan.environment.clone())
@@ -141,178 +115,12 @@ impl<'a> EnvironmentStore<'a> {
             );
         }
         environment.validate_and_mark(temporary.path())?;
-        fs::rename(temporary.path(), &destination).with_context(|| {
-            format!(
-                "cannot publish project environment into {}",
-                self.paths.environments().display()
-            )
-        })?;
+        let persisted = temporary.keep();
+        fs::rename(&persisted, &destination)
+            .context("cannot publish the prepared project environment")?;
         environment.verify_published(&destination)?;
         environment.published_recipe(destination)
     }
-
-    async fn ensure_layer(
-        &self,
-        name: &str,
-        version: &str,
-        marker: &str,
-        script: &str,
-        label: &str,
-    ) -> Result<PathBuf> {
-        let destination = self.paths.tools().join(name).join(version);
-        if layer_marker_matches(&destination, marker, name, version, label)? {
-            return Ok(destination);
-        }
-        let _lock = lock(&self.paths.locks().join(format!("layer-{name}.lock")))?;
-        if layer_marker_matches(&destination, marker, name, version, label)? {
-            return Ok(destination);
-        }
-        if destination.exists() {
-            bail!(
-                "incomplete environment layer at {}; remove it and retry",
-                destination.display()
-            );
-        }
-        fs::create_dir_all(self.paths.tools())?;
-        let temporary = tempfile::Builder::new()
-            .prefix(&format!(".{name}-{version}-"))
-            .tempdir_in(self.paths.tools())?;
-        let unique = SystemTime::now().duration_since(UNIX_EPOCH)?.as_nanos();
-        let sandbox_name = format!("fortlet-provision-{}-{unique:x}", std::process::id());
-        eprintln!("fortlet: preparing {label} (first use)");
-        let sandbox = Sandbox::builder(&sandbox_name)
-            .image(BASE_IMAGE)
-            .cpus(2)
-            .memory(2048)
-            .volume("/out", |mount| mount.bind(temporary.path()))
-            .script("hold", HOLD_SCRIPT)
-            .entrypoint(["hold"])
-            .create()
-            .await
-            .with_context(|| format!("cannot create {label} provisioning capsule"))?;
-        let provision = sandbox
-            .exec("/bin/sh", ["-c", script])
-            .await
-            .context("environment provisioning failed");
-        cleanup_provisioning_capsule(&sandbox, &sandbox_name).await;
-        let output = provision?;
-        if !output.status().success {
-            let diagnostic = sanitize_diagnostic(&output.stderr().unwrap_or_default());
-            if diagnostic.is_empty() {
-                bail!("environment provisioning exited {}", output.status().code);
-            }
-            bail!(
-                "environment provisioning exited {}: {diagnostic}",
-                output.status().code
-            );
-        }
-        fs::write(
-            temporary.path().join(marker),
-            format!(
-                "{}\n",
-                serde_json::json!({
-                    "name": name,
-                    "version": version,
-                    "image": BASE_IMAGE,
-                })
-            ),
-        )?;
-        fs::create_dir_all(destination.parent().context("layer has no parent")?)?;
-        let persisted = temporary.keep();
-        fs::rename(&persisted, &destination).with_context(|| {
-            format!(
-                "cannot publish environment layer {} to {}",
-                persisted.display(),
-                destination.display()
-            )
-        })?;
-        Ok(destination)
-    }
-}
-
-fn base_provision_script() -> String {
-    format!(
-        r#"set -eu
-step=temporary-directory
-temporary="$(mktemp -d)"
-cleanup() {{
-  status=$?
-  trap - EXIT
-  rm -rf "$temporary"
-  if [ "$status" -ne 0 ]; then
-    printf 'fortlet: base provisioning step failed: %s\n' "$step" >&2
-  fi
-  exit "$status"
-}}
-trap cleanup EXIT
-chmod 777 "$temporary"
-cd "$temporary"
-step=package-index
-apt-get update -qq
-step=certificate-installation
-DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends --reinstall ca-certificates
-step=package-download
-apt-get download "bubblewrap={BUBBLEWRAP_VERSION}" git curl tar xz-utils
-step=package-extraction
-for package in ./*.deb; do
-  dpkg-deb -x "$package" /out
-done
-step=bubblewrap-validation
-/out/usr/bin/bwrap --version
-step=git-validation
-/out/usr/bin/git --version
-step=curl-validation
-/out/usr/bin/curl --version
-step=tar-validation
-/out/bin/tar --version
-step=xz-validation
-/out/usr/bin/xz --version
-step=certificate-bundle
-/usr/sbin/update-ca-certificates --fresh
-mkdir -p /out/etc/ssl/certs
-cp /etc/ssl/certs/ca-certificates.crt /out/etc/ssl/certs/ca-certificates.crt
-test -s /out/etc/ssl/certs/ca-certificates.crt
-step=managed-shell-activation
-mkdir -p /out/etc/fortlet
-cat > /out/etc/fortlet/bash-env <<'FORTLET_BASH_ENV'
-case ":$PATH:" in
-  *:/.msb/scripts:*) PATH="/.msb/scripts:$FORTLET_MANAGED_PATH" ;;
-  *) PATH="$FORTLET_MANAGED_PATH" ;;
-esac
-export PATH
-FORTLET_BASH_ENV
-chmod 0444 /out/etc/fortlet/bash-env
-"#
-    )
-}
-
-fn layer_marker_matches(
-    destination: &Path,
-    marker: &str,
-    name: &str,
-    version: &str,
-    label: &str,
-) -> Result<bool> {
-    let marker_path = destination.join(marker);
-    let metadata = match fs::symlink_metadata(&marker_path) {
-        Ok(metadata) => metadata,
-        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(false),
-        Err(error) => return Err(error.into()),
-    };
-    if !metadata.is_file() || metadata.file_type().is_symlink() {
-        bail!("published {label} marker is not a regular file");
-    }
-    let actual: serde_json::Value = serde_json::from_slice(&fs::read(&marker_path)?)
-        .with_context(|| format!("published {label} marker is invalid"))?;
-    let expected = serde_json::json!({
-        "name": name,
-        "version": version,
-        "image": BASE_IMAGE,
-    });
-    if actual != expected {
-        bail!("published {label} marker does not match its inputs");
-    }
-    Ok(true)
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -413,72 +221,11 @@ mod tests {
     }
 
     #[test]
-    fn base_layer_installs_the_managed_bash_environment() {
-        let script = base_provision_script();
-
-        assert_eq!(BASE_TOOLS_VERSION, "bookworm-5");
-        for required in [
-            "printf 'fortlet: base provisioning step failed: %s\\n' \"$step\" >&2",
-            "step=certificate-installation",
-            "apt-get install -y -qq --no-install-recommends --reinstall ca-certificates",
-            "step=certificate-bundle",
-            "/usr/sbin/update-ca-certificates --fresh",
-            "cp /etc/ssl/certs/ca-certificates.crt /out/etc/ssl/certs/ca-certificates.crt",
-            "test -s /out/etc/ssl/certs/ca-certificates.crt",
-            "cat > /out/etc/fortlet/bash-env <<'FORTLET_BASH_ENV'",
-            "*:/.msb/scripts:*) PATH=\"/.msb/scripts:$FORTLET_MANAGED_PATH\" ;;",
-            "*) PATH=\"$FORTLET_MANAGED_PATH\" ;;",
-            "chmod 0444 /out/etc/fortlet/bash-env",
-            "/out/bin/tar --version",
-        ] {
-            assert!(script.contains(required), "{required}");
-        }
-        assert!(!script.contains("test -f /out/etc/ssl/certs/ca-certificates.crt"));
-    }
-
-    #[test]
     fn diagnostics_are_bounded_and_strip_control_characters() {
         let diagnostic = format!("bad\u{1b}[31m{}tail", "x".repeat(4096));
         let sanitized = sanitize_diagnostic(&diagnostic);
         assert!(!sanitized.contains('\u{1b}'));
         assert!(sanitized.len() <= 2048);
-    }
-
-    #[test]
-    fn tool_layer_markers_are_regular_and_bound_to_their_inputs() {
-        let temporary = tempfile::tempdir().unwrap();
-        let destination = temporary.path().join("codex/0.147.0");
-        fs::create_dir_all(&destination).unwrap();
-        fs::write(
-            destination.join(".fortlet-tool.json"),
-            serde_json::to_vec(&serde_json::json!({
-                "name": "codex",
-                "version": "0.147.0",
-                "image": BASE_IMAGE,
-            }))
-            .unwrap(),
-        )
-        .unwrap();
-
-        assert!(layer_marker_matches(
-            &destination,
-            ".fortlet-tool.json",
-            "codex",
-            "0.147.0",
-            "codex environment"
-        )
-        .unwrap());
-
-        fs::write(destination.join(".fortlet-tool.json"), "{}").unwrap();
-        let error = layer_marker_matches(
-            &destination,
-            ".fortlet-tool.json",
-            "codex",
-            "0.147.0",
-            "codex environment",
-        )
-        .unwrap_err();
-        assert!(error.to_string().contains("does not match its inputs"));
     }
 
     #[test]

@@ -9,10 +9,10 @@ use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
 use crate::auth::{ACCESS_TOKEN_ENV, ACCOUNT_ID_ENV};
-use crate::environment::BASE_IMAGE;
 use crate::harness;
 use crate::identity::{GIT_CONFIG_GLOBAL, GIT_CONFIG_NOSYSTEM, JJ_CONFIG};
 use crate::project::Project;
+use crate::runtime_artifacts::RUNTIME_CONTRACT;
 
 pub const GUEST_ROOT: &str = "/opt/fortlet/project";
 pub const NO_ENVIRONMENT: &str = "none";
@@ -36,8 +36,8 @@ const MARKER: &str = ".fortlet-project.json";
 const RECIPE_SCHEMA: u64 = 1;
 const NIX_SCHEMA: u64 = 2;
 const CONTRACT: &str = "fortlet-project-environment-v1";
-pub const NIX_PROVIDER_CONTRACT: &str = "fortlet-nix-dev-shell-v1";
-pub const NIX_VERSION: &str = "2.35.2";
+pub const NIX_PROVIDER_CONTRACT: &str = "fortlet-nix-dev-shell-v2";
+pub const NIX_VERSION: &str = "2.34.8";
 const MAX_MANIFEST_BYTES: u64 = 64 * 1024;
 const MAX_RECIPE_BYTES: u64 = 1024 * 1024;
 const MAX_PATH_ENTRIES: usize = 32;
@@ -279,12 +279,15 @@ impl ProjectEnvironment {
             schema: RECIPE_SCHEMA,
             identity: self.identity.clone(),
             output,
-            image: BASE_IMAGE.into(),
+            image: RUNTIME_CONTRACT.into(),
             platform: guest_platform()?.into(),
         };
         let mut file = File::create(root.join(MARKER))?;
         serde_json::to_writer(&mut file, &marker)?;
         file.write_all(b"\n")?;
+        file.sync_all()?;
+        drop(file);
+        seal_output(root)?;
         Ok(())
     }
 
@@ -299,17 +302,41 @@ impl ProjectEnvironment {
             .context("published project environment marker is invalid")?;
         if marker.schema != RECIPE_SCHEMA
             || marker.identity != self.identity
-            || marker.image != BASE_IMAGE
+            || marker.image != RUNTIME_CONTRACT
             || marker.platform != guest_platform()?
         {
             bail!("published project environment marker does not match its inputs");
         }
+        if is_writable(&metadata.permissions())
+            || is_writable(&fs::symlink_metadata(root.join(MARKER))?.permissions())
+        {
+            bail!("published project environment is not sealed");
+        }
         validate_declared_paths(root, &self.path)?;
-        if output_digest(root)? != marker.output {
-            bail!("published project environment content digest does not match its marker");
+        Ok(())
+    }
+}
+
+fn seal_output(root: &Path) -> Result<()> {
+    fn seal(path: &Path) -> Result<()> {
+        let metadata = fs::symlink_metadata(path)?;
+        if metadata.is_dir() {
+            for entry in fs::read_dir(path)? {
+                seal(&entry?.path())?;
+            }
+        }
+        if !metadata.file_type().is_symlink() {
+            let mut permissions = metadata.permissions();
+            permissions.set_mode(permissions.mode() & !0o222);
+            fs::set_permissions(path, permissions)?;
         }
         Ok(())
     }
+    seal(root)
+}
+
+fn is_writable(permissions: &fs::Permissions) -> bool {
+    permissions.mode() & 0o222 != 0
 }
 
 fn manifest_schema(bytes: &[u8]) -> Result<u64> {
@@ -483,7 +510,7 @@ fn read_from(file: File, limit: u64, kind: &str) -> Result<Vec<u8>> {
 fn input_identity(manifest: &[u8], recipe: &[u8], platform: &str) -> String {
     let mut digest = Sha256::new();
     hash_field(&mut digest, CONTRACT.as_bytes());
-    hash_field(&mut digest, BASE_IMAGE.as_bytes());
+    hash_field(&mut digest, RUNTIME_CONTRACT.as_bytes());
     hash_field(&mut digest, platform.as_bytes());
     hash_field(&mut digest, manifest);
     hash_field(&mut digest, recipe);
@@ -494,7 +521,7 @@ fn nix_input_identity(manifest: &[u8], flake: &[u8], lock: &[u8], platform: &str
     let mut digest = Sha256::new();
     hash_field(&mut digest, NIX_PROVIDER_CONTRACT.as_bytes());
     hash_field(&mut digest, NIX_VERSION.as_bytes());
-    hash_field(&mut digest, BASE_IMAGE.as_bytes());
+    hash_field(&mut digest, RUNTIME_CONTRACT.as_bytes());
     hash_field(&mut digest, platform.as_bytes());
     hash_field(&mut digest, manifest);
     hash_field(&mut digest, flake);
@@ -781,7 +808,7 @@ mod tests {
     }
 
     #[test]
-    fn published_output_is_content_verified() {
+    fn published_output_is_content_digested_and_sealed() {
         let project_root = tempfile::tempdir().unwrap();
         write_environment(
             project_root.path(),
@@ -799,12 +826,11 @@ mod tests {
 
         environment.validate_and_mark(output.path()).unwrap();
         environment.verify_published(output.path()).unwrap();
-        fs::write(&tool, "changed").unwrap();
-        assert!(environment
-            .verify_published(output.path())
-            .unwrap_err()
-            .to_string()
-            .contains("content digest"));
+        assert!(fs::write(&tool, "changed").is_err());
+        let mut permissions = fs::metadata(output.path()).unwrap().permissions();
+        permissions.set_mode(0o700);
+        fs::set_permissions(output.path(), permissions).unwrap();
+        assert!(environment.verify_published(output.path()).is_err());
     }
 
     #[test]
@@ -901,7 +927,7 @@ mod tests {
             .unwrap()
             .unwrap();
 
-        assert_eq!(environment.path, vec!["bin"]);
+        assert_eq!(environment.path, vec!["bin", "zig"]);
         assert_eq!(
             environment.environment.get("CARGO_HOME").unwrap(),
             "/home/agent/.cargo"
@@ -913,20 +939,24 @@ mod tests {
         for pinned in [
             "rust_version=1.97.1",
             "jj_version=0.43.0",
-            "libcap-ng-dev=0.8.3-1+b3",
+            "zig_version=0.15.2",
+            "${package}_0.8.3-1+b3_${debian_arch}.deb",
+            "bsdtar -xOf \"$archive\" data.tar.xz",
             "temporary=\"$(mktemp -d \"$FORTLET_OUTPUT/.fortlet-work.XXXXXX\")\"",
             "trap 'rm -rf \"$temporary\"' EXIT",
             "9a7a2c336b4787f1b72f6bab7c35d5b7af2fd03cbd39b4fc721466a70d402a7d",
             "88f28fa9af20594179f85d6df67078dfd6fa93e2f6da5e1e9b0ac4997988ca4f",
             "289197b6bec60b4e57d47260624b617716f737eb02cdfd9155791b2576aa5862",
             "59e5588583ac82b623239929368c65b90735931c0f26b5a16c1f04d5bb97643d",
+            "958ed7d1e00d0ea76590d27666efbf7a932281b3d7ba0c6b01b0ff26498f667f",
+            "02aa270f183da276e5b5920b1dac44a63f1a49e55050ebde3aecc9eb82f93239",
         ] {
             assert!(environment.recipe().unwrap().contains(pinned), "{pinned}");
         }
     }
 
     #[test]
-    fn repository_fixture_normalizes_pinned_debian_links() {
+    fn repository_fixture_extracts_pinned_debian_artifacts_without_a_package_manager() {
         let root = Path::new(env!("CARGO_MANIFEST_DIR"))
             .canonicalize()
             .unwrap();
@@ -937,12 +967,22 @@ mod tests {
         for required in [
             "debian_triplet=aarch64-linux-gnu",
             "debian_triplet=x86_64-linux-gnu",
+            "debian_arch=arm64",
+            "debian_arch=amd64",
+            "24e74ad29a37d2a3940b8977d11298a7afc77379ef414b561d79c64147d740e0",
+            "92ac2d723583ac9a34340f00c61adbf6a3ae613ec395541bc32d428f6c16c092",
+            "b4b54769c77e4a71c8b33aee4d600ba28a9994a1c6f60d55d4ebe7fc44882e07",
+            "50674ccc126009f8d640a9230db4600d6fe552b68077193f234ea892784db5d5",
+            "bsdtar -xOf \"$archive\" data.tar.xz",
             "[ \"$link_target\" != \"$expected_target\" ] || [ ! -f \"$FORTLET_OUTPUT$expected_target\" ]",
             "ln -snf \"../../..$expected_target\" \"$link\"",
             "/lib/$debian_triplet/libcap-ng.so.0.0.0",
             "/lib/$debian_triplet/libdrop_ambient.so.0.0.0",
         ] {
             assert!(environment.recipe().unwrap().contains(required), "{required}");
+        }
+        for forbidden in ["apt-get", "dpkg-deb"] {
+            assert!(!environment.recipe().unwrap().contains(forbidden));
         }
     }
 }

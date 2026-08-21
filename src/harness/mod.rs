@@ -10,8 +10,6 @@ mod tact;
 pub trait Harness: Sync {
     fn name(&self) -> &'static str;
     fn version(&self) -> &'static str;
-    fn executable(&self) -> &'static str;
-    fn provision_script(&self) -> String;
     fn environment(&self, project: &Project) -> Vec<(String, String)>;
 
     fn launch_arguments(&self, requested: &[String]) -> Vec<String> {

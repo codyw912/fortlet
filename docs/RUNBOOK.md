@@ -95,12 +95,16 @@ cargo test --bin fortlet session::tests::attachment
 ## Project tool environments
 
 `fortlet prepare <harness> [--project <path>] [--allow-broad-mount]` is an
-optional synchronous warm-up for the immutable base, selected harness, and
-optional project layers. It uses the same project selection as `run` and
+optional synchronous warm-up for the packaged Nix-built runtime, one
+project-scoped ext4 Nix store, the selected harness closure, and optional
+project layers. It uses the same project selection as `run` and
 prints `<harness><TAB>ready` only after every selected layer verifies. It does
 not read provider credentials, create a reusable project capsule or persistent
 harness home, project guest authentication, or attach a terminal. A cache hit
-does not contact MicroSandbox or the network and does not rewrite a layer.
+does not contact MicroSandbox or the network and does not rewrite a layer. The
+runtime image is loaded from the packaged OCI archive, verified by digest and
+platform, and always selected with pull policy `never`. Preparation does not
+require Docker, a registry login, host Nix, npm, or a harness installer.
 
 Skipping `prepare` is supported: explicit `run` and the transparent shims
 perform the same layer preparation automatically on first launch. Preparation
@@ -131,13 +135,14 @@ It does not receive the manifest, live project, persistent home, host
 environment, provider broker, SSH or signing material, publication authority,
 or registry credentials.
 
-Successful output is validated, content-digested, atomically published, and
-re-verified before every read-only mount at `/opt/fortlet/project`. Manifest
-paths precede the base and harness paths, while the harness executable remains
-an absolute Fortlet-owned path. `HOME`, `PATH`, terminal, credential, Fortlet,
+Successful output is validated, content-digested, sealed against writes,
+atomically published, and marker-verified before every read-only mount at
+`/opt/fortlet/project`. Manifest paths precede the common runtime and harness
+paths, while the harness executable remains an absolute path in the verified
+project store. `HOME`, `PATH`, terminal, credential, Fortlet,
 MicroSandbox, and harness-owned variables cannot be overridden. `BASH_ENV` is
 also reserved: a read-only package-owned hook restores Fortlet's managed PATH
-after Debian login profiles replace it, so agent commands launched through
+after login profiles replace it, so agent commands launched through
 non-interactive `bash -lc` keep project tools. Fortlet does not edit host or
 persistent user startup files.
 
@@ -154,7 +159,11 @@ A failed update preserves previous layers and the existing capsule. Restore the
 old manifest and recipe to select that layer again. There is no project
 environment update, rollback, purge, private-input, service, or Nix activation
 command in this slice. Recipes must pin and verify public downloads when
-cross-machine reproducibility matters.
+cross-machine reproducibility matters. They may use only the declared shell,
+Git, CA, download, archive, and core utility contract; they must not assume
+apt, dpkg, npm, Node, or an undeclared package manager. This repository's
+schema-1 fixture brings its own pinned Rust, Zig, Jujutsu, and libcap-ng
+artifacts.
 
 The deterministic gate does not start a VM or execute the checked-in recipe on
 the host:

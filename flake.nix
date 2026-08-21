@@ -15,7 +15,11 @@
       packages = forAllSystems (system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
-          fortlet = pkgs.callPackage ./package.nix { };
+          guestSystem = if system == "aarch64-darwin" then "aarch64-linux" else system;
+          runtimeArtifacts = import ./nix/runtime-artifacts.nix {
+            inherit guestSystem nixpkgs pkgs;
+          };
+          fortlet = pkgs.callPackage ./package.nix { inherit runtimeArtifacts; };
           shim-activation = pkgs.runCommand
             "fortlet-shim-activation-${fortlet.version}"
             { }
@@ -26,6 +30,7 @@
         in
         {
           default = fortlet;
+          runtime-artifacts = runtimeArtifacts.bundle;
           inherit fortlet shim-activation;
         });
 

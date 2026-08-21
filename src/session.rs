@@ -123,6 +123,7 @@ pub async fn launch(request: LaunchRequest) -> Result<i32> {
             harness,
             layers.project.as_ref(),
             identity.as_ref(),
+            &layers,
         ),
         "capsule",
         "check the reported Fortlet state path and retry",
@@ -155,6 +156,7 @@ pub async fn launch(request: LaunchRequest) -> Result<i32> {
             &runtime,
             &capsule,
             &sandbox,
+            &layers,
             &request.arguments,
             store,
             credentials,
@@ -162,7 +164,9 @@ pub async fn launch(request: LaunchRequest) -> Result<i32> {
         .await
     } else {
         stage(
-            runtime.attach(&capsule, &sandbox, &request.arguments).await,
+            runtime
+                .attach(&capsule, &sandbox, &layers, &request.arguments)
+                .await,
             "terminal",
             TERMINAL_CORRECTION,
         )
@@ -256,6 +260,7 @@ async fn attach_codex_with_lease(
     runtime: &MicroSandboxRuntime<'_>,
     capsule: &Capsule<'_>,
     sandbox: &microsandbox::Sandbox,
+    layers: &crate::environment::EnvironmentLayers,
     arguments: &[String],
     store: CredentialStore,
     credentials: Credentials,
@@ -271,7 +276,11 @@ async fn attach_codex_with_lease(
         #[allow(unreachable_code)]
         Ok::<(), anyhow::Error>(())
     });
-    match await_attachment_with_renewal(runtime.attach(capsule, sandbox, arguments), renewal).await
+    match await_attachment_with_renewal(
+        runtime.attach(capsule, sandbox, layers, arguments),
+        renewal,
+    )
+    .await
     {
         AttachmentOutcome::Attached(attached) => stage(attached, "terminal", TERMINAL_CORRECTION),
         AttachmentOutcome::RenewalEnded(error) => {

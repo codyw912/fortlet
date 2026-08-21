@@ -12,6 +12,7 @@ mod project;
 mod project_capability;
 mod project_environment;
 mod runtime;
+mod runtime_artifacts;
 mod session;
 
 #[tokio::main]

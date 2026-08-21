@@ -86,13 +86,18 @@ output; expiry kills only that command and preserves the reusable capsule.
 Use interactive managed Codex for work that may legitimately remain silent
 longer. Tact, interactive sessions, and `fortlet native` have no such ceiling.
 
-`fortlet prepare <harness>` is an optional eager warm-up. It ensures the base,
-selected harness, and optional project-tool layers without reading provider
+`fortlet prepare <harness>` is an optional eager warm-up. It loads the packaged
+Nix-built OCI image locally, seeds one labeled ext4 Nix-store volume per
+project, imports only the selected harness closure, and prepares optional
+project tools without reading provider
 credentials, creating a reusable project capsule or persistent harness home,
 or attaching a terminal. If it is omitted, `fortlet run` and the optional
 shims perform the same preparation automatically on first launch. A successful
 preparation prints `<harness><TAB>ready`; a verified cache hit performs no
-provisioning or network contact.
+provisioning, capsule launch, store mutation, registry access, or network
+contact. Live harness capsules mount the project store read-only and use the
+same image regardless of harness; Node and npm are not part of the runtime
+contract.
 
 ## Project tool environments
 
@@ -105,9 +110,10 @@ Fortlet reads and hashes both exact files on the host but never executes the
 recipe there. On first use, it runs the snapshotted recipe in a dedicated
 MicroSandbox capsule with public network access, no live project mount, no
 persistent home, and no provider, SSH, signing, publication, or registry
-credentials. The validated output is content-digested, published atomically,
-and mounted read-only at `/opt/fortlet/project`. A repository without the
-manifest keeps the existing base-plus-harness environment.
+credentials. The validated output is content-digested, sealed against writes,
+published atomically, checked in constant time on cache hits, and mounted
+read-only at `/opt/fortlet/project`. A repository without the manifest uses
+only the common runtime and selected harness closures.
 
 Changing either file selects a new immutable layer. If an old capsule exists,
 run `fortlet stop <harness>` and `fortlet reset <harness>` before launching
@@ -115,9 +121,11 @@ the new environment. A failed build leaves the prior layer and capsule intact;
 the old environment can be selected again by restoring its two files. Public
 downloads can drift unless the recipe pins and verifies them.
 
-This repository's recipe pins Rust, Cargo, Jujutsu, and the Linux development
-library needed to build Fortlet. It serves as the first project-environment
-fixture; Nix remains the host development and package-reproduction system.
+This repository's recipe pins Rust, Cargo, Zig, Jujutsu, and the Linux
+development library needed to build Fortlet. It downloads exact public
+artifacts and does not invoke apt, dpkg, npm, or another package resolver. It
+serves as the first project-environment fixture; Nix remains the host
+development and package-reproduction system.
 Fortlet also restores the managed tool PATH for non-interactive Bash login
 shells through a package-owned process environment hook. It does not write a
 user `.profile`, `.bashrc`, fish configuration, or other startup file.

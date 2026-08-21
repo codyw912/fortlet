@@ -29,16 +29,20 @@ impl AppPaths {
         })
     }
 
-    pub fn tools(&self) -> PathBuf {
-        self.data.join("tools")
-    }
-
     pub fn environments(&self) -> PathBuf {
         self.data.join("environments")
     }
 
     pub fn provider_root(&self, project_identity: &str) -> PathBuf {
-        self.data.join("providers").join(project_identity)
+        self.project_store_root(project_identity)
+    }
+
+    pub fn project_stores(&self) -> PathBuf {
+        self.data.join("project-stores")
+    }
+
+    pub fn project_store_root(&self, project_identity: &str) -> PathBuf {
+        self.project_stores().join(project_identity)
     }
 
     pub fn nix_store(&self, project_identity: &str) -> PathBuf {

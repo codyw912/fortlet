@@ -11,6 +11,8 @@ use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use base64::Engine;
 use sha2::{Digest, Sha256};
 
+mod support;
+
 const VALID_FAKE_EXPIRATION: u64 = 4_102_444_800;
 
 struct Fixture {
@@ -20,6 +22,7 @@ struct Fixture {
     data: PathBuf,
     project: PathBuf,
     auth: PathBuf,
+    artifacts: PathBuf,
 }
 
 impl Fixture {
@@ -30,6 +33,7 @@ impl Fixture {
         let data = temporary.path().join("data");
         let project = temporary.path().join("project");
         let auth = temporary.path().join("auth.json");
+        let artifacts = temporary.path().join("runtime-artifacts");
         fs::create_dir_all(&home).unwrap();
         fs::create_dir_all(&project).unwrap();
         Self {
@@ -39,6 +43,7 @@ impl Fixture {
             data,
             project,
             auth,
+            artifacts,
         }
     }
 
@@ -88,7 +93,8 @@ impl Fixture {
             .env("HOME", &self.home)
             .env("XDG_STATE_HOME", &self.state)
             .env("XDG_DATA_HOME", &self.data)
-            .env("FORTLET_AUTH_FILE", auth);
+            .env("FORTLET_AUTH_FILE", auth)
+            .env("FORTLET_RUNTIME_ARTIFACTS", &self.artifacts);
         command
     }
 
@@ -114,8 +120,11 @@ impl Fixture {
         self.state.join("fortlet/projects")
     }
 
-    fn tools(&self) -> PathBuf {
-        self.data.join("fortlet/tools")
+    fn project_stores(&self) -> PathBuf {
+        support::prepared_store(&self.data, &self.project)
+            .parent()
+            .unwrap()
+            .to_owned()
     }
 
     fn environments(&self) -> PathBuf {
@@ -123,23 +132,7 @@ impl Fixture {
     }
 
     fn seed_layers(&self, harness: &str) {
-        seed_layer_marker(
-            &self.tools().join("_base/bookworm-5"),
-            ".fortlet-base.json",
-            "_base",
-            "bookworm-5",
-        );
-        let version = match harness {
-            "codex" => "0.147.0",
-            "tact" => "0.3.7",
-            _ => panic!("unknown test harness"),
-        };
-        seed_layer_marker(
-            &self.tools().join(harness).join(version),
-            ".fortlet-tool.json",
-            harness,
-            version,
-        );
+        support::seed_prepared(&self.data, &self.project, &self.artifacts, harness);
     }
 
     fn capsule_state(&self, harness: &str) -> PathBuf {
@@ -149,20 +142,6 @@ impl Fixture {
             .join(hex::encode(&digest[..8]))
             .join(harness)
     }
-}
-
-fn seed_layer_marker(root: &Path, marker: &str, name: &str, version: &str) {
-    fs::create_dir_all(root).unwrap();
-    fs::write(
-        root.join(marker),
-        serde_json::to_vec(&serde_json::json!({
-            "name": name,
-            "version": version,
-            "image": "node:24-bookworm",
-        }))
-        .unwrap(),
-    )
-    .unwrap();
 }
 
 fn write_auth(path: &Path, expiration: u64) {
@@ -222,7 +201,7 @@ fn unsupported_harness_fails_before_project_or_runtime_artifacts() {
         "unsupported harness \"unknown\"; expected codex or tact",
     );
     assert!(!fixture.projects().exists());
-    assert!(!fixture.tools().exists());
+    assert!(!fixture.project_stores().exists());
 }
 
 #[test]
@@ -239,7 +218,7 @@ fn missing_project_fails_before_credentials_or_runtime_artifacts() {
         "cannot resolve project path",
     );
     assert!(!fixture.projects().exists());
-    assert!(!fixture.tools().exists());
+    assert!(!fixture.project_stores().exists());
 }
 
 #[test]
@@ -255,7 +234,7 @@ fn missing_auth_fails_before_capsule_or_environment_artifacts() {
         "cannot read Codex ChatGPT auth",
     );
     assert!(!fixture.projects().exists());
-    assert!(!fixture.tools().exists());
+    assert!(!fixture.project_stores().exists());
 }
 
 #[test]
@@ -271,7 +250,7 @@ fn codex_shim_missing_auth_fails_before_capsule_or_environment_artifacts() {
         "cannot read Codex ChatGPT auth",
     );
     assert!(!fixture.projects().exists());
-    assert!(!fixture.tools().exists());
+    assert!(!fixture.project_stores().exists());
 }
 
 #[test]
@@ -295,7 +274,7 @@ fn missing_refresh_token_fails_before_capsule_or_environment_artifacts() {
         "Codex ChatGPT auth has no refresh token; run `codex login` and retry",
     );
     assert!(!fixture.projects().exists());
-    assert!(!fixture.tools().exists());
+    assert!(!fixture.project_stores().exists());
 }
 
 #[test]
@@ -312,7 +291,7 @@ fn invalid_project_environment_fails_before_credentials_or_runtime_artifacts() {
         "project environment PATH entry must be a normalized relative path",
     );
     assert!(!fixture.projects().exists());
-    assert!(!fixture.tools().exists());
+    assert!(!fixture.project_stores().exists());
     assert!(!fixture.environments().exists());
 }
 
@@ -330,7 +309,7 @@ fn codex_shim_invalid_project_environment_fails_before_credentials_or_runtime_ar
         "project environment PATH entry must be a normalized relative path",
     );
     assert!(!fixture.projects().exists());
-    assert!(!fixture.tools().exists());
+    assert!(!fixture.project_stores().exists());
     assert!(!fixture.environments().exists());
 }
 
@@ -348,7 +327,7 @@ fn malformed_auth_fails_before_capsule_or_environment_artifacts() {
         "Codex auth is invalid",
     );
     assert!(!fixture.projects().exists());
-    assert!(!fixture.tools().exists());
+    assert!(!fixture.project_stores().exists());
 }
 
 #[test]
@@ -367,7 +346,7 @@ fn expired_auth_fails_before_capsule_or_environment_artifacts() {
         "Codex login refresh was rejected",
     );
     assert!(!fixture.projects().exists());
-    assert!(!fixture.tools().exists());
+    assert!(!fixture.project_stores().exists());
 }
 
 #[test]
@@ -385,7 +364,7 @@ fn project_mounted_auth_fails_before_capsule_or_environment_artifacts() {
         "credential file would be exposed by guest mount",
     );
     assert!(!fixture.projects().exists());
-    assert!(!fixture.tools().exists());
+    assert!(!fixture.project_stores().exists());
 }
 
 #[test]
@@ -436,11 +415,12 @@ fn invalid_guest_projection_fails_before_environment_or_runtime_artifacts() {
 }
 
 #[test]
-fn incomplete_base_layer_fails_before_provisioning_or_runtime_artifacts() {
+fn incomplete_project_store_fails_before_provisioning_or_runtime_artifacts() {
     let fixture = Fixture::new();
     fixture.write_valid_auth();
-    let incomplete_base = fixture.tools().join("_base/bookworm-5");
-    fs::create_dir_all(&incomplete_base).unwrap();
+    support::write_artifacts(&fixture.artifacts);
+    let incomplete_store = support::prepared_store(&fixture.data, &fixture.project);
+    fs::create_dir_all(&incomplete_store).unwrap();
 
     let output = fixture.run("codex", &fixture.project);
 
@@ -448,29 +428,23 @@ fn incomplete_base_layer_fails_before_provisioning_or_runtime_artifacts() {
         output,
         "environment",
         "check network access or remove the reported incomplete layer and retry",
-        "incomplete environment layer at",
+        "incomplete project runtime store; remove it and retry",
     );
     let capsule_state = fixture.capsule_state("codex");
     assert!(!capsule_state.exists());
     assert!(!capsule_state
         .join(".fortlet-credential-fingerprint")
         .exists());
-    assert!(!incomplete_base.join(".fortlet-base.json").exists());
-    assert!(!fixture.tools().join("codex").exists());
+    assert!(!incomplete_store.join("runtime.json").exists());
 }
 
 #[test]
-fn incomplete_harness_layer_fails_before_provisioning_or_runtime_artifacts() {
+fn incomplete_harness_closure_fails_before_provisioning_or_runtime_artifacts() {
     let fixture = Fixture::new();
     fixture.write_valid_auth();
-    let base = fixture.tools().join("_base/bookworm-5");
-    let incomplete_harness = fixture.tools().join("codex/0.147.0");
-    fs::create_dir_all(&base).unwrap();
-    fs::write(
-        base.join(".fortlet-base.json"),
-        r#"{"name":"_base","version":"bookworm-5","image":"node:24-bookworm"}"#,
-    )
-    .unwrap();
+    support::write_artifacts(&fixture.artifacts);
+    let store = support::seed_runtime(&fixture.data, &fixture.project);
+    let incomplete_harness = store.join("harnesses");
     fs::create_dir_all(&incomplete_harness).unwrap();
 
     let output = fixture.run("codex", &fixture.project);
@@ -479,12 +453,12 @@ fn incomplete_harness_layer_fails_before_provisioning_or_runtime_artifacts() {
         output,
         "environment",
         "check network access or remove the reported incomplete layer and retry",
-        "incomplete environment layer at",
+        "installed artifact is missing",
     );
     let capsule_state = fixture.capsule_state("codex");
     assert!(!capsule_state.exists());
     assert!(!capsule_state
         .join(".fortlet-credential-fingerprint")
         .exists());
-    assert!(!incomplete_harness.join(".fortlet-tool.json").exists());
+    assert!(!incomplete_harness.join("codex.json").exists());
 }

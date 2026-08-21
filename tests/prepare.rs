@@ -4,6 +4,8 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 
+mod support;
+
 struct Fixture {
     _temporary: tempfile::TempDir,
     home: PathBuf,
@@ -11,6 +13,7 @@ struct Fixture {
     data: PathBuf,
     project: PathBuf,
     auth: PathBuf,
+    artifacts: PathBuf,
 }
 
 impl Fixture {
@@ -21,6 +24,7 @@ impl Fixture {
         let data = temporary.path().join("data");
         let project = temporary.path().join("project");
         let auth = project.join("invalid-auth.json");
+        let artifacts = temporary.path().join("runtime-artifacts");
         fs::create_dir_all(&home).unwrap();
         fs::create_dir_all(&project).unwrap();
         fs::write(&auth, "not a credential").unwrap();
@@ -31,6 +35,7 @@ impl Fixture {
             data,
             project,
             auth,
+            artifacts,
         }
     }
 
@@ -47,6 +52,7 @@ impl Fixture {
             .env("XDG_STATE_HOME", &self.state)
             .env("XDG_DATA_HOME", &self.data)
             .env("FORTLET_AUTH_FILE", &self.auth)
+            .env("FORTLET_RUNTIME_ARTIFACTS", &self.artifacts)
             .output()
             .unwrap()
     }
@@ -60,57 +66,14 @@ impl Fixture {
         ])
     }
 
-    fn tools(&self) -> PathBuf {
-        self.data.join("fortlet/tools")
-    }
-
-    fn seed_base(&self) {
-        seed_marker(&self.tools().join("_base/bookworm-5"), ".fortlet-base.json");
-    }
-
-    fn seed_harness(&self, harness: &str) {
-        let version = match harness {
-            "codex" => "0.147.0",
-            "tact" => "0.3.7",
-            _ => panic!("test fixture has no version for {harness}"),
-        };
-        seed_marker(
-            &self.tools().join(harness).join(version),
-            ".fortlet-tool.json",
-        );
+    fn seed_prepared(&self, harness: &str) {
+        support::seed_prepared(&self.data, &self.project, &self.artifacts, harness);
     }
 
     fn assert_no_runtime_state(&self) {
         assert!(!self.state.join("fortlet/projects").exists());
         assert!(!self.data.join("fortlet/environments").exists());
     }
-}
-
-fn seed_marker(root: &Path, marker: &str) {
-    fs::create_dir_all(root).unwrap();
-    let (name, version) = if marker == ".fortlet-base.json" {
-        ("_base", "bookworm-5")
-    } else {
-        let name = root
-            .parent()
-            .unwrap()
-            .file_name()
-            .unwrap()
-            .to_str()
-            .unwrap();
-        let version = root.file_name().unwrap().to_str().unwrap();
-        (name, version)
-    };
-    fs::write(
-        root.join(marker),
-        serde_json::to_vec(&serde_json::json!({
-            "name": name,
-            "version": version,
-            "image": "node:24-bookworm",
-        }))
-        .unwrap(),
-    )
-    .unwrap();
 }
 
 fn assert_failure(output: Output, stage: &str, action: &str, cause: &str) {
@@ -151,7 +114,7 @@ fn missing_project_fails_without_reading_credentials_or_creating_runtime_state()
         "cannot resolve project path",
     );
     fixture.assert_no_runtime_state();
-    assert!(!fixture.tools().exists());
+    assert!(!support::prepared_store(&fixture.data, &fixture.project).exists());
 }
 
 #[test]
@@ -174,16 +137,16 @@ fn invalid_project_environment_fails_before_layer_or_runtime_creation() {
         "project environment PATH entry must be a normalized relative path",
     );
     fixture.assert_no_runtime_state();
-    assert!(!fixture.tools().exists());
+    assert!(!support::prepared_store(&fixture.data, &fixture.project).exists());
 }
 
 #[test]
 fn cache_hits_are_silent_idempotent_and_credential_free_for_both_harnesses() {
     for harness in ["codex", "tact"] {
         let fixture = Fixture::new();
-        fixture.seed_base();
-        fixture.seed_harness(harness);
-        let before = fs::read(fixture.tools().join("_base/bookworm-5/.fortlet-base.json")).unwrap();
+        fixture.seed_prepared(harness);
+        let marker = support::prepared_store(&fixture.data, &fixture.project).join("runtime.json");
+        let before = fs::read(&marker).unwrap();
 
         for _ in 0..2 {
             let output = fixture.prepare(harness);
@@ -195,10 +158,7 @@ fn cache_hits_are_silent_idempotent_and_credential_free_for_both_harnesses() {
             assert!(output.stderr.is_empty());
         }
 
-        assert_eq!(
-            fs::read(fixture.tools().join("_base/bookworm-5/.fortlet-base.json")).unwrap(),
-            before
-        );
+        assert_eq!(fs::read(marker).unwrap(), before);
         fixture.assert_no_runtime_state();
     }
 }
@@ -206,8 +166,7 @@ fn cache_hits_are_silent_idempotent_and_credential_free_for_both_harnesses() {
 #[test]
 fn implicit_selection_discovers_the_project_from_a_nested_directory() {
     let fixture = Fixture::new();
-    fixture.seed_base();
-    fixture.seed_harness("codex");
+    fixture.seed_prepared("codex");
     fs::create_dir(fixture.project.join(".jj")).unwrap();
     let nested = fixture.project.join("src/nested");
     fs::create_dir_all(&nested).unwrap();
@@ -221,12 +180,13 @@ fn implicit_selection_discovers_the_project_from_a_nested_directory() {
 }
 
 #[test]
-fn incomplete_harness_layer_preserves_the_verified_base() {
+fn incomplete_harness_closure_preserves_the_verified_runtime() {
     let fixture = Fixture::new();
-    fixture.seed_base();
-    let base_marker = fixture.tools().join("_base/bookworm-5/.fortlet-base.json");
-    let before = fs::read(&base_marker).unwrap();
-    fs::create_dir_all(fixture.tools().join("codex/0.147.0")).unwrap();
+    support::write_artifacts(&fixture.artifacts);
+    let store = support::seed_runtime(&fixture.data, &fixture.project);
+    let runtime_marker = store.join("runtime.json");
+    let before = fs::read(&runtime_marker).unwrap();
+    fs::create_dir_all(store.join("harnesses")).unwrap();
 
     let output = fixture.prepare("codex");
 
@@ -234,8 +194,8 @@ fn incomplete_harness_layer_preserves_the_verified_base() {
         output,
         "environment",
         "check network access or remove the reported incomplete layer and retry",
-        "incomplete environment layer at",
+        "installed artifact is missing",
     );
-    assert_eq!(fs::read(base_marker).unwrap(), before);
+    assert_eq!(fs::read(runtime_marker).unwrap(), before);
     fixture.assert_no_runtime_state();
 }

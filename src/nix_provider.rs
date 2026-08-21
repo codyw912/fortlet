@@ -7,11 +7,11 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use anyhow::{bail, Context, Result};
 use fs2::FileExt;
+use microsandbox::sandbox::PullPolicy;
 use microsandbox::Sandbox;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
-use crate::environment::BASE_IMAGE;
 use crate::paths::AppPaths;
 use crate::project::Project;
 use crate::project_environment::{
@@ -19,12 +19,12 @@ use crate::project_environment::{
     ProjectEnvironment, PublishedProjectEnvironment, NIX_PROVIDER_CONTRACT, NIX_VERSION,
 };
 use crate::runtime::{effective_gid, effective_uid};
+use crate::runtime_artifacts::PreparedRuntime;
 
 const RECORD_SCHEMA: u64 = 1;
 const GUEST_STORE: &str = "/nix";
 const MAX_VARIABLES: usize = 256;
 const MAX_VALUE_BYTES: usize = 16 * 1024;
-const HOLD_SCRIPT: &str = "trap 'exit 0' TERM INT; while :; do sleep 3600 & wait $!; done";
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
@@ -61,6 +61,7 @@ pub async fn ensure(
     paths: &AppPaths,
     project: &Project,
     environment: &ProjectEnvironment,
+    runtime: &PreparedRuntime,
 ) -> Result<PublishedProjectEnvironment> {
     let declaration = environment
         .nix()
@@ -72,7 +73,7 @@ pub async fn ensure(
     }
 
     let _lock = lock(&paths.locks().join(format!(
-        "nix-provider-{}.lock",
+        "project-store-{}.lock",
         declaration.project_identity
     )))?;
     if let Some(record) = verified_record(&record_path, &store, environment.identity())? {
@@ -84,7 +85,7 @@ pub async fn ensure(
     ensure_owned_directory(&store)?;
 
     eprintln!("fortlet: preparing Nix project environment (first use)");
-    let record = provision(&store, project, environment, &declaration).await?;
+    let record = provision(&store, project, environment, &declaration, runtime).await?;
     write_record(&record_path, &record)?;
     let record = verified_record(&record_path, &store, environment.identity())?
         .context("resolved Nix project environment record was not published")?;
@@ -96,6 +97,7 @@ async fn provision(
     project: &Project,
     environment: &ProjectEnvironment,
     declaration: &NixProjectEnvironment<'_>,
+    runtime: &PreparedRuntime,
 ) -> Result<ResolvedRecord> {
     let provider_root = store.parent().context("Nix provider store has no parent")?;
     let home = tempfile::Builder::new()
@@ -108,21 +110,23 @@ async fn provision(
     let sandbox_name = format!("fortlet-nix-provision-{}-{unique:x}", std::process::id());
     let project_path = project.root.display().to_string();
     let sandbox = Sandbox::builder(&sandbox_name)
-        .image(BASE_IMAGE)
+        .image(runtime.image_reference.clone())
+        .pull_policy(PullPolicy::Never)
         .cpus(4)
         .memory(8192)
         .root_disk(16384)
-        .volume(GUEST_STORE, |mount| mount.bind(store))
+        .volume(GUEST_STORE, |mount| {
+            mount.named(runtime.store_volume.clone())
+        })
         .volume("/home/agent", |mount| mount.bind(home.path()))
         .volume("/result", |mount| mount.bind(result.path()))
         .volume(&project_path, |mount| mount.bind(&project.root).readonly())
-        .script("hold", HOLD_SCRIPT)
-        .entrypoint(["hold"])
+        .entrypoint([runtime.hold.clone()])
         .create()
         .await
         .context("cannot create Nix project-environment provisioning capsule")?;
 
-    let outcome = provision_in_sandbox(&sandbox, project, environment, declaration).await;
+    let outcome = provision_in_sandbox(&sandbox, project, environment, declaration, runtime).await;
     cleanup(&sandbox, &sandbox_name).await;
     outcome
 }
@@ -132,39 +136,20 @@ async fn provision_in_sandbox(
     project: &Project,
     environment: &ProjectEnvironment,
     declaration: &NixProjectEnvironment<'_>,
+    runtime: &PreparedRuntime,
 ) -> Result<ResolvedRecord> {
-    let (url, digest) = nix_distribution()?;
     let bootstrap = format!(
         r#"set -eu
-export DEBIAN_FRONTEND=noninteractive
-apt-get update -qq
-apt-get install -y -qq ca-certificates curl xz-utils
-curl --fail --location --silent --show-error {url} -o /tmp/nix.tar.xz
-printf '%s  %s\n' '{digest}' /tmp/nix.tar.xz | sha256sum -c -
-tar -xJf /tmp/nix.tar.xz -C /tmp
-getent group {gid} >/dev/null || groupadd -g {gid} fortlet-agent
-getent passwd {uid} >/dev/null || useradd -u {uid} -g {gid} -d /home/agent -M fortlet-agent
+grep -q '^fortlet-agent:' /etc/group || printf 'fortlet-agent:x:{gid}:\n' >> /etc/group
+grep -q '^fortlet-agent:' /etc/passwd || printf 'fortlet-agent:x:{uid}:{gid}:Fortlet agent:/home/agent:/bin/sh\n' >> /etc/passwd
 chown {uid}:{gid} /nix /home/agent /result
 "#,
         uid = effective_uid(),
         gid = effective_gid(),
     );
-    checked_exec(sandbox, "/bin/sh", &["-c", &bootstrap], None).await?;
+    checked_exec(sandbox, &runtime.shell, &["-c", &bootstrap], None).await?;
 
-    let install = r#"set -eu
-set -- /tmp/nix-*/install
-test "$#" -eq 1
-"$1" --no-daemon --yes --no-channel-add --no-modify-profile
-"#;
-    checked_exec(
-        sandbox,
-        "/bin/sh",
-        &["-c", install],
-        Some(agent_environment()),
-    )
-    .await?;
-
-    let nix = "/home/agent/.nix-profile/bin/nix";
+    let nix = runtime.nix.as_str();
     let common = nix_arguments();
     let flake_reference = format!("path:{}", project.root.display());
     let mut archive_arguments = common.clone();
@@ -211,7 +196,7 @@ test "$#" -eq 1
         contract: NIX_PROVIDER_CONTRACT.to_owned(),
         declaration_identity: environment.identity().to_owned(),
         identity: String::new(),
-        nix_version: NIX_VERSION.to_owned(),
+        nix_version: runtime.nix_version.clone(),
         system: guest_system()?.to_owned(),
         source,
         derivation,
@@ -488,10 +473,6 @@ fn verified_record(
         .chain([&record.source, &record.derivation])
     {
         require_store_path(entry)?;
-        let host = store.join(entry.trim_start_matches("/nix/"));
-        if !host.exists() {
-            bail!("resolved Nix project environment store is incomplete");
-        }
     }
     Ok(Some(record))
 }
@@ -522,20 +503,6 @@ fn lock(path: &Path) -> Result<File> {
     let file = File::options().create(true).append(true).open(path)?;
     file.lock_exclusive()?;
     Ok(file)
-}
-
-fn nix_distribution() -> Result<(&'static str, &'static str)> {
-    match std::env::consts::ARCH {
-        "aarch64" => Ok((
-            "https://releases.nixos.org/nix/nix-2.35.2/nix-2.35.2-aarch64-linux.tar.xz",
-            "4d0302a2910f5eec1c33b8deef634f04899a75737e7001ec49908d003ae5efda",
-        )),
-        "x86_64" => Ok((
-            "https://releases.nixos.org/nix/nix-2.35.2/nix-2.35.2-x86_64-linux.tar.xz",
-            "0c3960a9792331a22081c3c7a5d8465db9b17c50b3acdf18587fa4c6f2cb1158",
-        )),
-        architecture => bail!("unsupported Nix provider architecture {architecture}"),
-    }
 }
 
 async fn cleanup(sandbox: &Sandbox, name: &str) {
@@ -604,12 +571,5 @@ mod tests {
                 parse_activation(&value.to_string(), &project(Path::new("/tmp/project"))).is_err()
             );
         }
-    }
-
-    #[test]
-    fn distribution_is_versioned_and_digest_pinned() {
-        let (url, digest) = nix_distribution().unwrap();
-        assert!(url.contains(NIX_VERSION));
-        assert_eq!(digest.len(), 64);
     }
 }
