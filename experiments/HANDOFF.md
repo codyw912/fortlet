@@ -1,10 +1,11 @@
-# Session Handoff — choose the portable project-capability goal
+# Session Handoff — review the portable project-capability contract
 
-Audience: a fresh agent session. `GOAL.md` is complete and intentionally has
-no successor yet. Verify `main`, the Jujutsu stack, conformance, and the
-complete `docs/RUNBOOK.md` gate before relying on this summary. Do not begin
-implementation until the operator accepts a successor GOAL and any required
-architecture proposal.
+Audience: a fresh agent session. The operator accepted the outcome, public
+testbeds, exclusions, evidence budget, and four-hour ceiling in the active
+`GOAL.md`. FIP-0012 is in Review. Verify `main`, the Jujutsu stack,
+conformance, and the complete `docs/RUNBOOK.md` gate before relying on this
+summary. Do not begin implementation until the operator accepts the exact
+FIP-0012 contract.
 
 ## Verified repository state
 
@@ -14,7 +15,14 @@ On 2026-08-20, `jj git fetch --remote origin` reported no changes. Local
 `Add opt-in startup latency diagnostics (#14)`. The working copy was a clean
 empty child of `main` before this handoff-only edit.
 
-The completed latency goal's full aarch64-darwin gate passed through
+On 2026-08-21 the successor session repeated the complete aarch64-darwin gate
+through `nix develop`: 91 unit tests and every enabled integration test,
+formatting, strict all-target/all-feature Clippy, conformance, the curated
+package, and the shim-activation check all passed. The two stock-Codex
+compatibility tests remain explicitly ignored because they require an external
+binary. Nix reported only the expected incompatible x86_64-linux omission.
+
+The completed latency goal's final aarch64-darwin gate passed through
 `nix develop`: 91 unit tests and every enabled integration test, formatting,
 strict all-target/all-feature Clippy, conformance, the curated package, and
 the shim-activation check. Experiments 0043 and 0045 established a 55–60 ms
@@ -161,17 +169,16 @@ approval policy and recommends fixing the common-case boundary rather than
 teaching a reviewer to approve noisy escalations indefinitely:
 <https://learn.chatgpt.com/docs/agent-approvals-security>.
 
-## Recommended successor direction
+## Selected successor and review boundary
 
-Do not combine every environment and publication feature into one mega-goal.
-The first successor should prove **complete local project work**:
+The active goal proves **complete local project work** without combining it
+with publication authority:
 
-1. Define an internal resolved project-environment plan independent of any
-   harness. It should make the selected base, provider, paths, variables,
-   preparation, caches, and unsupported or host-only requirements inspectable.
-2. Keep the current FIP-0006 recipe as the explicit escape hatch and implement
-   one real provider. Nix/devenv is the most immediately useful first provider;
-   keep the abstraction neutral so a safe Dev Container subset can follow.
+1. Define a harness-neutral resolved project-capability plan and a safe
+   `fortlet plan` inspection surface.
+2. Keep the current FIP-0006 recipe as schema 1 and add only an explicitly
+   selected, locked Nix dev-shell schema 2. Direct devenv and Dev Container
+   compatibility remain outside the goal.
 3. Put Git and bootstrap necessities in the common base. Project compilers and
    package managers belong to the selected provider rather than harness
    adapters.
@@ -182,9 +189,16 @@ The first successor should prove **complete local project work**:
 5. Allow useful mutable scratch state across capsule stop/start while reset
    remains destructive. Keep reproducible environment inputs and dependency
    caches distinct from unpromoted root mutation.
-6. Prove edit, project verification, and unsigned local commit through Codex
-   or Tact in two real projects. Report Linux-incompatible or host-only checks
-   honestly rather than claiming universal reproduction.
+6. Prove edit, project verification, and unsigned local checkpoint through one
+   Codex unit and one Tact unit using only public testbeds: Fortlet and a pinned
+   disposable checkout of `https://github.com/muesli/reflow`. Never mutate the
+   external repository remotely or record personal identity values.
+
+FIP-0012 is deliberately narrower than general Nix activation. It requires a
+project-scoped store, credential-free archiving/evaluation/realization,
+scalar-only captured activation, rejection of hooks/functions/services, and
+narrow generated Git and Jujutsu identity. The operator accepted the goal
+direction but has not yet accepted this exact architecture contract.
 
 After that succeeds, use a separate architecture slice to test one external
 publication lease:
@@ -206,15 +220,16 @@ plane for the first experiment.
 
 ## Next session
 
-1. Follow the repository startup order and run the complete verification gate.
-2. Confirm the completed latency GOAL and the parked Claude bookmark still
-   match this handoff.
-3. Discuss the exact outcome, exclusions, evidence, and time ceiling for the
-   complete-local-project-work successor GOAL with the operator.
-4. Determine whether that goal extends FIP-0006 or requires a new proposal.
-   Any architecture change MUST be accepted before implementation.
-5. Leave publication implementation and all additional harnesses outside the
-   first slice unless the operator deliberately chooses otherwise.
+1. Follow the repository startup order and confirm the verified baseline and
+   parked Claude bookmark still match this handoff.
+2. Present FIP-0012's exact schema, provider boundary, activation restrictions,
+   plan output, persistence, and identity projection to the operator.
+3. If the operator requests changes, revise the Review proposal without
+   implementation. Mark it Accepted only after explicit operator acceptance.
+4. After acceptance, create the authorized `portable-project-capability`
+   bookmark and draft pull request, then implement within the four-hour goal
+   ceiling.
+5. Predeclare every external checkout and model-backed unit before dispatch.
 
 ## What not to do
 
@@ -224,5 +239,6 @@ problem complete. Do not copy the host home or `.gitconfig`, forward SSH or
 run repository setup or Git hooks on the host. Do not silently guess among
 multiple environment definitions. Do not claim full Dev Container support
 from a subset. Do not unpark Claude Code merely because its proposal already
-exists. Do not create a successor GOAL without operator discussion and
-acceptance.
+exists. Do not begin FIP-0012 implementation while its status remains Review,
+and do not put any private project name, path, or personal identity value into
+a public artifact.

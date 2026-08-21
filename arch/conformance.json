@@ -301,6 +301,14 @@
         "experiments/0033-global-owned-capsule-inventory.md"
       ],
       "gaps": []
+    },
+    {
+      "proposal": "0012",
+      "title": "Resolved provider-backed project environments",
+      "status": "unimplemented",
+      "modules": [],
+      "tests": [],
+      "gaps": []
     }
   ]
 }

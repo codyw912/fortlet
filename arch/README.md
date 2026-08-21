@@ -58,3 +58,4 @@ cargo test --test conformance
 10. [FIP-0009: Codex Apps capability handling](proposals/0009-codex-apps-capability-handling.md)
 11. [FIP-0010: Bounded streaming non-interactive execution](proposals/0010-bounded-streaming-noninteractive-execution.md)
 12. [FIP-0011: Global owned-capsule inventory](proposals/0011-global-owned-capsule-inventory.md)
+13. [FIP-0012: Resolved provider-backed project environments](proposals/0012-resolved-provider-backed-project-environments.md)
