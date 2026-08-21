@@ -67,4 +67,4 @@ scannable failure/win history of the project:
 - `0043-capsule-lifecycle-latency-screen.md` — rejected; absent and stopped launches overlapped around 0.4–0.5 seconds while all six running launches completed in 0.06 seconds, so the prior nine-second result did not reproduce and lifecycle state alone did not attribute it.
 - `0044-managed-startup-phase-attribution.md` — terminal failure; the selected development executable was stale because the rehearsal built only its test harness, so three lifecycle commands produced no timing events before public cleanup.
 - `0045-built-startup-phase-attribution.md` — accepted; runtime reconciliation dominated absent and stopped totals, while six running launches had a 55-millisecond median and the earlier nine-second observation did not reproduce.
-- `0046-public-nix-provider-rehearsal.md` — declared; one zero-model public schema-2 provider unit is pending after the complete local gate.
+- `0046-public-nix-provider-rehearsal.md` — rejected; a long isolated HOME exceeded MicroSandbox's Unix-socket path limit before any Nix provider operation or VM creation.

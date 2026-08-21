@@ -1,6 +1,6 @@
 # Experiment 0046: public Nix-provider rehearsal
 
-Status: declared
+Status: completed — rejected
 Design: FIP-0012
 
 ## Baseline / Control
@@ -103,8 +103,34 @@ Nix emitted only the expected incompatible x86_64-linux omission.
 
 ## Results
 
-Pending.
+The complete pre-dispatch gate passed. The initial `plan` then reported the
+exact pinned public parent, the three declared setup files, target
+`aarch64-linux`, provider `nix-dev-shell`, selection `default`, and
+`unprepared`; it created neither isolated state nor data.
+
+The first `prepare tact` stopped while creating the common-base provisioning
+capsule, before Nix bootstrap or any schema-2 provider operation. MicroSandbox
+reported that its shortest derived agent relay socket path was 111 bytes,
+exceeding macOS's 104-byte Unix-socket limit, and directed the caller to use a
+shorter `MSB_HOME` or sandbox path. The experiment's long disposable `HOME`
+was therefore not a valid MicroSandbox control root.
+
+Post-failure inspection found only the isolated Fortlet data/lock directories
+and checkout. Raw MicroSandbox inventory contained the same unrelated stopped
+Codex capsule that predated the experiment and no experiment provisioning
+capsule. Exact cleanup removed the disposable checkout and isolated roots;
+inventory was unchanged afterward. No Nix command, model process, project
+edit, checkpoint, credential read, managed project capsule, or remote mutation
+occurred.
 
 ## Terminal Closure
 
-Pending.
+1. Outcome: rejected; the sole unit failed before provider dispatch.
+2. Root cause: the experiment chose a long isolated `HOME`, and MicroSandbox's
+   derived relay socket exceeded the host Unix-socket limit. This is an
+   experiment-control failure, not evidence about the Nix provider.
+3. Actual cost: one failed prepare command, zero created experiment VMs, zero
+   model calls, and $0; elapsed engineering time was not instrumented, within
+   the 45-minute cap.
+4. Next action: declare one fresh successor using exact short isolated roots
+   and an explicit short `MSB_HOME`; do not resume this checkout or unit.
