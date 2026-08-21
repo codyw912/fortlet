@@ -337,6 +337,14 @@
         "The required public Codex and Tact work units, unsigned checkpoints, exact diff inspection, and stop/start reuse evidence remain outstanding.",
         "Native x86_64-linux provider and package verification is outstanding."
       ]
+    },
+    {
+      "proposal": "0013",
+      "title": "Nix-built project runtime substrate",
+      "status": "unimplemented",
+      "modules": [],
+      "tests": [],
+      "gaps": []
     }
   ]
 }

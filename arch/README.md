@@ -59,3 +59,4 @@ cargo test --test conformance
 11. [FIP-0010: Bounded streaming non-interactive execution](proposals/0010-bounded-streaming-noninteractive-execution.md)
 12. [FIP-0011: Global owned-capsule inventory](proposals/0011-global-owned-capsule-inventory.md)
 13. [FIP-0012: Resolved provider-backed project environments](proposals/0012-resolved-provider-backed-project-environments.md)
+14. [FIP-0013: Nix-built project runtime substrate](proposals/0013-nix-built-runtime-substrate.md)

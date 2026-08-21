@@ -1,22 +1,25 @@
 # GOAL: Prove portable local project capability
 
-Status: blocked — accepted by the operator on 2026-08-21; FIP-0012 is Accepted,
-the common-base correction and base-only rehearsal succeeded, and provider and
-model dispatch await the operator's base-image decision and amended authority
+Status: active — accepted by the operator on 2026-08-21; FIP-0012 and FIP-0013
+are Accepted, one credential-free runtime-substrate implementation and
+feasibility campaign is authorized, and provider and model dispatch remain
+blocked pending its terminal result
 
 ## Outcome
 
 Establish one inspectable project-capability path that lets Fortlet-wrapped
 Codex and Tact edit, verify, and create unsigned local Jujutsu checkpoints in
-two public projects. Preserve Fortlet's existing isolated recipe for its own
-toolchain and add one explicit Nix dev-shell provider for a pinned public Go
-project. The evidence must show useful local work, not claim universal project
-compatibility.
+two public projects. First replace the provisional Node/Debian environment
+assembly with FIP-0013's Nix-built runtime image, isolated project stores, and
+pinned harness closures without regressing prepared startup. Preserve
+Fortlet's existing isolated recipe for its own toolchain and add one explicit
+Nix dev-shell provider for a pinned public Go project. The evidence must show
+useful local work, not claim universal project compatibility.
 
-This goal extends the accepted project-environment architecture. FIP-0012 MUST
-be accepted before implementation. Before implementation or live dispatch,
-read FIP-0001, FIP-0004, FIP-0005, FIP-0006, FIP-0007, FIP-0008, and FIP-0012
-in full.
+This goal extends the accepted project-environment architecture. FIP-0012 and
+FIP-0013 MUST be accepted before their respective implementation. Before
+implementation or live dispatch, read FIP-0001, FIP-0004, FIP-0005, FIP-0006,
+FIP-0007, FIP-0008, FIP-0012, and FIP-0013 in full.
 
 ## Deliverable 0 — Freeze the verified baseline
 
@@ -43,6 +46,34 @@ in full.
    authenticated inputs, services, and host-only requirements with one
    actionable correction. Do not silently choose or approximate an
    environment.
+
+## Deliverable 1a — Establish the common runtime substrate
+
+1. Produce one Nix-built OCI runtime definition per declared Linux guest
+   architecture, a canonical runtime-seed manifest, and locally loadable image
+   archives under FIP-0013. Ordinary preparation MUST require no Docker daemon,
+   registry login, host Nix, Debian package lifecycle, npm, or harness-specific
+   base image.
+2. Seed one isolated store per project before mounting it at `/nix`, add only
+   the selected harness closure, reuse the seeded Nix runtime for schema 2, and
+   mount the completed store read-only in managed capsules. Preserve schema 1
+   through its explicit common-tool contract.
+3. Deterministic evidence MUST cover artifact identity, no-pull local image
+   use, atomic and complete seeding, project isolation, Codex and Tact closure
+   selection, schema compatibility, offline cache hits, and failure
+   preservation before a live rehearsal.
+4. One predeclared credential-free feasibility campaign MUST compare the
+   existing mechanism and candidate under the same declared conditions. Record
+   cold phase durations and bytes, disk sizes, repeated preparation, and
+   prepared absent, stopped, and running launch samples.
+5. Repeated preparation MUST remain an offline, non-mutating, capsule-free
+   cache hit with a sub-second median. Prepared absent, stopped, and running
+   launches MUST retain sub-second medians, and every running sample MUST remain
+   below one second. Predeclare a finite cold-preparation ceiling; reject the
+   candidate terminally if it or any prepared-launch requirement fails.
+6. Stop after the substrate campaign's terminal closure and report its result.
+   Do not spend a provider or model unit until the operator authorizes the
+   remaining goal after reviewing that evidence.
 
 ## Deliverable 2 — Supply ordinary local project capability
 
@@ -110,6 +141,9 @@ in full.
    least one unit proves useful cache or state reuse after stop/start.
 5. FIP-0006 remains conformant, FIP-0012's status is accurate, every experiment
    is terminal, and the complete local and hosted gates pass.
+6. FIP-0013's runtime artifact, isolated-store, harness-closure, and prepared
+   latency requirements are conformant on every declared guest architecture;
+   any deferred cold-path optimization remains explicitly measured and bounded.
 
 ## Excluded scope
 
@@ -153,6 +187,18 @@ package's real installation/generation lifecycle inside the disposable,
 credential-free capsule, followed by one base-only rehearsal. Retaining
 `node:24-bookworm` for this bounded correction does not settle the base-image
 choice. No provider or model dispatch is authorized by this amendment.
+
+On 2026-08-21, the operator accepted FIP-0013's Nix-built runtime direction and
+authorized its deterministic implementation, complete local verification, and
+one predeclared credential-free feasibility campaign. That campaign MAY build
+and locally load Nix-produced OCI archives, fetch exact public unauthenticated
+build inputs, seed isolated project stores, prepare pinned Codex and Tact
+closures, and measure the declared cold and prepared paths. It MUST NOT publish
+an image or package, require registry authentication, read a provider or model
+credential, prepare the schema-2 public testbed, dispatch a model, edit a
+project, or mutate a remote. This amendment supersedes the prior base-image
+decision stop only for the named substrate work; provider and model dispatch
+remain blocked until the campaign closes and the operator reviews its evidence.
 
 Acceptance authorizes one `portable-project-capability` bookmark and one draft
 pull request targeting `main` under FIP-0005. Stop on a need to broaden the

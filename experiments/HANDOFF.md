@@ -1,10 +1,28 @@
-# Session Handoff — validate the portable project-capability implementation
+# Session Handoff — establish the Nix-built runtime substrate
 
 Audience: a fresh agent session. The operator accepted the outcome, public
 testbeds, exclusions, evidence budget, and four-hour ceiling in the active
-`GOAL.md`. FIP-0012 is Accepted. Verify `main`, the Jujutsu stack,
-conformance, and the complete `docs/RUNBOOK.md` gate before relying on this
-summary. Implement only the exact FIP-0012 contract within the active goal.
+`GOAL.md`. FIP-0012 and FIP-0013 are Accepted. Verify `main`, the Jujutsu
+stack, conformance, and the complete `docs/RUNBOOK.md` gate before relying on
+this summary. Implement only the exact accepted contracts within the active
+goal.
+
+The base-image review selected one small Nix-built OCI runtime for every
+harness, plus one isolated Nix store per project. Fortlet must locally load and
+digest-verify the OCI archive with pulling disabled, seed the runtime closure
+before `/nix` hides the image store, add only the selected pinned harness
+closure, and let schema 2 add its locked project closure. Managed capsules
+mount the completed store read-only. npm, Debian package assembly, per-harness
+images, registry login, and host Nix are not ordinary preparation contracts.
+
+FIP-0013 makes performance an adoption gate. Repeated preparation must be an
+offline, non-mutating, capsule-free cache hit with a sub-second median.
+Prepared absent, stopped, and running lifecycle medians must remain below one
+second, and every running sample must remain below one second. A predeclared
+credential-free feasibility campaign must compare the existing mechanism and
+candidate under the same conditions, record cold phase timings, bytes and disk
+sizes, and use a finite cold ceiling. The current authority stops after that
+campaign; it does not authorize schema-2 provider preparation or a model unit.
 
 The deterministic implementation is checkpointed at `062a68c69026`. It adds
 strict schema-2 discovery, side-effect-free `fortlet plan`, a pinned guest-only
@@ -278,17 +296,19 @@ plane for the first experiment.
 
 1. Follow the repository startup order and confirm the verified baseline,
    implementation checkpoint, goal bookmark, and parked Claude bookmark.
-2. Stop. The common-base correction is accepted, but no provider or model
-   dispatch is authorized. Keep the accepted FIP boundary fixed.
-3. Revisit the base-image choice with the operator: distinguish harness runtime,
-   provisioning substrate, and portable common-tool layer responsibilities.
-4. Only after that decision may the operator amend authority for a fresh
-   provider unit and the later Codex/Tact public work units.
+2. Implement FIP-0013 without changing FIP-0012's provider selection,
+   activation, inspection, identity, credential, workspace, or reset boundary.
+3. Run deterministic evidence and the complete runbook gate before declaring
+   one credential-free control-and-candidate substrate campaign.
+4. Close that campaign terminally and stop. Provider preparation and Codex or
+   Tact model work remain unauthorized pending operator review.
 
 ## What not to do
 
-Do not solve only AGD. Do not install Nix into every capsule and call the
-problem complete. Do not copy the host home or `.gitconfig`, forward SSH or
+Do not solve only AGD. Do not retain Node or npm merely for Codex, install Nix
+again inside every capsule, publish or require a registry image, share a
+writable store across projects, or mount the image's store over an empty
+project store. Do not copy the host home or `.gitconfig`, forward SSH or
 1Password sockets, expose a general GitHub token through the guest proxy, or
 run repository setup or Git hooks on the host. Do not silently guess among
 multiple environment definitions. Do not claim full Dev Container support

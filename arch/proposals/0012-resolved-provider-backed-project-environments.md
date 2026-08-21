@@ -3,6 +3,7 @@
 Status: Accepted
 Recorded: 2026-08-21 from the operator-accepted portable project-capability design
 Requires: FIP-0001, FIP-0004, FIP-0006, FIP-0007
+Extended-By: FIP-0013
 
 ## Summary
 
