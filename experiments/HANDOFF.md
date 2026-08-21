@@ -80,6 +80,33 @@ harness work, and the identical second prepare was an unchanged cache hit
 without network approval. Both isolated inventories were empty; exact cleanup
 left global inventory unchanged. No provider or model work ran.
 
+Checkpoint `d2df7964` implements FIP-0013's Nix-built OCI archive, canonical
+runtime seed, per-project named ext4 store, and pinned Codex and Tact closures.
+Checkpoint `894d306b` adds bounded opt-in cold-preparation phase timings. The
+complete aarch64-darwin gate passed at that candidate: 102 unit tests and every
+enabled integration test, formatting, strict Clippy, conformance, the curated
+package, and shim activation were green. Nix reported only the expected native
+x86_64-linux omission.
+
+Experiment 0054 is terminally rejected. The candidate loaded its 99.5 MiB local
+image, seeded the runtime store, imported Tact, and built Fortlet's schema-1
+layer in 267.29 seconds, below the predeclared 600-second ceiling. Five offline
+warm prepares had a 0.01-second median without marker mutation or capsules.
+The first prepared absent launch then failed before Tact: MicroSandbox rejected
+the read-only schema-1 project-layer bind with `Permission denied`. Read-only
+inspection attributed this to host-side extracted modes normalized to
+owner-only, followed by recursive sealing that produced representative `0500`
+directories and `0400` commands. Public reset and exact cleanup succeeded; the
+public project was unchanged; and no real credential, provider, model, edit,
+remote mutation, or publication occurred.
+
+Stop here for operator review. Do not fix the sealing contract, run a successor
+campaign, prepare schema 2, or dispatch Codex/Tact model work without fresh
+direction. The smallest successor should define portable published directory
+and executable modes, prove one mounted schema-1 layer deterministically and
+live, then repeat the remaining prepared lifecycle evidence under a new
+experiment identity.
+
 ## Verified repository state
 
 On 2026-08-20, `jj git fetch --remote origin` reported no changes. Local

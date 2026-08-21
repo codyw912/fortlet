@@ -1,6 +1,6 @@
 # Experiment 0054: Nix runtime substrate feasibility
 
-Status: declared
+Status: completed — rejected
 Design: FIP-0001, FIP-0006, FIP-0007, FIP-0012, FIP-0013
 
 ## Baseline / Control
@@ -154,8 +154,104 @@ harness, or model process was created during rehearsal.
 
 ## Results
 
-Pending.
+The exact control package built successfully. Its isolated inventory began
+empty, and its first prepare resolved the declared arm64/Linux
+`node:24-bookworm` digest and reported a 381.5 MiB image. The isolated
+production calls recorded:
+
+| Control phase | Real seconds | Outcome |
+| --- | ---: | --- |
+| common base | 82.66 | accepted for the unit |
+| Tact 0.3.7 | 1.71 | accepted for the unit |
+| schema-1 layer | 0.46 | rejected |
+
+The base-only call emitted no harness or project first-use event. After removal
+of only the declared synthetic marker, the Tact-only call emitted no base
+first-use event. The schema-1 call then failed before publication because the
+frozen candidate project requires the new common `bsdtar` contract and the
+accepted control does not provide it. The control cold sequence therefore
+stopped at 84.83 seconds; warm and lifecycle samples are unavailable rather
+than replaced with a different project revision. Its base and Tact outputs
+used 52,164 KiB and 44,976 KiB respectively, and the isolated MicroSandbox root
+used 1,182,544 KiB. HTTP transfer byte counts were unavailable from the control.
+The failure left no control capsule.
+
+The candidate began with empty capsule and image inventories. Its single cold
+prepare returned `tact<TAB>ready` and recorded:
+
+| Candidate phase | Milliseconds |
+| --- | ---: |
+| local image verification/load | 1,094 |
+| runtime-store seed | 3,029 |
+| Tact closure import | 1,098 |
+| schema-1 layer | 262,054 |
+| final verification | 0 |
+| bounded event total | 267,276 |
+| independent real total | 267,290 |
+
+The 267.29-second total passed the 600-second cold ceiling. The locally loaded
+image retained its exact digest and reported 99.5 MiB, versus the control's
+381.5 MiB. Preparation downloaded no image or harness input: the installed OCI
+archive, runtime seed, and Tact closure were 104,432,128, 98,195,343, and
+33,334,073 bytes. Schema-1 HTTP transfer bytes were unavailable. The sealed
+schema-1 output used 1,249,480 KiB. The isolated candidate MicroSandbox root,
+including image data and the store volume's allocated blocks, used 676,048
+KiB. The project-store disk was 16 GiB apparent and sparse.
+
+Five unchanged candidate prepares ran without network approval in 0.02, 0.01,
+0.01, 0.01, and 0.01 seconds, for a 0.01-second median. All returned
+`tact<TAB>ready`; runtime, harness, and project marker SHA-256 values, sizes,
+and mtimes were byte-for-byte identical before and after; and inventory stayed
+empty. The invoking login shell emitted a pre-command parse diagnostic in each
+sample. It was external to Fortlet and did not change command output or status,
+but the observation is retained.
+
+The first candidate prepared launch began from confirmed absence and failed
+before Tact execution:
+
+```text
+fortlet: capsule stage failed; run `fortlet doctor` and follow its reported correction: cannot create capsule: failed to start managed capsule: project-layer mount: Permission denied (os error 13)
+```
+
+The bounded startup events reached resolve at 0 milliseconds, credentials at
+1 millisecond, environment at 2 milliseconds, and capsule-state at 82
+milliseconds. Runtime and command events were absent. Independent real time was
+0.16 seconds, but this is a failed launch and not a latency sample. Status then
+reported one stopped owned capsule; public reset restored absence and empty
+isolated inventory. No launch was retried, so absent, stopped, and running
+candidate distributions are unavailable.
+
+Read-only attribution found that MicroSandbox's host bind backing had
+normalized extracted entries to owner-only modes. Recursive sealing preserved
+that restriction while removing write bits: the published root was `0555`, a
+representative executable directory was `0500`, and a representative command
+was `0400`. MicroSandbox rejected the resulting project-layer bind. The same
+sealed modes initially prevented recursive cleanup; restoring owner-write only
+on the exact terminal experiment layer allowed its deletion.
+
+Both temporary Jujutsu workspaces were clean and forgotten. The exact
+experiment root was removed and proved absent. Global inventory matched the
+pre-existing single unrelated stopped capsule recorded by the handoff. No real
+credential, provider, model process, project edit, checkpoint, remote mutation,
+or publication occurred.
 
 ## Terminal Closure
 
-Pending.
+1. Outcome: rejected; cold and warm preparation passed, but the first prepared
+   launch failed the required project-layer mount before Tact started.
+2. Root cause: schema-1 output sealing combined with host-side mode
+   normalization to produce owner-only non-writable directories and
+   non-executable files. The sealed tree was not mountable by MicroSandbox and
+   is therefore not a valid published runtime layer.
+3. Actual cost: 18 minutes 37 seconds versus the 60-minute ceiling, one
+   terminal control sequence, one candidate cold prepare, five candidate warm
+   prepares, one failed candidate launch, zero provider calls, zero model
+   calls, zero real credentials, and $0.
+4. Cleanup: public reset removed the stopped candidate capsule; both isolated
+   inventories were empty; the unchanged public project was verified; both
+   temporary workspaces were forgotten; and the exact experiment root was
+   removed after its sealed layer received cleanup-only owner-write permission.
+5. Next action: stop for operator review. A successor must define portable
+   executable/readable publication modes and prove a mounted schema-1 layer
+   before repeating the lifecycle campaign. Schema-2 preparation and model
+   dispatch remain unauthorized.

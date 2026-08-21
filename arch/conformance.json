@@ -312,6 +312,7 @@
         "src/identity.rs",
         "src/nix_provider.rs",
         "src/paths.rs",
+        "src/prepare_timing.rs",
         "src/preparation.rs",
         "src/project_capability.rs",
         "src/project_environment.rs",
@@ -361,13 +362,15 @@
       ],
       "tests": [
         "src/project_environment.rs",
+        "src/prepare_timing.rs",
         "src/runtime.rs",
         "src/runtime_artifacts.rs",
         "tests/prepare.rs",
-        "tests/pre_runtime_failures.rs"
+        "tests/pre_runtime_failures.rs",
+        "experiments/0054-nix-runtime-substrate-feasibility.md"
       ],
       "gaps": [
-        "The declared credential-free control-and-candidate substrate campaign has not yet closed terminally.",
+        "Experiment 0054 rejected the candidate because its sealed schema-1 output was not mountable; prepared absent, stopped, and running latency evidence remains outstanding.",
         "A successful isolated live schema-2 preparation remains outstanding under a later authorization.",
         "Native x86_64-linux artifact, package, and runtime verification remains outstanding."
       ]

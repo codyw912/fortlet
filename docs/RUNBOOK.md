@@ -109,8 +109,9 @@ require Docker, a registry login, host Nix, npm, or a harness installer.
 Set `FORTLET_PREPARE_TIMINGS=1` to emit bounded cold-preparation events for
 the image, runtime store, selected harness closure, selected project provider,
 and final verification. Events contain only a fixed phase name plus delta and
-cumulative milliseconds. Phases already satisfied by a cache hit are omitted;
-`final-verification` is emitted for every successful prepare.
+cumulative milliseconds. Runtime first-use phases already satisfied by a cache
+hit are omitted; selected provider verification and `final-verification` are
+emitted for every successful prepare.
 
 Skipping `prepare` is supported: explicit `run` and the transparent shims
 perform the same layer preparation automatically on first launch. Preparation

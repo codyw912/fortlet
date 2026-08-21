@@ -1,9 +1,8 @@
 # GOAL: Prove portable local project capability
 
-Status: active — accepted by the operator on 2026-08-21; FIP-0012 and FIP-0013
-are Accepted, one credential-free runtime-substrate implementation and
-feasibility campaign is authorized, and provider and model dispatch remain
-blocked pending its terminal result
+Status: active — stopped for operator review after Experiment 0054 rejected the
+Nix-runtime candidate's sealed schema-1 mount; FIP-0012 and FIP-0013 remain
+Accepted, and provider and model dispatch remain blocked
 
 ## Outcome
 
