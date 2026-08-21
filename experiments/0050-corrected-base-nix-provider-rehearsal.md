@@ -121,3 +121,7 @@ checkpoint, or remote mutation occurred.
 5. Next action: none under this GOAL. Its demonstrated-defect successor budget
    is exhausted; do not resume, retry, or declare another provider/model unit
    without new operator direction.
+
+The operator subsequently supplied that direction: one fresh, isolated
+firewall-clearance successor is authorized as Experiment 0051. Experiment 0050
+remains terminal and will not be resumed.

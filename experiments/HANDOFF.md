@@ -24,8 +24,10 @@ focused test and the complete runbook gate passed, and the operator authorized
 the GOAL's one fresh successor. Experiment 0050's exact preflight passed, but
 its sole preparation attempt lost Docker Hub DNS while fetching the common base
 image. It created no capsule and never ran the corrected script or Nix. Every
-root was exactly removed, global inventory was unchanged, and the successor
-budget is now exhausted. All records are terminal and authorize no retry.
+root was exactly removed and global inventory was unchanged. The operator then
+authorized one fresh firewall-clearance successor with new isolated state and
+identical frozen inputs. Experiment 0050 remains terminal; only the separately
+declared Experiment 0051 may run, with network approval from the outset.
 
 ## Verified repository state
 
@@ -243,14 +245,13 @@ plane for the first experiment.
 
 1. Follow the repository startup order and confirm the verified baseline,
    implementation checkpoint, goal bookmark, and parked Claude bookmark.
-2. Report that the accepted GOAL cannot complete under its exhausted live-unit
-   budget: the provider has deterministic green evidence but no successful
-   live proof, and neither public model unit may now be dispatched.
-3. Do not retry or declare another provider/model unit unless the operator
-   explicitly replaces or amends the GOAL's authority. Keep schema 1 conformant
-   and the accepted FIP boundary fixed.
-4. If new authority is granted, predeclare a fresh exact unit and ensure network
-   access is available before dispatch; never reuse a terminal checkout.
+2. Run only declared Experiment 0051 with network approval from the outset;
+   never reuse Experiment 0050's terminal checkout or state.
+3. If 0051 fails, close it and stop. No further provider or model unit is
+   authorized without another explicit GOAL amendment. Keep schema 1
+   conformant and the accepted FIP boundary fixed.
+4. Only after provider rehearsal succeeds may the exact Codex and Tact public
+   work units be predeclared before either model process.
 
 ## What not to do
 

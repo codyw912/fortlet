@@ -132,6 +132,13 @@ at most one fresh successor process total MAY validate the correction within
 the same time ceiling. No failed unit may be resumed, edited, or silently
 retried. Use at most one owned capsule at a time.
 
+On 2026-08-21, after that successor stopped before capsule creation because the
+execution boundary could not resolve Docker Hub, the operator authorized one
+additional fresh firewall-clearance successor. It MUST use new isolated state,
+the identical frozen public inputs, and network approval from the outset. It
+does not authorize resuming a terminal unit, another correction, or a further
+retry.
+
 Acceptance authorizes one `portable-project-capability` bookmark and one draft
 pull request targeting `main` under FIP-0005. Stop on a need to broaden the
 provider contract, execute repository text on the host, expose a credential or
