@@ -1,9 +1,9 @@
 # GOAL: Prove portable local project capability
 
-Status: active — one credential-free schema-1 bind-permission successor is
-authorized after Experiment 0054 rejected the Nix-runtime candidate's sealed
-mount; FIP-0012 and FIP-0013 remain Accepted, and provider and model dispatch
-remain blocked
+Status: active — stopped for operator review after Experiment 0055 rejected
+guest-only canonical sealing because MicroSandbox deliberately retains an
+owner-access floor on mirrored host inodes; FIP-0012 and FIP-0013 remain
+Accepted, and provider and model dispatch remain blocked
 
 ## Outcome
 

@@ -1,6 +1,6 @@
 # Experiment 0055: Explicit bind-permission publication policy
 
-Status: declared
+Status: completed — rejected
 Design: FIP-0001, FIP-0006, FIP-0007, FIP-0013
 
 ## Baseline / Control
@@ -156,8 +156,96 @@ image, sandbox, VM, or fixture was created during rehearsal.
 
 ## Results
 
-Pending.
+Preflight verified MicroSandbox 0.6.8, the exact
+`8acd80db302c20c3cfe626b0cdebf8899ead35ae1e7d482723ba8efdbd101697`
+OCI archive SHA-256, the declared manifest digest, an absent exact experiment
+root, and empty isolated image and capsule inventories. The archive loaded
+locally as the declared 99.5 MiB image without network access. Read-only global
+Fortlet inventory contained the one pre-existing unrelated stopped capsule
+named by the handoff.
+
+The first control-publisher start was denied by the outer execution sandbox
+with `Operation not permitted` before the VM or fixture ran. It took 0.05
+seconds and left one stopped empty capsule. Following the execution
+environment's required permission replay, that exact capsule was removed, the
+empty control directory was verified, and the identical predeclared command
+was run with host VM permission. No experimental input or threshold changed.
+
+The control publisher then exited zero in 0.48 seconds and reported the
+declared guest modes:
+
+| Control entry | Guest mode | Literal host mode | Host mode after sealing |
+| --- | ---: | ---: | ---: |
+| root | `0755` | `0700` | `0500` |
+| `bin` | `0755` | `0700` | `0500` |
+| `share` | `0755` | `0700` | `0500` |
+| `bin/probe` | `0755` | `0600` | `0400` |
+| `share/data` | `0644` | `0600` | `0400` |
+
+Every entry carried MicroSandbox's `user.msb.override_stat` xattr, and the
+relative symlink target remained `probe`. The exact current-style host sealer
+removed write bits. The strict/private read-only consumer then failed in 0.06
+seconds before executing the probe:
+
+```text
+error: failed to start "f55-control-consume"
+  → mount: mount layer_ae137427: Permission denied (os error 13)
+  → the host path is not readable by msb (check permissions)
+```
+
+This reproduced Experiment 0054 and passed the attribution gate.
+
+The candidate publisher exited zero in 0.29 seconds. Its trusted finalizer
+reported exactly `0555` for the root, both directories, and executable, and
+`0444` for data. It retained the relative symlink and found no special file.
+Literal host inspection after capsule removal, however, reported `0755` for
+the root, both directories, and executable, and `0644` for data. Every entry
+again carried the stat-override xattr. The two file SHA-256 values were
+`97e605bd53b3d47c8c9462fa174267c1961e3f44633cf7388a0003d4f54ab9e9`
+and `ee5075a1707aea4f4d06583c57087a69955f856cee6358424f3e8fea706f5978`.
+
+Read-only inspection of the exact MicroSandbox 0.6.8 source attributed the
+divergence to an intentional safety property, not an ignored mount option.
+`HostPermissions::Mirror` mirrors ordinary guest bits only after OR-ing an
+owner-access floor of `0700` for directories and `0600` for regular files so
+the host process cannot lock itself out. Guest `0555` therefore becomes host
+`0755`, and guest `0444` becomes host `0644`. Because acceptance criterion 3
+required literal canonical host modes, the candidate was rejected immediately
+and `f55-candidate-consume` was never created.
+
+Both completed and failed capsules were removed and isolated capsule inventory
+was empty. Before cleanup, isolated image inventory contained only the exact
+locally loaded image. Cleanup-only owner access was restored on the two exact
+fixture trees, `/private/tmp/f55` was removed and proved absent, and global
+Fortlet inventory exactly matched baseline. No network, project, provider,
+harness, model, credential, identity, remote, source, package, or publication
+operation occurred.
+
+After terminal cleanup, the complete `aarch64-darwin` standard verification
+set passed through `nix develop`: 102 unit tests and every enabled integration
+test, formatting, strict all-target/all-feature Clippy, conformance, the Nix
+package, and shim activation were green. The two stock-Codex compatibility
+tests remained explicitly ignored because they require an external binary, and
+Nix reported only the expected incompatible `x86_64-linux` omission.
 
 ## Terminal Closure
 
-Pending.
+1. Outcome: rejected; the control reproduced, but mirrored publication could
+   not make guest-finalized non-writable modes literal on the host.
+2. Root cause: MicroSandbox 0.6.8 intentionally ORs a `0700` directory or
+   `0600` regular-file owner-access floor into mirrored host modes. The proposed
+   guest-only finalizer therefore cannot be the sole authority for a literally
+   sealed host tree.
+3. Actual cost: about 2 minutes 55 seconds of live work versus the 15-minute
+   ceiling, one locally loaded image, one outer-sandbox-denied pre-VM start,
+   one control publication, one expected-failed control consumption, one
+   rejected candidate publication, no candidate consumption, zero network,
+   provider, harness, model, or credential calls, and $0.
+4. Cleanup: all exact capsules and the exact isolated root were removed,
+   isolated inventory was empty, and global inventory was unchanged.
+5. Next action: stop for operator review. The smallest successor is a distinct
+   experiment that retains mirrored guest creation and validation, then applies
+   a trusted host-side canonical seal to remove only MicroSandbox's deliberate
+   owner-write floor before testing the relaxed read-only consumer. No such
+   successor, production fix, lifecycle retry, schema-2 work, or model dispatch
+   is authorized by this closure.
