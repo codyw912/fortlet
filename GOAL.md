@@ -1,8 +1,8 @@
 # GOAL: Prove portable local project capability
 
-Status: blocked — accepted by the operator on 2026-08-21; FIP-0012 is Accepted,
-but live validation exposed an unresolved common-base CA construction defect
-and the authorized correction/successor budget is exhausted
+Status: active — accepted by the operator on 2026-08-21; FIP-0012 is Accepted,
+and one bounded common-base correction plus base-only rehearsal is authorized;
+provider and model dispatch remain blocked
 
 ## Outcome
 
@@ -145,6 +145,14 @@ bundle defect before harness or provider preparation. After the defect was
 closed, the operator authorized its bounded correction, the complete gate, and
 one final fresh provider-validation successor. No terminal unit may be resumed,
 and this amendment authorizes no additional correction or retry.
+
+That validation proved the attempted correction retained the false assumption
+that raw package extraction provides Debian maintainer-generated state. On
+2026-08-21 the operator authorized one mechanism-level correction using the
+package's real installation/generation lifecycle inside the disposable,
+credential-free capsule, followed by one base-only rehearsal. Retaining
+`node:24-bookworm` for this bounded correction does not settle the base-image
+choice. No provider or model dispatch is authorized by this amendment.
 
 Acceptance authorizes one `portable-project-capability` bookmark and one draft
 pull request targeting `main` under FIP-0005. Stop on a need to broaden the

@@ -45,6 +45,12 @@ capsule and exact root were removed, global inventory was unchanged, and no
 Tact, Nix, or model command ran. The GOAL is blocked and all authorized
 provider successors are terminal.
 
+The operator subsequently authorized one mechanism-level correction and one
+base-only rehearsal, while explicitly leaving the suitability of
+`node:24-bookworm` open for later discussion. The correction may use Debian's
+real certificate installation/generation lifecycle inside the disposable,
+credential-free capsule. It does not authorize another provider or model run.
+
 ## Verified repository state
 
 On 2026-08-20, `jj git fetch --remote origin` reported no changes. Local
@@ -261,14 +267,13 @@ plane for the first experiment.
 
 1. Follow the repository startup order and confirm the verified baseline,
    implementation checkpoint, goal bookmark, and parked Claude bookmark.
-2. Stop. Experiment 0052 is terminal, the GOAL is blocked, and no further
-   correction, provider rehearsal, or model dispatch is authorized.
-3. Under new operator direction, replace the shared assumption that raw Debian
-   package extraction supplies maintainer-generated state. Rehearse the whole
-   base layer rather than another individual path. Keep schema 1 conformant and
-   the accepted FIP boundary fixed.
-4. A fresh provider unit must succeed before the exact Codex and Tact public
-   work units can be predeclared under separately amended authority.
+2. Replace the raw-extraction assumption only for maintainer-generated CA state
+   by using the real package lifecycle inside the disposable capsule. Keep the
+   accepted FIP boundary fixed.
+3. After the complete gate, predeclare and run one base-only rehearsal. Stop on
+   failure or success; no provider or model dispatch is authorized.
+4. Revisit the base-image choice with the operator before any separately
+   amended provider or model authority.
 
 ## What not to do
 
