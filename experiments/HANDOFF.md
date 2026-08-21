@@ -26,8 +26,12 @@ its sole preparation attempt lost Docker Hub DNS while fetching the common base
 image. It created no capsule and never ran the corrected script or Nix. Every
 root was exactly removed and global inventory was unchanged. The operator then
 authorized one fresh firewall-clearance successor with new isolated state and
-identical frozen inputs. Experiment 0050 remains terminal; only the separately
-declared Experiment 0051 may run, with network approval from the outset.
+identical frozen inputs. Experiment 0051 cleared Docker Hub DNS and entered the
+base script, which exited 1 before Tact or Nix. Static inspection proves that
+package extraction cannot satisfy its later requirement for the generated CA
+bundle because the script never runs `update-ca-certificates`. Its capsule and
+exact root were removed, global inventory was unchanged, and the amended retry
+budget is exhausted. All provider experiments are terminal.
 
 ## Verified repository state
 
@@ -245,13 +249,13 @@ plane for the first experiment.
 
 1. Follow the repository startup order and confirm the verified baseline,
    implementation checkpoint, goal bookmark, and parked Claude bookmark.
-2. Run only declared Experiment 0051 with network approval from the outset;
-   never reuse Experiment 0050's terminal checkout or state.
-3. If 0051 fails, close it and stop. No further provider or model unit is
-   authorized without another explicit GOAL amendment. Keep schema 1
-   conformant and the accepted FIP boundary fixed.
-4. Only after provider rehearsal succeeds may the exact Codex and Tact public
-   work units be predeclared before either model process.
+2. Stop: Experiment 0051 is terminal and the amended firewall-clearance budget
+   is exhausted. Do not resume any provider checkout or dispatch a model unit.
+3. Correct CA-bundle construction and command-level provisioning diagnostics
+   only under new operator direction, then rerun the complete gate. Keep schema
+   1 conformant and the accepted FIP boundary fixed.
+4. A fresh provider unit and the later Codex and Tact public work units each
+   require explicit amended authority before dispatch.
 
 ## What not to do
 

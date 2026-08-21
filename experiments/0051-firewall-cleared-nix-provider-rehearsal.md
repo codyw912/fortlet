@@ -1,6 +1,6 @@
 # Experiment 0051: firewall-cleared public Nix-provider rehearsal
 
-Status: declared
+Status: completed — rejected with Fortlet base-layer defect
 Design: FIP-0012
 
 ## Baseline / Control
@@ -72,8 +72,44 @@ first failure, hard-invariant anomaly, remote mutation, or FIP change.
 
 ## Results
 
-Pending.
+Both runtime hashes, the absolute checkout, exact public parent, and three-file
+diff matched their declarations. Initial plan was redacted and unprepared
+without creating Fortlet state, data, or MicroSandbox roots.
+
+The network-approved first prepare cleared Experiment 0050's Docker Hub DNS
+failure, downloaded the common image, created the credential-free base
+provisioning capsule, and entered Fortlet's base script. The script exited 1
+without captured stderr, before Tact or schema-2 Nix preparation began.
+
+Deterministic inspection found a guaranteed failure after the corrected tar
+validation: Fortlet extracts the `ca-certificates` package and then requires
+`/out/etc/ssl/certs/ca-certificates.crt`, but it never invokes the package's
+`update-ca-certificates` generator. Debian's official package file list contains
+the generator and individual certificates, not that generated bundle:
+<https://packages.debian.org/bookworm/all/ca-certificates/filelist>.
+Because the capsule output did not identify individual commands, this evidence
+does not claim whether the immediately preceding xz validation or the silent
+certificate test was the first exit; the certificate assertion cannot succeed
+under the declared extraction mechanism in either case.
+
+Fortlet's bounded cleanup removed the provisioning capsule; isolated raw
+inventory was `[]`. The checkout still contained exactly the declared three
+setup files. The exact temporary root was removed and proved absent. Global
+inventory retained only the unrelated pre-existing stopped Codex capsule. No
+model, credential read, managed project capsule, project-source edit,
+checkpoint, or remote mutation occurred.
 
 ## Terminal Closure
 
-Pending.
+1. Outcome: rejected with a demonstrated common-base construction defect before
+   harness or Nix-provider preparation.
+2. Root cause: package extraction alone cannot produce the CA bundle Fortlet
+   requires, and the provisioning error lacks command-level diagnostics.
+3. Actual cost: one credential-free base provisioning capsule, automatically
+   removed; zero Nix commands, zero model calls, and $0. Elapsed engineering
+   time was not instrumented, within the 45-minute cap.
+4. Cleanup: isolated inventory was empty, the exact temporary root was removed,
+   and global inventory was unchanged.
+5. Next action: stop. Correct CA-bundle construction and base-script diagnostics
+   only under new operator direction, then rerun the complete gate before any
+   separately authorized fresh unit. Do not resume or retry this experiment.
