@@ -332,7 +332,7 @@
         "tests/pre_runtime_failures.rs"
       ],
       "gaps": [
-        "Common-base CA construction is not conformant: raw ca-certificates package extraction does not create /etc/ca-certificates.conf, so the current bundle builder fails before harness or provider preparation.",
+        "Common-base CA construction now uses Debian's real certificate package lifecycle but awaits the authorized live base-only rehearsal.",
         "A successful isolated live Nix-provider preparation and verified cache hit have not yet been recorded.",
         "The required public Codex and Tact work units, unsigned checkpoints, exact diff inspection, and stop/start reuse evidence remain outstanding.",
         "Native x86_64-linux provider and package verification is outstanding."

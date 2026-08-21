@@ -124,10 +124,10 @@ impl Fixture {
 
     fn seed_layers(&self, harness: &str) {
         seed_layer_marker(
-            &self.tools().join("_base/bookworm-4"),
+            &self.tools().join("_base/bookworm-5"),
             ".fortlet-base.json",
             "_base",
-            "bookworm-4",
+            "bookworm-5",
         );
         let version = match harness {
             "codex" => "0.147.0",
@@ -439,7 +439,7 @@ fn invalid_guest_projection_fails_before_environment_or_runtime_artifacts() {
 fn incomplete_base_layer_fails_before_provisioning_or_runtime_artifacts() {
     let fixture = Fixture::new();
     fixture.write_valid_auth();
-    let incomplete_base = fixture.tools().join("_base/bookworm-4");
+    let incomplete_base = fixture.tools().join("_base/bookworm-5");
     fs::create_dir_all(&incomplete_base).unwrap();
 
     let output = fixture.run("codex", &fixture.project);
@@ -463,12 +463,12 @@ fn incomplete_base_layer_fails_before_provisioning_or_runtime_artifacts() {
 fn incomplete_harness_layer_fails_before_provisioning_or_runtime_artifacts() {
     let fixture = Fixture::new();
     fixture.write_valid_auth();
-    let base = fixture.tools().join("_base/bookworm-4");
+    let base = fixture.tools().join("_base/bookworm-5");
     let incomplete_harness = fixture.tools().join("codex/0.147.0");
     fs::create_dir_all(&base).unwrap();
     fs::write(
         base.join(".fortlet-base.json"),
-        r#"{"name":"_base","version":"bookworm-4","image":"node:24-bookworm"}"#,
+        r#"{"name":"_base","version":"bookworm-5","image":"node:24-bookworm"}"#,
     )
     .unwrap();
     fs::create_dir_all(&incomplete_harness).unwrap();
