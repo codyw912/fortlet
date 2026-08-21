@@ -1,8 +1,8 @@
 # GOAL: Prove portable local project capability
 
-Status: active — accepted by the operator on 2026-08-21; FIP-0012 is Accepted,
-and one bounded common-base correction plus base-only rehearsal is authorized;
-provider and model dispatch remain blocked
+Status: blocked — accepted by the operator on 2026-08-21; FIP-0012 is Accepted,
+the common-base correction and base-only rehearsal succeeded, and provider and
+model dispatch await the operator's base-image decision and amended authority
 
 ## Outcome
 

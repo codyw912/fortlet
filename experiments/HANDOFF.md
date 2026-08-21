@@ -55,9 +55,12 @@ Checkpoint `d7edc93d` implements that correction: it reinstalls
 `ca-certificates`, invokes Debian's generator, copies the resulting nonempty
 bundle, retains command-level diagnostics, and bumps the immutable base identity.
 The complete 101-test runbook gate, strict Clippy, conformance, Nix package,
-and shim checks passed. Only separately declared Experiment 0053 may run, and
-it MUST preseed the Tact cache marker so the production preparation path
-exercises the base without provisioning a harness or provider.
+and shim checks passed. Experiment 0053 then accepted the production mechanism:
+one base first-use event published a nonempty generated CA bundle after every
+declared tool executed in the guest, the preseeded Tact marker prevented
+harness work, and the identical second prepare was an unchanged cache hit
+without network approval. Both isolated inventories were empty; exact cleanup
+left global inventory unchanged. No provider or model work ran.
 
 ## Verified repository state
 
@@ -275,12 +278,12 @@ plane for the first experiment.
 
 1. Follow the repository startup order and confirm the verified baseline,
    implementation checkpoint, goal bookmark, and parked Claude bookmark.
-2. Run only declared Experiment 0053 with new isolated state and network
-   approval. Its preseeded Tact marker MUST prevent harness provisioning.
-3. Close 0053 and stop on failure or success; no provider or model dispatch is
-   authorized. Keep the accepted FIP boundary fixed.
-4. Revisit the base-image choice with the operator before any separately
-   amended provider or model authority.
+2. Stop. The common-base correction is accepted, but no provider or model
+   dispatch is authorized. Keep the accepted FIP boundary fixed.
+3. Revisit the base-image choice with the operator: distinguish harness runtime,
+   provisioning substrate, and portable common-tool layer responsibilities.
+4. Only after that decision may the operator amend authority for a fresh
+   provider unit and the later Codex/Tact public work units.
 
 ## What not to do
 

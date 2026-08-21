@@ -1,6 +1,6 @@
 # Experiment 0053: package-lifecycle common-base rehearsal
 
-Status: declared
+Status: completed — accepted
 Design: FIP-0012
 
 ## Baseline / Control
@@ -75,8 +75,43 @@ change.
 
 ## Results
 
-Pending.
+Both runtime hashes and the exact preseeded Tact marker matched their
+declarations. The initial plan reported no provider, no declarations, no
+activation, and no unsupported requirements without creating Fortlet state or
+MicroSandbox roots.
+
+The first network-approved prepare printed one base first-use event followed by
+exactly `tact<TAB>ready`. It emitted no Tact first-use event. The published
+`bookworm-5` layer had the exact marker, a nonempty 224,449-byte generated CA
+bundle, and nonempty bwrap, Git, curl, tar, and xz files. The production script
+had executed every tool successfully inside the guest before publication.
+
+MicroSandbox's macOS bind backing normalized extracted tool modes to 0600, so a
+host `test -x` is not evidence of guest executability; the guest validations
+are. A read-only inspection command also briefly used zsh's special `path`
+variable and thereby hid its own `stat` and `env` commands. Repeating that
+inspection with non-special names and absolute tools succeeded; neither
+inspection mutated experiment state.
+
+The second identical prepare ran without network approval and printed exactly
+`tact<TAB>ready` with no first-use output. Base marker, CA bundle, and Tact
+marker hashes, byte sizes, and mtimes were identical before and after. Raw
+isolated inventory was `[]` after both preparations. Global inventory retained
+only the unrelated pre-existing stopped Codex capsule. The exact temporary root
+was removed and proved absent. No harness package download, provider operation,
+credential or identity read, model process, project edit, checkpoint, or remote
+mutation occurred.
 
 ## Terminal Closure
 
-Pending.
+1. Outcome: accepted; the package-lifecycle correction produced and reused the
+   complete common base through the production preparation path.
+2. Root cause closed: Debian maintainer-generated CA state must be produced by
+   the real package lifecycle rather than inferred from raw archive contents.
+3. Actual cost: one credential-free base provisioning capsule, automatically
+   removed; zero harness downloads, provider commands, model calls, and $0.
+   Elapsed engineering time was not instrumented, within the 20-minute cap.
+4. Cleanup: both isolated inventories were empty, the exact temporary root was
+   removed, and global inventory was unchanged.
+5. Next action: stop and revisit the base-image choice with the operator before
+   any provider or model authority is amended.

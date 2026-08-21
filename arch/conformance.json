@@ -329,10 +329,10 @@
         "src/session.rs",
         "tests/plan.rs",
         "tests/prepare.rs",
-        "tests/pre_runtime_failures.rs"
+        "tests/pre_runtime_failures.rs",
+        "experiments/0053-package-lifecycle-base-rehearsal.md"
       ],
       "gaps": [
-        "Common-base CA construction now uses Debian's real certificate package lifecycle but awaits the authorized live base-only rehearsal.",
         "A successful isolated live Nix-provider preparation and verified cache hit have not yet been recorded.",
         "The required public Codex and Tact work units, unsigned checkpoints, exact diff inspection, and stop/start reuse evidence remain outstanding.",
         "Native x86_64-linux provider and package verification is outstanding."
