@@ -49,13 +49,13 @@ environment files.
 Fortlet resolves schema 2 in a dedicated credential-free preparation capsule.
 A pinned single-user Nix runtime archives the read-only project into a
 project-scoped `/nix` store, evaluates only that content-addressed source, and
-realizes
-`devShells.<guest-system>.<name>`. Fortlet captures only exported scalar
-variables, rejects hooks, functions, arrays, protected names, and host-only
-paths, and binds the resulting activation and derivation to the project
-environment identity. Launch mounts the verified project store and applies the
-captured activation directly; it does not evaluate Nix or run activation shell
-text again.
+realizes `devShells.<guest-system>.<name>`. Fortlet captures only exported
+scalar variables, discards non-exported Nix and stdenv functions, arrays, and
+variables as inert provider metadata, rejects executable activation, protected
+names, and host-only paths, and binds the resulting activation and derivation
+to the project environment identity. Launch mounts the verified project store
+and applies the captured activation directly; it does not evaluate Nix or run
+activation shell text again.
 
 Add `fortlet plan [--project <path>] [--allow-broad-mount]` as the read-only
 inspection surface. It reports stable public classes and names, not environment
@@ -139,9 +139,12 @@ no host configuration file or signing and publication authority.
 
 1. Fortlet MUST capture the selected dev shell through the pinned Nix
    structured environment interface. It MUST accept only exported scalar
-   variables with bounded names and values.
-2. A non-empty shell hook, shell function, array, command alias, service, task,
-   or other executable activation MUST fail as unsupported. Repository shell
+   variables with bounded names and values. It MUST discard non-exported
+   variables, arrays, and Nix stdenv shell functions without executing,
+   persisting, or projecting them.
+2. A non-empty `shellHook`, command alias, service, task, explicitly required
+   shell function, or other executable activation MUST fail as unsupported.
+   Projects that require shell functions MUST use schema 1. Repository shell
    text MUST NOT execute on the host or during a credentialed launch.
 3. `HOME`, `PATH`, `BASH_ENV`, terminal variables, Fortlet and MicroSandbox
    variables, credential variables, Git and Jujutsu configuration selectors,
@@ -250,11 +253,12 @@ model use, and Codex and Tact share one project contract rather than growing
 harness-specific setup.
 
 The first Nix provider is intentionally strict. It admits locked, scalar-only
-dev shells and rejects shell hooks, functions, services, tasks, private inputs,
-and impure evaluation. Some existing flakes will therefore require a small
-Fortlet-facing dev shell or must keep using schema 1. The pinned structured
-environment interface is experimental upstream, so its version and fixtures
-become compatibility obligations.
+dev shells, ignores inert Nix stdenv metadata, and rejects non-empty shell hooks,
+required shell functions, services, tasks, private inputs, and impure
+evaluation. Some existing flakes will therefore require a small Fortlet-facing
+dev shell or must keep using schema 1. The pinned structured environment
+interface is experimental upstream, so its version and fixtures become
+compatibility obligations.
 
 A project-scoped Nix store consumes more disk than a global shared store but
 prevents one repository's untrusted evaluation and cache mutation from
