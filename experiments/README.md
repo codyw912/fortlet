@@ -76,3 +76,4 @@ scannable failure/win history of the project:
 - `0052-ca-corrected-nix-provider-rehearsal.md` — rejected; command-level diagnostics identified that raw ca-certificates extraction provides neither the generated selection config nor bundle, invalidating the attempted fix before Tact or Nix.
 - `0053-package-lifecycle-base-rehearsal.md` — accepted; Debian's real package lifecycle produced a nonempty CA bundle, every common tool passed guest validation, the second prepare was an unchanged cache hit, and no harness, provider, or model work ran.
 - `0054-nix-runtime-substrate-feasibility.md` — rejected; the candidate passed its 267.29-second cold ceiling and 0.01-second warm median, but its sealed owner-only schema-1 tree failed the first prepared project-layer mount before Tact launched.
+- `0055-explicit-bind-permission-policy.md` — declared; compare the default private-permission failure with mirrored guest publication and a sealed read-only relaxed-stat consumer.
