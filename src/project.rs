@@ -42,19 +42,55 @@ pub fn resolve(
     explicit: Option<&Path>,
     allow_broad_mount: bool,
 ) -> Result<Project> {
+    resolve_with_scratch(paths, explicit, allow_broad_mount, true)
+}
+
+pub fn resolve_read_only(
+    paths: &AppPaths,
+    explicit: Option<&Path>,
+    allow_broad_mount: bool,
+) -> Result<Project> {
+    resolve_with_scratch(paths, explicit, allow_broad_mount, false)
+}
+
+fn resolve_with_scratch(
+    paths: &AppPaths,
+    explicit: Option<&Path>,
+    allow_broad_mount: bool,
+    create_scratch: bool,
+) -> Result<Project> {
     let cwd = env::current_dir().context("cannot read current directory")?;
     let home = env::var_os("HOME")
         .map(PathBuf::from)
         .context("HOME is not set")?;
-    resolve_from(paths, &cwd, &home, explicit, allow_broad_mount)
+    resolve_from_mode(
+        paths,
+        &cwd,
+        &home,
+        explicit,
+        allow_broad_mount,
+        create_scratch,
+    )
 }
 
+#[cfg(test)]
 fn resolve_from(
     paths: &AppPaths,
     cwd: &Path,
     home: &Path,
     explicit: Option<&Path>,
     allow_broad_mount: bool,
+) -> Result<Project> {
+    resolve_from_mode(paths, cwd, home, explicit, allow_broad_mount, true)
+}
+
+fn resolve_from_mode(
+    paths: &AppPaths,
+    cwd: &Path,
+    home: &Path,
+    explicit: Option<&Path>,
+    allow_broad_mount: bool,
+    create_scratch: bool,
 ) -> Result<Project> {
     let cwd = canonical_directory(cwd)?;
     let home = canonical_directory(home)?;
@@ -72,7 +108,7 @@ fn resolve_from(
     };
 
     if !allow_broad_mount && is_broad_root(&root, &home) {
-        return scratch_project(paths);
+        return scratch_project(paths, create_scratch);
     }
     Ok(project(root, cwd, kind, false))
 }
@@ -102,11 +138,17 @@ fn is_broad_root(root: &Path, home: &Path) -> bool {
     root == home || root.parent().is_none()
 }
 
-fn scratch_project(paths: &AppPaths) -> Result<Project> {
+fn scratch_project(paths: &AppPaths, create: bool) -> Result<Project> {
     let root = paths.scratch();
-    fs::create_dir_all(&root)
-        .with_context(|| format!("cannot create scratch workspace {}", root.display()))?;
-    let root = canonical_directory(&root)?;
+    if create {
+        fs::create_dir_all(&root)
+            .with_context(|| format!("cannot create scratch workspace {}", root.display()))?;
+    }
+    let root = if root.exists() {
+        canonical_directory(&root)?
+    } else {
+        root
+    };
     Ok(project(root.clone(), root, "scratch", true))
 }
 
@@ -351,6 +393,20 @@ mod tests {
             assert_eq!(resolved.cwd, scratch, "{}", cwd.display());
             assert!(resolved.scratch, "{}", cwd.display());
         }
+    }
+
+    #[test]
+    fn read_only_resolution_does_not_create_broad_root_scratch() {
+        let temporary = tempfile::tempdir().unwrap();
+        let paths = test_paths(temporary.path());
+        let home = temporary.path().join("home");
+        fs::create_dir(&home).unwrap();
+
+        let resolved = resolve_from_mode(&paths, &home, &home, None, false, false).unwrap();
+
+        assert!(resolved.scratch);
+        assert_eq!(resolved.root, paths.scratch());
+        assert!(!paths.scratch().exists());
     }
 
     #[test]

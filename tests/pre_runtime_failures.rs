@@ -122,6 +122,26 @@ impl Fixture {
         self.data.join("fortlet/environments")
     }
 
+    fn seed_layers(&self, harness: &str) {
+        seed_layer_marker(
+            &self.tools().join("_base/bookworm-3"),
+            ".fortlet-base.json",
+            "_base",
+            "bookworm-3",
+        );
+        let version = match harness {
+            "codex" => "0.147.0",
+            "tact" => "0.3.7",
+            _ => panic!("unknown test harness"),
+        };
+        seed_layer_marker(
+            &self.tools().join(harness).join(version),
+            ".fortlet-tool.json",
+            harness,
+            version,
+        );
+    }
+
     fn capsule_state(&self, harness: &str) -> PathBuf {
         let project = self.project.canonicalize().unwrap();
         let digest = Sha256::digest(project.as_os_str().as_encoded_bytes());
@@ -129,6 +149,20 @@ impl Fixture {
             .join(hex::encode(&digest[..8]))
             .join(harness)
     }
+}
+
+fn seed_layer_marker(root: &Path, marker: &str, name: &str, version: &str) {
+    fs::create_dir_all(root).unwrap();
+    fs::write(
+        root.join(marker),
+        serde_json::to_vec(&serde_json::json!({
+            "name": name,
+            "version": version,
+            "image": "node:24-bookworm",
+        }))
+        .unwrap(),
+    )
+    .unwrap();
 }
 
 fn write_auth(path: &Path, expiration: u64) {
@@ -358,6 +392,7 @@ fn project_mounted_auth_fails_before_capsule_or_environment_artifacts() {
 fn invalid_capsule_state_fails_before_projection_or_environment_artifacts() {
     let fixture = Fixture::new();
     fixture.write_valid_auth();
+    fixture.seed_layers("codex");
     let capsule_state = fixture.capsule_state("codex");
     fs::create_dir_all(capsule_state.parent().unwrap()).unwrap();
     fs::write(&capsule_state, "not a directory").unwrap();
@@ -371,13 +406,14 @@ fn invalid_capsule_state_fails_before_projection_or_environment_artifacts() {
         "cannot create harness state",
     );
     assert!(capsule_state.is_file());
-    assert!(!fixture.tools().exists());
+    assert!(!fixture.environments().exists());
 }
 
 #[test]
 fn invalid_guest_projection_fails_before_environment_or_runtime_artifacts() {
     let fixture = Fixture::new();
     fixture.write_valid_auth();
+    fixture.seed_layers("codex");
     let capsule_state = fixture.capsule_state("codex");
     let projection_target = fixture.state.join("projection-target");
     fs::create_dir_all(&capsule_state).unwrap();
@@ -396,14 +432,14 @@ fn invalid_guest_projection_fails_before_environment_or_runtime_artifacts() {
     assert!(!capsule_state
         .join(".fortlet-credential-fingerprint")
         .exists());
-    assert!(!fixture.tools().exists());
+    assert!(!fixture.environments().exists());
 }
 
 #[test]
 fn incomplete_base_layer_fails_before_provisioning_or_runtime_artifacts() {
     let fixture = Fixture::new();
     fixture.write_valid_auth();
-    let incomplete_base = fixture.tools().join("_base/bookworm-2");
+    let incomplete_base = fixture.tools().join("_base/bookworm-3");
     fs::create_dir_all(&incomplete_base).unwrap();
 
     let output = fixture.run("codex", &fixture.project);
@@ -415,7 +451,7 @@ fn incomplete_base_layer_fails_before_provisioning_or_runtime_artifacts() {
         "incomplete environment layer at",
     );
     let capsule_state = fixture.capsule_state("codex");
-    assert!(capsule_state.join(".codex/auth.json").is_file());
+    assert!(!capsule_state.exists());
     assert!(!capsule_state
         .join(".fortlet-credential-fingerprint")
         .exists());
@@ -427,12 +463,12 @@ fn incomplete_base_layer_fails_before_provisioning_or_runtime_artifacts() {
 fn incomplete_harness_layer_fails_before_provisioning_or_runtime_artifacts() {
     let fixture = Fixture::new();
     fixture.write_valid_auth();
-    let base = fixture.tools().join("_base/bookworm-2");
+    let base = fixture.tools().join("_base/bookworm-3");
     let incomplete_harness = fixture.tools().join("codex/0.147.0");
     fs::create_dir_all(&base).unwrap();
     fs::write(
         base.join(".fortlet-base.json"),
-        r#"{"name":"_base","version":"bookworm-2","image":"node:24-bookworm"}"#,
+        r#"{"name":"_base","version":"bookworm-3","image":"node:24-bookworm"}"#,
     )
     .unwrap();
     fs::create_dir_all(&incomplete_harness).unwrap();
@@ -446,7 +482,7 @@ fn incomplete_harness_layer_fails_before_provisioning_or_runtime_artifacts() {
         "incomplete environment layer at",
     );
     let capsule_state = fixture.capsule_state("codex");
-    assert!(capsule_state.join(".codex/auth.json").is_file());
+    assert!(!capsule_state.exists());
     assert!(!capsule_state
         .join(".fortlet-credential-fingerprint")
         .exists());

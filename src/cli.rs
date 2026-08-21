@@ -11,6 +11,7 @@ use crate::native;
 use crate::paths::AppPaths;
 use crate::preparation::{self, PrepareRequest};
 use crate::project;
+use crate::project_capability::{self, PlanRequest};
 use crate::session::{self, LaunchRequest};
 
 #[derive(Parser)]
@@ -38,6 +39,12 @@ enum Command {
     },
     Prepare {
         harness: String,
+        #[arg(long)]
+        project: Option<PathBuf>,
+        #[arg(long)]
+        allow_broad_mount: bool,
+    },
+    Plan {
         #[arg(long)]
         project: Option<PathBuf>,
         #[arg(long)]
@@ -118,6 +125,18 @@ async fn run_command(command: Command) -> Result<()> {
                 })
                 .await?
             );
+            Ok(())
+        }
+        Command::Plan {
+            project,
+            allow_broad_mount,
+        } => {
+            for line in project_capability::inspect(PlanRequest {
+                project,
+                allow_broad_mount,
+            })? {
+                println!("{line}");
+            }
             Ok(())
         }
         Command::Status {
@@ -368,6 +387,26 @@ mod tests {
                 project: Some(ref project),
                 allow_broad_mount: true,
             } if harness == "codex" && project == Path::new("/tmp/project")
+        ));
+    }
+
+    #[test]
+    fn parses_read_only_project_plan() {
+        let plan = Cli::try_parse_from([
+            "fortlet",
+            "plan",
+            "--project",
+            "/tmp/project",
+            "--allow-broad-mount",
+        ])
+        .unwrap();
+
+        assert!(matches!(
+            plan.command,
+            Command::Plan {
+                project: Some(ref project),
+                allow_broad_mount: true,
+            } if project == Path::new("/tmp/project")
         ));
     }
 }

@@ -16,10 +16,13 @@ use microsandbox::{
 use crate::auth::{Credentials, ACCESS_TOKEN_ENV, ACCOUNT_ID_ENV};
 use crate::environment::{EnvironmentLayers, BASE_IMAGE, MANAGED_BASH_ENV};
 use crate::harness::Harness;
+use crate::identity::{
+    IdentityProjection, GIT_CONFIG_GLOBAL, GIT_CONFIG_NOSYSTEM, GUEST_IDENTITY_ROOT, JJ_CONFIG,
+};
 use crate::paths::{AppPaths, PRODUCT};
 use crate::project::Project;
 use crate::project_environment::{
-    ProjectEnvironment, GUEST_ROOT, NO_ENVIRONMENT, TERMINAL_ENVIRONMENT,
+    PublishedProjectEnvironment, NO_ENVIRONMENT, TERMINAL_ENVIRONMENT,
 };
 
 const SCHEMA_VERSION: &str = "1";
@@ -33,6 +36,7 @@ pub struct Capsule<'a> {
     pub state: PathBuf,
     pub project: &'a Project,
     pub harness: &'a dyn Harness,
+    pub identity: Option<&'a IdentityProjection>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -63,14 +67,22 @@ impl CapsuleDescriptor {
     fn for_launch(
         project: &Project,
         harness: &dyn Harness,
-        environment: Option<&ProjectEnvironment>,
+        environment: Option<&PublishedProjectEnvironment>,
+        identity: Option<&IdentityProjection>,
     ) -> Self {
         let mut descriptor = Self::new(project, harness);
         descriptor.labels.insert(
             label("environment"),
             environment
-                .map(ProjectEnvironment::identity)
+                .map(|environment| environment.identity.as_str())
                 .unwrap_or(NO_ENVIRONMENT)
+                .to_owned(),
+        );
+        descriptor.labels.insert(
+            label("identity"),
+            identity
+                .map(|projection| projection.identity.as_str())
+                .unwrap_or("none")
                 .to_owned(),
         );
         descriptor
@@ -152,8 +164,18 @@ impl CapsuleDescriptor {
             .get(&label("environment"))
             .map(String::as_str)
             .unwrap_or(NO_ENVIRONMENT);
+        let stored_identity = labels
+            .get(&label("identity"))
+            .map(String::as_str)
+            .unwrap_or("none");
+        let expected_identity = self
+            .labels
+            .get(&label("identity"))
+            .map(String::as_str)
+            .unwrap_or("none");
         if labels.get(&label("version")) != self.labels.get(&label("version"))
             || stored_environment != expected_environment
+            || stored_identity != expected_identity
         {
             bail!(
                 "capsule has stale configuration; run `fortlet stop {}` followed by `fortlet reset {}` and retry",
@@ -182,7 +204,8 @@ impl<'a> MicroSandboxRuntime<'a> {
         &self,
         project: &'b Project,
         harness: &'b dyn Harness,
-        environment: Option<&ProjectEnvironment>,
+        environment: Option<&PublishedProjectEnvironment>,
+        identity: Option<&'b IdentityProjection>,
     ) -> Result<Capsule<'b>> {
         let state = self
             .paths
@@ -194,10 +217,11 @@ impl<'a> MicroSandboxRuntime<'a> {
             .with_context(|| format!("cannot create harness state {}", state.display()))?;
         let state = state.canonicalize()?;
         Ok(Capsule {
-            descriptor: CapsuleDescriptor::for_launch(project, harness, environment),
+            descriptor: CapsuleDescriptor::for_launch(project, harness, environment, identity),
             state,
             project,
             harness,
+            identity,
         })
     }
 
@@ -478,7 +502,14 @@ async fn create_capsule(capsule: &Capsule<'_>, layers: &EnvironmentLayers) -> Re
         .labels(capsule.descriptor.labels());
 
     if let Some(project) = &layers.project {
-        builder = builder.volume(GUEST_ROOT, |mount| mount.bind(&project.root).readonly());
+        builder = builder.volume(&project.guest_root, |mount| {
+            mount.bind(&project.root).readonly()
+        });
+    }
+    if let Some(identity) = capsule.identity {
+        builder = builder.volume(GUEST_IDENTITY_ROOT, |mount| {
+            mount.bind(&identity.root).readonly()
+        });
     }
     for (key, value) in capsule_environment(capsule, layers) {
         builder = builder.env(key, value);
@@ -521,6 +552,23 @@ fn capsule_environment(capsule: &Capsule<'_>, layers: &EnvironmentLayers) -> Vec
                 .collect::<Vec<_>>()
         })
         .unwrap_or_default();
+    environment.extend([
+        (
+            GIT_CONFIG_GLOBAL.to_owned(),
+            capsule
+                .identity
+                .map(|_| format!("{GUEST_IDENTITY_ROOT}/gitconfig"))
+                .unwrap_or_else(|| "/dev/null".to_owned()),
+        ),
+        (GIT_CONFIG_NOSYSTEM.to_owned(), "1".to_owned()),
+        (
+            JJ_CONFIG.to_owned(),
+            capsule
+                .identity
+                .map(|_| format!("{GUEST_IDENTITY_ROOT}/jjconfig.toml"))
+                .unwrap_or_else(|| "/dev/null".to_owned()),
+        ),
+    ]);
     environment.extend(capsule.harness.environment(capsule.project));
     environment
 }
@@ -538,13 +586,7 @@ fn guest_path(layers: &EnvironmentLayers) -> String {
     let mut entries = layers
         .project
         .as_ref()
-        .map(|project| {
-            project
-                .path
-                .iter()
-                .map(|entry| format!("{GUEST_ROOT}/{entry}"))
-                .collect::<Vec<_>>()
-        })
+        .map(|project| project.path.clone())
         .unwrap_or_default();
     entries.extend([
         format!("/opt/{PRODUCT}/base/usr/bin"),
@@ -592,12 +634,12 @@ pub fn lock_capsule(paths: &AppPaths, descriptor: &CapsuleDescriptor) -> Result<
 }
 
 #[cfg(unix)]
-fn effective_uid() -> u32 {
+pub(crate) fn effective_uid() -> u32 {
     unsafe { libc::geteuid() }
 }
 
 #[cfg(unix)]
-fn effective_gid() -> u32 {
+pub(crate) fn effective_gid() -> u32 {
     unsafe { libc::getegid() }
 }
 
@@ -966,7 +1008,7 @@ mod tests {
             .insert(label("environment"), "configured".into());
         let legacy_labels = CapsuleDescriptor::new(&project, harness).labels();
 
-        CapsuleDescriptor::for_launch(&project, harness, None)
+        CapsuleDescriptor::for_launch(&project, harness, None, None)
             .validate_launch(&configured.name, &legacy_labels)
             .unwrap();
         configured
@@ -985,7 +1027,11 @@ mod tests {
         let published = PublishedProjectEnvironment {
             identity: "environment-id".into(),
             root: "/project-layer".into(),
-            path: vec!["cargo/bin".into(), "jj/bin".into()],
+            guest_root: "/opt/fortlet/project".into(),
+            path: vec![
+                "/opt/fortlet/project/cargo/bin".into(),
+                "/opt/fortlet/project/jj/bin".into(),
+            ],
             environment: BTreeMap::from([("RUST_BACKTRACE".into(), "1".into())]),
         };
         let layers = EnvironmentLayers {
@@ -1014,6 +1060,7 @@ mod tests {
                 state: "/state".into(),
                 project: &project,
                 harness,
+                identity: None,
             };
             let environment = capsule_environment(&capsule, &layers);
             assert!(environment.contains(&("RUST_BACKTRACE".into(), "1".into())));

@@ -50,7 +50,7 @@ pub async fn prepare(request: PrepareRequest) -> Result<String> {
         "project-environment",
         "fix or remove .fortlet/environment.json and retry",
     )?;
-    ensure_layers(&paths, harness, project_environment.as_ref()).await?;
+    ensure_layers(&paths, harness, &project, project_environment.as_ref()).await?;
 
     Ok(format!("{}\tready", harness.name()))
 }
@@ -58,11 +58,12 @@ pub async fn prepare(request: PrepareRequest) -> Result<String> {
 async fn ensure_layers(
     paths: &AppPaths,
     harness: &dyn Harness,
+    project: &crate::project::Project,
     project_environment: Option<&ProjectEnvironment>,
 ) -> Result<()> {
     stage(
         EnvironmentStore::new(paths)
-            .ensure(harness, project_environment)
+            .ensure(harness, project, project_environment)
             .await,
         "environment",
         "check network access or remove the reported incomplete layer and retry",
@@ -86,7 +87,7 @@ mod tests {
     fn seed_marker(root: &std::path::Path, marker: &str) {
         fs::create_dir_all(root).unwrap();
         let (name, version) = if marker == ".fortlet-base.json" {
-            ("_base", "bookworm-2")
+            ("_base", "bookworm-3")
         } else {
             let name = root
                 .parent()
@@ -161,17 +162,29 @@ mod tests {
         let marker_before = fs::read(published.join(".fortlet-project.json")).unwrap();
 
         seed_marker(
-            &paths.tools().join("_base/bookworm-2"),
+            &paths.tools().join("_base/bookworm-3"),
             ".fortlet-base.json",
         );
+        let project = Project {
+            identity: ProjectIdentity::from_local_root(&project_root),
+            root: project_root.clone(),
+            cwd: project_root.clone(),
+            kind: "test",
+            scratch: false,
+        };
         for (name, version) in [("codex", "0.147.0"), ("tact", "0.3.7")] {
             seed_marker(
                 &paths.tools().join(name).join(version),
                 ".fortlet-tool.json",
             );
-            ensure_layers(&paths, harness::find(name).unwrap(), Some(&environment))
-                .await
-                .unwrap();
+            ensure_layers(
+                &paths,
+                harness::find(name).unwrap(),
+                &project,
+                Some(&environment),
+            )
+            .await
+            .unwrap();
         }
 
         assert_eq!(
@@ -181,9 +194,14 @@ mod tests {
         assert!(!paths.state.join("projects").exists());
 
         fs::write(published.join("bin/tool"), "corrupted").unwrap();
-        let error = ensure_layers(&paths, harness::find("codex").unwrap(), Some(&environment))
-            .await
-            .unwrap_err();
+        let error = ensure_layers(
+            &paths,
+            harness::find("codex").unwrap(),
+            &project,
+            Some(&environment),
+        )
+        .await
+        .unwrap_err();
         assert!(format!("{error:#}").contains("content digest"));
     }
 }

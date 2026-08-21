@@ -11,6 +11,7 @@ use crate::auth::{
 };
 use crate::environment::EnvironmentStore;
 use crate::harness;
+use crate::identity;
 use crate::paths::AppPaths;
 use crate::project;
 use crate::project_environment::ProjectEnvironment;
@@ -102,9 +103,27 @@ pub async fn launch(request: LaunchRequest) -> Result<i32> {
         "move the host credential file outside every guest mount and retry",
     )?;
     timings.record(StartupPhase::Credentials);
+    let layers = stage(
+        EnvironmentStore::new(&paths)
+            .ensure(harness, &project, project_environment.as_ref())
+            .await,
+        "environment",
+        "check network access or remove the reported incomplete layer and retry",
+    )?;
+    timings.record(StartupPhase::Environment);
+    let identity = stage(
+        identity::prepare(&paths, &project),
+        "identity",
+        "fix the host Git user.name and user.email or remove the reported invalid projection",
+    )?;
     let runtime = MicroSandboxRuntime::new(&paths);
     let capsule = stage(
-        runtime.capsule(&project, harness, project_environment.as_ref()),
+        runtime.capsule(
+            &project,
+            harness,
+            layers.project.as_ref(),
+            identity.as_ref(),
+        ),
         "capsule",
         "check the reported Fortlet state path and retry",
     )?;
@@ -125,14 +144,6 @@ pub async fn launch(request: LaunchRequest) -> Result<i32> {
         "move the host credential file outside every guest mount and retry",
     )?;
     timings.record(StartupPhase::CapsuleState);
-    let layers = stage(
-        EnvironmentStore::new(&paths)
-            .ensure(harness, project_environment.as_ref())
-            .await,
-        "environment",
-        "check network access or remove the reported incomplete layer and retry",
-    )?;
-    timings.record(StartupPhase::Environment);
     let sandbox = stage(
         runtime.ensure(&capsule, &layers, &credentials).await,
         "capsule",

@@ -65,7 +65,7 @@ impl Fixture {
     }
 
     fn seed_base(&self) {
-        seed_marker(&self.tools().join("_base/bookworm-2"), ".fortlet-base.json");
+        seed_marker(&self.tools().join("_base/bookworm-3"), ".fortlet-base.json");
     }
 
     fn seed_harness(&self, harness: &str) {
@@ -89,7 +89,7 @@ impl Fixture {
 fn seed_marker(root: &Path, marker: &str) {
     fs::create_dir_all(root).unwrap();
     let (name, version) = if marker == ".fortlet-base.json" {
-        ("_base", "bookworm-2")
+        ("_base", "bookworm-3")
     } else {
         let name = root
             .parent()
@@ -183,7 +183,7 @@ fn cache_hits_are_silent_idempotent_and_credential_free_for_both_harnesses() {
         let fixture = Fixture::new();
         fixture.seed_base();
         fixture.seed_harness(harness);
-        let before = fs::read(fixture.tools().join("_base/bookworm-2/.fortlet-base.json")).unwrap();
+        let before = fs::read(fixture.tools().join("_base/bookworm-3/.fortlet-base.json")).unwrap();
 
         for _ in 0..2 {
             let output = fixture.prepare(harness);
@@ -196,7 +196,7 @@ fn cache_hits_are_silent_idempotent_and_credential_free_for_both_harnesses() {
         }
 
         assert_eq!(
-            fs::read(fixture.tools().join("_base/bookworm-2/.fortlet-base.json")).unwrap(),
+            fs::read(fixture.tools().join("_base/bookworm-3/.fortlet-base.json")).unwrap(),
             before
         );
         fixture.assert_no_runtime_state();
@@ -224,7 +224,7 @@ fn implicit_selection_discovers_the_project_from_a_nested_directory() {
 fn incomplete_harness_layer_preserves_the_verified_base() {
     let fixture = Fixture::new();
     fixture.seed_base();
-    let base_marker = fixture.tools().join("_base/bookworm-2/.fortlet-base.json");
+    let base_marker = fixture.tools().join("_base/bookworm-3/.fortlet-base.json");
     let before = fs::read(&base_marker).unwrap();
     fs::create_dir_all(fixture.tools().join("codex/0.147.0")).unwrap();
 

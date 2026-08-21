@@ -11,6 +11,7 @@ use sha2::{Digest, Sha256};
 use crate::auth::{ACCESS_TOKEN_ENV, ACCOUNT_ID_ENV};
 use crate::environment::BASE_IMAGE;
 use crate::harness;
+use crate::identity::{GIT_CONFIG_GLOBAL, GIT_CONFIG_NOSYSTEM, JJ_CONFIG};
 use crate::project::Project;
 
 pub const GUEST_ROOT: &str = "/opt/fortlet/project";
@@ -29,9 +30,14 @@ pub const TERMINAL_ENVIRONMENT: &[&str] = &[
 
 const MANIFEST_PATH: &str = ".fortlet/environment.json";
 const RECIPE_PATH: &str = ".fortlet/environment.sh";
+const FLAKE_PATH: &str = "flake.nix";
+const LOCK_PATH: &str = "flake.lock";
 const MARKER: &str = ".fortlet-project.json";
-const SCHEMA: u64 = 1;
+const RECIPE_SCHEMA: u64 = 1;
+const NIX_SCHEMA: u64 = 2;
 const CONTRACT: &str = "fortlet-project-environment-v1";
+pub const NIX_PROVIDER_CONTRACT: &str = "fortlet-nix-dev-shell-v1";
+pub const NIX_VERSION: &str = "2.35.2";
 const MAX_MANIFEST_BYTES: u64 = 64 * 1024;
 const MAX_RECIPE_BYTES: u64 = 1024 * 1024;
 const MAX_PATH_ENTRIES: usize = 32;
@@ -43,17 +49,40 @@ const MAX_OUTPUT_BYTES: u64 = 4 * 1024 * 1024 * 1024;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ProjectEnvironment {
     identity: String,
-    recipe: String,
+    provider: ProjectEnvironmentProvider,
     path: Vec<String>,
     environment: BTreeMap<String, String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum ProjectEnvironmentProvider {
+    Recipe {
+        recipe: String,
+    },
+    NixDevShell {
+        name: String,
+        project_root: PathBuf,
+        project_identity: String,
+        flake: Vec<u8>,
+        lock: Vec<u8>,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PublishedProjectEnvironment {
     pub identity: String,
     pub root: PathBuf,
+    pub guest_root: String,
     pub path: Vec<String>,
     pub environment: BTreeMap<String, String>,
+}
+
+pub(crate) struct NixProjectEnvironment<'a> {
+    pub name: &'a str,
+    pub project_root: &'a Path,
+    pub project_identity: &'a str,
+    pub flake: &'a [u8],
+    pub lock: &'a [u8],
 }
 
 #[derive(Debug, Deserialize)]
@@ -62,6 +91,20 @@ struct Manifest {
     schema: u64,
     path: Vec<String>,
     environment: BTreeMap<String, String>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct NixManifest {
+    schema: u64,
+    provider: NixProvider,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct NixProvider {
+    kind: String,
+    name: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -96,45 +139,131 @@ impl ProjectEnvironment {
             MAX_MANIFEST_BYTES,
             "manifest",
         )?;
-        let recipe_bytes = snapshot_file(
-            &project.root,
-            &project.root.join(RECIPE_PATH),
-            MAX_RECIPE_BYTES,
-            "recipe",
-        )?;
-        let manifest: Manifest = serde_json::from_slice(&manifest_bytes)
-            .context("project environment manifest is not valid schema-1 JSON")?;
-        validate_manifest(&manifest, project)?;
-        let recipe = String::from_utf8(recipe_bytes.clone())
-            .context("project environment recipe is not valid UTF-8")?;
-        if recipe.is_empty() {
-            bail!("project environment recipe is empty");
-        }
         let platform = guest_platform()?;
-        let identity = input_identity(&manifest_bytes, &recipe_bytes, platform);
-
-        Ok(Some(Self {
-            identity,
-            recipe,
-            path: manifest.path,
-            environment: manifest.environment,
-        }))
+        let schema = manifest_schema(&manifest_bytes)?;
+        match schema {
+            RECIPE_SCHEMA => {
+                let recipe_bytes = snapshot_file(
+                    &project.root,
+                    &project.root.join(RECIPE_PATH),
+                    MAX_RECIPE_BYTES,
+                    "recipe",
+                )?;
+                let manifest: Manifest = serde_json::from_slice(&manifest_bytes)
+                    .context("project environment manifest is not valid schema-1 JSON")?;
+                validate_manifest(&manifest, project)?;
+                let recipe = String::from_utf8(recipe_bytes.clone())
+                    .context("project environment recipe is not valid UTF-8")?;
+                if recipe.is_empty() {
+                    bail!("project environment recipe is empty");
+                }
+                Ok(Some(Self {
+                    identity: input_identity(&manifest_bytes, &recipe_bytes, platform),
+                    provider: ProjectEnvironmentProvider::Recipe { recipe },
+                    path: manifest.path,
+                    environment: manifest.environment,
+                }))
+            }
+            NIX_SCHEMA => {
+                reject_adjacent_recipe(&project.root)?;
+                let manifest: NixManifest = serde_json::from_slice(&manifest_bytes)
+                    .context("project environment manifest is not valid schema-2 JSON")?;
+                validate_nix_manifest(&manifest)?;
+                let flake = snapshot_file(
+                    &project.root,
+                    &project.root.join(FLAKE_PATH),
+                    MAX_RECIPE_BYTES,
+                    "flake.nix",
+                )?;
+                let lock = snapshot_file(
+                    &project.root,
+                    &project.root.join(LOCK_PATH),
+                    MAX_RECIPE_BYTES,
+                    "flake.lock",
+                )?;
+                let identity = nix_input_identity(&manifest_bytes, &flake, &lock, platform);
+                Ok(Some(Self {
+                    identity,
+                    provider: ProjectEnvironmentProvider::NixDevShell {
+                        name: manifest.provider.name,
+                        project_root: project.root.clone(),
+                        project_identity: project.identity.as_str().to_owned(),
+                        flake,
+                        lock,
+                    },
+                    path: Vec::new(),
+                    environment: BTreeMap::new(),
+                }))
+            }
+            schema => bail!(
+                "unsupported project environment schema {schema}; expected {RECIPE_SCHEMA} or {NIX_SCHEMA}"
+            ),
+        }
     }
 
     pub fn identity(&self) -> &str {
         &self.identity
     }
 
-    pub fn recipe(&self) -> &str {
-        &self.recipe
+    pub fn recipe(&self) -> Option<&str> {
+        match &self.provider {
+            ProjectEnvironmentProvider::Recipe { recipe } => Some(recipe),
+            ProjectEnvironmentProvider::NixDevShell { .. } => None,
+        }
     }
 
-    pub fn published(&self, root: PathBuf) -> PublishedProjectEnvironment {
-        PublishedProjectEnvironment {
+    pub fn published_recipe(&self, root: PathBuf) -> Result<PublishedProjectEnvironment> {
+        if !matches!(self.provider, ProjectEnvironmentProvider::Recipe { .. }) {
+            bail!("Nix project environments do not publish recipe layers");
+        }
+        Ok(PublishedProjectEnvironment {
             identity: self.identity.clone(),
             root,
-            path: self.path.clone(),
+            guest_root: GUEST_ROOT.to_owned(),
+            path: self
+                .path
+                .iter()
+                .map(|entry| format!("{GUEST_ROOT}/{entry}"))
+                .collect(),
             environment: self.environment.clone(),
+        })
+    }
+
+    pub fn provider_name(&self) -> Option<&str> {
+        match &self.provider {
+            ProjectEnvironmentProvider::Recipe { .. } => None,
+            ProjectEnvironmentProvider::NixDevShell { name, .. } => Some(name),
+        }
+    }
+
+    pub fn activation_names(&self) -> Vec<&str> {
+        self.environment.keys().map(String::as_str).collect()
+    }
+
+    pub fn project_identity(&self) -> Option<&str> {
+        self.nix().map(|provider| provider.project_identity)
+    }
+
+    pub fn is_recipe(&self) -> bool {
+        matches!(self.provider, ProjectEnvironmentProvider::Recipe { .. })
+    }
+
+    pub(crate) fn nix(&self) -> Option<NixProjectEnvironment<'_>> {
+        match &self.provider {
+            ProjectEnvironmentProvider::Recipe { .. } => None,
+            ProjectEnvironmentProvider::NixDevShell {
+                name,
+                project_root,
+                project_identity,
+                flake,
+                lock,
+            } => Some(NixProjectEnvironment {
+                name,
+                project_root,
+                project_identity,
+                flake,
+                lock,
+            }),
         }
     }
 
@@ -147,7 +276,7 @@ impl ProjectEnvironment {
         validate_declared_paths(root, &self.path)?;
         let output = output_digest(root)?;
         let marker = Marker {
-            schema: SCHEMA,
+            schema: RECIPE_SCHEMA,
             identity: self.identity.clone(),
             output,
             image: BASE_IMAGE.into(),
@@ -168,7 +297,7 @@ impl ProjectEnvironment {
         let marker_bytes = read_bounded(&root.join(MARKER), MAX_MANIFEST_BYTES, "marker")?;
         let marker: Marker = serde_json::from_slice(&marker_bytes)
             .context("published project environment marker is invalid")?;
-        if marker.schema != SCHEMA
+        if marker.schema != RECIPE_SCHEMA
             || marker.identity != self.identity
             || marker.image != BASE_IMAGE
             || marker.platform != guest_platform()?
@@ -183,10 +312,56 @@ impl ProjectEnvironment {
     }
 }
 
-fn validate_manifest(manifest: &Manifest, project: &Project) -> Result<()> {
-    if manifest.schema != SCHEMA {
+fn manifest_schema(bytes: &[u8]) -> Result<u64> {
+    let value: serde_json::Value =
+        serde_json::from_slice(bytes).context("project environment manifest is not valid JSON")?;
+    value
+        .as_object()
+        .and_then(|object| object.get("schema"))
+        .and_then(serde_json::Value::as_u64)
+        .context("project environment manifest must contain an integer schema")
+}
+
+fn reject_adjacent_recipe(root: &Path) -> Result<()> {
+    match fs::symlink_metadata(root.join(RECIPE_PATH)) {
+        Ok(_) => bail!(
+            "schema-2 project environment is ambiguous while {RECIPE_PATH} exists; remove the schema-1 recipe and retry"
+        ),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(()),
+        Err(error) => Err(error).context("cannot inspect adjacent project environment recipe"),
+    }
+}
+
+fn validate_nix_manifest(manifest: &NixManifest) -> Result<()> {
+    if manifest.schema != NIX_SCHEMA {
+        bail!("schema-2 project environment has an inconsistent schema");
+    }
+    if manifest.provider.kind != "nix-dev-shell" {
         bail!(
-            "unsupported project environment schema {}; expected {SCHEMA}",
+            "unsupported project environment provider {:?}; use \"nix-dev-shell\"",
+            manifest.provider.kind
+        );
+    }
+    let name = manifest.provider.name.as_bytes();
+    let valid_start = name
+        .first()
+        .is_some_and(|byte| byte.is_ascii_alphabetic() || *byte == b'_');
+    if name.is_empty()
+        || name.len() > 64
+        || !valid_start
+        || !name
+            .iter()
+            .all(|byte| byte.is_ascii_alphanumeric() || matches!(*byte, b'_' | b'-' | b'\''))
+    {
+        bail!("Nix dev-shell name must be one bounded attribute component");
+    }
+    Ok(())
+}
+
+fn validate_manifest(manifest: &Manifest, project: &Project) -> Result<()> {
+    if manifest.schema != RECIPE_SCHEMA {
+        bail!(
+            "unsupported project environment schema {}; expected {RECIPE_SCHEMA}",
             manifest.schema
         );
     }
@@ -211,12 +386,13 @@ fn validate_manifest(manifest: &Manifest, project: &Project) -> Result<()> {
     Ok(())
 }
 
-fn protected_environment_name(name: &str, project: &Project) -> Result<bool> {
+pub(crate) fn protected_environment_name(name: &str, project: &Project) -> Result<bool> {
     if name == "HOME"
         || name == "PATH"
         || name == "BASH_ENV"
         || name == ACCESS_TOKEN_ENV
         || name == ACCOUNT_ID_ENV
+        || matches!(name, GIT_CONFIG_GLOBAL | GIT_CONFIG_NOSYSTEM | JJ_CONFIG)
         || name.starts_with("FORTLET_")
         || name.starts_with("MSB_")
         || TERMINAL_ENVIRONMENT.contains(&name)
@@ -235,7 +411,7 @@ fn protected_environment_name(name: &str, project: &Project) -> Result<bool> {
     Ok(false)
 }
 
-fn validate_environment_name(name: &str) -> Result<()> {
+pub(crate) fn validate_environment_name(name: &str) -> Result<()> {
     let mut characters = name.chars();
     let valid_start = characters
         .next()
@@ -314,6 +490,18 @@ fn input_identity(manifest: &[u8], recipe: &[u8], platform: &str) -> String {
     hex::encode(digest.finalize())
 }
 
+fn nix_input_identity(manifest: &[u8], flake: &[u8], lock: &[u8], platform: &str) -> String {
+    let mut digest = Sha256::new();
+    hash_field(&mut digest, NIX_PROVIDER_CONTRACT.as_bytes());
+    hash_field(&mut digest, NIX_VERSION.as_bytes());
+    hash_field(&mut digest, BASE_IMAGE.as_bytes());
+    hash_field(&mut digest, platform.as_bytes());
+    hash_field(&mut digest, manifest);
+    hash_field(&mut digest, flake);
+    hash_field(&mut digest, lock);
+    hex::encode(digest.finalize())
+}
+
 fn hash_field(digest: &mut Sha256, value: &[u8]) {
     digest.update((value.len() as u64).to_be_bytes());
     digest.update(value);
@@ -323,6 +511,14 @@ pub(crate) fn guest_platform() -> Result<&'static str> {
     match std::env::consts::ARCH {
         "aarch64" => Ok("linux/aarch64"),
         "x86_64" => Ok("linux/x86_64"),
+        architecture => bail!("unsupported project environment architecture {architecture}"),
+    }
+}
+
+pub(crate) fn guest_system() -> Result<&'static str> {
+    match std::env::consts::ARCH {
+        "aarch64" => Ok("aarch64-linux"),
+        "x86_64" => Ok("x86_64-linux"),
         architecture => bail!("unsupported project environment architecture {architecture}"),
     }
 }
@@ -440,6 +636,13 @@ mod tests {
         fs::write(root.join(RECIPE_PATH), recipe).unwrap();
     }
 
+    fn write_nix_environment(root: &Path, manifest: &str, flake: &str, lock: &str) {
+        fs::create_dir_all(root.join(".fortlet")).unwrap();
+        fs::write(root.join(MANIFEST_PATH), manifest).unwrap();
+        fs::write(root.join(FLAKE_PATH), flake).unwrap();
+        fs::write(root.join(LOCK_PATH), lock).unwrap();
+    }
+
     #[test]
     fn absence_is_opt_in_and_side_effect_free() {
         let temporary = tempfile::tempdir().unwrap();
@@ -474,7 +677,67 @@ mod tests {
 
         assert_ne!(first.identity(), recipe_changed.identity());
         assert_ne!(first.identity(), manifest_changed.identity());
-        assert_eq!(first.recipe(), "mkdir -p /out/bin\n");
+        assert_eq!(first.recipe(), Some("mkdir -p /out/bin\n"));
+    }
+
+    #[test]
+    fn schema_two_is_explicit_locked_and_snapshot_identified() {
+        let temporary = tempfile::tempdir().unwrap();
+        let manifest = r#"{"schema":2,"provider":{"kind":"nix-dev-shell","name":"default"}}"#;
+        write_nix_environment(temporary.path(), manifest, "{ outputs = _: {}; }\n", "{}\n");
+
+        let first = ProjectEnvironment::discover(&project(temporary.path()))
+            .unwrap()
+            .unwrap();
+        assert!(!first.is_recipe());
+        assert_eq!(first.provider_name(), Some("default"));
+        assert!(first.nix().is_some());
+
+        fs::write(temporary.path().join(LOCK_PATH), "{\"version\": 7}\n").unwrap();
+        let changed = ProjectEnvironment::discover(&project(temporary.path()))
+            .unwrap()
+            .unwrap();
+        assert_ne!(first.identity(), changed.identity());
+    }
+
+    #[test]
+    fn schema_two_rejects_ambiguity_missing_locks_and_unknown_provider_fields() {
+        let cases = [
+            (
+                r#"{"schema":2,"provider":{"kind":"other","name":"default"}}"#,
+                "unsupported",
+            ),
+            (
+                r#"{"schema":2,"provider":{"kind":"nix-dev-shell","name":"bad.name"}}"#,
+                "attribute component",
+            ),
+            (
+                r#"{"schema":2,"provider":{"kind":"nix-dev-shell","name":"default","path":"x"}}"#,
+                "unknown field",
+            ),
+        ];
+        for (manifest, expected) in cases {
+            let temporary = tempfile::tempdir().unwrap();
+            write_nix_environment(temporary.path(), manifest, "{}\n", "{}\n");
+            let error = ProjectEnvironment::discover(&project(temporary.path())).unwrap_err();
+            assert!(format!("{error:#}").contains(expected), "{error:#}");
+        }
+
+        let temporary = tempfile::tempdir().unwrap();
+        write_nix_environment(
+            temporary.path(),
+            r#"{"schema":2,"provider":{"kind":"nix-dev-shell","name":"default"}}"#,
+            "{}\n",
+            "{}\n",
+        );
+        fs::write(temporary.path().join(RECIPE_PATH), "true\n").unwrap();
+        let error = ProjectEnvironment::discover(&project(temporary.path())).unwrap_err();
+        assert!(error.to_string().contains("ambiguous"));
+
+        fs::remove_file(temporary.path().join(RECIPE_PATH)).unwrap();
+        fs::remove_file(temporary.path().join(LOCK_PATH)).unwrap();
+        let error = ProjectEnvironment::discover(&project(temporary.path())).unwrap_err();
+        assert!(format!("{error:#}").contains("flake.lock"));
     }
 
     #[test]
@@ -658,7 +921,7 @@ mod tests {
             "289197b6bec60b4e57d47260624b617716f737eb02cdfd9155791b2576aa5862",
             "59e5588583ac82b623239929368c65b90735931c0f26b5a16c1f04d5bb97643d",
         ] {
-            assert!(environment.recipe.contains(pinned), "{pinned}");
+            assert!(environment.recipe().unwrap().contains(pinned), "{pinned}");
         }
     }
 
@@ -679,7 +942,7 @@ mod tests {
             "/lib/$debian_triplet/libcap-ng.so.0.0.0",
             "/lib/$debian_triplet/libdrop_ambient.so.0.0.0",
         ] {
-            assert!(environment.recipe.contains(required), "{required}");
+            assert!(environment.recipe().unwrap().contains(required), "{required}");
         }
     }
 }

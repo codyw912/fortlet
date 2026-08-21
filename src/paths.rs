@@ -37,6 +37,18 @@ impl AppPaths {
         self.data.join("environments")
     }
 
+    pub fn provider_root(&self, project_identity: &str) -> PathBuf {
+        self.data.join("providers").join(project_identity)
+    }
+
+    pub fn nix_store(&self, project_identity: &str) -> PathBuf {
+        self.provider_root(project_identity).join("nix")
+    }
+
+    pub fn provider_record(&self, project_identity: &str) -> PathBuf {
+        self.provider_root(project_identity).join("resolved.json")
+    }
+
     pub fn locks(&self) -> PathBuf {
         self.state.join("locks")
     }

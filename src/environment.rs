@@ -7,11 +7,13 @@ use fs2::FileExt;
 use microsandbox::Sandbox;
 
 use crate::harness::Harness;
+use crate::nix_provider;
 use crate::paths::AppPaths;
+use crate::project::Project;
 use crate::project_environment::{guest_platform, ProjectEnvironment, PublishedProjectEnvironment};
 
 pub const BASE_IMAGE: &str = "node:24-bookworm";
-const BASE_TOOLS_VERSION: &str = "bookworm-2";
+const BASE_TOOLS_VERSION: &str = "bookworm-3";
 const BUBBLEWRAP_VERSION: &str = "0.8.0-2+deb12u1";
 const HOLD_SCRIPT: &str = "trap 'exit 0' TERM INT; while :; do sleep 3600 & wait $!; done";
 pub const MANAGED_BASH_ENV: &str = "/opt/fortlet/base/etc/fortlet/bash-env";
@@ -34,7 +36,8 @@ impl<'a> EnvironmentStore<'a> {
     pub async fn ensure(
         &self,
         harness: &dyn Harness,
-        project: Option<&ProjectEnvironment>,
+        project: &Project,
+        project_environment: Option<&ProjectEnvironment>,
     ) -> Result<EnvironmentLayers> {
         let base_script = base_provision_script();
         let base = self
@@ -56,8 +59,13 @@ impl<'a> EnvironmentStore<'a> {
                 &harness_label,
             )
             .await?;
-        let project = match project {
-            Some(environment) => Some(self.ensure_project(environment).await?),
+        let project = match project_environment {
+            Some(environment) if environment.is_recipe() => {
+                Some(self.ensure_project(environment).await?)
+            }
+            Some(environment) => {
+                Some(nix_provider::ensure(self.paths, project, environment).await?)
+            }
             None => None,
         };
         Ok(EnvironmentLayers {
@@ -74,7 +82,7 @@ impl<'a> EnvironmentStore<'a> {
         let destination = self.paths.environments().join(environment.identity());
         if destination.exists() {
             environment.verify_published(&destination)?;
-            return Ok(environment.published(destination));
+            return environment.published_recipe(destination);
         }
         let _lock = lock(
             &self
@@ -84,7 +92,7 @@ impl<'a> EnvironmentStore<'a> {
         )?;
         if destination.exists() {
             environment.verify_published(&destination)?;
-            return Ok(environment.published(destination));
+            return environment.published_recipe(destination);
         }
         if fs::symlink_metadata(&destination).is_ok() {
             bail!("published project environment is not a real directory");
@@ -140,7 +148,7 @@ impl<'a> EnvironmentStore<'a> {
             )
         })?;
         environment.verify_published(&destination)?;
-        Ok(environment.published(destination))
+        environment.published_recipe(destination)
     }
 
     async fn ensure_layer(
@@ -227,11 +235,16 @@ trap 'rm -rf "$temporary"' EXIT
 chmod 777 "$temporary"
 cd "$temporary"
 apt-get update -qq
-apt-get download "bubblewrap={BUBBLEWRAP_VERSION}"
-set -- bubblewrap_*.deb
-test "$#" -eq 1
-dpkg-deb -x "$1" /out
+apt-get download "bubblewrap={BUBBLEWRAP_VERSION}" git ca-certificates curl tar xz-utils
+for package in ./*.deb; do
+  dpkg-deb -x "$package" /out
+done
 /out/usr/bin/bwrap --version
+/out/usr/bin/git --version
+/out/usr/bin/curl --version
+/out/usr/bin/tar --version
+/out/usr/bin/xz --version
+test -f /out/etc/ssl/certs/ca-certificates.crt
 mkdir -p /out/etc/fortlet
 cat > /out/etc/fortlet/bash-env <<'FORTLET_BASH_ENV'
 case ":$PATH:" in
@@ -287,7 +300,10 @@ fn project_provisioning_plan(
 ) -> Result<ProjectProvisioningPlan> {
     Ok(ProjectProvisioningPlan {
         output: output.to_owned(),
-        recipe: project.recipe().to_owned(),
+        recipe: project
+            .recipe()
+            .context("project environment is not an isolated recipe")?
+            .to_owned(),
         environment: vec![
             ("FORTLET_OUTPUT".into(), "/out".into()),
             ("FORTLET_TARGET".into(), guest_platform()?.into()),
@@ -372,7 +388,7 @@ mod tests {
     fn base_layer_installs_the_managed_bash_environment() {
         let script = base_provision_script();
 
-        assert_eq!(BASE_TOOLS_VERSION, "bookworm-2");
+        assert_eq!(BASE_TOOLS_VERSION, "bookworm-3");
         for required in [
             "cat > /out/etc/fortlet/bash-env <<'FORTLET_BASH_ENV'",
             "*:/.msb/scripts:*) PATH=\"/.msb/scripts:$FORTLET_MANAGED_PATH\" ;;",
