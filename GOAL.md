@@ -1,7 +1,7 @@
 # GOAL: Prove portable local project capability
 
-Status: active — accepted by the operator on 2026-08-21; implementation is
-blocked until FIP-0012 is accepted
+Status: active — accepted by the operator on 2026-08-21; FIP-0012 is Accepted
+and deterministic implementation is in progress
 
 ## Outcome
 

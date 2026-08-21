@@ -1,10 +1,27 @@
-# Session Handoff — review the portable project-capability contract
+# Session Handoff — validate the portable project-capability implementation
 
 Audience: a fresh agent session. The operator accepted the outcome, public
 testbeds, exclusions, evidence budget, and four-hour ceiling in the active
 `GOAL.md`. FIP-0012 is Accepted. Verify `main`, the Jujutsu stack,
 conformance, and the complete `docs/RUNBOOK.md` gate before relying on this
 summary. Implement only the exact FIP-0012 contract within the active goal.
+
+The deterministic implementation is checkpointed at `062a68c69026`. It adds
+strict schema-2 discovery, side-effect-free `fortlet plan`, a pinned guest-only
+Nix provider with project-scoped store and resolved record, common Git/bootstrap
+tools, bounded structured activation, and narrow generated Git/Jujutsu identity.
+The complete `aarch64-darwin` runbook gate passed after implementation: 101
+unit tests and every enabled integration test, formatting, strict Clippy,
+conformance, Nix packaging, and shim activation were green.
+
+Do not start another provider rehearsal without operator direction. Experiment
+0046 failed before VM creation because a long isolated HOME exceeded the host
+Unix-socket limit. Experiment 0047 then failed before Fortlet dispatch because
+a relative clone destination landed outside its declared short root. Both were
+closed and exactly cleaned up; neither ran Nix, a model, or a remote mutation.
+The self-correction rule treats them as two failures in manual experiment-root
+choreography and requires an explicit decision before one mechanically verified
+absolute-root successor.
 
 ## Verified repository state
 
@@ -195,9 +212,10 @@ with publication authority:
 
 FIP-0012 is deliberately narrower than general Nix activation. It requires a
 project-scoped store, credential-free archiving/evaluation/realization,
-scalar-only captured activation, rejection of hooks/functions/services, and
-narrow generated Git and Jujutsu identity. The operator accepted this exact
-architecture contract on 2026-08-21.
+scalar-only captured activation, rejection of executable hooks and required
+functions or services, discarding inert Nix/stdenv function and array metadata,
+and narrow generated Git and Jujutsu identity. The operator accepted this
+architecture contract and its activation clarification on 2026-08-21.
 
 After that succeeds, use a separate architecture slice to test one external
 publication lease:
@@ -219,13 +237,15 @@ plane for the first experiment.
 
 ## Next session
 
-1. Follow the repository startup order and confirm the verified baseline and
-   parked Claude bookmark still match this handoff.
-2. Create the authorized `portable-project-capability` bookmark and draft pull
-   request, then implement only FIP-0012 within the four-hour goal ceiling.
-3. Keep schema 1 conformant while adding the strict schema-2 provider, plan
-   inspection, common tools, and narrow identity projection.
-4. Predeclare every external checkout and model-backed unit before dispatch.
+1. Follow the repository startup order and confirm the verified baseline,
+   implementation checkpoint, goal bookmark, and parked Claude bookmark.
+2. Obtain the operator's decision on one successor to Experiments 0046 and
+   0047. If authorized, use one absolute short root and mechanically verify the
+   clone destination before declaring provider dispatch successful.
+3. Diagnose any real provider failure without resuming or editing a terminal
+   experiment. Keep schema 1 conformant and the accepted FIP boundary fixed.
+4. Only after provider rehearsal and a repeated complete gate, predeclare the
+   exact Codex and Tact public work units before either model process.
 
 ## What not to do
 

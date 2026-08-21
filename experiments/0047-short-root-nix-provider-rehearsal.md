@@ -1,6 +1,6 @@
 # Experiment 0047: short-root public Nix-provider rehearsal
 
-Status: declared
+Status: completed — rejected before dispatch
 Design: FIP-0012
 
 ## Baseline / Control
@@ -82,8 +82,30 @@ the isolated control paths before any VM or provider operation.
 
 ## Results
 
-Pending.
+The preflight verified `/tmp/f47` absent and created only its short home
+directory. The checkout command was then invoked from `/tmp` with relative
+destination `r`, so Jujutsu created `/private/tmp/r` rather than the declared
+`/tmp/f47/r`. The clone resolved to the exact required public parent
+`83f63799117108248750298720ed34dd55d5201a`, but its location was outside the
+declared experiment root.
+
+The undeclared path terminated the experiment immediately. No setup file,
+Fortlet command, MicroSandbox operation, Nix command, model process, project
+edit, checkpoint, credential read, managed capsule, or remote mutation ran.
+Inspection preceded exact removal of both `/tmp/f47` and `/private/tmp/r`, and
+both were absent afterward.
 
 ## Terminal Closure
 
-Pending.
+1. Outcome: rejected before provider dispatch because checkout placement
+   violated the declared scope.
+2. Root cause: the clone used a relative destination from the wrong working
+   directory. Together with Experiment 0046, this is a second terminal failure
+   in manual experiment-root choreography, even though the immediate socket
+   and checkout causes differ.
+3. Actual cost: one read-only public clone, zero Fortlet or VM commands, zero
+   model calls, and $0; elapsed engineering time was not instrumented, within
+   the 45-minute cap.
+4. Next action: stop under the self-correction rule rather than make a third
+   mask-level path attempt. The operator must decide whether to authorize one
+   successor whose setup uses one absolute, mechanically verified root.
