@@ -242,7 +242,7 @@ done
 /out/usr/bin/bwrap --version
 /out/usr/bin/git --version
 /out/usr/bin/curl --version
-/out/usr/bin/tar --version
+/out/bin/tar --version
 /out/usr/bin/xz --version
 test -f /out/etc/ssl/certs/ca-certificates.crt
 mkdir -p /out/etc/fortlet
@@ -394,6 +394,7 @@ mod tests {
             "*:/.msb/scripts:*) PATH=\"/.msb/scripts:$FORTLET_MANAGED_PATH\" ;;",
             "*) PATH=\"$FORTLET_MANAGED_PATH\" ;;",
             "chmod 0444 /out/etc/fortlet/bash-env",
+            "/out/bin/tar --version",
         ] {
             assert!(script.contains(required), "{required}");
         }
