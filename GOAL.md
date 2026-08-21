@@ -1,6 +1,11 @@
 # GOAL: Make capsule launch latency suitable for daily use
 
-Status: active — ready; operator merge and landing verification pending
+Status: complete — PR #14 landed and exact local/remote revision equality verified
+
+The operator squash-merged the goal as `29cd952ad2d4c28a1fec23456ca50d792024e6b1`.
+After fetching `origin`, local `main`, `main@origin`, and the Git-backed `main`
+bookmark all resolve to that revision. Successor product work requires a new
+operator-accepted GOAL.
 
 ## Outcome
 
