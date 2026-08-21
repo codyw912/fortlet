@@ -1,8 +1,9 @@
 # GOAL: Prove portable local project capability
 
-Status: active — stopped for operator review after Experiment 0054 rejected the
-Nix-runtime candidate's sealed schema-1 mount; FIP-0012 and FIP-0013 remain
-Accepted, and provider and model dispatch remain blocked
+Status: active — one credential-free schema-1 bind-permission successor is
+authorized after Experiment 0054 rejected the Nix-runtime candidate's sealed
+mount; FIP-0012 and FIP-0013 remain Accepted, and provider and model dispatch
+remain blocked
 
 ## Outcome
 
@@ -198,6 +199,18 @@ credential, prepare the schema-2 public testbed, dispatch a model, edit a
 project, or mutate a remote. This amendment supersedes the prior base-image
 decision stop only for the named substrate work; provider and model dispatch
 remain blocked until the campaign closes and the operator reviews its evidence.
+
+After reviewing Experiment 0054's terminal evidence and MicroSandbox's
+documented mount policies, on 2026-08-21 the operator authorized one narrowly
+predeclared, credential-free successor experiment. It MAY use the already-built
+local runtime image and public-neutral synthetic files to reproduce the default
+private-permission failure and test explicit mirrored publication,
+canonicalized portable modes, and a read-only relaxed-stat consumer mount. It
+MUST use fresh isolated state, create no project checkout or provider state,
+dispatch no harness or model, read no credential, and mutate no remote. Stop
+after terminally recording and cleaning up this experiment; any production
+change, lifecycle-campaign retry, schema-2 work, provider preparation, or model
+dispatch requires further operator review.
 
 Acceptance authorizes one `portable-project-capability` bookmark and one draft
 pull request targeting `main` under FIP-0005. Stop on a need to broaden the
