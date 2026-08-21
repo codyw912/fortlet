@@ -2,10 +2,9 @@
 
 Audience: a fresh agent session. The operator accepted the outcome, public
 testbeds, exclusions, evidence budget, and four-hour ceiling in the active
-`GOAL.md`. FIP-0012 is in Review. Verify `main`, the Jujutsu stack,
+`GOAL.md`. FIP-0012 is Accepted. Verify `main`, the Jujutsu stack,
 conformance, and the complete `docs/RUNBOOK.md` gate before relying on this
-summary. Do not begin implementation until the operator accepts the exact
-FIP-0012 contract.
+summary. Implement only the exact FIP-0012 contract within the active goal.
 
 ## Verified repository state
 
@@ -197,8 +196,8 @@ with publication authority:
 FIP-0012 is deliberately narrower than general Nix activation. It requires a
 project-scoped store, credential-free archiving/evaluation/realization,
 scalar-only captured activation, rejection of hooks/functions/services, and
-narrow generated Git and Jujutsu identity. The operator accepted the goal
-direction but has not yet accepted this exact architecture contract.
+narrow generated Git and Jujutsu identity. The operator accepted this exact
+architecture contract on 2026-08-21.
 
 After that succeeds, use a separate architecture slice to test one external
 publication lease:
@@ -222,14 +221,11 @@ plane for the first experiment.
 
 1. Follow the repository startup order and confirm the verified baseline and
    parked Claude bookmark still match this handoff.
-2. Present FIP-0012's exact schema, provider boundary, activation restrictions,
-   plan output, persistence, and identity projection to the operator.
-3. If the operator requests changes, revise the Review proposal without
-   implementation. Mark it Accepted only after explicit operator acceptance.
-4. After acceptance, create the authorized `portable-project-capability`
-   bookmark and draft pull request, then implement within the four-hour goal
-   ceiling.
-5. Predeclare every external checkout and model-backed unit before dispatch.
+2. Create the authorized `portable-project-capability` bookmark and draft pull
+   request, then implement only FIP-0012 within the four-hour goal ceiling.
+3. Keep schema 1 conformant while adding the strict schema-2 provider, plan
+   inspection, common tools, and narrow identity projection.
+4. Predeclare every external checkout and model-backed unit before dispatch.
 
 ## What not to do
 
@@ -239,6 +235,6 @@ problem complete. Do not copy the host home or `.gitconfig`, forward SSH or
 run repository setup or Git hooks on the host. Do not silently guess among
 multiple environment definitions. Do not claim full Dev Container support
 from a subset. Do not unpark Claude Code merely because its proposal already
-exists. Do not begin FIP-0012 implementation while its status remains Review,
-and do not put any private project name, path, or personal identity value into
-a public artifact.
+exists. Do not broaden FIP-0012 without a successor architecture decision, and
+do not put any private project name, path, or personal identity value into a
+public artifact.
