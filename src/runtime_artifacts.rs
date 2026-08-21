@@ -15,6 +15,7 @@ use sha2::{Digest, Sha256};
 
 use crate::harness::Harness;
 use crate::paths::AppPaths;
+use crate::prepare_timing::{PreparePhase, PrepareTimings};
 use crate::project::Project;
 use crate::project_environment::{guest_system, NIX_VERSION};
 use crate::runtime::{effective_gid, effective_uid};
@@ -114,6 +115,7 @@ impl RuntimeArtifacts {
         paths: &AppPaths,
         project: &Project,
         harness: &dyn Harness,
+        timings: &mut PrepareTimings,
     ) -> Result<PreparedRuntime> {
         let harness_manifest = self.harness(harness)?;
         let destination = paths.project_store_root(project.identity.as_str());
@@ -130,16 +132,36 @@ impl RuntimeArtifacts {
             return Ok(self.prepared_runtime(project, harness_manifest));
         }
         if !destination.exists() {
+            self.verify_runtime_archives()?;
+            self.ensure_image().await?;
+            timings.record(PreparePhase::Image);
             self.seed(paths, project).await?;
+            timings.record(PreparePhase::RuntimeStore);
         }
         self.verify_runtime_store(&destination)?;
         if !self.harness_prepared(&destination, harness_manifest)? {
             self.import_harness(project, &destination, harness_manifest)
                 .await?;
+            timings.record(PreparePhase::HarnessClosure);
         }
         self.prepared(&destination, harness_manifest)?
             .then(|| self.prepared_runtime(project, harness_manifest))
             .context("prepared project runtime did not verify after publication")
+    }
+
+    pub fn verify_prepared(
+        &self,
+        paths: &AppPaths,
+        project: &Project,
+        harness: &dyn Harness,
+    ) -> Result<()> {
+        let harness_manifest = self.harness(harness)?;
+        self.prepared(
+            &paths.project_store_root(project.identity.as_str()),
+            harness_manifest,
+        )?
+        .then_some(())
+        .context("prepared project runtime did not verify")
     }
 
     fn harness(&self, harness: &dyn Harness) -> Result<&HarnessManifest> {
@@ -203,8 +225,6 @@ impl RuntimeArtifacts {
     }
 
     async fn seed(&self, paths: &AppPaths, project: &Project) -> Result<()> {
-        self.verify_runtime_archives()?;
-        self.ensure_image().await?;
         let stores = paths.project_stores();
         fs::create_dir_all(&stores)?;
         let temporary = tempfile::Builder::new()

@@ -106,6 +106,12 @@ runtime image is loaded from the packaged OCI archive, verified by digest and
 platform, and always selected with pull policy `never`. Preparation does not
 require Docker, a registry login, host Nix, npm, or a harness installer.
 
+Set `FORTLET_PREPARE_TIMINGS=1` to emit bounded cold-preparation events for
+the image, runtime store, selected harness closure, selected project provider,
+and final verification. Events contain only a fixed phase name plus delta and
+cumulative milliseconds. Phases already satisfied by a cache hit are omitted;
+`final-verification` is emitted for every successful prepare.
+
 Skipping `prepare` is supported: explicit `run` and the transparent shims
 perform the same layer preparation automatically on first launch. Preparation
 does not validate login, runtime health, or terminal readiness and does not

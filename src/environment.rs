@@ -10,6 +10,7 @@ use microsandbox::Sandbox;
 use crate::harness::Harness;
 use crate::nix_provider;
 use crate::paths::AppPaths;
+use crate::prepare_timing::{PreparePhase, PrepareTimings};
 use crate::project::Project;
 use crate::project_environment::{guest_platform, ProjectEnvironment, PublishedProjectEnvironment};
 use crate::runtime_artifacts::{PreparedRuntime, RuntimeArtifacts};
@@ -34,18 +35,31 @@ impl<'a> EnvironmentStore<'a> {
         project: &Project,
         project_environment: Option<&ProjectEnvironment>,
     ) -> Result<EnvironmentLayers> {
+        let mut timings = PrepareTimings::from_environment();
         let artifacts = RuntimeArtifacts::from_environment()?;
-        let runtime = artifacts.ensure(self.paths, project, harness).await?;
-        let project = match project_environment {
+        let runtime = artifacts
+            .ensure(self.paths, project, harness, &mut timings)
+            .await?;
+        let published_project = match project_environment {
             Some(environment) if environment.is_recipe() => {
-                Some(self.ensure_project(environment, &runtime).await?)
+                let project = self.ensure_project(environment, &runtime).await?;
+                timings.record(PreparePhase::Schema1Layer);
+                Some(project)
             }
             Some(environment) => {
-                Some(nix_provider::ensure(self.paths, project, environment, &runtime).await?)
+                let project =
+                    nix_provider::ensure(self.paths, project, environment, &runtime).await?;
+                timings.record(PreparePhase::Schema2Provider);
+                Some(project)
             }
             None => None,
         };
-        Ok(EnvironmentLayers { runtime, project })
+        artifacts.verify_prepared(self.paths, project, harness)?;
+        timings.record(PreparePhase::FinalVerification);
+        Ok(EnvironmentLayers {
+            runtime,
+            project: published_project,
+        })
     }
 
     async fn ensure_project(

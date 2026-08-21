@@ -8,6 +8,7 @@ mod native;
 mod nix_provider;
 mod paths;
 mod preparation;
+mod prepare_timing;
 mod project;
 mod project_capability;
 mod project_environment;
