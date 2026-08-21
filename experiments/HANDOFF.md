@@ -31,7 +31,13 @@ base script, which exited 1 before Tact or Nix. Static inspection proves that
 package extraction cannot satisfy its later requirement for the generated CA
 bundle because the script never runs `update-ca-certificates`. Its capsule and
 exact root were removed, global inventory was unchanged, and the amended retry
-budget is exhausted. All provider experiments are terminal.
+unit was closed. The operator authorized a deterministic correction and one
+fresh provider-validation successor. Checkpoint `dd72b652` constructs the
+bundle from enabled trusted entries, rejects traversal, surfaces the failing
+base step, bumps the immutable layer identity, and updates FIP-0012 conformance
+to honest partial status. The complete 102-test runbook gate, strict Clippy,
+conformance, Nix package, and shim checks passed. Only separately declared
+Experiment 0052 may now run.
 
 ## Verified repository state
 
@@ -249,13 +255,12 @@ plane for the first experiment.
 
 1. Follow the repository startup order and confirm the verified baseline,
    implementation checkpoint, goal bookmark, and parked Claude bookmark.
-2. Stop: Experiment 0051 is terminal and the amended firewall-clearance budget
-   is exhausted. Do not resume any provider checkout or dispatch a model unit.
-3. Correct CA-bundle construction and command-level provisioning diagnostics
-   only under new operator direction, then rerun the complete gate. Keep schema
-   1 conformant and the accepted FIP boundary fixed.
-4. A fresh provider unit and the later Codex and Tact public work units each
-   require explicit amended authority before dispatch.
+2. Run only declared Experiment 0052 with new isolated state and network
+   approval from the outset. Never reuse a terminal checkout or state root.
+3. If 0052 fails, close it and stop; no correction or retry is authorized. Keep
+   schema 1 conformant and the accepted FIP boundary fixed.
+4. Only after 0052 succeeds may the exact Codex and Tact public work units be
+   predeclared under the GOAL's existing model-process authority.
 
 ## What not to do
 

@@ -139,6 +139,12 @@ the identical frozen public inputs, and network approval from the outset. It
 does not authorize resuming a terminal unit, another correction, or a further
 retry.
 
+That successor cleared the firewall and exposed a deterministic common-base CA
+bundle defect before harness or provider preparation. After the defect was
+closed, the operator authorized its bounded correction, the complete gate, and
+one final fresh provider-validation successor. No terminal unit may be resumed,
+and this amendment authorizes no additional correction or retry.
+
 Acceptance authorizes one `portable-project-capability` bookmark and one draft
 pull request targeting `main` under FIP-0005. Stop on a need to broaden the
 provider contract, execute repository text on the host, expose a credential or
