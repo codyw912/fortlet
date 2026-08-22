@@ -2,11 +2,11 @@
 
 Audience: a fresh agent session. The operator accepted the outcome, public
 testbeds, exclusions, evidence budget, and four-hour ceiling in the active
-`GOAL.md`. FIP-0012 and FIP-0013 are Accepted. Experiment 0055 is now terminal
+`GOAL.md`. FIP-0012 and FIP-0013 are Accepted. Experiment 0056 is now terminal
 and authority has stopped for operator review. Verify `main`, the Jujutsu
 stack, conformance, and the complete `docs/RUNBOOK.md` gate before relying on
-this summary. Do not implement a sealing change or run a successor without
-fresh operator direction.
+this summary. Do not implement the accepted sealing mechanism or run the
+remaining lifecycle campaign without fresh operator direction.
 
 The base-image review selected one small Nix-built OCI runtime for every
 harness, plus one isolated Nix store per project. Fortlet must locally load and
@@ -120,13 +120,34 @@ stock-Codex compatibility tests remain explicitly ignored because they require
 an external binary. Nix reported only the expected incompatible
 `x86_64-linux` omission.
 
+Experiment 0056 accepted the smallest successor mechanism. One strict/mirrored
+publisher's trusted guest finalizer reported `0555` directories and executable
+plus `0444` data; MicroSandbox's intentional floor made the literal host modes
+`0755`/`0644`. Exact host validation passed, and removing only write bits made
+the host modes canonical without changing the relative link, types, hashes, or
+stat-override xattr names. A strict read-only consumer still failed mounting
+the sealed root. The otherwise identical relaxed private `ro,nosuid,nodev`
+consumer ran as numeric user 1000, executed both file and link, read data,
+proved append and chmod failed, and left every recorded property unchanged.
+Publisher, strict, and relaxed runs took 0.32, 0.05, and 0.26 seconds. Exact
+cleanup restored empty isolated inventory and unchanged global inventory; no
+network, provider, harness, model, credential, project, or remote work ran.
+
+After terminal cleanup, the complete `aarch64-darwin` standard gate passed:
+102 unit tests and every enabled integration test, formatting, strict
+all-target/all-feature Clippy, conformance, the Nix package, and shim activation
+were green. The two stock-Codex compatibility tests remain explicitly ignored
+because they require an external binary. Nix reported only the expected
+incompatible `x86_64-linux` omission.
+
 Stop here for operator review. Do not fix the sealing contract, run a successor
 campaign, prepare schema 2, or dispatch Codex/Tact model work without fresh
-direction. The smallest successor is now sharper: keep mirrored guest creation
-and trusted guest validation, then use a trusted host-side canonical seal to
-remove only MicroSandbox's deliberate owner-write floor before proving the
-relaxed read-only consumer. If accepted, that mechanism must still repeat the
-remaining Fortlet lifecycle evidence under a new experiment identity.
+direction. The next implementation should set mirrored permissions on the
+schema-1 provisioning bind, retain trusted guest validation, validate the
+literal host tree before removing only write bits, and use relaxed private
+`ro,nosuid,nodev` consumption. Deterministic tests belong with that code. The
+accepted mechanism must then repeat the remaining Fortlet prepared-lifecycle
+evidence under a new experiment identity.
 
 ## Verified repository state
 

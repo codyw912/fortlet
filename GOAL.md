@@ -1,9 +1,9 @@
 # GOAL: Prove portable local project capability
 
-Status: active — one credential-free trusted-host sealing successor is
-authorized after Experiment 0055 identified MicroSandbox's deliberate mirrored
-owner-access floor; FIP-0012 and FIP-0013 remain Accepted, and provider and
-model dispatch remain blocked
+Status: active — stopped for operator review after Experiment 0056 accepted
+mirrored guest validation, trusted host write-bit removal, and relaxed
+read-only consumption; FIP-0012 and FIP-0013 remain Accepted, and production
+changes, provider work, and model dispatch remain blocked
 
 ## Outcome
 

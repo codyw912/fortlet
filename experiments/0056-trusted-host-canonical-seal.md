@@ -1,6 +1,6 @@
 # Experiment 0056: Trusted host canonical seal
 
-Status: declared
+Status: completed — accepted
 Design: FIP-0001, FIP-0006, FIP-0007, FIP-0013
 
 ## Baseline / Control
@@ -158,8 +158,96 @@ image, capsule, VM, or fixture existed during rehearsal.
 
 ## Results
 
-Pending.
+Preflight verified MicroSandbox 0.6.8, exact OCI archive SHA-256
+`8acd80db302c20c3cfe626b0cdebf8899ead35ae1e7d482723ba8efdbd101697`,
+the declared manifest digest, an absent exact root, and empty isolated image
+and capsule inventories. The archive loaded locally as the declared 99.5 MiB
+image without network access. Global Fortlet inventory contained only the
+pre-existing unrelated stopped capsule named by the handoff.
+
+The mirrored publisher exited zero in 0.32 seconds. Its trusted finalizer
+reported exactly `0555` for the root, `bin`, `share`, and `bin/probe`, and
+`0444` for `share/data`. It retained the relative `probe` symlink target and
+found no special file. After capsule removal, the exact five-entry host tree
+had the expected MicroSandbox owner-floor modes:
+
+| Entry | Guest-finalized mode | Host mode before seal | Host mode after seal |
+| --- | ---: | ---: | ---: |
+| root | `0555` | `0755` | `0555` |
+| `bin` | `0555` | `0755` | `0555` |
+| `share` | `0555` | `0755` | `0555` |
+| `bin/probe` | `0555` | `0755` | `0555` |
+| `share/data` | `0444` | `0644` | `0444` |
+
+Pre-seal validation proved the exact shape, relative link, ordinary types,
+expected modes, and file SHA-256 values
+`ec06825574cbc2fea7c714de6c86694b179f54cfdc6417ece60df81794b0917b`
+and `ee5075a1707aea4f4d06583c57087a69955f856cee6358424f3e8fea706f5978`.
+Every entry carried the expected `user.msb.override_stat` xattr. The trusted
+host then ran only `chmod -R a-w` on the exact validated tree. Post-seal modes
+were canonical, while link, types, hashes, and xattr names were unchanged.
+
+The strict/private read-only consumer failed during mount in 0.05 seconds
+before its command:
+
+```text
+error: failed to start "f56-strict-consume"
+  → mount: mount layer_ae137427: Permission denied (os error 13)
+  → the host path is not readable by msb (check permissions)
+```
+
+The stopped strict capsule was removed, isolated inventory returned to empty,
+and every sealed mode, hash, link, and xattr name remained unchanged. This
+retains Experiment 0055's strict sealed-root behavior even after correcting
+literal readability and executability, so strict is not selected.
+
+The otherwise identical relaxed/private read-only consumer exited zero in 0.26
+seconds as numeric user `1000:1000` and printed exactly:
+
+```text
+probe-ok
+probe-ok
+data-ok
+readonly-ok
+```
+
+It executed both the file and relative symlink, read the ordinary file, and
+required both append and chmod to fail. After capsule removal, exact modes,
+link, types, hashes, and xattr names still matched the sealed record. Relaxed
+stat virtualization is therefore selected with private host propagation and
+`ro,nosuid,nodev` enforcement.
+
+Final isolated capsule inventory was empty and isolated image inventory
+contained only the exact locally loaded image. Cleanup-only owner access was
+restored on the exact layer, `/private/tmp/f56` was removed and proved absent,
+and global Fortlet inventory exactly matched baseline. No network, project,
+provider, harness, model, credential, identity, remote, source, package, or
+publication operation occurred.
+
+After terminal cleanup, the complete `aarch64-darwin` standard verification
+set passed through `nix develop`: 102 unit tests and every enabled integration
+test, formatting, strict all-target/all-feature Clippy, conformance, the Nix
+package, and shim activation were green. The two stock-Codex compatibility
+tests remained explicitly ignored because they require an external binary, and
+Nix reported only the expected incompatible `x86_64-linux` omission.
 
 ## Terminal Closure
 
-Pending.
+1. Outcome: accepted; the trusted host seal produced canonical portable modes,
+   and the relaxed read-only consumer proved non-root execution, readability,
+   and immutability without changing the layer.
+2. Root cause resolved: mirrored publication preserves the guest's intended
+   group/other bits but adds only a deliberate owner-write floor. Exact
+   post-validation host write-bit removal eliminates that floor, while relaxed
+   stat handling avoids strict probing of the sealed xattr-backed root.
+3. Actual cost: about 1 minute 52 seconds of live work versus the 15-minute
+   ceiling, one local image load, one publisher, one expected-failed strict
+   consumer, one successful relaxed consumer, zero network, provider, harness,
+   model, or credential calls, and $0.
+4. Cleanup: every exact capsule and the exact isolated root were removed,
+   isolated inventory was empty, and global inventory was unchanged.
+5. Next action: stop for operator review. If accepted for implementation, add
+   explicit mirrored provisioning, trusted pre-seal validation and canonical
+   sealing, and relaxed private `ro,nosuid,nodev` schema-1 consumption with
+   deterministic tests in the same checkpoint. A production change and the
+   remaining prepared lifecycle campaign require fresh operator direction.
