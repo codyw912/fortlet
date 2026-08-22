@@ -111,15 +111,16 @@ recipe there. On first use, it runs the snapshotted recipe in a dedicated
 MicroSandbox capsule with public network access, no live project mount, no
 persistent home, and no provider, SSH, signing, publication, or registry
 credentials. The validated output is content-digested, sealed against writes,
-published atomically, fully reverified on cache hits, and mounted read-only at
-`/opt/fortlet/project`. Provisioning uses a strict mirrored output bind so a
-package-owned guest finalizer can preserve executable intent. After that
-capsule is retired, Fortlet validates the resulting `0755`/`0644` host tree
-and seals it to canonical `0555`/`0444` modes. Runtime consumption uses an
-explicit relaxed, private, read-only, `nosuid`, `nodev` mount; this remains
-usable when MicroSandbox stat-override metadata is absent. A repository
-without the manifest uses only the common runtime and selected harness
-closures.
+fully reverified, and published atomically. Cache hits perform bounded
+verification of only the real canonical root and its versioned marker, then
+mount the layer read-only at `/opt/fortlet/project`. Provisioning uses a strict
+mirrored output bind so a package-owned guest finalizer can preserve executable
+intent. After that capsule is retired, Fortlet validates the resulting
+`0755`/`0644` host tree and seals it to canonical `0555`/`0444` modes. Runtime
+consumption uses an explicit relaxed, private, read-only, `nosuid`, `nodev`
+mount; this remains usable when MicroSandbox stat-override metadata is absent.
+A repository without the manifest uses only the common runtime and selected
+harness closures.
 
 Changing either file selects a new immutable layer. If an old capsule exists,
 run `fortlet stop <harness>` and `fortlet reset <harness>` before launching
@@ -129,6 +130,10 @@ downloads can drift unless the recipe pins and verifies them.
 The internal publication contract is versioned independently of schema 1, so
 layers made under an older permission contract are not cache hits and malformed
 legacy `0500`/`0400` trees fail closed.
+The published cache and invoking host user are one trusted principal. Complete
+tree validation protects that principal from provisioning-guest output, and
+the runtime mount prevents guest writes; bounded reuse does not claim to detect
+arbitrary cache changes made directly by that same host principal.
 
 This repository's recipe pins Rust, Cargo, Zig, Jujutsu, and the Linux
 development library needed to build Fortlet. It downloads exact public

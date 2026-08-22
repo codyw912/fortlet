@@ -152,14 +152,23 @@ pre-seal tree, writes and syncs its versioned marker, removes only write bits,
 then revalidates exact `0555`/`0444` modes and the unchanged content digest
 before atomic publication.
 
-Every reuse verifies the publication-contract identity, marker binding,
-canonical modes, paths, types, relative links, and output digest. Older
-permission-contract identities are not selected as cache hits, and legacy
-owner-only `0500`/`0400` trees fail closed. The published layer is mounted at
-`/opt/fortlet/project` with explicit read-only, `nosuid`, `nodev`, relaxed stat
-virtualization, private host-permission propagation, and no root-symlink
-following. Relaxed virtualization uses override metadata when available and
-falls back to the canonical literal host modes when it is absent.
+Every reuse verifies only that the selected root is a real canonical `0555`
+directory and its bounded `0444` regular-file marker binds the current
+publication contract, declaration identity, recorded output digest, runtime,
+and platform. It does not enumerate descendants, revalidate declared paths, or
+rehash the output. Older permission-contract identities are not selected as
+cache hits. The published layer is mounted at `/opt/fortlet/project` with
+explicit read-only, `nosuid`, `nodev`, relaxed stat virtualization, private
+host-permission propagation, and no root-symlink following. Relaxed
+virtualization uses override metadata when available and falls back to the
+canonical literal host modes when it is absent.
+
+The published cache and invoking host user are one trusted principal. The
+complete pre-publication validation protects that principal from guest output,
+and the runtime mount prevents guest mutation. Bounded reuse does not claim to
+detect arbitrary cache changes performed directly by the same host principal;
+that guarantee would require a privileged store or content-verifying
+filesystem.
 
 Manifest paths precede the common runtime and harness paths, while the harness
 executable remains an absolute path in the verified project store. `HOME`,

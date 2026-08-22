@@ -196,7 +196,7 @@
         "experiments/0058-sealed-schema-one-lifecycle-rerun.md"
       ],
       "gaps": [
-        "Published schema-1 reuse recursively validates modes and rehashes the complete output; Experiment 0058 measured a 5.14-second repeated-prepare median, violating the amended no-traversal cache-hit requirement and FIP-0013 latency gate."
+        "The accepted bounded verified-reuse amendment is implemented with automated root, marker, contract-invalidation, and no-descendant-traversal evidence; a fresh credential-free experiment must establish the required repeated-prepare and lifecycle latency before conformance."
       ]
     },
     {
@@ -379,7 +379,7 @@
         "experiments/0058-sealed-schema-one-lifecycle-rerun.md"
       ],
       "gaps": [
-        "Experiment 0058 accepted 200.95-second cold schema-1 preparation but rejected repeated preparation at a 5.14-second median because sealed-output reuse verification traverses and rehashes the complete layer; prepared absent, stopped, and running lifecycle evidence remains outstanding.",
+        "Experiment 0058 accepted 200.95-second cold schema-1 preparation but rejected its 5.14-second repeated-prepare median; the accepted bounded verified-reuse implementation now requires a fresh credential-free repeated-prepare gate followed by prepared absent, stopped, and running lifecycle evidence.",
         "A successful isolated live schema-2 preparation remains outstanding under a later authorization.",
         "Native x86_64-linux artifact, package, and runtime verification remains outstanding."
       ]

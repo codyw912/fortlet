@@ -36,7 +36,7 @@ const MARKER: &str = ".fortlet-project.json";
 const RECIPE_SCHEMA: u64 = 1;
 const NIX_SCHEMA: u64 = 2;
 const DECLARATION_CONTRACT: &str = "fortlet-project-environment-v1";
-const PUBLICATION_CONTRACT: &str = "fortlet-project-layer-v2";
+const PUBLICATION_CONTRACT: &str = "fortlet-project-layer-v3";
 pub const NIX_PROVIDER_CONTRACT: &str = "fortlet-nix-dev-shell-v2";
 pub const NIX_VERSION: &str = "2.34.8";
 const MAX_MANIFEST_BYTES: u64 = 64 * 1024;
@@ -108,7 +108,7 @@ struct NixProvider {
     name: String,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 struct Marker {
     schema: u64,
@@ -310,7 +310,12 @@ impl ProjectEnvironment {
         if !metadata.is_dir() || metadata.file_type().is_symlink() {
             bail!("published project environment is not a real directory");
         }
-        let marker_bytes = read_bounded(&root.join(MARKER), MAX_MANIFEST_BYTES, "marker")?;
+        validate_output_mode(
+            metadata.permissions().mode() & 0o7777,
+            true,
+            PublicationPhase::PostSeal,
+        )?;
+        let marker_bytes = read_published_marker(root)?;
         let marker: Marker = serde_json::from_slice(&marker_bytes)
             .context("published project environment marker is invalid")?;
         if marker.schema != RECIPE_SCHEMA
@@ -321,13 +326,35 @@ impl ProjectEnvironment {
         {
             bail!("published project environment marker does not match its inputs");
         }
-        validate_output_modes(root, PublicationPhase::PostSeal)?;
-        validate_declared_paths(root, &self.path)?;
-        if output_digest(root)? != marker.output {
-            bail!("published project environment output digest does not match its marker");
-        }
+        validate_recorded_output_digest(&marker.output)?;
         Ok(())
     }
+}
+
+fn read_published_marker(root: &Path) -> Result<Vec<u8>> {
+    let path = root.join(MARKER);
+    let metadata = fs::symlink_metadata(&path)
+        .context("cannot inspect published project environment marker")?;
+    if !metadata.is_file() || metadata.file_type().is_symlink() {
+        bail!("published project environment marker is not a regular file");
+    }
+    validate_output_mode(
+        metadata.permissions().mode() & 0o7777,
+        false,
+        PublicationPhase::PostSeal,
+    )?;
+    if metadata.len() > MAX_MANIFEST_BYTES {
+        bail!("project environment marker exceeds {MAX_MANIFEST_BYTES} bytes");
+    }
+    let file = File::open(path).context("cannot open published project environment marker")?;
+    read_from(file, MAX_MANIFEST_BYTES, "marker")
+}
+
+fn validate_recorded_output_digest(output: &str) -> Result<()> {
+    if output.len() != 64 || !output.bytes().all(|byte| byte.is_ascii_hexdigit()) {
+        bail!("published project environment marker has an invalid output digest");
+    }
+    Ok(())
 }
 
 #[derive(Clone, Copy)]
@@ -551,21 +578,6 @@ fn snapshot_file(root: &Path, path: &Path, limit: u64, kind: &str) -> Result<Vec
     read_from(file, limit, kind)
 }
 
-fn read_bounded(path: &Path, limit: u64, kind: &str) -> Result<Vec<u8>> {
-    let metadata = fs::symlink_metadata(path).with_context(|| {
-        format!(
-            "cannot inspect project environment {kind} {}",
-            path.display()
-        )
-    })?;
-    if !metadata.is_file() || metadata.file_type().is_symlink() {
-        bail!("project environment {kind} is not a regular file");
-    }
-    let file = File::open(path)
-        .with_context(|| format!("cannot open project environment {kind} {}", path.display()))?;
-    read_from(file, limit, kind)
-}
-
 fn read_from(file: File, limit: u64, kind: &str) -> Result<Vec<u8>> {
     let mut bytes = Vec::new();
     file.take(limit + 1).read_to_end(&mut bytes)?;
@@ -742,6 +754,17 @@ mod tests {
 
     fn set_mode(path: &Path, mode: u32) {
         fs::set_permissions(path, fs::Permissions::from_mode(mode)).unwrap();
+    }
+
+    fn rewrite_published_marker(root: &Path, marker: &Marker) {
+        let marker_path = root.join(MARKER);
+        set_mode(root, 0o755);
+        set_mode(&marker_path, 0o644);
+        let mut bytes = serde_json::to_vec(marker).unwrap();
+        bytes.push(b'\n');
+        fs::write(&marker_path, bytes).unwrap();
+        set_mode(&marker_path, 0o444);
+        set_mode(root, 0o555);
     }
 
     fn legacy_recipe_identity(manifest: &[u8], recipe: &[u8], platform: &str) -> String {
@@ -960,14 +983,88 @@ mod tests {
         set_mode(&tool, 0o755);
         fs::write(&tool, "changed").unwrap();
         set_mode(&tool, 0o555);
-        assert!(environment
-            .verify_published(output.path())
-            .unwrap_err()
-            .to_string()
-            .contains("digest"));
+        assert_ne!(output_digest(output.path()).unwrap(), marker.output);
+        environment.verify_published(output.path()).unwrap();
 
         set_mode(&tool, 0o500);
-        assert!(environment.verify_published(output.path()).is_err());
+        environment.verify_published(output.path()).unwrap();
+        restore_cleanup_permissions(output.path()).unwrap();
+    }
+
+    #[test]
+    fn bounded_reuse_validates_only_the_root_and_marker() {
+        let project_root = tempfile::tempdir().unwrap();
+        write_environment(
+            project_root.path(),
+            r#"{"schema":1,"path":["bin"],"environment":{}}"#,
+            "true\n",
+        );
+        let environment = ProjectEnvironment::discover(&project(project_root.path()))
+            .unwrap()
+            .unwrap();
+        let output = tempfile::tempdir().unwrap();
+        fs::create_dir(output.path().join("bin")).unwrap();
+        fs::write(output.path().join("bin/tool"), "content").unwrap();
+        set_mode(output.path(), 0o755);
+        environment.validate_and_mark(output.path()).unwrap();
+
+        set_mode(&output.path().join("bin"), 0o700);
+        environment.verify_published(output.path()).unwrap();
+
+        set_mode(output.path(), 0o755);
+        let error = environment.verify_published(output.path()).unwrap_err();
+        assert!(error.to_string().contains("expected 0555"));
+        set_mode(output.path(), 0o555);
+
+        let marker_path = output.path().join(MARKER);
+        set_mode(&marker_path, 0o644);
+        let error = environment.verify_published(output.path()).unwrap_err();
+        assert!(error.to_string().contains("expected 0444"));
+        set_mode(&marker_path, 0o444);
+
+        let marker: Marker = serde_json::from_slice(&fs::read(&marker_path).unwrap()).unwrap();
+        let mut malformed_digest = marker.clone();
+        malformed_digest.output = "not-a-digest".into();
+        rewrite_published_marker(output.path(), &malformed_digest);
+        let error = environment.verify_published(output.path()).unwrap_err();
+        assert!(error.to_string().contains("invalid output digest"));
+
+        let mismatched_markers = [
+            Marker {
+                schema: RECIPE_SCHEMA + 1,
+                ..marker.clone()
+            },
+            Marker {
+                contract: "fortlet-project-layer-v2".into(),
+                ..marker.clone()
+            },
+            Marker {
+                identity: "0".repeat(64),
+                ..marker.clone()
+            },
+            Marker {
+                image: "other-runtime".into(),
+                ..marker.clone()
+            },
+            Marker {
+                platform: "linux/other".into(),
+                ..marker.clone()
+            },
+        ];
+        for mismatched in mismatched_markers {
+            rewrite_published_marker(output.path(), &mismatched);
+            let error = environment.verify_published(output.path()).unwrap_err();
+            assert!(error.to_string().contains("does not match its inputs"));
+        }
+
+        rewrite_published_marker(output.path(), &marker);
+        set_mode(output.path(), 0o755);
+        fs::rename(&marker_path, output.path().join("saved-marker")).unwrap();
+        std::os::unix::fs::symlink("saved-marker", &marker_path).unwrap();
+        set_mode(output.path(), 0o555);
+        let error = environment.verify_published(output.path()).unwrap_err();
+        assert!(error.to_string().contains("not a regular file"));
+
         restore_cleanup_permissions(output.path()).unwrap();
     }
 
