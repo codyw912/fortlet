@@ -4,14 +4,12 @@ Audience: a fresh agent session. The operator accepted the outcome, public
 testbeds, exclusions, evidence budget, and four-hour ceiling in the active
 `GOAL.md`. FIP-0012 and FIP-0013 are Accepted. The portable schema-1 sealing
 mechanism is implemented at signed tip `dd75b81cf8c7`, and its complete local
-gate and draft PR #15 hosted checks pass. Experiment 0057 is terminally
-rejected: both a first cold attempt and the operator-directed firewall retry
-reached the same preparation-guest DNS failure for `deb.debian.org`, even
-though the intervening host HTTPS clearance check returned 200. Neither attempt
-reached schema-1 publication or lifecycle. Exact cleanup passed and global
-inventory was unchanged. Authority has stopped for operator review; schema-2
-preparation, another lifecycle campaign, provider or model dispatch, and
-public-project mutation remain unauthorized.
+gate and draft PR #15 hosted checks pass. Experiment 0057 produced no product
+lifecycle evidence and completed exact cleanup with unchanged global
+inventory. The operator authorized Experiment 0058 as one fresh rerun using
+the exact existing package and frozen campaign conditions. Schema-2
+preparation, provider or model dispatch, and public-project mutation remain
+unauthorized.
 
 The base-image review selected one small Nix-built OCI runtime for every
 harness, plus one isolated Nix store per project. Fortlet must locally load and

@@ -244,6 +244,14 @@ project edit, additional sample, remote project mutation, or retry of a failed
 unit. Declaration, terminal evidence, exact cleanup, verification, and updates
 to the existing goal bookmark and draft PR are in scope.
 
+After reviewing Experiment 0057, on 2026-08-22 the operator authorized one
+fresh credential-free successor using the same signed implementation, exact
+already-built immutable package, frozen public inputs, thresholds, ordering,
+and evidence requirements. It MAY repeat the declared cold, warm, and
+lifecycle campaign from fresh isolated state. This authorizes no package
+rebuild, schema-2 preparation, provider or model request, project edit,
+additional performance sample, or remote project mutation.
+
 Acceptance authorizes one `portable-project-capability` bookmark and one draft
 pull request targeting `main` under FIP-0005. Stop on a need to broaden the
 provider contract, execute repository text on the host, expose a credential or
