@@ -37,11 +37,31 @@ store mount policy, provider contract, or public command surface.
 
 ## Frozen Inputs
 
-Use the candidate produced by the authorized implementation checkpoint, with
-its exact signed revision, immutable package path, executable hash, OCI archive
-hash and manifest digest, runtime seed hash, Tact closure hash, MicroSandbox
-0.6.8, and Tact 0.3.7 recorded before the first live capsule. No source or
-package rebuild is permitted after live execution begins.
+Use signed candidate
+`eb363924fde5f2f540dcf557f26ba88bc0a40d89` and exact immutable package
+`/nix/store/f2wf5fb7dgzn66ylccr24c5598ml3yjr-fortlet-0.1.0`. Its SSH
+signature verifies as `good` for the declared GitHub noreply identity. The
+package contains Fortlet 0.1.0, MicroSandbox 0.6.8, Tact 0.3.7, runtime
+contract `fip0013-2`, and these identities:
+
+- Fortlet executable SHA-256
+  `7d367bc8c175d7be8b4b915957343de9d6879f850fa9934ac757bc65bf3bd867`;
+- MicroSandbox executable SHA-256
+  `799c8d50bf8281582fee5aa75613a79101ad7631310dc08b6c4045ae57985c02`;
+- OCI archive SHA-256
+  `79bd08cbe230c5a676d2e29cbf4fbef8ff83c75eb0ac42dccf3c3eef8529bf46`;
+- OCI manifest digest
+  `sha256:1833500921de187517faff311532608dbba63af310530daad28c855d281dd2b8`;
+- runtime seed SHA-256
+  `8a9a38b4960987021757672d6a95b05e2c6a525737fbec493a7842d2274e6655`;
+  and
+- Tact closure SHA-256
+  `7fb40fe4eaad08a5d4ce4dd780c1caccf0624b3ca31e6a0587cf61fd3e3fa3e3`.
+
+The manifest selects root bundle
+`/etc/ssl/certs/ca-certificates.crt` and immutable source
+`/nix/store/xqm9bp646askgkfwsgsifvmzv0sc34yg-nss-cacert-3.126/etc/ssl/certs/ca-bundle.crt`.
+No source or package rebuild is permitted after live execution begins.
 
 Use only exact owned root `/private/tmp/f60`. Use separate fresh control and
 schema-1 project roots, Fortlet state, Fortlet data, isolated MicroSandbox
@@ -157,9 +177,13 @@ Repository baseline verification passed before implementation: 106 unit tests
 and all enabled integration tests, formatting, strict Clippy, conformance, the
 Nix package, and shim activation were green; the two stock Codex compatibility
 tests remained intentionally ignored, and Nix reported only the known native
-`x86_64-linux` omission. No experiment root, workspace, capsule, credential
-fixture, package rebuild, provider, harness, model, project mutation, or remote
-mutation was created by this rehearsal.
+`x86_64-linux` omission. The corrected candidate then passed 107 unit tests and
+the same complete gate; its artifact build rootlessly unpacked the OCI image
+and checked the real root-level bundle and four CA environment selectors. The
+exact signed package was built and hashed while `/private/tmp/f60` remained
+absent and the sole Jujutsu workspace remained clean. No experiment root,
+capsule, credential fixture, provider, harness, model, project mutation, or
+remote mutation was created by this rehearsal.
 
 ## Results
 
