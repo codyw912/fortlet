@@ -1,9 +1,8 @@
 # GOAL: Prove portable local project capability
 
-Status: active — Experiment 0059 accepted bounded schema-1 reuse with a
-0.02-second median but rejected the first prepared absent launch when the guest
-agent could not initialize on a read-only filesystem; provider work and model
-dispatch remain blocked pending operator review
+Status: active — Experiment 0060 is authorized to correct and validate the
+runtime CA-bundle contract after Experiment 0059's guest-agent initialization
+failure; provider work and model dispatch remain blocked
 
 ## Outcome
 
@@ -261,6 +260,22 @@ rule ended lifecycle sampling. Exact cleanup completed with unchanged global
 inventory. No schema-2 preparation, provider request, model dispatch, project
 edit, package rebuild, or remote mutation is authorized after this terminal
 result.
+
+On 2026-08-22, after reviewing Experiment 0059 and the pinned MicroSandbox
+0.6.8 guest-agent initialization path, the operator authorized one bounded
+runtime-contract correction and Experiment 0060. The correction MAY advance
+FIP-0013's internal runtime contract, preserve the read-only project `/nix`
+store, and materialize the initial CA bundle at a real root-filesystem path
+that the guest agent may extend inside the disposable capsule root. It MUST add
+deterministic OCI evidence, pass the complete local gate, and use a freshly
+built signed package. The experiment MUST first pass a fresh manifest-free
+Tact boot and stop/start control. Only then MAY it repeat the cold schema-1,
+five-prepare, and twelve-launch lifecycle campaign from separate fresh isolated
+state with the existing 600-second cold and sub-second prepared thresholds.
+It authorizes no schema-2 preparation, provider or model request, project edit,
+real credential read, public-project mutation, or remote mutation outside the
+existing goal branch and draft PR. Stop on the first product or cleanup
+failure.
 
 Acceptance authorizes one `portable-project-capability` bookmark and one draft
 pull request targeting `main` under FIP-0005. Stop on a need to broaden the

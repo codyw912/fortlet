@@ -16,9 +16,16 @@ initialization and the VM shut down before its relay became available. The
 stopped configuration contained the intended read-only project store and
 relaxed/private `ro,nosuid,nodev` schema-1 mount, but the capsule never reached
 running state. The remaining eleven launches did not run. Exact cleanup passed
-with unchanged global inventory. Schema-2 preparation, provider or model
-dispatch, and public-project mutation remain unauthorized pending operator
-review.
+with unchanged global inventory.
+
+The operator has authorized one bounded runtime-contract correction and
+Experiment 0060. The candidate must keep `/nix` read-only, materialize the
+initial CA bundle at a real root-filesystem path for MicroSandbox guest-agent
+initialization, add deterministic OCI evidence, and pass the complete gate.
+The experiment first runs a fresh manifest-free Tact boot and stop/start
+control; only a passing control may unlock a separate fresh repeat of the cold,
+five-prepare, and twelve-launch schema-1 campaign. Schema-2 preparation,
+provider or model dispatch, and public-project mutation remain unauthorized.
 
 The base-image review selected one small Nix-built OCI runtime for every
 harness, plus one isolated Nix store per project. Fortlet must locally load and
@@ -374,15 +381,14 @@ plane for the first experiment.
 1. Follow the repository startup order and confirm the signed bounded-reuse
    implementation, Experiment 0059 terminal record, goal bookmark, draft PR,
    and parked Claude bookmark.
-2. Stop for operator review. Do not retry Experiment 0059's failed launch or
-   consume its remaining eleven samples.
-3. If authorized, predeclare a fresh credential-free diagnostic that isolates
-   the guest-agent write requirement against the frozen Nix runtime. Do not
-   assume from the current log alone that the correction belongs to the base
-   image, root disk, or one particular mount.
+2. Implement the authorized root-level CA-bundle runtime contract and its
+   deterministic OCI evidence without weakening the read-only project store.
+3. Pass the complete gate, freeze and sign the candidate, then run Experiment
+   0060 exactly as declared: manifest-free control first, fresh schema-1
+   campaign only on control success, terminal closure and exact cleanup.
 4. Keep schema-2 preparation, provider requests, Codex/Tact model work, and
-   public-project mutation blocked until a successful successor closes the
-   prepared absent, stopped, and running lifecycle evidence.
+   public-project mutation blocked until Experiment 0060 successfully closes
+   the prepared absent, stopped, and running lifecycle evidence.
 
 ## What not to do
 
