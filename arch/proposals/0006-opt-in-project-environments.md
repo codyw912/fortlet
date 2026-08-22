@@ -330,10 +330,10 @@ handling avoids the strict writable-xattr probe that rejected the sealed tree.
 
 ## Amendment — 2026-08-22 bounded verified reuse
 
-Amendment status: Draft. Proposed after Experiment 0058 showed that recursively
-validating modes and rehashing a correctly sealed 1.2-GiB layer made five
-unchanged prepares take a 5.14-second median, contradicting this FIP's
-no-traversal cache-hit contract and FIP-0013's sub-second requirement.
+Amendment status: Accepted. Operator-accepted after Experiment 0058 showed that
+recursively validating modes and rehashing a correctly sealed 1.2-GiB layer
+made five unchanged prepares take a 5.14-second median, contradicting this
+FIP's no-traversal cache-hit contract and FIP-0013's sub-second requirement.
 
 This amendment resolves the conflict between the original requirement to
 rehash the complete output before every reuse or mount and the later

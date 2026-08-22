@@ -12,12 +12,13 @@ cold preparation passed, but five unchanged prepares had a 5.14-second median
 because full reuse verification recursively validates modes and rehashes the
 1.2-GiB sealed output. The sub-second requirement failed before lifecycle
 sampling. Exact cleanup passed and global inventory was unchanged. Authority
-has stopped for operator review. A draft FIP-0006 bounded verified-reuse
-amendment moves complete tree validation and digest enforcement to cold atomic
-publication, treats the invoking host user and Fortlet data as one trusted
-principal, and limits ordinary reuse to root and bounded-marker verification.
-Implementation awaits operator acceptance; schema-2 preparation, provider or
-model dispatch, and public-project mutation remain unauthorized.
+has stopped for operator review. The operator accepted a FIP-0006 bounded
+verified-reuse amendment that moves complete tree validation and digest
+enforcement to cold atomic publication, treats the invoking host user and
+Fortlet data as one trusted principal, and limits ordinary reuse to root and
+bounded-marker verification. Deterministic implementation is active; schema-2
+preparation, provider or model dispatch, and public-project mutation remain
+unauthorized.
 
 The base-image review selected one small Nix-built OCI runtime for every
 harness, plus one isolated Nix store per project. Fortlet must locally load and

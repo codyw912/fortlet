@@ -1,9 +1,8 @@
 # GOAL: Prove portable local project capability
 
-Status: active — Experiment 0058 exposed a conflict between FIP-0006's complete
-reuse digest and no-traversal cache-hit requirements; a bounded verified-reuse
-amendment is draft, and implementation, lifecycle, provider work, and model
-dispatch remain blocked pending operator acceptance
+Status: active — the FIP-0006 bounded verified-reuse amendment is accepted;
+its deterministic implementation and verification are active, while lifecycle,
+provider work, and model dispatch remain blocked
 
 ## Outcome
 
