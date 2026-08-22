@@ -1,6 +1,6 @@
 # FIP-0006: Opt-in project environments
 
-Status: Accepted
+Status: Review
 Recorded: 2026-08-17 from the operator-validated project-environment design
 Requires: FIP-0001
 
@@ -223,3 +223,106 @@ separate design problems.
    commands are warranted after the implicit first-use path is proven.
 5. Whether project services should share one environment across harnesses or
    require a separate project workload capsule and lease model.
+
+## Amendment — 2026-08-21 portable sealed layer permissions
+
+Amendment status: Review. Proposed after Experiments 0054 and 0055 rejected
+implicit and guest-only permission handling, and Experiment 0056 accepted the
+complete mirrored-publication, trusted-seal, and relaxed-consumption mechanism.
+
+This amendment changes only schema-1 output publication identity, finalization,
+sealing, verification, and runtime mount policy. The public manifest remains
+schema 1, repository recipes retain the same inputs and authority, and every
+other discovery, snapshot, digest, atomicity, activation, credential, failure,
+and user contract in this FIP remains unchanged.
+
+### Publication contract
+
+1. Schema-1 output publication MUST have an internal versioned contract
+   identity distinct from the public manifest schema. That version MUST
+   participate in the published-layer identity and marker binding. A layer
+   produced under an older permission contract MUST NOT be selected as a cache
+   hit for the amended contract.
+2. The provisioning capsule's writable `/out` bind MUST use strict stat
+   virtualization with mirrored host permissions. Mirroring applies only to
+   the owned empty output root; it MUST NOT broaden permissions on the project,
+   persistent state, credentials, sockets, or any other host path.
+3. After the snapshotted repository recipe exits successfully, Fortlet MUST run
+   a separate package-owned finalizer inside the same credential-free capsule.
+   No repository-controlled command may run after that finalizer. The finalizer
+   MUST operate only beneath `/out`, follow no symlink during traversal, and:
+
+   - reject device nodes, FIFOs, sockets, and every other unsupported type;
+   - preserve validated symlink targets without changing symlink modes;
+   - set every real directory to `0555`;
+   - set a regular file to `0555` when any executable bit was present, otherwise
+     to `0444`; and
+   - remove every write, set-user-ID, and set-group-ID bit.
+
+4. Fortlet MUST stop or remove the provisioning capsule before trusted host
+   validation or sealing begins. No guest process may retain the output mount
+   while the host publishes it.
+5. Before changing host modes, Fortlet MUST validate the exact owned temporary
+   tree, declared paths, relative non-escaping links, supported types, output
+   digest, and the literal host modes resulting from the finalized guest modes
+   plus the pinned MicroSandbox owner-access floor. For MicroSandbox 0.6.8,
+   those pre-seal host modes are exactly `0755` for real directories and
+   executable regular files and `0644` for non-executable regular files. Any
+   other mode or type MUST fail closed before publication.
+6. The trusted host MUST write and sync the marker at ordinary non-executable
+   file mode, then remove only write bits recursively from non-symlink entries
+   beneath the exact validated temporary root. It MUST NOT add readability or
+   executability, interpret repository text, follow symlinks, or mutate an
+   existing published layer.
+7. Before atomic rename, Fortlet MUST revalidate the complete tree. Every real
+   directory and executable regular file MUST be exactly `0555`; every other
+   regular file, including the marker, MUST be exactly `0444`; links, types,
+   and the output digest MUST match the pre-seal record; and no entry may be
+   writable. Publication MUST fail closed on any mismatch.
+8. Reuse verification MUST enforce the amended contract identity, marker
+   binding, canonical literal modes, supported types, links, declared paths,
+   and output digest. It MUST reject owner-only `0500`/`0400` trees and other
+   legacy or malformed outputs rather than treating non-writability alone as a
+   valid seal.
+
+### Runtime consumption
+
+1. The schema-1 layer MUST be mounted with explicit read-only, `nosuid`, and
+   `nodev` options, relaxed stat virtualization, private host-permission
+   propagation, and no root-symlink following.
+2. Relaxed stat virtualization MAY consume MicroSandbox stat-override metadata
+   when present and MUST tolerate its absence by falling back to the canonical
+   literal host modes. It does not relax Fortlet's publication verification,
+   path containment, supported-type, or digest requirements.
+3. The host and guest read-only enforcement MUST reject content writes,
+   creation, removal, rename, and chmod through the runtime mount. A numeric
+   non-root capsule user MUST be able to traverse declared directories, execute
+   canonical executable files, follow validated relative links, and read
+   canonical ordinary files.
+
+### Failure, performance, and evidence
+
+1. Recipe, guest-finalization, capsule-cleanup, pre-seal validation, marker,
+   seal, or post-seal validation failure MUST preserve every previously
+   published layer and MUST NOT publish the temporary tree. Cleanup MAY restore
+   owner access only on that exact owned temporary root after terminal evidence
+   has been retained.
+2. Guest finalization and host validation/sealing are cold-preparation work.
+   A verified cache hit and prepared launch MUST perform no traversal, chmod,
+   marker rewrite, capsule creation, or layer mutation.
+3. Automated evidence MUST cover executable-intent normalization, ordinary
+   files, directories, links, hostile names, unsupported types, special bits,
+   exact pre-seal and post-seal modes, marker mode, digest preservation,
+   publication-contract invalidation, rejection of legacy owner-only layers,
+   cleanup preservation, and the exact provisioning and runtime mount policies.
+4. Experiment 0056 establishes direct mechanism feasibility for the pinned
+   MicroSandbox release. Adoption still requires the credential-free Fortlet
+   preparation and absent/stopped/running lifecycle evidence and latency limits
+   required by FIP-0013.
+
+The owner-access floor remains a useful MicroSandbox safety property while a
+guest is actively publishing. Trusted host sealing occurs only after that guest
+has lost the mount, so removing the floor at publication does not weaken the
+host process during guest execution. Canonical literal modes also keep the
+layer usable if stat-override xattrs are unavailable, while relaxed runtime stat
+handling avoids the strict writable-xattr probe that rejected the sealed tree.

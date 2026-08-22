@@ -1,9 +1,9 @@
 # GOAL: Prove portable local project capability
 
-Status: active — stopped for operator review after Experiment 0056 accepted
-mirrored guest validation, trusted host write-bit removal, and relaxed
-read-only consumption; FIP-0012 and FIP-0013 remain Accepted, and production
-changes, provider work, and model dispatch remain blocked
+Status: active — the portable schema-1 permission amendment to FIP-0006 is in
+Review after Experiment 0056 accepted its mechanism; implementation remains
+blocked until the operator accepts the exact amendment, and provider work and
+model dispatch remain blocked
 
 ## Outcome
 
