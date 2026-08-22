@@ -1,6 +1,6 @@
 # Experiment 0058: Sealed schema-1 lifecycle rerun
 
-Status: declared — operator-authorized, not started
+Status: terminal — rejected on repeated-preparation latency
 Design: FIP-0001, FIP-0006, FIP-0007, FIP-0013
 
 ## Baseline / Control
@@ -110,3 +110,89 @@ MicroSandbox executable remain present, the signed public implementation is
 unchanged, and `/private/tmp/f58` is absent. No workspace, experiment state,
 image, capsule, credential fixture, network request, provider, harness, model,
 project mutation, or remote mutation was created during rehearsal.
+
+## Results
+
+Preflight passed against signed implementation
+`dd75b81cf8c7736ad57864c0af792ce636e17765` and exact immutable package
+`/nix/store/l3a280n1rnsnazchhqhzc359xngl4v4r-fortlet-0.1.0`. The workspace
+was clean, all declared artifact identities matched, synthetic auth passed
+structural and mode checks without disclosure, isolated capsule and image
+inventories were empty, and global inventory matched baseline.
+
+Cold preparation returned exactly `tact<TAB>ready` in 200.95 seconds, below
+the 600-second ceiling:
+
+| Phase | Milliseconds |
+| --- | ---: |
+| Local image verification/load | 1,183 |
+| Runtime-store seed | 2,736 |
+| Tact closure import | 1,075 |
+| Schema-1 layer | 195,918 |
+| Final verification | 0 |
+| Bounded event total | 200,914 |
+
+The published layer was canonical: its root, directories, and executable
+files were `0555`; ordinary files and the marker were `0444`. Status remained
+absent and raw capsule inventory was empty. The isolated image inventory
+contained only the declared 104,326,438-byte local image. Fortlet data used
+1,258,928 KiB, Fortlet state used 0 KiB, and isolated MicroSandbox state used
+676,316 KiB.
+
+The runtime, Tact, and project-layer markers had these baseline identities:
+
+| Marker | Size | SHA-256 |
+| --- | ---: | --- |
+| Runtime | 6,873 bytes | `5f27f2d2d201a4ff818befea5418deaf8778edeeaade338030eab4391825af57` |
+| Tact | 748 bytes | `38bb9fc890b5e918b9c05332c1e54f426493753ff7f4a9bdf0e8da93d5e7d3c9` |
+| Project layer | 252 bytes | `50b10e3f965b64ff2b451565b5b9b1eea2ddcebc9aada5b2f4aeaa26522a6521` |
+
+All five unchanged prepares succeeded, printed the ready line, created no
+capsule, emitted no image, runtime-store, or harness first-use phase, and left
+every marker hash, size, mtime, and mode unchanged. They failed the latency
+requirement:
+
+| Sample | Schema-1 verification ms | Real seconds |
+| --- | ---: | ---: |
+| 1 | 5,501 | 5.51 |
+| 2 | 5,125 | 5.14 |
+| 3 | 5,124 | 5.14 |
+| 4 | 5,077 | 5.09 |
+| 5 | 5,202 | 5.22 |
+
+The 5.14-second median exceeds the required sub-second median. Static
+attribution confirms that a published schema-1 cache hit calls
+`verify_published`, which recursively validates modes and then recursively
+reads and hashes the complete sealed output. For this 1.2-GiB tool layer, that
+full reuse traversal dominates every prepare. The permission correction is
+functionally valid, but its reuse verification violates FIP-0006's amended
+no-traversal cache-hit requirement and FIP-0013's latency gate.
+
+The campaign stopped before lifecycle sampling, so absent, stopped, and
+running launch distributions remain unavailable. No provider request, model
+request, schema-2 preparation, project edit, real credential read, authenticated
+input, package rebuild, or remote mutation occurred.
+
+Public stop and reset reported absence. Raw capsule inventory was empty, the
+testbed workspace remained clean and was forgotten, `/private/tmp/f58` was
+removed and proved absent, and final global inventory matched preflight.
+
+## Terminal Closure
+
+1. Outcome: rejected; cold preparation passed at 200.95 seconds, but five
+   successful unchanged prepares had a 5.14-second median against the
+   sub-second requirement.
+2. Root cause: reuse performs recursive mode validation and a complete
+   content-digest traversal of the sealed schema-1 output. The 1.2-GiB Fortlet
+   tool layer makes that integrity work incompatible with the cache-hit latency
+   contract.
+3. Actual cost: about five minutes versus the 30-minute ceiling, one cold
+   prepare, five warm prepares, zero lifecycle launches, zero provider calls,
+   zero model calls, zero real credentials, and $0.
+4. Cleanup: public stop/reset reported absence, isolated capsule inventory was
+   empty, the exact workspace was clean and forgotten, the exact experiment
+   root was removed, and global inventory was unchanged.
+5. Next action: stop for operator review. A successor must reconcile FIP-0006's
+   integrity verification with its no-traversal cache-hit requirement before
+   repeating lifecycle evidence. Schema-2 preparation and provider or model
+   dispatch remain unauthorized.

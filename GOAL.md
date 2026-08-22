@@ -1,9 +1,9 @@
 # GOAL: Prove portable local project capability
 
 Status: active — the accepted portable schema-1 permission amendment to
-FIP-0006 is deterministically implemented and passes the complete local gate;
-the remaining live lifecycle campaign, provider work, and model dispatch
-remain blocked
+FIP-0006 is implemented, but its full reuse verification fails FIP-0013's
+repeated-preparation latency requirement; lifecycle, provider work, and model
+dispatch remain blocked
 
 ## Outcome
 
@@ -167,15 +167,14 @@ at most one fresh successor process total MAY validate the correction within
 the same time ceiling. No failed unit may be resumed, edited, or silently
 retried. Use at most one owned capsule at a time.
 
-On 2026-08-21, after that successor stopped before capsule creation because the
-execution boundary could not resolve Docker Hub, the operator authorized one
-additional fresh firewall-clearance successor. It MUST use new isolated state,
-the identical frozen public inputs, and network approval from the outset. It
-does not authorize resuming a terminal unit, another correction, or a further
-retry.
+On 2026-08-21, after that successor stopped before capsule creation because its
+base-image fetch was unavailable, the operator authorized one additional fresh
+successor. It MUST use new isolated state and the identical frozen public
+inputs. It does not authorize resuming a terminal unit, another correction, or
+a further retry.
 
-That successor cleared the firewall and exposed a deterministic common-base CA
-bundle defect before harness or provider preparation. After the defect was
+That successor reached the base script and exposed a deterministic common-base
+CA bundle defect before harness or provider preparation. After the defect was
 closed, the operator authorized its bounded correction, the complete gate, and
 one final fresh provider-validation successor. No terminal unit may be resumed,
 and this amendment authorizes no additional correction or retry.

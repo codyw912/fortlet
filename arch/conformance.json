@@ -164,7 +164,7 @@
     {
       "proposal": "0006",
       "title": "Opt-in project environments",
-      "status": "conformant",
+      "status": "partial",
       "modules": [
         ".fortlet/environment.json",
         ".fortlet/environment.sh",
@@ -192,9 +192,12 @@
         "experiments/0032-packaged-login-shell-project-tools.md",
         "experiments/0054-nix-runtime-substrate-feasibility.md",
         "experiments/0055-explicit-bind-permission-policy.md",
-        "experiments/0056-trusted-host-canonical-seal.md"
+        "experiments/0056-trusted-host-canonical-seal.md",
+        "experiments/0058-sealed-schema-one-lifecycle-rerun.md"
       ],
-      "gaps": []
+      "gaps": [
+        "Published schema-1 reuse recursively validates modes and rehashes the complete output; Experiment 0058 measured a 5.14-second repeated-prepare median, violating the amended no-traversal cache-hit requirement and FIP-0013 latency gate."
+      ]
     },
     {
       "proposal": "0007",
@@ -372,10 +375,11 @@
         "tests/pre_runtime_failures.rs",
         "experiments/0054-nix-runtime-substrate-feasibility.md",
         "experiments/0055-explicit-bind-permission-policy.md",
-        "experiments/0056-trusted-host-canonical-seal.md"
+        "experiments/0056-trusted-host-canonical-seal.md",
+        "experiments/0058-sealed-schema-one-lifecycle-rerun.md"
       ],
       "gaps": [
-        "Experiment 0056 accepted the portable permission mechanism and its deterministic production implementation now passes locally; exact credential-free Fortlet preparation plus prepared absent, stopped, and running lifecycle and latency evidence remain outstanding.",
+        "Experiment 0058 accepted 200.95-second cold schema-1 preparation but rejected repeated preparation at a 5.14-second median because sealed-output reuse verification traverses and rehashes the complete layer; prepared absent, stopped, and running lifecycle evidence remains outstanding.",
         "A successful isolated live schema-2 preparation remains outstanding under a later authorization.",
         "Native x86_64-linux artifact, package, and runtime verification remains outstanding."
       ]

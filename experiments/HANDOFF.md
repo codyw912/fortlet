@@ -7,9 +7,13 @@ mechanism is implemented at signed tip `dd75b81cf8c7`, and its complete local
 gate and draft PR #15 hosted checks pass. Experiment 0057 produced no product
 lifecycle evidence and completed exact cleanup with unchanged global
 inventory. The operator authorized Experiment 0058 as one fresh rerun using
-the exact existing package and frozen campaign conditions. Schema-2
-preparation, provider or model dispatch, and public-project mutation remain
-unauthorized.
+the exact existing package and frozen campaign conditions. Its 200.95-second
+cold preparation passed, but five unchanged prepares had a 5.14-second median
+because full reuse verification recursively validates modes and rehashes the
+1.2-GiB sealed output. The sub-second requirement failed before lifecycle
+sampling. Exact cleanup passed and global inventory was unchanged. Authority
+has stopped for operator review; schema-2 preparation, provider or model
+dispatch, and public-project mutation remain unauthorized.
 
 The base-image review selected one small Nix-built OCI runtime for every
 harness, plus one isolated Nix store per project. Fortlet must locally load and
@@ -44,12 +48,12 @@ runtime and firmware, reached the guest, and exposed Fortlet's incorrect Debian
 tar validation path before Nix. That path was corrected at `95a87bec`, its
 focused test and the complete runbook gate passed, and the operator authorized
 the GOAL's one fresh successor. Experiment 0050's exact preflight passed, but
-its sole preparation attempt lost Docker Hub DNS while fetching the common base
-image. It created no capsule and never ran the corrected script or Nix. Every
-root was exactly removed and global inventory was unchanged. The operator then
-authorized one fresh firewall-clearance successor with new isolated state and
-identical frozen inputs. Experiment 0051 cleared Docker Hub DNS and entered the
-base script, which exited 1 before Tact or Nix. Static inspection proves that
+its sole preparation attempt stopped while fetching the common base image. It
+created no capsule and never ran the corrected script or Nix. Every root was
+exactly removed and global inventory was unchanged. The operator then
+authorized one fresh successor with new isolated state and identical frozen
+inputs. Experiment 0051 entered the base script, which exited 1 before Tact or
+Nix. Static inspection proves that
 package extraction cannot satisfy its later requirement for the generated CA
 bundle because the script never runs `update-ca-certificates`. Its capsule and
 exact root were removed, global inventory was unchanged, and the amended retry
