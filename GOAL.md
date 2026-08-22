@@ -1,9 +1,8 @@
 # GOAL: Prove portable local project capability
 
-Status: active — the portable schema-1 permission amendment to FIP-0006 is in
-Review after Experiment 0056 accepted its mechanism; implementation remains
-blocked until the operator accepts the exact amendment, and provider work and
-model dispatch remain blocked
+Status: active — the portable schema-1 permission amendment to FIP-0006 is
+Accepted and its deterministic implementation is authorized; the remaining
+live lifecycle campaign, provider work, and model dispatch remain blocked
 
 ## Outcome
 
@@ -222,6 +221,13 @@ credential, prepare no provider or project, contact no network, and mutate no
 remote. Stop after terminally recording and cleaning up the experiment. This
 does not authorize a production change, lifecycle-campaign retry, schema-2
 work, provider preparation, or model dispatch.
+
+On 2026-08-21 the operator accepted FIP-0006's portable sealed layer amendment.
+Acceptance authorizes its deterministic production implementation, conformance
+updates, documentation, and complete local verification. It does not authorize
+a live capsule experiment, lifecycle-campaign retry, schema-2 provider
+preparation, harness or model dispatch, or remote mutation beyond the existing
+goal publication grant.
 
 Acceptance authorizes one `portable-project-capability` bookmark and one draft
 pull request targeting `main` under FIP-0005. Stop on a need to broaden the

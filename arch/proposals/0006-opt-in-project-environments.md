@@ -1,6 +1,6 @@
 # FIP-0006: Opt-in project environments
 
-Status: Review
+Status: Accepted
 Recorded: 2026-08-17 from the operator-validated project-environment design
 Requires: FIP-0001
 
@@ -226,9 +226,10 @@ separate design problems.
 
 ## Amendment — 2026-08-21 portable sealed layer permissions
 
-Amendment status: Review. Proposed after Experiments 0054 and 0055 rejected
-implicit and guest-only permission handling, and Experiment 0056 accepted the
-complete mirrored-publication, trusted-seal, and relaxed-consumption mechanism.
+Amendment status: Accepted. Operator-accepted after Experiments 0054 and 0055
+rejected implicit and guest-only permission handling, and Experiment 0056
+accepted the complete mirrored-publication, trusted-seal, and
+relaxed-consumption mechanism.
 
 This amendment changes only schema-1 output publication identity, finalization,
 sealing, verification, and runtime mount policy. The public manifest remains

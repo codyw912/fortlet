@@ -164,7 +164,7 @@
     {
       "proposal": "0006",
       "title": "Opt-in project environments",
-      "status": "conformant",
+      "status": "partial",
       "modules": [
         ".fortlet/environment.json",
         ".fortlet/environment.sh",
@@ -191,7 +191,10 @@
         "experiments/0031-login-shell-project-path.md",
         "experiments/0032-packaged-login-shell-project-tools.md"
       ],
-      "gaps": []
+      "gaps": [
+        "The accepted portable sealed layer amendment is not implemented: schema-1 publication still lacks explicit mirrored output permissions, package-owned guest finalization, canonical host sealing, an internal publication-contract identity, legacy-mode rejection, and the explicit relaxed private read-only runtime mount policy.",
+        "Deterministic evidence for the amended permission contract and the remaining FIP-0013 prepared lifecycle evidence are outstanding."
+      ]
     },
     {
       "proposal": "0007",
