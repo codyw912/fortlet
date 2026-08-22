@@ -1,8 +1,9 @@
 # GOAL: Prove portable local project capability
 
-Status: active — the FIP-0006 bounded verified-reuse amendment is accepted;
-its deterministic implementation and verification are active, while lifecycle,
-provider work, and model dispatch remain blocked
+Status: active — the accepted FIP-0006 bounded verified-reuse amendment is
+implemented at signed tip `95107fdbc686` and passes the complete local gate;
+Experiment 0059 is declared but not authorized, and lifecycle, provider work,
+and model dispatch remain blocked
 
 ## Outcome
 
