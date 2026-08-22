@@ -1,9 +1,9 @@
 # GOAL: Prove portable local project capability
 
-Status: active — stopped for operator review after Experiment 0055 rejected
-guest-only canonical sealing because MicroSandbox deliberately retains an
-owner-access floor on mirrored host inodes; FIP-0012 and FIP-0013 remain
-Accepted, and provider and model dispatch remain blocked
+Status: active — one credential-free trusted-host sealing successor is
+authorized after Experiment 0055 identified MicroSandbox's deliberate mirrored
+owner-access floor; FIP-0012 and FIP-0013 remain Accepted, and provider and
+model dispatch remain blocked
 
 ## Outcome
 
@@ -211,6 +211,17 @@ dispatch no harness or model, read no credential, and mutate no remote. Stop
 after terminally recording and cleaning up this experiment; any production
 change, lifecycle-campaign retry, schema-2 work, provider preparation, or model
 dispatch requires further operator review.
+
+After reviewing Experiment 0055's terminal evidence, on 2026-08-21 the operator
+authorized one fresh, narrowly predeclared, credential-free successor. It MAY
+use the already-built local runtime image and a public-neutral synthetic tree
+to combine mirrored guest creation and validation with a trusted host step that
+removes only write bits, then compare strict and relaxed read-only consumers.
+It MUST use fresh isolated state, dispatch no harness or model, read no
+credential, prepare no provider or project, contact no network, and mutate no
+remote. Stop after terminally recording and cleaning up the experiment. This
+does not authorize a production change, lifecycle-campaign retry, schema-2
+work, provider preparation, or model dispatch.
 
 Acceptance authorizes one `portable-project-capability` bookmark and one draft
 pull request targeting `main` under FIP-0005. Stop on a need to broaden the
