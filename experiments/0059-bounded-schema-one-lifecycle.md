@@ -1,6 +1,6 @@
 # Experiment 0059: Bounded schema-1 reuse lifecycle
 
-Status: declared — awaiting operator authorization
+Status: authorized — not started
 Design: FIP-0001, FIP-0006, FIP-0007, FIP-0013
 
 ## Baseline / Control

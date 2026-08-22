@@ -21,8 +21,8 @@ publication contract, passes the complete local gate, and is frozen in exact
 immutable package
 `/nix/store/6ldx5571fpz2gah2c9c5lydi46w36br2-fortlet-0.1.0`. Experiment 0059
 is declared to repeat the five-prepare hard gate before the fixed lifecycle
-sequence, but is not authorized. Schema-2 preparation, provider or model
-dispatch, and public-project mutation remain unauthorized.
+sequence and is operator-authorized but not started. Schema-2 preparation,
+provider or model dispatch, and public-project mutation remain unauthorized.
 
 The base-image review selected one small Nix-built OCI runtime for every
 harness, plus one isolated Nix store per project. Fortlet must locally load and
