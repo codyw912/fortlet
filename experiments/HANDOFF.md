@@ -2,27 +2,23 @@
 
 Audience: a fresh agent session. The operator accepted the outcome, public
 testbeds, exclusions, evidence budget, and four-hour ceiling in the active
-`GOAL.md`. FIP-0012 and FIP-0013 are Accepted. The portable schema-1 sealing
-mechanism is implemented at signed tip `dd75b81cf8c7`, and its complete local
-gate and draft PR #15 hosted checks pass. Experiment 0057 produced no product
-lifecycle evidence and completed exact cleanup with unchanged global
-inventory. The operator authorized Experiment 0058 as one fresh rerun using
-the exact existing package and frozen campaign conditions. Its 200.95-second
-cold preparation passed, but five unchanged prepares had a 5.14-second median
-because full reuse verification recursively validates modes and rehashes the
-1.2-GiB sealed output. The sub-second requirement failed before lifecycle
-sampling. Exact cleanup passed and global inventory was unchanged. Authority
-has stopped for operator review. The operator accepted a FIP-0006 bounded
-verified-reuse amendment that moves complete tree validation and digest
-enforcement to cold atomic publication, treats the invoking host user and
-Fortlet data as one trusted principal, and limits ordinary reuse to root and
-bounded-marker verification. Signed implementation `95107fdbc686` advances the
-publication contract, passes the complete local gate, and is frozen in exact
-immutable package
-`/nix/store/6ldx5571fpz2gah2c9c5lydi46w36br2-fortlet-0.1.0`. Experiment 0059
-is declared to repeat the five-prepare hard gate before the fixed lifecycle
-sequence and is operator-authorized but not started. Schema-2 preparation,
-provider or model dispatch, and public-project mutation remain unauthorized.
+`GOAL.md`. FIP-0012 and FIP-0013 are Accepted. FIP-0006's bounded
+verified-reuse amendment is implemented at signed tip `95107fdbc686`; its
+complete local gate and draft PR #15 hosted check pass, and exact immutable
+package `/nix/store/6ldx5571fpz2gah2c9c5lydi46w36br2-fortlet-0.1.0` is frozen.
+
+Experiment 0059 is terminally rejected overall. Cold schema-1 preparation
+passed in 186.27 seconds, and five unchanged prepares had a 0.02-second median
+without traversal, mutation, or capsule creation. The first prepared absent
+launch then failed before Tact: MicroSandbox entered the VM and installed bind
+identity maps, but `agentd` encountered a read-only filesystem during
+initialization and the VM shut down before its relay became available. The
+stopped configuration contained the intended read-only project store and
+relaxed/private `ro,nosuid,nodev` schema-1 mount, but the capsule never reached
+running state. The remaining eleven launches did not run. Exact cleanup passed
+with unchanged global inventory. Schema-2 preparation, provider or model
+dispatch, and public-project mutation remain unauthorized pending operator
+review.
 
 The base-image review selected one small Nix-built OCI runtime for every
 harness, plus one isolated Nix store per project. Fortlet must locally load and
@@ -156,14 +152,10 @@ were green. The two stock-Codex compatibility tests remain explicitly ignored
 because they require an external binary. Nix reported only the expected
 incompatible `x86_64-linux` omission.
 
-Stop here for operator review. Do not fix the sealing contract, run a successor
-campaign, prepare schema 2, or dispatch Codex/Tact model work without fresh
-direction. The next implementation should set mirrored permissions on the
-schema-1 provisioning bind, retain trusted guest validation, validate the
-literal host tree before removing only write bits, and use relaxed private
-`ro,nosuid,nodev` consumption. Deterministic tests belong with that code. The
-accepted mechanism must then repeat the remaining Fortlet prepared-lifecycle
-evidence under a new experiment identity.
+The sealing review described above led to the accepted portable-seal and
+bounded-reuse amendments and Experiments 0057–0059 summarized at the top. The
+current stop is the Experiment 0059 guest-agent initialization failure, not the
+earlier sealing mechanism.
 
 ## Verified repository state
 
@@ -379,14 +371,18 @@ plane for the first experiment.
 
 ## Next session
 
-1. Follow the repository startup order and confirm the verified baseline,
-   implementation checkpoint, goal bookmark, and parked Claude bookmark.
-2. Implement FIP-0013 without changing FIP-0012's provider selection,
-   activation, inspection, identity, credential, workspace, or reset boundary.
-3. Run deterministic evidence and the complete runbook gate before declaring
-   one credential-free control-and-candidate substrate campaign.
-4. Close that campaign terminally and stop. Provider preparation and Codex or
-   Tact model work remain unauthorized pending operator review.
+1. Follow the repository startup order and confirm the signed bounded-reuse
+   implementation, Experiment 0059 terminal record, goal bookmark, draft PR,
+   and parked Claude bookmark.
+2. Stop for operator review. Do not retry Experiment 0059's failed launch or
+   consume its remaining eleven samples.
+3. If authorized, predeclare a fresh credential-free diagnostic that isolates
+   the guest-agent write requirement against the frozen Nix runtime. Do not
+   assume from the current log alone that the correction belongs to the base
+   image, root disk, or one particular mount.
+4. Keep schema-2 preparation, provider requests, Codex/Tact model work, and
+   public-project mutation blocked until a successful successor closes the
+   prepared absent, stopped, and running lifecycle evidence.
 
 ## What not to do
 

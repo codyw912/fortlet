@@ -193,10 +193,11 @@
         "experiments/0054-nix-runtime-substrate-feasibility.md",
         "experiments/0055-explicit-bind-permission-policy.md",
         "experiments/0056-trusted-host-canonical-seal.md",
-        "experiments/0058-sealed-schema-one-lifecycle-rerun.md"
+        "experiments/0058-sealed-schema-one-lifecycle-rerun.md",
+        "experiments/0059-bounded-schema-one-lifecycle.md"
       ],
       "gaps": [
-        "The accepted bounded verified-reuse amendment is implemented with automated root, marker, contract-invalidation, and no-descendant-traversal evidence; a fresh credential-free experiment must establish the required repeated-prepare and lifecycle latency before conformance."
+        "Experiment 0059 accepted bounded verified reuse with a 0.02-second five-prepare median, but its first prepared absent launch failed during guest-agent initialization; successful runtime mount and absent, stopped, and running lifecycle evidence remain outstanding."
       ]
     },
     {
@@ -376,10 +377,11 @@
         "experiments/0054-nix-runtime-substrate-feasibility.md",
         "experiments/0055-explicit-bind-permission-policy.md",
         "experiments/0056-trusted-host-canonical-seal.md",
-        "experiments/0058-sealed-schema-one-lifecycle-rerun.md"
+        "experiments/0058-sealed-schema-one-lifecycle-rerun.md",
+        "experiments/0059-bounded-schema-one-lifecycle.md"
       ],
       "gaps": [
-        "Experiment 0058 accepted 200.95-second cold schema-1 preparation but rejected its 5.14-second repeated-prepare median; the accepted bounded verified-reuse implementation now requires a fresh credential-free repeated-prepare gate followed by prepared absent, stopped, and running lifecycle evidence.",
+        "Experiment 0059 accepted 186.27-second cold schema-1 preparation and a 0.02-second repeated-prepare median, but the first prepared absent launch failed when the guest agent encountered a read-only filesystem; prepared absent, stopped, and running lifecycle evidence remains outstanding.",
         "A successful isolated live schema-2 preparation remains outstanding under a later authorization.",
         "Native x86_64-linux artifact, package, and runtime verification remains outstanding."
       ]

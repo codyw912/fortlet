@@ -1,9 +1,9 @@
 # GOAL: Prove portable local project capability
 
-Status: active — the accepted FIP-0006 bounded verified-reuse amendment is
-implemented at signed tip `95107fdbc686` and passes the complete local gate;
-Experiment 0059 is authorized but not started, and provider work and model
-dispatch remain blocked
+Status: active — Experiment 0059 accepted bounded schema-1 reuse with a
+0.02-second median but rejected the first prepared absent launch when the guest
+agent could not initialize on a read-only filesystem; provider work and model
+dispatch remain blocked pending operator review
 
 ## Outcome
 
@@ -250,6 +250,17 @@ and evidence requirements. It MAY repeat the declared cold, warm, and
 lifecycle campaign from fresh isolated state. This authorizes no package
 rebuild, schema-2 preparation, provider or model request, project edit,
 additional performance sample, or remote project mutation.
+
+After reviewing Experiment 0058 and accepting FIP-0006's bounded verified-reuse
+amendment, the operator authorized Experiment 0059 against signed tip
+`95107fdbc686` and its exact immutable package. The experiment passed cold
+preparation in 186.27 seconds and the five-prepare hard gate with a 0.02-second
+median. Its first prepared absent launch failed before Tact when the guest agent
+encountered a read-only filesystem during initialization, so the declared stop
+rule ended lifecycle sampling. Exact cleanup completed with unchanged global
+inventory. No schema-2 preparation, provider request, model dispatch, project
+edit, package rebuild, or remote mutation is authorized after this terminal
+result.
 
 Acceptance authorizes one `portable-project-capability` bookmark and one draft
 pull request targeting `main` under FIP-0005. Stop on a need to broaden the

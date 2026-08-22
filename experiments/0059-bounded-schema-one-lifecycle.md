@@ -1,6 +1,6 @@
 # Experiment 0059: Bounded schema-1 reuse lifecycle
 
-Status: authorized — not started
+Status: terminal — rejected on first prepared absent launch
 Design: FIP-0001, FIP-0006, FIP-0007, FIP-0013
 
 ## Baseline / Control
@@ -130,3 +130,107 @@ package, executable, MicroSandbox runtime, and artifact paths are present;
 `/private/tmp/f59` is absent; and no `exp0059` workspace exists. No workspace,
 experiment state, image, capsule, credential fixture, network request,
 provider, harness, model, project mutation, or remote mutation was created.
+
+## Results
+
+Preflight passed against signed implementation
+`95107fdbc686058ab4bb2fb11c9c3ffb9fc606a9` and exact immutable package
+`/nix/store/6ldx5571fpz2gah2c9c5lydi46w36br2-fortlet-0.1.0`. The workspace
+was clean, every declared package and artifact identity matched, synthetic auth
+passed structural and mode checks without disclosure, isolated image and
+capsule inventories were empty, and global Fortlet inventory matched baseline.
+
+Cold preparation returned exactly `tact<TAB>ready` in 186.27 seconds, below
+the 600-second ceiling:
+
+| Phase | Milliseconds |
+| --- | ---: |
+| Local image verification/load | 1,063 |
+| Runtime-store seed | 2,624 |
+| Tact closure import | 1,151 |
+| Schema-1 layer | 181,418 |
+| Final verification | 0 |
+| Bounded event total | 186,258 |
+
+The published `fortlet-project-layer-v3` layer was canonical: its root and
+directories were `0555`, executable files were `0555`, and ordinary files and
+the marker were `0444`. A complete evidence traversal found no unsupported
+type or mode. Status remained absent and raw capsule inventory was empty. The
+isolated image inventory contained only the declared 104,326,438-byte image.
+Fortlet data used 1,256,956 KiB, Fortlet state used 0 KiB, and isolated
+MicroSandbox state used 676,060 KiB.
+
+The runtime, Tact, and project-layer markers had these identities, which
+remained unchanged through every later product unit and cleanup check:
+
+| Marker | Size | Mode | SHA-256 |
+| --- | ---: | ---: | --- |
+| Runtime | 6,873 bytes | `0600` | `5f27f2d2d201a4ff818befea5418deaf8778edeeaade338030eab4391825af57` |
+| Tact | 748 bytes | `0600` | `38bb9fc890b5e918b9c05332c1e54f426493753ff7f4a9bdf0e8da93d5e7d3c9` |
+| Project layer | 252 bytes | `0444` | `f402b9b7596706d7b979148013894a3758280d654c25cee4990f7f29f2173cbd` |
+
+All five unchanged prepares passed. Each printed the exact ready line, created
+no capsule, emitted no image, runtime-store, or harness first-use phase, and
+left every marker hash, size, mtime, and mode unchanged:
+
+| Sample | Schema-1 verification ms | Real seconds |
+| --- | ---: | ---: |
+| 1 | 2 | 0.02 |
+| 2 | 0 | 0.02 |
+| 3 | 0 | 0.01 |
+| 4 | 0 | 0.02 |
+| 5 | 0 | 0.01 |
+
+The 0.02-second median passes the required sub-second hard gate and improves
+Experiment 0058's 5.14-second median by more than two orders of magnitude.
+This establishes that ordinary `v3` reuse is bounded independently of the
+1.2-GiB output size.
+
+The first lifecycle launch, from prepared absence, failed before Tact or
+command attachment. Fortlet emitted `resolve` in 1 millisecond, `credentials`
+and `environment` in 0 milliseconds, and `capsule-state` in 52 milliseconds,
+then reported that the sandbox process exited with status zero before the
+agent relay became available. Total wall time was 0.55 seconds, but it is a
+failed sample and provides no accepted launch latency.
+
+Retained MicroSandbox logs narrow the failure to guest-agent initialization.
+The VM entered, installed the five bind-identity mappings, and then the guest
+reported `agentd: init failed: io error: Read-only file system (os error 30)`
+before shutdown. The stopped configuration contained the intended read-only
+project-store mount and the schema-1 relaxed/private
+`ro,nosuid,nodev`, no-root-symlink-following mount. Because the capsule never
+reached running state, that configuration is not runtime mount or mutation
+evidence, and the log does not identify which guest path required a write.
+
+The declared launch-failure rule ended the campaign after one of twelve
+launches. No launch was retried, no stopped or running launch ran, and no
+lifecycle-state median is available. No schema-2 preparation, provider or
+model request, project edit, real credential read, authenticated input,
+package rebuild, or remote mutation occurred.
+
+The exact stopped provider capsule was inspected and removed during bounded
+cleanup. Raw isolated inventory then returned `[]`; every marker snapshot was
+unchanged; the testbed workspace remained clean and was forgotten; only
+`/private/tmp/f59` was removed and proved absent; and the final global Fortlet
+inventory matched its preflight hash.
+
+## Terminal Closure
+
+1. Outcome: rejected overall. Cold preparation passed at 186.27 seconds and
+   bounded reuse passed with a 0.02-second median, but the first prepared absent
+   launch failed before Tact because the guest agent could not initialize.
+2. Root cause boundary: MicroSandbox entered the VM and installed bind identity
+   maps, then `agentd` encountered a read-only filesystem and the VM shut down.
+   The retained evidence does not identify the write target or establish
+   whether the correction belongs in the runtime image, root-disk policy, or
+   another writable mount.
+3. Actual cost: one cold prepare, five warm prepares, one of twelve lifecycle
+   launches, zero provider calls, zero model calls, zero real credentials, and
+   $0, within the 30-minute ceiling.
+4. Cleanup: the exact stopped capsule was removed, isolated inventory was
+   empty, snapshots and project contents were unchanged, the exact clean
+   workspace was forgotten, the exact root was removed, and global inventory
+   was unchanged.
+5. Next action: stop for operator review. A successor should first isolate the
+   guest-agent write requirement against the frozen Nix runtime before any
+   lifecycle retry, schema-2 preparation, provider request, or model dispatch.

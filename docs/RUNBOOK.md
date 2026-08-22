@@ -209,6 +209,16 @@ cargo test --test prepare
 cargo test --test pre_runtime_failures invalid_project_environment
 ```
 
+Experiment 0059 measured the bounded publication contract against the 1.2-GiB
+Fortlet schema-1 layer. Cold preparation completed in 186.27 seconds and five
+unchanged offline prepares had a 0.02-second median without capsule creation or
+marker mutation. Preparation alone is not a runtime-health check: the first
+prepared absent launch entered the VM but stopped before Tact when the guest
+agent encountered a read-only filesystem during initialization. The retained
+stopped configuration had the intended project-layer mount policy, but no
+successful runtime mount or absent/stopped/running latency distribution was
+established.
+
 ## Global capsule inventory
 
 `fortlet list` reports every Fortlet-owned capsule across projects without
