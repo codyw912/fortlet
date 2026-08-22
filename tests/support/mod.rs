@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 
 use sha2::{Digest, Sha256};
 
-const CONTRACT: &str = "fip0013-1";
+const CONTRACT: &str = "fip0013-2";
 
 pub fn write_artifacts(root: &Path) {
     let runtime = runtime_manifest();
@@ -77,7 +77,8 @@ fn runtime_manifest() -> serde_json::Value {
         "hold": "/nix/store/runtime/bin/fortlet-hold",
         "managed_bash_env": "/nix/store/runtime/etc/managed-bash-env",
         "runtime_library_path": "/nix/store/runtime/lib",
-        "ca_bundle": "/nix/store/runtime/etc/ssl/certs/ca-bundle.crt",
+        "ca_bundle": "/etc/ssl/certs/ca-certificates.crt",
+        "ca_bundle_source": "/nix/store/runtime/etc/ssl/certs/ca-bundle.crt",
         "store_paths": ["/nix/store/runtime"]
     })
 }

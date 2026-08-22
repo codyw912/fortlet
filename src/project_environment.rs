@@ -512,6 +512,10 @@ pub(crate) fn protected_environment_name(name: &str, project: &Project) -> Resul
     if name == "HOME"
         || name == "PATH"
         || name == "BASH_ENV"
+        || matches!(
+            name,
+            "NIX_SSL_CERT_FILE" | "SSL_CERT_FILE" | "CURL_CA_BUNDLE" | "REQUESTS_CA_BUNDLE"
+        )
         || name == ACCESS_TOKEN_ENV
         || name == ACCOUNT_ID_ENV
         || matches!(name, GIT_CONFIG_GLOBAL | GIT_CONFIG_NOSYSTEM | JJ_CONFIG)
@@ -897,6 +901,10 @@ mod tests {
             ),
             (
                 r#"{"schema":1,"path":[],"environment":{"BASH_ENV":"/tmp/hook"}}"#,
+                "reserved",
+            ),
+            (
+                r#"{"schema":1,"path":[],"environment":{"SSL_CERT_FILE":"/tmp/ca"}}"#,
                 "reserved",
             ),
             (

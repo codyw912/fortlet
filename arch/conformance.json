@@ -194,10 +194,11 @@
         "experiments/0055-explicit-bind-permission-policy.md",
         "experiments/0056-trusted-host-canonical-seal.md",
         "experiments/0058-sealed-schema-one-lifecycle-rerun.md",
-        "experiments/0059-bounded-schema-one-lifecycle.md"
+        "experiments/0059-bounded-schema-one-lifecycle.md",
+        "experiments/0060-root-ca-bundle-lifecycle.md"
       ],
       "gaps": [
-        "Experiment 0059 accepted bounded verified reuse with a 0.02-second five-prepare median, but its first prepared absent launch failed during guest-agent initialization; successful runtime mount and absent, stopped, and running lifecycle evidence remain outstanding."
+        "The fip0013-2 runtime candidate materializes the active CA bundle in the disposable root while preserving a read-only project store; authorized Experiment 0060 must establish successful runtime mount and absent, stopped, and running lifecycle evidence."
       ]
     },
     {
@@ -378,10 +379,11 @@
         "experiments/0055-explicit-bind-permission-policy.md",
         "experiments/0056-trusted-host-canonical-seal.md",
         "experiments/0058-sealed-schema-one-lifecycle-rerun.md",
-        "experiments/0059-bounded-schema-one-lifecycle.md"
+        "experiments/0059-bounded-schema-one-lifecycle.md",
+        "experiments/0060-root-ca-bundle-lifecycle.md"
       ],
       "gaps": [
-        "Experiment 0059 accepted 186.27-second cold schema-1 preparation and a 0.02-second repeated-prepare median, but the first prepared absent launch failed when the guest agent encountered a read-only filesystem; prepared absent, stopped, and running lifecycle evidence remains outstanding.",
+        "The fip0013-2 runtime candidate has deterministic OCI evidence for a disposable root-level CA bundle and immutable source, but authorized Experiment 0060 must establish prepared absent, stopped, and running lifecycle evidence.",
         "A successful isolated live schema-2 preparation remains outstanding under a later authorization.",
         "Native x86_64-linux artifact, package, and runtime verification remains outstanding."
       ]

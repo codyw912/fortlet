@@ -3,9 +3,11 @@
 let
   lib = pkgs.lib;
   guest = nixpkgs.legacyPackages.${guestSystem};
-  contract = "fip0013-1";
+  contract = "fip0013-2";
   imageReference = "fortlet-runtime:${contract}-${guestSystem}";
   runtimeLibraryPath = lib.makeLibraryPath [ guest.stdenv.cc.cc.lib guest.glibc guest.zlib ];
+  caBundle = "/etc/ssl/certs/ca-certificates.crt";
+  caBundleSource = "${guest.cacert}/etc/ssl/certs/ca-bundle.crt";
 
   platform = {
     aarch64-linux = {
@@ -55,6 +57,8 @@ let
     sandbox = false
     EOF
     chmod 0444 "$out/etc/nix/nix.conf"
+
+    ln -s ${caBundleSource} "$out/etc/fortlet/ca-bundle-source.crt"
   '';
 
   runtimeRoot = pkgs.buildEnv {
@@ -77,7 +81,7 @@ let
       guest.xz
       runtimeSupport
     ];
-    pathsToLink = [ "/bin" "/etc" ];
+    pathsToLink = [ "/bin" "/etc/fortlet" "/etc/nix" ];
   };
 
   runtimeClosure = pkgs.closureInfo { rootPaths = [ runtimeRoot ]; };
@@ -97,11 +101,12 @@ let
     tag = "${contract}-${guestSystem}";
     contents = [ runtimeRoot ];
     extraCommands = ''
-      mkdir -p bin etc home/agent tmp usr/bin ".$(dirname ${platform.fhsLoader})"
+      mkdir -p bin etc/ssl/certs home/agent tmp usr/bin ".$(dirname ${platform.fhsLoader})"
       ln -sf ${guest.bash}/bin/bash bin/bash
       ln -sf ${guest.bash}/bin/bash bin/sh
       ln -sf ${guest.coreutils}/bin/env usr/bin/env
       ln -sf ${guest.stdenv.cc.bintools.dynamicLinker} ".${platform.fhsLoader}"
+      install -m 0644 ${caBundleSource} ".${caBundle}"
       printf 'root:x:0:0:root:/root:/bin/sh\n' > etc/passwd
       printf 'root:x:0:\n' > etc/group
       chmod 1777 tmp
@@ -110,8 +115,10 @@ let
       Cmd = [ "${runtimeSupport}/bin/fortlet-hold" ];
       Env = [
         "PATH=${runtimeRoot}/bin"
-        "NIX_SSL_CERT_FILE=${guest.cacert}/etc/ssl/certs/ca-bundle.crt"
-        "SSL_CERT_FILE=${guest.cacert}/etc/ssl/certs/ca-bundle.crt"
+        "NIX_SSL_CERT_FILE=${caBundle}"
+        "SSL_CERT_FILE=${caBundle}"
+        "CURL_CA_BUNDLE=${caBundle}"
+        "REQUESTS_CA_BUNDLE=${caBundle}"
         "LD_LIBRARY_PATH=${runtimeLibraryPath}"
       ];
       WorkingDir = "/home/agent";
@@ -188,7 +195,7 @@ let
   tactBundle = mkClosureBundle "tact" tactVersion tact "${tact}/bin/tact";
 
   bundle = pkgs.runCommand "fortlet-runtime-artifacts-${contract}-${guestSystem}"
-    { nativeBuildInputs = [ pkgs.coreutils pkgs.gnutar pkgs.jq pkgs.skopeo ]; }
+    { nativeBuildInputs = [ pkgs.coreutils pkgs.gnutar pkgs.jq pkgs.skopeo pkgs.umoci ]; }
     ''
       mkdir -p "$out/harnesses/codex" "$out/harnesses/tact" "$out/runtime"
       skopeo --insecure-policy copy \
@@ -221,7 +228,8 @@ let
         --arg hold "${runtimeSupport}/bin/fortlet-hold" \
         --arg managed_bash_env "${runtimeSupport}/etc/fortlet/bash-env" \
         --arg runtime_library_path "${runtimeLibraryPath}" \
-        --arg ca_bundle "${guest.cacert}/etc/ssl/certs/ca-bundle.crt" \
+        --arg ca_bundle "${caBundle}" \
+        --arg ca_bundle_source "${caBundleSource}" \
         --slurpfile store_paths <(jq -R . < ${runtimeClosure}/store-paths) \
         '{
           schema: 1,
@@ -241,8 +249,34 @@ let
           managed_bash_env: $managed_bash_env,
           runtime_library_path: $runtime_library_path,
           ca_bundle: $ca_bundle,
+          ca_bundle_source: $ca_bundle_source,
           store_paths: $store_paths
         }' > "$out/runtime/manifest.json"
+
+      skopeo --insecure-policy copy \
+        "oci-archive:$out/runtime/image.oci.tar:${imageReference}" \
+        "oci:$inspection/image:${contract}"
+      umoci unpack --rootless \
+        --image "$inspection/image:${contract}" \
+        "$inspection/unpacked"
+      root="$inspection/unpacked/rootfs"
+      test -d "$root/etc/ssl"
+      test ! -L "$root/etc/ssl"
+      test -d "$root/etc/ssl/certs"
+      test ! -L "$root/etc/ssl/certs"
+      test -f "$root${caBundle}"
+      test ! -L "$root${caBundle}"
+      test "$(stat -c '%a' "$root${caBundle}")" = 644
+      cmp ${caBundleSource} "$root${caBundle}"
+      for variable in \
+        "NIX_SSL_CERT_FILE=${caBundle}" \
+        "SSL_CERT_FILE=${caBundle}" \
+        "CURL_CA_BUNDLE=${caBundle}" \
+        "REQUESTS_CA_BUNDLE=${caBundle}"; do
+        jq -e --arg variable "$variable" \
+          '.process.env | index($variable) != null' \
+          "$inspection/unpacked/config.json" >/dev/null
+      done
     '';
 in
 {

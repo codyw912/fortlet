@@ -97,7 +97,9 @@ preparation prints `<harness><TAB>ready`; a verified cache hit performs no
 provisioning, capsule launch, store mutation, registry access, or network
 contact. Live harness capsules mount the project store read-only and use the
 same image regardless of harness; Node and npm are not part of the runtime
-contract.
+contract. The immutable Nix closure supplies the initial CA roots, while the
+image materializes the active bundle at `/etc/ssl/certs/ca-certificates.crt`
+so MicroSandbox can extend it only in each capsule's disposable root.
 
 ## Project tool environments
 

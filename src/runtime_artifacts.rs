@@ -21,7 +21,8 @@ use crate::project_environment::{guest_system, NIX_VERSION};
 use crate::runtime::{effective_gid, effective_uid};
 
 const ARTIFACTS_ENV: &str = "FORTLET_RUNTIME_ARTIFACTS";
-pub const RUNTIME_CONTRACT: &str = "fip0013-1";
+pub const RUNTIME_CONTRACT: &str = "fip0013-2";
+pub const ROOT_CA_BUNDLE: &str = "/etc/ssl/certs/ca-certificates.crt";
 const MAX_MANIFEST_BYTES: u64 = 1024 * 1024;
 const MAX_STORE_PATHS: usize = 1024;
 const PROJECT_STORE_MIB: u32 = 16 * 1024;
@@ -46,6 +47,7 @@ pub struct RuntimeManifest {
     managed_bash_env: String,
     runtime_library_path: String,
     ca_bundle: String,
+    ca_bundle_source: String,
     store_paths: Vec<String>,
 }
 
@@ -73,6 +75,7 @@ pub struct PreparedRuntime {
     pub hold: String,
     pub managed_bash_env: String,
     pub runtime_library_path: String,
+    pub ca_bundle: String,
     pub harness_executable: String,
     pub runtime_identity: String,
     pub harness_identity: String,
@@ -425,6 +428,7 @@ impl RuntimeArtifacts {
             hold: self.runtime.hold.clone(),
             managed_bash_env: self.runtime.managed_bash_env.clone(),
             runtime_library_path: self.runtime.runtime_library_path.clone(),
+            ca_bundle: self.runtime.ca_bundle.clone(),
             harness_executable: harness.executable.clone(),
             runtime_identity: format!(
                 "{}:{}",
@@ -462,7 +466,7 @@ impl RuntimeManifest {
             &self.shell,
             &self.hold,
             &self.managed_bash_env,
-            &self.ca_bundle,
+            &self.ca_bundle_source,
         ] {
             validate_store_path(path)?;
             if !self
@@ -472,6 +476,9 @@ impl RuntimeManifest {
             {
                 bail!("runtime artifact path is outside its declared closure");
             }
+        }
+        if self.ca_bundle != ROOT_CA_BUNDLE {
+            bail!("runtime artifact CA bundle is outside the managed root path");
         }
         for path in self.runtime_library_path.split(':') {
             validate_store_path(path)?;
@@ -657,6 +664,33 @@ async fn cleanup(sandbox: &Sandbox, name: &str) {
 mod tests {
     use super::*;
 
+    fn runtime_manifest() -> RuntimeManifest {
+        RuntimeManifest {
+            schema: 1,
+            contract: RUNTIME_CONTRACT.into(),
+            system: guest_system().unwrap().into(),
+            architecture: expected_architecture().unwrap().into(),
+            image_reference: format!(
+                "fortlet-runtime:{RUNTIME_CONTRACT}-{}",
+                guest_system().unwrap()
+            ),
+            image_digest: format!("sha256:{}", "0".repeat(64)),
+            image_archive_sha256: "0".repeat(64),
+            seed_archive_sha256: "0".repeat(64),
+            runtime_root: "/nix/store/runtime".into(),
+            nix_version: NIX_VERSION.into(),
+            nix: "/nix/store/runtime/bin/nix".into(),
+            nix_store: "/nix/store/runtime/bin/nix-store".into(),
+            shell: "/nix/store/runtime/bin/bash".into(),
+            hold: "/nix/store/runtime/bin/fortlet-hold".into(),
+            managed_bash_env: "/nix/store/runtime/etc/fortlet/bash-env".into(),
+            runtime_library_path: "/nix/store/runtime/lib".into(),
+            ca_bundle: ROOT_CA_BUNDLE.into(),
+            ca_bundle_source: "/nix/store/runtime/etc/fortlet/ca-bundle-source.crt".into(),
+            store_paths: vec!["/nix/store/runtime".into()],
+        }
+    }
+
     #[test]
     fn store_paths_are_absolute_and_contained() {
         assert!(validate_store_path("/nix/store/abc-tool").is_ok());
@@ -671,6 +705,20 @@ mod tests {
         assert!(valid_sha256(&"A".repeat(64)));
         assert!(!valid_sha256(&"g".repeat(64)));
         assert!(!valid_sha256(&"a".repeat(63)));
+    }
+
+    #[test]
+    fn manifest_separates_mutable_root_ca_bundle_from_immutable_source() {
+        let manifest = runtime_manifest();
+        manifest.validate().unwrap();
+
+        let mut store_backed_bundle = manifest.clone();
+        store_backed_bundle.ca_bundle = store_backed_bundle.ca_bundle_source.clone();
+        assert!(store_backed_bundle.validate().is_err());
+
+        let mut root_backed_source = manifest;
+        root_backed_source.ca_bundle_source = ROOT_CA_BUNDLE.into();
+        assert!(root_backed_source.validate().is_err());
     }
 
     #[test]

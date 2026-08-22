@@ -105,6 +105,10 @@ does not contact MicroSandbox or the network and does not rewrite a layer. The
 runtime image is loaded from the packaged OCI archive, verified by digest and
 platform, and always selected with pull policy `never`. Preparation does not
 require Docker, a registry login, host Nix, npm, or a harness installer.
+The immutable project store retains the declared Nix CA source, but the active
+bundle is a regular root-filesystem file at
+`/etc/ssl/certs/ca-certificates.crt`. This lets MicroSandbox install its
+per-capsule CA into disposable root state without making `/nix` writable.
 
 Set `FORTLET_PREPARE_TIMINGS=1` to emit bounded cold-preparation events for
 the image, runtime store, selected harness closure, selected project provider,
@@ -412,6 +416,14 @@ nix build .#checks.$(nix eval --impure --raw --expr builtins.currentSystem).shim
 Package install checks compare the bundled MicroSandbox runtime byte-for-byte
 with its fixed-output release archive. This preserves the macOS Hypervisor
 entitlement that Nix's generic stripping phase would otherwise remove.
+The runtime-artifact build also unpacks the produced OCI image rootlessly and
+requires real `/etc/ssl` directories, a regular mode-`0644` active bundle with
+the exact declared initial bytes, and matching Nix, SSL, Curl, and Requests CA
+environment selectors:
+
+```bash
+nix build .#runtime-artifacts --no-link
+```
 
 ## Interactive acceptance observer
 

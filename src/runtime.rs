@@ -673,6 +673,15 @@ fn capsule_environment(capsule: &Capsule<'_>, layers: &EnvironmentLayers) -> Vec
         ),
     ]);
     environment.extend(capsule.harness.environment(capsule.project));
+    environment.extend([
+        ("NIX_SSL_CERT_FILE".into(), layers.runtime.ca_bundle.clone()),
+        ("SSL_CERT_FILE".into(), layers.runtime.ca_bundle.clone()),
+        ("CURL_CA_BUNDLE".into(), layers.runtime.ca_bundle.clone()),
+        (
+            "REQUESTS_CA_BUNDLE".into(),
+            layers.runtime.ca_bundle.clone(),
+        ),
+    ]);
     match environment
         .iter_mut()
         .find(|(key, _)| key == "LD_LIBRARY_PATH")
@@ -1189,8 +1198,8 @@ mod tests {
         };
         let layers = EnvironmentLayers {
             runtime: crate::runtime_artifacts::PreparedRuntime {
-                store_volume: "fortlet-store-501-fip0013-1-project".into(),
-                image_reference: "fortlet-runtime:fip0013-1-aarch64-linux".into(),
+                store_volume: "fortlet-store-501-fip0013-2-project".into(),
+                image_reference: "fortlet-runtime:fip0013-2-aarch64-linux".into(),
                 runtime_root: "/nix/store/runtime".into(),
                 nix_version: "2.34.8".into(),
                 nix: "/nix/store/runtime/bin/nix".into(),
@@ -1198,6 +1207,7 @@ mod tests {
                 hold: "/nix/store/runtime/bin/fortlet-hold".into(),
                 managed_bash_env: "/nix/store/runtime/etc/managed-bash-env".into(),
                 runtime_library_path: "/nix/store/glibc/lib:/nix/store/zlib/lib".into(),
+                ca_bundle: "/etc/ssl/certs/ca-certificates.crt".into(),
                 harness_executable: "/nix/store/codex/bin/codex".into(),
                 runtime_identity: "sha256:runtime:seed".into(),
                 harness_identity: "harness-closure".into(),
@@ -1229,6 +1239,15 @@ mod tests {
             };
             let environment = capsule_environment(&capsule, &layers);
             assert!(environment.contains(&("RUST_BACKTRACE".into(), "1".into())));
+            for name in [
+                "NIX_SSL_CERT_FILE",
+                "SSL_CERT_FILE",
+                "CURL_CA_BUNDLE",
+                "REQUESTS_CA_BUNDLE",
+            ] {
+                assert!(environment
+                    .contains(&(name.into(), "/etc/ssl/certs/ca-certificates.crt".into())));
+            }
             for (key, _) in harness.environment(&project) {
                 assert!(environment.iter().any(|(candidate, _)| candidate == &key));
             }
