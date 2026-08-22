@@ -1,6 +1,6 @@
 # Experiment 0057: Sealed schema-1 prepared lifecycle
 
-Status: declared — operator-authorized, not started
+Status: terminal — rejected during cold preparation on guest DNS
 Design: FIP-0001, FIP-0006, FIP-0007, FIP-0013
 
 ## Baseline / Control
@@ -160,3 +160,90 @@ are explicit ordinary files; public status, stop, reset, list, timing events,
 and exact workspace cleanup are already accepted mechanisms. No experiment
 root, package, image, store, capsule, credential fixture, or live command was
 created during rehearsal.
+
+## Results
+
+Preflight passed. Signed implementation revision
+`dd75b81cf8c7736ad57864c0af792ce636e17765` had a good SSH signature and
+the isolated Jujutsu workspace was clean with that revision as its parent. The
+exact package was
+`/nix/store/l3a280n1rnsnazchhqhzc359xngl4v4r-fortlet-0.1.0`.
+Its OCI archive, runtime seed, Tact closure, and OCI manifest digest matched
+the declared identities. The synthetic auth document passed structural checks
+at mode `0600`; its values were never printed, refreshed, or sent. Isolated
+capsule and image inventories were empty, and the global Fortlet inventory
+hash was
+`7a47f642bd6a6012b8e2e05cec9c9798b8be86210be840140b1231d57ae0701a`.
+
+The first cold preparation attempt failed before schema-1 output publication:
+
+```text
+fortlet: prepare-timing phase=image delta_ms=1120 total_ms=1120
+fortlet: prepare-timing phase=runtime-store delta_ms=3127 total_ms=4248
+fortlet: prepare-timing phase=harness-closure delta_ms=1120 total_ms=5368
+fortlet: environment stage failed; check network access or remove the reported incomplete layer and retry: project environment recipe exited 6: curl: (6) Could not resolve host: deb.debian.org
+```
+
+Independent real time was 16.80 seconds. The failure left no capsule. Per the
+operator's standing direction to retry likely firewall-caused DNS failures
+once, a host-side HTTPS clearance request to the same public Debian endpoint
+returned HTTP 200. The exact partial Fortlet data, state, home, and isolated
+MicroSandbox caches were then removed and recreated empty. The signed
+workspace, package, auth fixture, empty capsule and image inventories, and
+unchanged global inventory were reverified before the identical retry.
+
+The DNS-cleared retry failed at the same point:
+
+```text
+fortlet: prepare-timing phase=image delta_ms=1025 total_ms=1025
+fortlet: prepare-timing phase=runtime-store delta_ms=3056 total_ms=4082
+fortlet: prepare-timing phase=harness-closure delta_ms=1334 total_ms=5416
+fortlet: environment stage failed; check network access or remove the reported incomplete layer and retry: project environment recipe exited 6: curl: (6) Could not resolve host: deb.debian.org
+```
+
+Independent real time was 16.89 seconds. Host resolution therefore cleared
+while the disposable MicroSandbox preparation guest still could not resolve
+the first frozen recipe input. This is an unresolved guest-network or firewall
+path, not evidence for or against the corrected schema-1 sealing and mount
+mechanism. The project recipe's first request is the pinned `libcap-ng`
+artifact from Debian; the failure occurred before downloading it and before
+the schema-1 finalizer, marker, sealing, or prepared lifecycle ran.
+
+The terminal retry again left status absent and raw capsule inventory empty.
+The isolated image inventory contained only the declared 104,326,438-byte
+local image. Partial setup used 12 KiB under Fortlet data, 0 KiB under Fortlet
+state, and 676,092 KiB under isolated MicroSandbox state. The runtime and Tact
+markers existed with SHA-256 values
+`5f27f2d2d201a4ff818befea5418deaf8778edeeaade338030eab4391825af57`
+and
+`38bb9fc890b5e918b9c05332c1e54f426493753ff7f4a9bdf0e8da93d5e7d3c9`;
+no project-layer marker existed.
+
+The matching second failure activated the declared shared-assumption stop.
+No warm prepare, Tact command, provider request, model request, schema-2
+preparation, project edit, real credential read, or remote mutation occurred.
+Public stop and reset both returned `tact<TAB>absent`. Raw capsule inventory
+was empty, the testbed workspace remained clean and was forgotten, and the
+exact experiment root was removed and proved absent. The final global inventory
+hash matched preflight.
+
+## Terminal Closure
+
+1. Outcome: rejected; cold preparation could not pass its network prerequisite,
+   so warm preparation and all lifecycle distributions are unavailable rather
+   than replaced.
+2. Attribution: two fresh-state attempts reached the same guest curl DNS
+   failure even though the intervening host HTTPS check succeeded. The
+   unresolved boundary is guest DNS/firewall reachability for the schema-1
+   recipe, not the Nix-built image, sealed-layer permission correction, or
+   runtime latency.
+3. Actual cost: about four minutes versus the 30-minute live ceiling, two
+   retained 16.80- and 16.89-second DNS-failed preparation attempts including
+   the explicitly requested firewall retry, one host clearance check, zero
+   provider calls, zero model calls, zero real credentials, and $0.
+4. Cleanup: public stop/reset reported absence, isolated capsule inventory was
+   empty, the exact workspace was clean and forgotten, `/private/tmp/f57` was
+   removed, and global inventory was unchanged.
+5. Next action: stop for operator review. A successor lifecycle campaign needs
+   fresh authority and a preflight that establishes preparation-guest egress;
+   schema-2 preparation and provider or model dispatch remain unauthorized.
