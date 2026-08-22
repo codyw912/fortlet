@@ -7,7 +7,9 @@ use std::time::Duration;
 
 use anyhow::{bail, Context, Result};
 use fs2::FileExt;
-use microsandbox::sandbox::{PullPolicy, SandboxStatus};
+use microsandbox::sandbox::{
+    HostPermissions, MountBuilder, PullPolicy, SandboxStatus, StatVirtualization,
+};
 use microsandbox::{
     ExecEvent, ExecHandle, MicrosandboxError, ModificationDisposition, PlannedChange, Sandbox,
     SecretSource,
@@ -546,7 +548,7 @@ async fn create_capsule(capsule: &Capsule<'_>, layers: &EnvironmentLayers) -> Re
     if let Some(project) = &layers.project {
         if project.guest_root != "/nix" {
             builder = builder.volume(&project.guest_root, |mount| {
-                mount.bind(&project.root).readonly()
+                project_layer_mount(mount, &project.root)
             });
         }
     }
@@ -582,6 +584,17 @@ async fn create_capsule(capsule: &Capsule<'_>, layers: &EnvironmentLayers) -> Re
         .create_detached()
         .await
         .with_context(|| format!("cannot create capsule {}", capsule.descriptor.name))
+}
+
+fn project_layer_mount(mount: MountBuilder, root: &Path) -> MountBuilder {
+    mount
+        .bind(root)
+        .readonly()
+        .nosuid()
+        .nodev()
+        .stat_virtualization(StatVirtualization::Relaxed)
+        .host_permissions(HostPermissions::Private)
+        .follow_root_symlinks(false)
 }
 
 fn guest_accounts(capsule: &Capsule<'_>, layers: &EnvironmentLayers) -> Result<(PathBuf, PathBuf)> {
@@ -769,6 +782,39 @@ mod tests {
             cwd: "/tmp/fortlet-descriptor-test".into(),
             kind: "test",
             scratch: false,
+        }
+    }
+
+    #[test]
+    fn schema_one_project_layer_mount_is_relaxed_private_and_read_only() {
+        let mount = project_layer_mount(
+            MountBuilder::new("/opt/fortlet/project"),
+            Path::new("/project-layer"),
+        )
+        .build()
+        .unwrap();
+
+        match mount {
+            microsandbox::sandbox::VolumeMount::Bind {
+                host,
+                guest,
+                options,
+                stat_virtualization,
+                host_permissions,
+                follow_root_symlinks,
+                ..
+            } => {
+                assert_eq!(host, Path::new("/project-layer"));
+                assert_eq!(guest, "/opt/fortlet/project");
+                assert!(options.readonly);
+                assert!(options.nosuid);
+                assert!(options.nodev);
+                assert!(!options.noexec);
+                assert_eq!(stat_virtualization, StatVirtualization::Relaxed);
+                assert_eq!(host_permissions, HostPermissions::Private);
+                assert!(!follow_root_symlinks);
+            }
+            _ => panic!("project layer must be a bind mount"),
         }
     }
 

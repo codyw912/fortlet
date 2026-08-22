@@ -4,7 +4,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use anyhow::{bail, Context, Result};
 use fs2::FileExt;
-use microsandbox::sandbox::PullPolicy;
+use microsandbox::sandbox::{HostPermissions, MountBuilder, PullPolicy, StatVirtualization};
 use microsandbox::Sandbox;
 
 use crate::harness::Harness;
@@ -12,7 +12,9 @@ use crate::nix_provider;
 use crate::paths::AppPaths;
 use crate::prepare_timing::{PreparePhase, PrepareTimings};
 use crate::project::Project;
-use crate::project_environment::{guest_platform, ProjectEnvironment, PublishedProjectEnvironment};
+use crate::project_environment::{
+    guest_platform, restore_cleanup_permissions, ProjectEnvironment, PublishedProjectEnvironment,
+};
 use crate::runtime_artifacts::{PreparedRuntime, RuntimeArtifacts};
 
 pub struct EnvironmentStore<'a> {
@@ -23,6 +25,16 @@ pub struct EnvironmentLayers {
     pub runtime: PreparedRuntime,
     pub project: Option<PublishedProjectEnvironment>,
 }
+
+const PROJECT_OUTPUT_FINALIZER: &str = r#"
+if find -P /out -xdev ! -type d ! -type f ! -type l -print -quit | grep -q .; then
+    printf '%s\n' 'project environment output contains an unsupported file type' >&2
+    exit 1
+fi
+find -P /out -xdev -type f -perm /111 -exec chmod 0555 {} +
+find -P /out -xdev -type f ! -perm /111 -exec chmod 0444 {} +
+find -P /out -xdev -type d -exec chmod 0555 {} +
+"#;
 
 impl<'a> EnvironmentStore<'a> {
     pub fn new(paths: &'a AppPaths) -> Self {
@@ -103,7 +115,9 @@ impl<'a> EnvironmentStore<'a> {
             .cpus(4)
             .memory(8192)
             .root_disk(8192)
-            .volume("/out", |mount| mount.bind(&plan.output))
+            .volume("/out", |mount| {
+                provisioning_output_mount(mount, &plan.output)
+            })
             .entrypoint([runtime.hold.clone()])
             .create()
             .await
@@ -114,11 +128,35 @@ impl<'a> EnvironmentStore<'a> {
                     .args(["-eu", "-c", plan.recipe.as_str()])
                     .envs(plan.environment.clone())
             })
-            .await
-            .context("project environment recipe execution failed");
-        cleanup_provisioning_capsule(&sandbox, &sandbox_name).await;
-        let output = provision?;
+            .await;
+        let output = match provision {
+            Ok(output) => output,
+            Err(error) => {
+                if let Err(cleanup_error) =
+                    cleanup_provisioning_capsule(&sandbox, &sandbox_name).await
+                {
+                    let _ = temporary.keep();
+                    return Err(cleanup_error).with_context(|| {
+                        format!(
+                            "cannot retire project environment provisioning capsule after recipe execution failed: {error}"
+                        )
+                    });
+                }
+                let _ = restore_cleanup_permissions(temporary.path());
+                return Err(error).context("project environment recipe execution failed");
+            }
+        };
         if !output.status().success {
+            if let Err(error) = cleanup_provisioning_capsule(&sandbox, &sandbox_name).await {
+                let code = output.status().code;
+                let _ = temporary.keep();
+                return Err(error).with_context(|| {
+                    format!(
+                        "cannot retire project environment provisioning capsule after recipe exited {code}"
+                    )
+                });
+            }
+            let _ = restore_cleanup_permissions(temporary.path());
             let diagnostic = sanitize_diagnostic(&output.stderr().unwrap_or_default());
             if diagnostic.is_empty() {
                 bail!("project environment recipe exited {}", output.status().code);
@@ -128,13 +166,61 @@ impl<'a> EnvironmentStore<'a> {
                 output.status().code
             );
         }
-        environment.validate_and_mark(temporary.path())?;
-        let persisted = temporary.keep();
-        fs::rename(&persisted, &destination)
-            .context("cannot publish the prepared project environment")?;
-        environment.verify_published(&destination)?;
+        let finalize = sandbox
+            .exec_with(&runtime.shell, |options| {
+                options.args(["-eu", "-c", PROJECT_OUTPUT_FINALIZER])
+            })
+            .await;
+        if let Err(error) = cleanup_provisioning_capsule(&sandbox, &sandbox_name).await {
+            let _ = temporary.keep();
+            return Err(error).context(
+                "cannot retire project environment provisioning capsule after finalization",
+            );
+        }
+        let output = match finalize {
+            Ok(output) => output,
+            Err(error) => {
+                let _ = restore_cleanup_permissions(temporary.path());
+                return Err(error).context("project environment output finalization failed");
+            }
+        };
+        if !output.status().success {
+            let _ = restore_cleanup_permissions(temporary.path());
+            let diagnostic = sanitize_diagnostic(&output.stderr().unwrap_or_default());
+            if diagnostic.is_empty() {
+                bail!(
+                    "project environment output finalizer exited {}",
+                    output.status().code
+                );
+            }
+            bail!(
+                "project environment output finalizer exited {}: {diagnostic}",
+                output.status().code
+            );
+        }
+        if let Err(error) = environment.validate_and_mark(temporary.path()) {
+            let _ = restore_cleanup_permissions(temporary.path());
+            return Err(error);
+        }
+        if let Err(error) = fs::rename(temporary.path(), &destination) {
+            let _ = restore_cleanup_permissions(temporary.path());
+            return Err(error).context("cannot publish the prepared project environment");
+        }
+        if let Err(error) = environment.verify_published(&destination) {
+            let _ = restore_cleanup_permissions(&destination);
+            let _ = fs::remove_dir_all(&destination);
+            return Err(error).context("published project environment failed final verification");
+        }
         environment.published_recipe(destination)
     }
+}
+
+fn provisioning_output_mount(mount: MountBuilder, root: &Path) -> MountBuilder {
+    mount
+        .bind(root)
+        .stat_virtualization(StatVirtualization::Strict)
+        .host_permissions(HostPermissions::Mirror)
+        .follow_root_symlinks(false)
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -177,9 +263,17 @@ fn sanitize_diagnostic(value: &str) -> String {
         .to_owned()
 }
 
-async fn cleanup_provisioning_capsule(sandbox: &Sandbox, name: &str) {
-    let _ = sandbox.stop_and_wait().await;
-    let _ = Sandbox::remove(name).await;
+async fn cleanup_provisioning_capsule(sandbox: &Sandbox, name: &str) -> Result<()> {
+    let stop = sandbox.stop_and_wait().await;
+    match Sandbox::remove(name).await {
+        Ok(()) => Ok(()),
+        Err(remove_error) => match stop {
+            Ok(_) => Err(remove_error).context("cannot remove stopped provisioning capsule"),
+            Err(stop_error) => Err(remove_error).with_context(|| {
+                format!("cannot stop ({stop_error}) or remove provisioning capsule")
+            }),
+        },
+    }
 }
 
 fn lock(path: &Path) -> Result<File> {
@@ -232,6 +326,40 @@ mod tests {
             ]
         );
         assert!(!plan.recipe.contains("/Users/"));
+        assert!(!plan.recipe.contains(PROJECT_OUTPUT_FINALIZER));
+        assert_eq!(PROJECT_OUTPUT_FINALIZER.matches("find -P /out").count(), 4);
+        assert!(PROJECT_OUTPUT_FINALIZER.contains("-type f -perm /111"));
+        assert!(PROJECT_OUTPUT_FINALIZER.contains("-type f ! -perm /111"));
+        assert!(PROJECT_OUTPUT_FINALIZER.contains("-type d -exec chmod 0555"));
+        assert!(!PROJECT_OUTPUT_FINALIZER.contains("$FORTLET_OUTPUT"));
+    }
+
+    #[test]
+    fn provisioning_output_mount_is_strict_mirrored_and_writable() {
+        let mount =
+            provisioning_output_mount(MountBuilder::new("/out"), Path::new("/owned/output"))
+                .build()
+                .unwrap();
+
+        match mount {
+            microsandbox::sandbox::VolumeMount::Bind {
+                host,
+                guest,
+                options,
+                stat_virtualization,
+                host_permissions,
+                follow_root_symlinks,
+                ..
+            } => {
+                assert_eq!(host, Path::new("/owned/output"));
+                assert_eq!(guest, "/out");
+                assert!(!options.readonly);
+                assert_eq!(stat_virtualization, StatVirtualization::Strict);
+                assert_eq!(host_permissions, HostPermissions::Mirror);
+                assert!(!follow_root_symlinks);
+            }
+            _ => panic!("provisioning output must be a bind mount"),
+        }
     }
 
     #[test]

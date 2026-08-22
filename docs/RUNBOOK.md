@@ -142,11 +142,28 @@ It does not receive the manifest, live project, persistent home, host
 environment, provider broker, SSH or signing material, publication authority,
 or registry credentials.
 
-Successful output is validated, content-digested, sealed against writes,
-atomically published, and marker-verified before every read-only mount at
-`/opt/fortlet/project`. Manifest paths precede the common runtime and harness
-paths, while the harness executable remains an absolute path in the verified
-project store. `HOME`, `PATH`, terminal, credential, Fortlet,
+After a successful recipe, a separate package-owned finalizer in the same
+credential-free capsule rejects unsupported types and normalizes directories
+and executable files to `0555` and ordinary files to `0444` without following
+links. The writable `/out` bind uses strict stat virtualization and mirrored
+host permissions, so MicroSandbox 0.6.8 exposes the finalized tree to the host
+as exact `0755`/`0644` modes. Fortlet retires the capsule, validates that
+pre-seal tree, writes and syncs its versioned marker, removes only write bits,
+then revalidates exact `0555`/`0444` modes and the unchanged content digest
+before atomic publication.
+
+Every reuse verifies the publication-contract identity, marker binding,
+canonical modes, paths, types, relative links, and output digest. Older
+permission-contract identities are not selected as cache hits, and legacy
+owner-only `0500`/`0400` trees fail closed. The published layer is mounted at
+`/opt/fortlet/project` with explicit read-only, `nosuid`, `nodev`, relaxed stat
+virtualization, private host-permission propagation, and no root-symlink
+following. Relaxed virtualization uses override metadata when available and
+falls back to the canonical literal host modes when it is absent.
+
+Manifest paths precede the common runtime and harness paths, while the harness
+executable remains an absolute path in the verified project store. `HOME`,
+`PATH`, terminal, credential, Fortlet,
 MicroSandbox, and harness-owned variables cannot be overridden. `BASH_ENV` is
 also reserved: a read-only package-owned hook restores Fortlet's managed PATH
 after login profiles replace it, so agent commands launched through
@@ -178,6 +195,7 @@ the host:
 ```bash
 cargo test --bin fortlet project_environment
 cargo test --bin fortlet environment
+cargo test --bin fortlet schema_one_project_layer_mount_is_relaxed_private_and_read_only
 cargo test --test prepare
 cargo test --test pre_runtime_failures invalid_project_environment
 ```

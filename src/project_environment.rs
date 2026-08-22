@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use std::fs::{self, File};
 use std::io::{Read, Write};
-use std::os::unix::fs::PermissionsExt;
+use std::os::unix::fs::{OpenOptionsExt, PermissionsExt};
 use std::path::{Component, Path, PathBuf};
 
 use anyhow::{bail, Context, Result};
@@ -35,7 +35,8 @@ const LOCK_PATH: &str = "flake.lock";
 const MARKER: &str = ".fortlet-project.json";
 const RECIPE_SCHEMA: u64 = 1;
 const NIX_SCHEMA: u64 = 2;
-const CONTRACT: &str = "fortlet-project-environment-v1";
+const DECLARATION_CONTRACT: &str = "fortlet-project-environment-v1";
+const PUBLICATION_CONTRACT: &str = "fortlet-project-layer-v2";
 pub const NIX_PROVIDER_CONTRACT: &str = "fortlet-nix-dev-shell-v2";
 pub const NIX_VERSION: &str = "2.34.8";
 const MAX_MANIFEST_BYTES: u64 = 64 * 1024;
@@ -111,6 +112,7 @@ struct NixProvider {
 #[serde(deny_unknown_fields)]
 struct Marker {
     schema: u64,
+    contract: String,
     identity: String,
     output: String,
     image: String,
@@ -275,19 +277,30 @@ impl ProjectEnvironment {
         }
         validate_declared_paths(root, &self.path)?;
         let output = output_digest(root)?;
+        validate_output_modes(root, PublicationPhase::PreSeal)?;
         let marker = Marker {
             schema: RECIPE_SCHEMA,
+            contract: PUBLICATION_CONTRACT.into(),
             identity: self.identity.clone(),
             output,
             image: RUNTIME_CONTRACT.into(),
             platform: guest_platform()?.into(),
         };
-        let mut file = File::create(root.join(MARKER))?;
+        let mut file = File::options()
+            .write(true)
+            .create_new(true)
+            .mode(0o644)
+            .open(root.join(MARKER))?;
+        file.set_permissions(fs::Permissions::from_mode(0o644))?;
         serde_json::to_writer(&mut file, &marker)?;
         file.write_all(b"\n")?;
         file.sync_all()?;
         drop(file);
         seal_output(root)?;
+        validate_output_modes(root, PublicationPhase::PostSeal)?;
+        if output_digest(root)? != marker.output {
+            bail!("project environment output changed while it was sealed");
+        }
         Ok(())
     }
 
@@ -301,20 +314,60 @@ impl ProjectEnvironment {
         let marker: Marker = serde_json::from_slice(&marker_bytes)
             .context("published project environment marker is invalid")?;
         if marker.schema != RECIPE_SCHEMA
+            || marker.contract != PUBLICATION_CONTRACT
             || marker.identity != self.identity
             || marker.image != RUNTIME_CONTRACT
             || marker.platform != guest_platform()?
         {
             bail!("published project environment marker does not match its inputs");
         }
-        if is_writable(&metadata.permissions())
-            || is_writable(&fs::symlink_metadata(root.join(MARKER))?.permissions())
-        {
-            bail!("published project environment is not sealed");
-        }
+        validate_output_modes(root, PublicationPhase::PostSeal)?;
         validate_declared_paths(root, &self.path)?;
+        if output_digest(root)? != marker.output {
+            bail!("published project environment output digest does not match its marker");
+        }
         Ok(())
     }
+}
+
+#[derive(Clone, Copy)]
+enum PublicationPhase {
+    PreSeal,
+    PostSeal,
+}
+
+fn validate_output_modes(root: &Path, phase: PublicationPhase) -> Result<()> {
+    fn validate(path: &Path, phase: PublicationPhase) -> Result<()> {
+        let metadata = fs::symlink_metadata(path)?;
+        if metadata.file_type().is_symlink() {
+            return Ok(());
+        }
+        let actual = metadata.permissions().mode() & 0o7777;
+        validate_output_mode(actual, metadata.is_dir(), phase)?;
+        if metadata.is_dir() {
+            for entry in fs::read_dir(path)? {
+                validate(&entry?.path(), phase)?;
+            }
+        }
+        Ok(())
+    }
+    validate(root, phase)
+}
+
+fn validate_output_mode(actual: u32, directory: bool, phase: PublicationPhase) -> Result<()> {
+    let executable = directory || actual & 0o111 != 0;
+    let expected = match (phase, executable) {
+        (PublicationPhase::PreSeal, true) => 0o755,
+        (PublicationPhase::PreSeal, false) => 0o644,
+        (PublicationPhase::PostSeal, true) => 0o555,
+        (PublicationPhase::PostSeal, false) => 0o444,
+    };
+    if actual != expected {
+        bail!(
+            "project environment output has noncanonical mode {actual:04o}; expected {expected:04o}"
+        );
+    }
+    Ok(())
 }
 
 fn seal_output(root: &Path) -> Result<()> {
@@ -335,8 +388,23 @@ fn seal_output(root: &Path) -> Result<()> {
     seal(root)
 }
 
-fn is_writable(permissions: &fs::Permissions) -> bool {
-    permissions.mode() & 0o222 != 0
+pub(crate) fn restore_cleanup_permissions(root: &Path) -> Result<()> {
+    fn restore(path: &Path) -> Result<()> {
+        let metadata = fs::symlink_metadata(path)?;
+        if metadata.file_type().is_symlink() {
+            return Ok(());
+        }
+        let mut permissions = metadata.permissions();
+        permissions.set_mode(if metadata.is_dir() { 0o700 } else { 0o600 });
+        fs::set_permissions(path, permissions)?;
+        if metadata.is_dir() {
+            for entry in fs::read_dir(path)? {
+                restore(&entry?.path())?;
+            }
+        }
+        Ok(())
+    }
+    restore(root)
 }
 
 fn manifest_schema(bytes: &[u8]) -> Result<u64> {
@@ -509,7 +577,8 @@ fn read_from(file: File, limit: u64, kind: &str) -> Result<Vec<u8>> {
 
 fn input_identity(manifest: &[u8], recipe: &[u8], platform: &str) -> String {
     let mut digest = Sha256::new();
-    hash_field(&mut digest, CONTRACT.as_bytes());
+    hash_field(&mut digest, DECLARATION_CONTRACT.as_bytes());
+    hash_field(&mut digest, PUBLICATION_CONTRACT.as_bytes());
     hash_field(&mut digest, RUNTIME_CONTRACT.as_bytes());
     hash_field(&mut digest, platform.as_bytes());
     hash_field(&mut digest, manifest);
@@ -561,6 +630,7 @@ fn validate_declared_paths(root: &Path, entries: &[String]) -> Result<()> {
 }
 
 fn output_digest(root: &Path) -> Result<String> {
+    let canonical_root = root.canonicalize()?;
     let mut entries = Vec::new();
     collect_entries(root, root, &mut entries)?;
     entries.sort_by(|left, right| left.0.cmp(&right.0));
@@ -609,7 +679,7 @@ fn output_digest(root: &Path) -> Result<String> {
                 .join(&target)
                 .canonicalize()
                 .context("project environment output contains a broken link")?;
-            if !canonical.starts_with(root) {
+            if !canonical.starts_with(&canonical_root) {
                 bail!("project environment output contains an escaping link");
             }
             hash_field(&mut digest, target.as_os_str().as_encoded_bytes());
@@ -670,6 +740,20 @@ mod tests {
         fs::write(root.join(LOCK_PATH), lock).unwrap();
     }
 
+    fn set_mode(path: &Path, mode: u32) {
+        fs::set_permissions(path, fs::Permissions::from_mode(mode)).unwrap();
+    }
+
+    fn legacy_recipe_identity(manifest: &[u8], recipe: &[u8], platform: &str) -> String {
+        let mut digest = Sha256::new();
+        hash_field(&mut digest, DECLARATION_CONTRACT.as_bytes());
+        hash_field(&mut digest, RUNTIME_CONTRACT.as_bytes());
+        hash_field(&mut digest, platform.as_bytes());
+        hash_field(&mut digest, manifest);
+        hash_field(&mut digest, recipe);
+        hex::encode(digest.finalize())
+    }
+
     #[test]
     fn absence_is_opt_in_and_side_effect_free() {
         let temporary = tempfile::tempdir().unwrap();
@@ -704,6 +788,14 @@ mod tests {
 
         assert_ne!(first.identity(), recipe_changed.identity());
         assert_ne!(first.identity(), manifest_changed.identity());
+        assert_ne!(
+            first.identity(),
+            legacy_recipe_identity(
+                manifest.as_bytes(),
+                b"mkdir -p /out/bin\n",
+                guest_platform().unwrap()
+            )
+        );
         assert_eq!(first.recipe(), Some("mkdir -p /out/bin\n"));
     }
 
@@ -820,17 +912,92 @@ mod tests {
             .unwrap();
         let output = tempfile::tempdir().unwrap();
         fs::create_dir(output.path().join("bin")).unwrap();
+        fs::create_dir(output.path().join("share")).unwrap();
         let tool = output.path().join("bin/tool");
         fs::write(&tool, "first").unwrap();
-        fs::set_permissions(&tool, fs::Permissions::from_mode(0o755)).unwrap();
+        set_mode(&tool, 0o755);
+        let data = output.path().join("share/odd\n name");
+        fs::write(&data, "data").unwrap();
+        set_mode(&data, 0o644);
+        std::os::unix::fs::symlink("../share/odd\n name", output.path().join("bin/data")).unwrap();
+        set_mode(output.path(), 0o755);
 
         environment.validate_and_mark(output.path()).unwrap();
         environment.verify_published(output.path()).unwrap();
+        assert_eq!(
+            fs::metadata(output.path()).unwrap().permissions().mode() & 0o7777,
+            0o555
+        );
+        assert_eq!(
+            fs::metadata(output.path().join("bin"))
+                .unwrap()
+                .permissions()
+                .mode()
+                & 0o7777,
+            0o555
+        );
+        assert_eq!(
+            fs::metadata(&tool).unwrap().permissions().mode() & 0o7777,
+            0o555
+        );
+        assert_eq!(
+            fs::metadata(&data).unwrap().permissions().mode() & 0o7777,
+            0o444
+        );
+        assert_eq!(
+            fs::metadata(output.path().join(MARKER))
+                .unwrap()
+                .permissions()
+                .mode()
+                & 0o7777,
+            0o444
+        );
+        let marker: Marker =
+            serde_json::from_slice(&fs::read(output.path().join(MARKER)).unwrap()).unwrap();
+        assert_eq!(marker.contract, PUBLICATION_CONTRACT);
         assert!(fs::write(&tool, "changed").is_err());
-        let mut permissions = fs::metadata(output.path()).unwrap().permissions();
-        permissions.set_mode(0o700);
-        fs::set_permissions(output.path(), permissions).unwrap();
+
+        set_mode(&tool, 0o755);
+        fs::write(&tool, "changed").unwrap();
+        set_mode(&tool, 0o555);
+        assert!(environment
+            .verify_published(output.path())
+            .unwrap_err()
+            .to_string()
+            .contains("digest"));
+
+        set_mode(&tool, 0o500);
         assert!(environment.verify_published(output.path()).is_err());
+        restore_cleanup_permissions(output.path()).unwrap();
+    }
+
+    #[test]
+    fn publication_rejects_noncanonical_preseal_modes_and_special_files() {
+        let project_root = tempfile::tempdir().unwrap();
+        write_environment(
+            project_root.path(),
+            r#"{"schema":1,"path":[],"environment":{}}"#,
+            "true\n",
+        );
+        let environment = ProjectEnvironment::discover(&project(project_root.path()))
+            .unwrap()
+            .unwrap();
+
+        let legacy = tempfile::tempdir().unwrap();
+        set_mode(legacy.path(), 0o500);
+        let error = environment.validate_and_mark(legacy.path()).unwrap_err();
+        assert!(error.to_string().contains("noncanonical mode 0500"));
+        restore_cleanup_permissions(legacy.path()).unwrap();
+
+        let error = validate_output_mode(0o4755, false, PublicationPhase::PreSeal).unwrap_err();
+        assert!(error.to_string().contains("noncanonical mode 4755"));
+
+        let special = tempfile::tempdir().unwrap();
+        let socket_path = special.path().join("socket");
+        let socket = std::os::unix::net::UnixListener::bind(&socket_path).unwrap();
+        let error = environment.validate_and_mark(special.path()).unwrap_err();
+        assert!(error.to_string().contains("unsupported file type"));
+        drop(socket);
     }
 
     #[test]
@@ -874,6 +1041,7 @@ mod tests {
         let first_output = tempfile::tempdir().unwrap();
         fs::create_dir(first_output.path().join("bin")).unwrap();
         fs::write(first_output.path().join("bin/tool"), "working").unwrap();
+        set_mode(first_output.path(), 0o755);
         first.validate_and_mark(first_output.path()).unwrap();
 
         write_environment(
@@ -892,6 +1060,7 @@ mod tests {
             fs::read_to_string(first_output.path().join("bin/tool")).unwrap(),
             "working"
         );
+        restore_cleanup_permissions(first_output.path()).unwrap();
     }
 
     #[test]

@@ -1,8 +1,9 @@
 # GOAL: Prove portable local project capability
 
-Status: active — the portable schema-1 permission amendment to FIP-0006 is
-Accepted and its deterministic implementation is authorized; the remaining
-live lifecycle campaign, provider work, and model dispatch remain blocked
+Status: active — the accepted portable schema-1 permission amendment to
+FIP-0006 is deterministically implemented and passes the complete local gate;
+the remaining live lifecycle campaign, provider work, and model dispatch
+remain blocked
 
 ## Outcome
 

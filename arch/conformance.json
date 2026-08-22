@@ -164,7 +164,7 @@
     {
       "proposal": "0006",
       "title": "Opt-in project environments",
-      "status": "partial",
+      "status": "conformant",
       "modules": [
         ".fortlet/environment.json",
         ".fortlet/environment.sh",
@@ -189,12 +189,12 @@
         "experiments/0020-relative-debian-project-links.md",
         "experiments/0030-first-post-eof-daily-work-loop.md",
         "experiments/0031-login-shell-project-path.md",
-        "experiments/0032-packaged-login-shell-project-tools.md"
+        "experiments/0032-packaged-login-shell-project-tools.md",
+        "experiments/0054-nix-runtime-substrate-feasibility.md",
+        "experiments/0055-explicit-bind-permission-policy.md",
+        "experiments/0056-trusted-host-canonical-seal.md"
       ],
-      "gaps": [
-        "The accepted portable sealed layer amendment is not implemented: schema-1 publication still lacks explicit mirrored output permissions, package-owned guest finalization, canonical host sealing, an internal publication-contract identity, legacy-mode rejection, and the explicit relaxed private read-only runtime mount policy.",
-        "Deterministic evidence for the amended permission contract and the remaining FIP-0013 prepared lifecycle evidence are outstanding."
-      ]
+      "gaps": []
     },
     {
       "proposal": "0007",
@@ -370,10 +370,12 @@
         "src/runtime_artifacts.rs",
         "tests/prepare.rs",
         "tests/pre_runtime_failures.rs",
-        "experiments/0054-nix-runtime-substrate-feasibility.md"
+        "experiments/0054-nix-runtime-substrate-feasibility.md",
+        "experiments/0055-explicit-bind-permission-policy.md",
+        "experiments/0056-trusted-host-canonical-seal.md"
       ],
       "gaps": [
-        "Experiment 0054 rejected the candidate because its sealed schema-1 output was not mountable; prepared absent, stopped, and running latency evidence remains outstanding.",
+        "Experiment 0056 accepted the portable permission mechanism and its deterministic production implementation now passes locally; exact credential-free Fortlet preparation plus prepared absent, stopped, and running lifecycle and latency evidence remain outstanding.",
         "A successful isolated live schema-2 preparation remains outstanding under a later authorization.",
         "Native x86_64-linux artifact, package, and runtime verification remains outstanding."
       ]
