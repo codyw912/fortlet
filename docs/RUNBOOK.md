@@ -223,6 +223,17 @@ stopped configuration had the intended project-layer mount policy, but no
 successful runtime mount or absent/stopped/running latency distribution was
 established.
 
+Experiment 0060 corrected the guest-agent initialization contract by retaining
+the immutable CA source in the project store while materializing the active
+bundle in disposable root state. A manifest-free absent/stopped/running control
+returned Tact 0.3.7 in 0.47, 0.35, and 0.03 seconds, preserved the immutable
+source as the active bundle prefix, added exactly one capsule certificate, and
+proved `/nix` rejected mutation. Fresh schema-1 cold preparation completed in
+155.00 seconds; five unchanged prepares had a 0.00-second median. Twelve fixed
+launches had 0.40-second absent, 0.32-second stopped, and 0.02-second running
+medians, with every running sample at or below 0.03 seconds. The inspected
+runtime and project mounts retained their declared read-only policies.
+
 ## Global capsule inventory
 
 `fortlet list` reports every Fortlet-owned capsule across projects without

@@ -2,10 +2,10 @@
 
 Audience: a fresh agent session. The operator accepted the outcome, public
 testbeds, exclusions, evidence budget, and four-hour ceiling in the active
-`GOAL.md`. FIP-0012 and FIP-0013 are Accepted. FIP-0006's bounded
-verified-reuse amendment is implemented at signed tip `95107fdbc686`; its
-complete local gate and draft PR #15 hosted check pass, and exact immutable
-package `/nix/store/6ldx5571fpz2gah2c9c5lydi46w36br2-fortlet-0.1.0` is frozen.
+`GOAL.md`. FIP-0012 and FIP-0013 are Accepted. The `fip0013-2` runtime CA
+contract is implemented at signed tip `eb363924fde5`; its complete local gate
+passes, and exact immutable package
+`/nix/store/f2wf5fb7dgzn66ylccr24c5598ml3yjr-fortlet-0.1.0` is frozen.
 
 Experiment 0059 is terminally rejected overall. Cold schema-1 preparation
 passed in 186.27 seconds, and five unchanged prepares had a 0.02-second median
@@ -18,14 +18,18 @@ relaxed/private `ro,nosuid,nodev` schema-1 mount, but the capsule never reached
 running state. The remaining eleven launches did not run. Exact cleanup passed
 with unchanged global inventory.
 
-The operator has authorized one bounded runtime-contract correction and
-Experiment 0060. The candidate must keep `/nix` read-only, materialize the
-initial CA bundle at a real root-filesystem path for MicroSandbox guest-agent
-initialization, add deterministic OCI evidence, and pass the complete gate.
-The experiment first runs a fresh manifest-free Tact boot and stop/start
-control; only a passing control may unlock a separate fresh repeat of the cold,
-five-prepare, and twelve-launch schema-1 campaign. Schema-2 preparation,
-provider or model dispatch, and public-project mutation remain unauthorized.
+Experiment 0060 is terminally accepted. Its manifest-free control passed
+absent, stopped, and running launches in 0.47, 0.35, and 0.03 seconds. The
+active root bundle retained the immutable Nix source as an exact prefix, added
+one MicroSandbox capsule CA, and `/nix` rejected mutation. Fresh schema-1 cold
+preparation passed in 155.00 seconds; five unchanged prepares had a 0.00-second
+median. All twelve lifecycle launches returned Tact 0.3.7 with 0.40-second
+absent, 0.32-second stopped, and 0.02-second running medians; every running
+sample was at most 0.03 seconds. Mount policy and markers remained exact, and
+cleanup restored empty isolated inventories, unchanged global inventory, one
+default workspace, and absent `/private/tmp/f60`. Schema-2 preparation,
+provider or model dispatch, and public-project mutation remain unauthorized
+pending operator review.
 
 The base-image review selected one small Nix-built OCI runtime for every
 harness, plus one isolated Nix store per project. Fortlet must locally load and
@@ -41,8 +45,10 @@ Prepared absent, stopped, and running lifecycle medians must remain below one
 second, and every running sample must remain below one second. A predeclared
 credential-free feasibility campaign must compare the existing mechanism and
 candidate under the same conditions, record cold phase timings, bytes and disk
-sizes, and use a finite cold ceiling. The current authority stops after that
-campaign; it does not authorize schema-2 provider preparation or a model unit.
+sizes, and use a finite cold ceiling. Experiment 0060 now accepts those
+prepared lifecycle requirements on the declared `aarch64-darwin` host. The
+current authority stops for operator review; it does not authorize schema-2
+provider preparation or a model unit.
 
 The deterministic implementation is checkpointed at `062a68c69026`. It adds
 strict schema-2 discovery, side-effect-free `fortlet plan`, a pinned guest-only
@@ -378,17 +384,16 @@ plane for the first experiment.
 
 ## Next session
 
-1. Follow the repository startup order and confirm the signed bounded-reuse
-   implementation, Experiment 0059 terminal record, goal bookmark, draft PR,
-   and parked Claude bookmark.
-2. Implement the authorized root-level CA-bundle runtime contract and its
-   deterministic OCI evidence without weakening the read-only project store.
-3. Pass the complete gate, freeze and sign the candidate, then run Experiment
-   0060 exactly as declared: manifest-free control first, fresh schema-1
-   campaign only on control success, terminal closure and exact cleanup.
-4. Keep schema-2 preparation, provider requests, Codex/Tact model work, and
-   public-project mutation blocked until Experiment 0060 successfully closes
-   the prepared absent, stopped, and running lifecycle evidence.
+1. Follow the repository startup order and confirm signed implementation
+   `eb363924fde5`, Experiment 0060's terminal record, the goal bookmark, draft
+   PR #15, and the parked Claude bookmark.
+2. Stop for operator review. Do not rerun Experiment 0060 or consume schema-2,
+   provider, harness-model, project-edit, or public-testbed authority.
+3. If the operator authorizes the remaining goal, predeclare the first live
+   schema-2 provider unit and preserve the accepted runtime, activation,
+   identity, credential, workspace, and publication boundaries.
+4. Native `x86_64-linux` package and runtime verification remains a separate
+   FIP-0013 conformance gap.
 
 ## What not to do
 

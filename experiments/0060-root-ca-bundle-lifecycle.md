@@ -1,6 +1,6 @@
 # Experiment 0060: Root CA bundle lifecycle successor
 
-Status: authorized — implementation and deterministic gate pending
+Status: terminal — accepted
 Design: FIP-0001, FIP-0006, FIP-0007, FIP-0013
 
 ## Baseline / Control
@@ -187,8 +187,126 @@ remote mutation was created by this rehearsal.
 
 ## Results
 
-Pending.
+Deterministic implementation `eb363924fde5f2f540dcf557f26ba88bc0a40d89`
+advanced the runtime contract to `fip0013-2` and verified with a good SSH
+signature. Its OCI artifact build unpacked the produced root filesystem and
+proved that `/etc/ssl` and `/etc/ssl/certs` are real directories, the active
+bundle is a regular mode-`0644` file with the exact immutable initial bytes,
+all four CA environment selectors use it, and the Nix source remains in the
+seed closure. The complete pre-live gate passed: 107 unit tests and every
+enabled integration test, formatting, strict all-target/all-feature Clippy,
+conformance, the Nix package, and shim activation were green. The two external
+stock Codex tests remained intentionally ignored, and Nix reported only the
+known native `x86_64-linux` omission.
+
+Preflight passed against the signed implementation and exact immutable package
+declared above. Both isolated image and capsule inventories began empty, both
+isolated Fortlet inventories reported `no capsules`, synthetic auth passed
+mode and structural checks without disclosure, the schema-1 workspace was a
+clean empty child of the signed candidate, and the hashed global inventory
+matched its later cleanup value.
+
+The manifest-free control preparation completed in 6.31 seconds:
+
+| Phase | Milliseconds |
+| --- | ---: |
+| Local image verification/load | 1,144 |
+| Runtime-store seed | 4,072 |
+| Tact closure import | 1,082 |
+| Final verification | 0 |
+| Bounded event total | 6,299 |
+
+Its absent, stopped, and running launches returned Tact 0.3.7 in 0.47, 0.35,
+and 0.03 seconds. The running capsule exposed real root-level `/etc/ssl`
+directories and a regular active bundle. The immutable source contained
+472,033 bytes and 121 certificates; the active bundle retained that exact
+prefix and contained 472,668 bytes and 122 certificates after MicroSandbox
+injected its capsule CA. Creating `/nix/fortlet-exp0060-write` failed with a
+read-only-filesystem error and left no entry. Public stop/reset restored
+absence and empty inventory, and its runtime and Tact markers remained
+byte-for-byte unchanged.
+
+The first two direct diagnostic execs stopped before completing that boundary
+check because they attempted to resolve `cmp` first through the absent managed
+PATH and then through a runtime root that does not link Diffutils. These were
+retained apparatus errors, not retried Fortlet launches. Host inspection of the
+frozen manifest selected only present `head` and `sha256sum` commands; the
+corrected read-only observation then passed. Similarly, the first mount JSON
+predicates expected lowercase types and an option array, returned `false`, and
+were corrected against the bounded typed object before the cycle closed.
+
+Fresh schema-1 cold preparation completed in 155.00 seconds, below the
+600-second ceiling:
+
+| Phase | Milliseconds |
+| --- | ---: |
+| Local image verification/load | 1,064 |
+| Runtime-store seed | 2,453 |
+| Tact closure import | 1,042 |
+| Schema-1 layer | 150,435 |
+| Final verification | 1 |
+| Bounded event total | 154,997 |
+
+Complete post-cold inspection accepted the canonical `0555` directories and
+executables, `0444` ordinary files and marker, and supported directory, file,
+and link types. Fortlet data used 1,263,068 KiB, of which the project layer used
+1,263,056 KiB; isolated MicroSandbox state used 676,452 KiB and Fortlet state
+used 0 KiB. The isolated image was 104,486,136 bytes.
+
+The runtime, Tact, and schema-1 marker identities remained unchanged through
+all later prepares, lifecycle cycles, and cleanup preflight:
+
+| Marker | Size | Mode | SHA-256 |
+| --- | ---: | ---: | --- |
+| Runtime | 6,929 bytes | `0600` | `ba62bf089abcaa664c38c437bd5627b62596af70abb51edf582fb38fb9626b24` |
+| Tact | 748 bytes | `0600` | `4aa3d255d81ddbba73a170029fbf1cf0827644f0ba601c764557affc9cbb1a10` |
+| Project layer | 252 bytes | `0444` | `e1dce142f43663c44e55abeeef5ba507ba5487c8cdc8b1c6ad47c59cd41eaa79` |
+
+All five unchanged prepares returned the exact ready line, emitted only
+zero-millisecond schema-1 and final-verification events, created no capsule,
+and preserved every marker property. Wall times were 0.01, 0.00, 0.00, 0.00,
+and 0.00 seconds; the 0.00-second median passes the sub-second hard gate.
+
+All twelve fixed lifecycle launches returned Tact 0.3.7:
+
+| Cycle | Absent | Running 1 | Stopped | Running 2 |
+| --- | ---: | ---: | ---: | ---: |
+| 1 | 0.42 s | 0.03 s | 0.34 s | 0.03 s |
+| 2 | 0.40 s | 0.02 s | 0.32 s | 0.02 s |
+| 3 | 0.39 s | 0.02 s | 0.32 s | 0.02 s |
+
+The absent median was 0.40 seconds, the stopped median was 0.32 seconds, and
+the running median was 0.02 seconds. Every running sample was at most 0.03
+seconds. The inspected configuration had a named read-only `/nix` mount and a
+schema-1 bind with read-only, `nosuid`, `nodev`, relaxed stat virtualization,
+private host permissions, and root-symlink following disabled. Every cycle
+ended absent with empty isolated inventory and unchanged markers.
+
+Final public stop/reset, workspace status, both isolated inventories, marker
+comparison, and global inventory comparison passed. Workspace `exp0060` was
+forgotten, cleanup-only owner access was restored beneath the exact disposable
+root, and only `/private/tmp/f60` was removed and proved absent. No schema-2
+preparation, provider or model request, real credential read, project edit,
+remote-project mutation, or publication outside the authorized goal branch
+occurred.
 
 ## Terminal Closure
 
-Pending.
+1. Outcome: accepted. The manifest-free control and fresh schema-1 campaign
+   both passed guest-agent initialization, immutable-store enforcement,
+   preparation, lifecycle, integrity, mount-policy, and latency criteria.
+2. Root cause: the prior image exposed `/etc/ssl` through the Nix store, so
+   MicroSandbox's required CA append reached the read-only `/nix` mount. The
+   corrected contract keeps the immutable source in the seed closure but
+   materializes the active bundle in disposable root state.
+3. Actual cost: one manifest-free prepare, three control launches, one cold
+   schema-1 prepare, five warm prepares, twelve schema-1 launches, zero
+   provider calls, zero model calls, zero real credentials, zero project edits,
+   and $0, within the 40-minute live ceiling.
+4. Cleanup: every owned capsule was publicly stopped and reset; both isolated
+   inventories were empty; markers, workspace, and global inventory were
+   unchanged; workspace `exp0060` was forgotten; and `/private/tmp/f60` was
+   removed and proved absent.
+5. Next action: stop for operator review. FIP-0013's prepared lifecycle gate is
+   accepted on the declared `aarch64-darwin` host, but schema-2 provider work,
+   model dispatch, and native `x86_64-linux` verification remain separate.

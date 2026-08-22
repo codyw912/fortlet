@@ -1,8 +1,9 @@
 # GOAL: Prove portable local project capability
 
-Status: active — Experiment 0060 is authorized to correct and validate the
-runtime CA-bundle contract after Experiment 0059's guest-agent initialization
-failure; provider work and model dispatch remain blocked
+Status: active — Experiment 0060 accepted the corrected runtime CA-bundle
+contract with a 0.00-second warm median and sub-second absent, stopped, and
+running lifecycle medians; provider work and model dispatch remain blocked
+pending operator review
 
 ## Outcome
 
