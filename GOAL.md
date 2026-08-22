@@ -230,6 +230,20 @@ a live capsule experiment, lifecycle-campaign retry, schema-2 provider
 preparation, harness or model dispatch, or remote mutation beyond the existing
 goal publication grant.
 
+On 2026-08-22, after the deterministic implementation passed the complete
+local gate and draft PR #15's hosted verification, the operator authorized one
+fresh credential-free FIP-0013 lifecycle campaign against signed implementation
+tip `dd75b81cf8c7`. It MAY build that exact public package, use fresh isolated
+state and a synthetic non-provider auth fixture, contact only the recipe's
+frozen public unauthenticated inputs during cold schema-1 preparation, run five
+unchanged prepares, and run the predeclared three-cycle Tact `--version`
+absent/running/stopped sequence. It MUST retain the existing 600-second cold,
+sub-second warm and lifecycle median, and every-running-sample-below-one-second
+ceilings. It authorizes no schema-2 preparation, provider or model request,
+project edit, additional sample, remote project mutation, or retry of a failed
+unit. Declaration, terminal evidence, exact cleanup, verification, and updates
+to the existing goal bookmark and draft PR are in scope.
+
 Acceptance authorizes one `portable-project-capability` bookmark and one draft
 pull request targeting `main` under FIP-0005. Stop on a need to broaden the
 provider contract, execute repository text on the host, expose a credential or

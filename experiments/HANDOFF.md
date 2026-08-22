@@ -2,11 +2,13 @@
 
 Audience: a fresh agent session. The operator accepted the outcome, public
 testbeds, exclusions, evidence budget, and four-hour ceiling in the active
-`GOAL.md`. FIP-0012 and FIP-0013 are Accepted. Experiment 0056 is now terminal
-and authority has stopped for operator review. Verify `main`, the Jujutsu
-stack, conformance, and the complete `docs/RUNBOOK.md` gate before relying on
-this summary. Do not implement the accepted sealing mechanism or run the
-remaining lifecycle campaign without fresh operator direction.
+`GOAL.md`. FIP-0012 and FIP-0013 are Accepted. The portable schema-1 sealing
+mechanism is implemented at signed tip `dd75b81cf8c7`, its complete local gate
+and draft PR #15 hosted check pass, and Experiment 0057 is authorized and
+declared to run the remaining credential-free lifecycle campaign. Verify the
+Jujutsu stack and experiment status before relying on the older narrative
+below. Schema-2 preparation, provider or model dispatch, and public-project
+mutation remain unauthorized.
 
 The base-image review selected one small Nix-built OCI runtime for every
 harness, plus one isolated Nix store per project. Fortlet must locally load and
