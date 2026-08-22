@@ -327,3 +327,87 @@ has lost the mount, so removing the floor at publication does not weaken the
 host process during guest execution. Canonical literal modes also keep the
 layer usable if stat-override xattrs are unavailable, while relaxed runtime stat
 handling avoids the strict writable-xattr probe that rejected the sealed tree.
+
+## Amendment — 2026-08-22 bounded verified reuse
+
+Amendment status: Draft. Proposed after Experiment 0058 showed that recursively
+validating modes and rehashing a correctly sealed 1.2-GiB layer made five
+unchanged prepares take a 5.14-second median, contradicting this FIP's
+no-traversal cache-hit contract and FIP-0013's sub-second requirement.
+
+This amendment resolves the conflict between the original requirement to
+rehash the complete output before every reuse or mount and the later
+requirement that verified reuse perform no traversal. It changes only the
+post-publication schema-1 trust and verification boundary. Cold publication,
+the output digest, canonical sealing, atomic rename, runtime mount policy, and
+all repository, guest, credential, and lifecycle boundaries remain unchanged.
+
+### Trust boundary
+
+1. Fortlet's local data directory and the invoking host user are one trusted
+   principal. Schema-1 isolation protects that principal from repository code
+   running in the provisioning guest and from writes through a managed runtime
+   mount; it does not claim tamper resistance against the same host principal
+   that can replace Fortlet, its declarations, and its data.
+2. Atomic publication is the transition from untrusted guest output to a
+   trusted immutable cache entry. Before that transition, Fortlet MUST retain
+   the complete validation, digest, marker, canonical-mode, sync, and sealing
+   sequence required by the portable sealed-layer amendment.
+3. The output digest remains the content identity and publication evidence for
+   the complete tree. It MUST be computed before publication and rechecked
+   after sealing but before atomic rename. It is not a mandate to reread the
+   published tree on every ordinary cache hit or launch.
+4. Detecting arbitrary post-publication mutation by the trusted host principal
+   would require a stronger primitive such as a privileged store or a
+   content-verifying filesystem. Such a primitive is outside this schema-1
+   amendment and MUST NOT be implied by bounded marker verification.
+
+### Bounded reuse verification
+
+1. The internal schema-1 publication contract MUST advance. The new contract
+   identity MUST participate in input identity and marker binding, so an older
+   layer cannot become a cache hit under this trust contract.
+2. Ordinary reuse MUST inspect only the selected root and its bounded marker.
+   It MUST verify that the root is a real directory with canonical `0555` mode
+   and that the marker is a non-symlink regular file with canonical `0444` mode
+   whose size is within the existing marker bound.
+3. The parsed marker MUST bind the public schema, new publication contract,
+   exact declaration identity, recorded output digest, runtime contract, and
+   guest platform. The output digest field MUST have the exact supported digest
+   shape. A missing, malformed, legacy, or mismatched record MUST fail closed.
+4. Marker binding transitively identifies the snapshotted declaration,
+   declared paths, publication contract, runtime, and platform that received
+   complete cold validation. Ordinary reuse MUST NOT enumerate descendants,
+   restat declared paths, validate descendant modes or links, or recompute the
+   output digest.
+5. Bounded verification MUST perform no write, marker rewrite, permission
+   change, capsule creation, network request, or store mutation. Its work and
+   bytes read MUST be independent of output entry count and output byte size.
+6. A prepared launch MUST use the same bounded verification before the existing
+   read-only, `nosuid`, `nodev`, private, no-root-symlink-following mount. The
+   mount contract remains the enforcement boundary against guest mutation.
+
+These rules supersede isolated-provisioning specification item 5 only where it
+requires the output digest before every reuse or mount, and portable
+sealed-layer publication item 8 only where it requires recursive enforcement
+on reuse. They make the existing no-traversal performance rule precise; all
+complete-tree requirements still apply before atomic publication.
+
+### Failure and evidence
+
+1. Bounded verification failure MUST preserve the published entry and fail
+   before capsule creation or mutation with the existing project-environment
+   recovery guidance. It MUST NOT silently rebuild, repair, or delete the
+   entry.
+2. Automated evidence MUST prove the new contract invalidates prior entries,
+   root and marker type/mode checks fail closed, every marker binding is
+   enforced, malformed digest fields are rejected, and ordinary reuse does not
+   inspect descendants or change any recorded marker property.
+3. Complete publication tests MUST continue proving descendant modes, types,
+   links, declared paths, digest preservation, and post-seal content identity.
+   The implementation SHOULD retain a test-only or explicitly invoked complete
+   audit path if useful, but ordinary prepare and launch MUST NOT call it.
+4. A fresh predeclared FIP-0013 experiment MUST repeat five unchanged prepares
+   against the exact new contract before lifecycle sampling. The sub-second
+   median remains a hard gate; lifecycle, provider, and model work remain
+   blocked until it passes.

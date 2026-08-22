@@ -1,9 +1,9 @@
 # GOAL: Prove portable local project capability
 
-Status: active — the accepted portable schema-1 permission amendment to
-FIP-0006 is implemented, but its full reuse verification fails FIP-0013's
-repeated-preparation latency requirement; lifecycle, provider work, and model
-dispatch remain blocked
+Status: active — Experiment 0058 exposed a conflict between FIP-0006's complete
+reuse digest and no-traversal cache-hit requirements; a bounded verified-reuse
+amendment is draft, and implementation, lifecycle, provider work, and model
+dispatch remain blocked pending operator acceptance
 
 ## Outcome
 
